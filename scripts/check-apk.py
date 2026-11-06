@@ -14,7 +14,7 @@ from androguard.core.dex import DEX
 
 root = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
-parser.add_argument("--version", default="1.19")
+parser.add_argument("--version", default="2.9")
 version = parser.parse_args().version
 file = root / "dist" / f"RP-local-{version}.apk"
 apk = APK(str(file))
@@ -33,6 +33,21 @@ assert "Lcom/rphub/app/OnlineReturn;" in classes
 if tuple(map(int, version.split('.'))) >= (1, 4):
     local_methods = {method.get_name() for method in classes["Lcom/rphub/app/LocalFiles;"].get_methods()}
     assert {"writeTextIfChanged", "runtimeInfo"} <= local_methods
+if tuple(map(int, version.split('.'))) >= (1, 22):
+    assert "prepareBackupFileRead" in local_methods
+    assert "Lcom/rphub/app/RenderRecovery;" in classes
+    reader = next(method for method in classes["Lcom/rphub/app/LocalFiles;"].get_methods()
+                  if method.get_name() == "backupResponse")
+    reader_code = "\n".join(instruction.get_output() for instruction in reader.get_instructions())
+    assert "->openInputStream(" in reader_code
+    assert "->readAllBytes(" not in reader_code
+if tuple(map(int, version.split('.'))) >= (1, 23):
+    assert "Lcom/rphub/app/WebViewSupport;" in classes
+    bridge = classes["Lcom/rphub/app/MainActivity$6;"]
+    assert any(method.get_name() == "copyText" for method in bridge.get_methods())
+    startup = next(method for method in classes["Lcom/rphub/app/MainActivity;"].get_methods()
+                   if method.get_name() == "onCreate")
+    assert "WebViewSupport;->loadEntry" in "\n".join(i.get_output() for i in startup.get_instructions())
 activity = classes["Lcom/rphub/app/MainActivity;"]
 if tuple(map(int, version.split('.'))) >= (1, 13):
     back = next(method for method in activity.get_methods() if method.get_name() == "handleBackPressed")
@@ -61,8 +76,14 @@ assert "OnlineReturn;->attach" in "\n".join(i.get_output() for i in show_lightho
 return_listener = classes["Lcom/rphub/app/MainActivity$OnlineReturn;"]
 assert any("access$44" in i.get_output() for method in return_listener.get_methods()
            if method.get_name() == "onClick" for i in method.get_instructions())
-previous_version = "0.9" if version == "1.00" else f"1.{int(version.split('.')[1]) - 1:02d}"
-previous_local = APK(str(root / "dist" / f"RP-local-{previous_version}.apk"))
+older_packages = []
+for candidate in (root / "dist").glob("RP-local-*.apk"):
+    parts = candidate.stem.removeprefix("RP-local-").split(".")
+    if all(part.isdigit() for part in parts):
+        number = tuple(map(int, parts))
+        if number < tuple(map(int, version.split("."))):
+            older_packages.append((number, candidate))
+previous_local = APK(str(max(older_packages, key=lambda item: item[0])[1]))
 assert int(apk.get_androidversion_code()) > int(previous_local.get_androidversion_code())
 assert any(method.get_name() == "readImage" for method in classes["Lcom/rphub/app/LocalFiles;"].get_methods())
 client = classes["Lcom/rphub/app/MainActivity$7;"]

@@ -205,7 +205,7 @@
             const dirty = ref(false);
             const panel = ref(null);
             const previousFocus = document.activeElement;
-            let baseline = '[]';
+            let memoryState = null;
             let epoch = 0;
             let scope = '';
             const storage = window.RPHubStorage;
@@ -226,12 +226,13 @@
                 status.value = '';
                 try {
                     const targetScope = branchScope(id);
-                    const raw = await storage.getScopedStoredValue('classic_memories', targetScope) || [];
+                    const state = await storage.readMemoryState(targetScope);
+                    const raw = state.list;
                     if (token !== epoch) return;
                     const loaded = validate(raw);
                     scope = targetScope;
                     branchId.value = id;
-                    baseline = JSON.stringify(raw);
+                    memoryState = state;
                     entries.value = loaded;
                     dirty.value = false;
                     limit.value = 20;
@@ -243,15 +244,17 @@
                 loading.value = true;
                 error.value = '';
                 try {
-                    const current = await storage.getScopedStoredValue('classic_memories', scope) || [];
-                    if (JSON.stringify(current) !== baseline) throw new Error('这份记忆已有更新，请重新打开后再编辑');
                     const result = validate(entries.value);
-                    await storage.setScopedStoredValue('classic_memories', scope, result);
-                    baseline = JSON.stringify(result);
+                    const saved = await storage.commitMemoryState(memoryState, result);
+                    if (!['committed', 'unchanged'].includes(saved.status)) {
+                        throw new Error(saved.status === 'conflict' ? '这份记忆已有更新，请重新打开后再编辑'
+                            : saved.error?.message || '记忆保存失败，请重新打开后核对');
+                    }
+                    memoryState = saved.state;
                     entries.value = result;
                     dirty.value = false;
                     status.value = '记忆已保存';
-                    emit('saved', { scope, memories: result });
+                    emit('saved', { scope, memories: result, state: saved.state });
                 } catch (failure) { error.value = failure.message; }
                 finally { loading.value = false; }
             };

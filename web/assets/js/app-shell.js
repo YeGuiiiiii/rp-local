@@ -260,7 +260,7 @@
             const night = computed(() => theme.packs.find(pack => pack.id === theme.selected.value)?.mode === 'night');
             return {
                 night,
-                toggleDayNight: () => window.RPThemePacks.set(theme.packs.find(pack => pack.mode === (night.value ? 'day' : 'night'))?.id),
+                toggleDayNight: () => window.RPThemePacks.set(theme.packs.find(pack => pack.id !== 'classic' && pack.mode === (night.value ? 'day' : 'night'))?.id),
                 version: window.RP_LOCAL_VERSION,
                 trapFocus: useDialogFocus(() => props.show, '.shell-chat-menu'),
                 items: [
@@ -299,10 +299,106 @@
             </div>
           </teleport>`
     };
+    function useCompetitionClock() {
+        const now = ref(Date.now());
+        const refresh = () => { now.value = Date.now(); };
+        let timer;
+        onMounted(() => {
+            timer = setInterval(refresh, 60000);
+            document.addEventListener('visibilitychange', refresh);
+        });
+        onBeforeUnmount(() => {
+            clearInterval(timer);
+            document.removeEventListener('visibilitychange', refresh);
+        });
+        return event => window.RPCompetitions.phase(event, now.value);
+    }
+    const competitionSlide = ref(0);
+    const CompetitionList = {
+        components: { Icon },
+        props: { compact: Boolean },
+        emits: ['select'],
+        setup() {
+            const events = window.RPCompetitions.events, selected = competitionSlide;
+            const step = (direction, event) => {
+                const track = event?.target.closest('.competition-entry--banner')?.parentElement;
+                selected.value = (selected.value + direction + events.length) % events.length;
+                if (track) nextTick(() => track.querySelectorAll('.competition-entry')[selected.value]?.focus({ preventScroll: true }));
+            };
+            return { events, selected, step, phase: useCompetitionClock() };
+        },
+        template: `
+          <div class="competition-list" :class="{'competition-list--compact':compact,'competition-carousel':!compact}" role="group" aria-label="灯塔赛事">
+            <div class="competition-slides" @keydown.left.prevent="step(-1,$event)" @keydown.right.prevent="step(1,$event)">
+            <button v-for="(event,index) in events" v-show="compact || index===selected" :key="event.id" type="button" class="competition-entry"
+              :class="compact?'':'competition-entry--banner competition-entry--'+event.id"
+              :aria-label="event.name" @click="$emit('select',event.id)">
+              <img v-if="!compact" :src="event.banner" alt="" width="1200" height="450" loading="lazy" data-rphub-no-save>
+              <span class="competition-entry-copy"><strong>{{event.name}}</strong>
+                <span v-if="!compact">{{event.reward}}</span>
+                <small>{{phase(event)}} · {{event.deadline}} 截稿</small>
+              </span><icon v-if="compact" name="ChevronRight"/>
+            </button>
+            <template v-if="!compact">
+              <button type="button" class="competition-carousel-arrow competition-carousel-arrow--previous" aria-label="上一场赛事" title="上一场赛事" @click="step(-1)"><icon name="ChevronLeft"/></button>
+              <button type="button" class="competition-carousel-arrow competition-carousel-arrow--next" aria-label="下一场赛事" title="下一场赛事" @click="step(1)"><icon name="ChevronRight"/></button>
+            </template>
+            </div>
+            <div v-if="!compact" class="competition-carousel-dots" role="group" aria-label="选择赛事" @keydown.left.prevent="step(-1,$event)" @keydown.right.prevent="step(1,$event)">
+              <button v-for="(event,index) in events" :key="event.id" type="button" :aria-label="'查看'+event.name"
+                :title="event.name" :aria-pressed="index===selected" @click="selected=index"><span></span></button>
+            </div>
+          </div>`
+    };
+    const CompetitionDetail = {
+        components: { Icon, SettingsPageHeader: window.RPHubComponents.SettingsPageHeader },
+        props: { event: Object },
+        emits: ['back', 'visit'],
+        setup() { return { phase: useCompetitionClock() }; },
+        template: `
+          <main class="management-view competition-page" data-rphub-no-save>
+            <settings-page-header :title="event.name" @menu="$emit('back')"></settings-page-header>
+            <article class="competition-detail">
+              <div class="competition-intro">
+                <p class="competition-subtitle">{{event.subtitle}}</p>
+                <p>{{event.introduction}}</p>
+                <dl class="competition-facts"><div><dt>投稿状态</dt><dd>{{phase(event)}}</dd></div>
+                  <div v-for="fact in event.facts" :key="fact[0]"><dt>{{fact[0]}}</dt><dd>{{fact[1]}}</dd></div></dl>
+              </div>
+              <section class="competition-section">
+                <h2>赛事奖励</h2>
+                <dl class="competition-prizes"><div v-for="prize in event.prizes" :key="prize[0]"><dt>{{prize[0]}}</dt><dd>{{prize[1]}}</dd></div></dl>
+                <p v-if="event.extraPrize">{{event.extraPrize}}</p>
+              </section>
+              <section class="competition-section"><h2>参赛规则</h2><ul><li v-for="rule in event.rules" :key="rule">{{rule}}</li></ul></section>
+              <details v-if="event.submission" class="competition-section">
+                <summary>作品提交格式<icon name="ChevronDown"/></summary>
+                <p>邮件标题：【科技杯】作品名 - 作者昵称</p>
+                <pre class="competition-submission">{{event.submission}}</pre>
+                <p>阅读参赛须知后，在邮件中填写是否同意，并署名、填写日期。作品文件需另行添加到邮件附件。</p>
+                <a class="competition-mail" :href="event.mailto">打开投稿邮件草稿<icon name="ArrowUpRight"/></a>
+              </details>
+              <details v-if="event.notice" class="competition-section">
+                <summary>参赛须知<icon name="ChevronDown"/></summary>
+                <p>本人已阅读以下条款并承诺遵守：</p>
+                <ol><li v-for="item in event.notice" :key="item">{{item}}</li></ol>
+                <p>参赛者昵称：＿＿＿＿＿　日期：＿＿＿＿＿</p>
+              </details>
+              <details v-if="event.examples" class="competition-section">
+                <summary>脑洞参考<icon name="ChevronDown"/></summary>
+                <ul><li v-for="example in event.examples" :key="example">{{example}}</li></ul>
+              </details>
+              <img :src="event.poster" :alt="event.name+'赛事海报'" class="competition-poster" loading="lazy" data-rphub-no-save>
+              <button type="button" class="competition-visit" @click="$emit('visit',event.url)">
+                <icon name="Lighthouse"/><span>前往灯塔查看赛事</span><icon name="ArrowUpRight"/>
+              </button>
+            </article>
+          </main>`
+    };
     const Advanced = {
-        components: { Icon, MascotHeader },
+        components: { Icon, MascotHeader, CompetitionList },
         props: { characters: Array, selected: Number, busy: Boolean },
-        emits: ['select', 'navigate'],
+        emits: ['select', 'navigate', 'event'],
         setup(props) {
             const card = computed(() => props.characters?.[props.selected]);
             const plugins = computed(() => [
@@ -339,6 +435,10 @@
               <button type="button" @click="$emit('navigate','presets')"><span class="shell-action-icon"><icon name="NotebookPen"/></span><strong>预设管理</strong></button>
               <button type="button" @click="$emit('navigate','tools')"><span class="shell-action-icon"><icon name="Wrench"/></span><strong>工具管理</strong></button>
             </div>
+            <div class="shell-section-heading"><h2>灯塔赛事</h2>
+              <button type="button" class="competition-lighthouse-link" @click="$emit('navigate','lighthouse')"><icon name="Lighthouse"/>逛灯塔<icon name="ArrowUpRight"/></button>
+            </div>
+            <competition-list @select="$emit('event',$event)"></competition-list>
             <div class="shell-section-heading"><h2>已接入功能</h2></div>
             <div class="shell-row-list">
               <button v-for="plugin in plugins" :key="plugin.view" type="button" :disabled="!plugin.installed" @click="$emit('navigate',plugin.view)">
@@ -467,7 +567,8 @@
                 <div class="theme-pack-grid">
                   <label v-for="pack in packs" :key="pack.id" class="theme-pack" :class="{'is-selected':selected===pack.id}">
                     <div class="theme-pack-preview" :style="{'--preview-bg':pack.preview.background,'--preview-accent':pack.preview.accent}">
-                      <img :src="pack.preview.image" alt="" data-rphub-no-save>
+                      <img v-if="pack.preview.image" :src="pack.preview.image" alt="" data-rphub-no-save>
+                      <span v-else class="theme-classic-preview" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                       <span class="theme-preview-lines" aria-hidden="true"><i></i><i></i><i></i></span>
                       <span class="theme-mode-badge">{{pack.modeLabel}}</span>
                     </div>
@@ -494,9 +595,9 @@
           </div>`
     };
     const ReleaseAnnouncement = {
-        components: { Icon },
+        components: { Icon, CompetitionList },
         props: { show: Boolean },
-        emits: ['close'],
+        emits: ['close', 'event'],
         setup(props) {
             watch(() => props.show, show => { document.getElementById('app').inert = show; });
             onBeforeUnmount(() => { document.getElementById('app').inert = false; });
@@ -517,7 +618,8 @@
                   </header>
                   <div class="release-reading" tabindex="0" role="region" aria-label="更新内容">
                     <section v-for="section in notes.sections" :key="section.title" class="release-section">
-                      <h3>{{section.title}}</h3><p>{{section.text}}</p>
+                      <h3>{{section.title}}</h3><p v-if="section.text">{{section.text}}</p>
+                      <competition-list v-if="section.events" compact @select="$emit('event',$event)"></competition-list>
                     </section>
                   </div>
                   <footer class="release-footer">
@@ -528,5 +630,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, Advanced, Settings, Utilities, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ReleaseAnnouncement });
 })();

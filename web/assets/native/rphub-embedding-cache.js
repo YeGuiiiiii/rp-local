@@ -751,8 +751,8 @@
 
     function tickCard() {
         try {
-            if (G.RPAppShell) { if (cardTimer) clearInterval(cardTimer); return; }
-            if (!document.querySelector('.settings-view .settings-stack')) return;
+            if (G.RPThemePacks.current !== 'classic') return;
+            if (!document.querySelector('.settings-view:not(.shell-settings-detail) .settings-stack')) return;
             if (!mountCard()) return;
             renderCard();
         } catch (_) {}
@@ -760,7 +760,7 @@
 
     // 低频轮询：只在设置页出现时才动 DOM，且 renderCard 有签名去重。
     try {
-        var cardTimer = setInterval(tickCard, 2000);
+        setInterval(tickCard, 2000);
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', tickCard);
         } else {

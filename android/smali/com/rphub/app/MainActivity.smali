@@ -5683,9 +5683,7 @@
     .line 1364
     iget-object p1, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;
 
-    const-string v0, "https://sta1n156.github.io/RP-Hub/"
-
-    invoke-virtual {p1, v0}, Landroid/webkit/WebView;->loadUrl(Ljava/lang/String;)V
+    invoke-static {p0, p1}, Lcom/rphub/app/WebViewSupport;->loadEntry(Landroid/app/Activity;Landroid/webkit/WebView;)V
 
     .line 1366
     :cond_7

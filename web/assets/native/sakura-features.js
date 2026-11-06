@@ -291,7 +291,7 @@
     // 数据逻辑不动——renderPresence 每秒轮询，卡片挂上来自动就填好了。
     function mountPresenceCard() {
         if (document.getElementById('sf-presence-card')) return;
-        var stack = document.querySelector(window.RPAppShell
+        var stack = document.querySelector(window.RPThemePacks.current !== 'classic'
             ? '.settings-view[data-section="reading"] .settings-stack'
             : '.settings-view .settings-stack');
         if (!stack) return;
@@ -698,6 +698,11 @@
 
     var SAKURA_ENTRY_SEARCH_DEFS = [
         {
+            key: 'worldinfo', headerTitle: '世界书', arrKey: 'worldInfo', editFn: 'editWorldInfo', label: '世界书',
+            nameOf: function (e) { return sakuraPick(e, 'comment', 'name') || '未命名条目'; },
+            searchOf: function (e) { return [sakuraPick(e, 'comment', 'name'), sakuraPick(e, 'content')].join('\n'); }
+        },
+        {
             key: 'presets', headerTitle: '预设管理', arrKey: 'presets', editFn: 'editPreset', label: '预设',
             nameOf: function (e) { return sakuraPick(e, 'name') || '未命名预设'; },
             searchOf: function (e) { return [sakuraPick(e, 'name'), sakuraPick(e, 'content')].join('\n'); }
@@ -728,6 +733,7 @@
                 }
             }
             if (!def) continue;
+            if (def.key === 'worldinfo' && window.RPThemePacks.current !== 'classic') continue;
             if (hdr.querySelector('.sakura-entry-search-btn')) continue;
 
             // 优先查找 SettingsPageHeader 的按钮容器 slot

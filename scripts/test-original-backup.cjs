@@ -5,8 +5,8 @@ const vm = require('node:vm');
 const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..');
-const originalVersion = process.argv.includes('--116') ? '2.8.116' : '2.8.80';
-const originalRoot = originalVersion === '2.8.116' ? path.join(root,'reference/original-2.8.116') : path.resolve(root, '../RP-Hub-v2.8.80-检查');
+const originalVersion = process.argv.includes('--118') ? '2.8.118' : process.argv.includes('--116') ? '2.8.116' : '2.8.80';
+const originalRoot = originalVersion !== '2.8.80' ? path.join(root,'reference/original-'+originalVersion) : path.resolve(root, '../RP-Hub-v2.8.80-检查');
 const origin = 'https://sta1n156.github.io';
 
 (async () => {
@@ -27,7 +27,7 @@ const origin = 'https://sta1n156.github.io';
         const relative = url.pathname.replace(/^\/RP-Hub\//, '') || 'index.html';
         if (original) {
           const basename = path.basename(relative);
-          file = [path.join(originalRoot,originalVersion === '2.8.116'?'patched':'patched-seed',basename), path.join(originalRoot,'apk-extracted/assets/patch-seed',basename)].find(fs.existsSync);
+          file = [path.join(originalRoot,originalVersion !== '2.8.80'?'patched':'patched-seed',basename), path.join(originalRoot,'apk-extracted/assets/patch-seed',basename)].find(fs.existsSync);
         } else file = path.join(root,'web',relative);
       } else if (original) {
         const map = { 'cdn.tailwindcss.com': 'tailwind.js', 'unpkg.com': 'vue.global.prod.js' };
@@ -153,7 +153,7 @@ const origin = 'https://sta1n156.github.io';
     const originalBackup=await exportData(original);
     assert.equal(originalBackup.type,'rp-hub-complete-backup');
     assert.equal(originalBackup.version,8);
-    if(originalVersion==='2.8.116')assert.ok(originalBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));
+    if(originalVersion!=='2.8.80')assert.ok(originalBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));
     const current=await load();
     verify(await importData(current,originalBackup));
     await current.waitForFunction(() => window.__rpDataReady);
@@ -161,12 +161,12 @@ const origin = 'https://sta1n156.github.io';
     const currentBackup=await exportData(current);
     const currentSettings=currentBackup.entries.find(entry=>entry.key==='rp_hub_settings').value;
     assert.equal(currentSettings.retainedCompatibilityField.keep,true);
-    assert.ok(!currentBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));
+    assert.ok(currentBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));
     assert.equal(currentBackup.type,'rp-hub-complete-backup');
     assert.equal(currentBackup.version,8);
     const originalRestore=await load(true);
     verify(await importData(originalRestore,currentBackup));
-    if(originalVersion==='2.8.116'){
+    if(originalVersion!=='2.8.80'){
       const state=await originalRestore.evaluate(async()=>({
         live:await RPHubStorage.readMemoryState('backup-card-uuid__branch__branch-two'),
         deleted:await RPHubStorage.readMemoryState('deleted-memory-scope')
@@ -195,8 +195,8 @@ const origin = 'https://sta1n156.github.io';
     assert.throws(()=>normalize({type:'rp-hub-complete-backup',entries:[
       {key:'rp_hub_b1_memory_state_test',value:{schema:1,revision:'bad',deleted:false}}
     ]}));
-    const report={originalVersion,originalExportExecuted:true,originalToLocalImport:true,localToOriginalImport:true,exportType:currentBackup.type,exportVersion:currentBackup.version,characterAndWorldbookAndRegexAndUi:true,branchesAndChatAndMemory:true,personasAndFakeKeysAndPresets:true,unrecognizedSettingsPreservedInLocalExport:true,blobAndArrayBufferRoundTrip:true,localStorageAndImageFreezeRecords:true,memoryTombstoneDoesNotResurrect:true,newMemoryRevisionOnReturn:originalVersion==='2.8.116',pluginAndLegacyLayouts:4,invalidEntriesRejected:true,realPersonalDataUsed:false};
-    fs.writeFileSync(path.join(root,'verification/'+(originalVersion==='2.8.116'?'original-116-backup.json':'original-backup.json')),JSON.stringify(report,null,2));
+    const report={originalVersion,originalExportExecuted:true,originalToLocalImport:true,localToOriginalImport:true,exportType:currentBackup.type,exportVersion:currentBackup.version,characterAndWorldbookAndRegexAndUi:true,branchesAndChatAndMemory:true,personasAndFakeKeysAndPresets:true,unrecognizedSettingsPreservedInLocalExport:true,blobAndArrayBufferRoundTrip:true,localStorageAndImageFreezeRecords:true,memoryTombstoneDoesNotResurrect:true,validMemoryRevisionOnReturn:originalVersion!=='2.8.80',pluginAndLegacyLayouts:4,invalidEntriesRejected:true,realPersonalDataUsed:false};
+    fs.writeFileSync(path.join(root,'verification/'+(originalVersion!=='2.8.80'?`original-${originalVersion.split('.').at(-1)}-backup.json`:'original-backup.json')),JSON.stringify(report,null,2));
     console.log(JSON.stringify(report,null,2));
   } finally { await browser.close(); }
 })().catch(error=>{console.error(error);process.exitCode=1;});

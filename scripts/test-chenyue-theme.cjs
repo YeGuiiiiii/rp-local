@@ -56,6 +56,8 @@ const root = path.resolve(__dirname,'..'), web = path.join(root,'web');
         assert.ok(geometry.left>=0&&geometry.right<=geometry.screenW+1&&geometry.top>=0&&geometry.bottom<=geometry.screenH+1,JSON.stringify(geometry));
         const close=menu.getByRole('button',{name:'关闭聊天菜单',exact:true});
         await close.focus();await page.keyboard.press('Shift+Tab');
+        assert.equal(await menu.getByRole('button',{name:'戳戳玥玥',exact:true}).evaluate(el=>el===document.activeElement),true);
+        await page.keyboard.press('Shift+Tab');
         assert.equal(await menu.getByRole('button',{name:'设置',exact:true}).evaluate(el=>el===document.activeElement),true);
         const image=await menu.locator('.yy-menu-header img').boundingBox();
         const closeRect=await close.boundingBox();
@@ -88,7 +90,7 @@ const root = path.resolve(__dirname,'..'), web = path.join(root,'web');
     }
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.evaluate(()=>__qa.navigateWorkspace('settings'));
-    assert.equal(await page.evaluate(()=>document.querySelector('.yy-page-mascot')?.getAttribute('alt')),'陈玥');
+    assert.equal(await page.getByRole('button',{name:'戳戳玥玥',exact:true}).count(),1);
     assert.deepEqual(errors,[]);assert.deepEqual(failedAssets,[]);
     const report={mascotName:'陈玥 / 玥玥',generatedPanelAndButtonImagesLoaded:true,correctedCharacterImagesDecode:true,emptyAndLongCardMenu:true,realButtonNavigationPreserved:true,focusTrap:true,lightAndDark:true,screenshots,smallAndLargeScreens:true,failedAssets,errors};
     fs.writeFileSync(path.join(root,'verification/chenyue-theme.json'),JSON.stringify(report,null,2));

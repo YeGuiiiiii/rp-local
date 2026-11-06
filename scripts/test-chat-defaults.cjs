@@ -36,16 +36,16 @@ fs.mkdirSync(output, { recursive: true });
     }
     try {
         await page.goto('https://sta1n156.github.io/RP-Hub/'); await ready();
-        assert.equal(await page.evaluate(() => __qa.settings.immersiveMode), true, 'Fresh install defaults to immersive');
+        assert.equal(await page.evaluate(() => __qa.settings.immersiveMode), false, 'Fresh install uses the 2.8.118 message layout');
         await page.evaluate(async () => {
             const saved = await RPHubStorage.getStoredValue('settings');
             delete saved.localImmersiveDefault;
             RPHubStorage.setWritesPaused(true);
-            await RPHubStorage.setStoredValue('settings', { ...saved, immersiveMode: false, upgradeSentinel: 'keep' }, { force: true });
+            await RPHubStorage.setStoredValue('settings', { ...saved, immersiveMode: true, upgradeSentinel: 'keep' }, { force: true });
             await RPLocalStore.flush();
         });
         await page.reload(); await ready();
-        assert.equal(await page.evaluate(() => __qa.settings.immersiveMode), true, 'Old install receives the new default once');
+        assert.equal(await page.evaluate(() => __qa.settings.immersiveMode), true, 'Upgrade preserves an existing immersive preference');
         await page.evaluate(async () => {
             __qa.characters = [{ uuid: 'immersive-card', name: '默认阅读检查', avatar: 'assets/images/chenyue/welcome.webp',
                 first_mes: '故事从这里开始。', worldInfo: [], regexScripts: [], uiTemplates: [] }];
@@ -64,7 +64,7 @@ fs.mkdirSync(output, { recursive: true });
         await page.waitForTimeout(1100);
         await page.waitForFunction(async () => {
             const saved = await RPHubStorage.getStoredValue('settings');
-            return saved.immersiveMode === false && saved.localImmersiveDefault === true;
+            return saved.immersiveMode === false;
         });
         await page.evaluate(() => RPLocalStore.flush());
         await page.reload(); await ready();
@@ -96,7 +96,7 @@ fs.mkdirSync(output, { recursive: true });
         await reading.waitFor();
         await page.waitForTimeout(240);
         assert.match(await reading.innerText(), /特别鸣谢红花铃🔔老师、启元老师/);
-        assert.match(await reading.innerText(), /QQ 群 472441481 发布/);
+        assert.match(await reading.innerText(), /QQ 群 472441481、132292045 发布/);
         await reading.evaluate(el => { el.scrollTop = el.scrollHeight; });
         assert.ok(await page.evaluate(() => document.querySelector('.release-section:last-child').getBoundingClientRect().bottom
             <= document.querySelector('.release-footer').getBoundingClientRect().top));

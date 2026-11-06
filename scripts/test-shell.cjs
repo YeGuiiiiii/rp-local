@@ -92,7 +92,7 @@ const evidence = path.join(root, 'verification');
     assert.equal(await page.evaluate(() => __qa.isBatchDeleteMode), true);
     await page.getByRole('button', { name: '取消选择', exact: true }).click();
     await page.evaluate(async () => {
-      await RPHubStorage.setScopedStoredValue('classic_memories', 'shell-card-a',
+      await RPHubStorage.replaceMemoryScopeList('shell-card-a',
         [{ classicMemory: true, turn: 1, no: 1, summary: '记忆管理测试' }]);
     });
     await firstCard.getByRole('button', { name: '管理记忆', exact: true }).click();

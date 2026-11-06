@@ -61,6 +61,7 @@ const {
     numberClassicMemories,
     prepareClassicMemoriesForRuntime,
     quantizeEmbeddingForStorage,
+    summaryEmbeddingFingerprint,
     trimMemoryText
 } = window.RPHubMemoryUtils;
 const {
@@ -226,8 +227,15 @@ const RphubInputRow = {
 };
 
 RphubInputRow.render = window.RPCompiledRenders?.RphubInputRow;
+let activeMainRender;
 const app = createApp({
-    render: window.RPCompiledMainRender,
+    render(...args) {
+        const render = this.classicUi ? window.RPCompiledClassicRender : window.RPCompiledMainRender;
+        if (activeMainRender !== render) { args[1].length = 0; activeMainRender = render; }
+        const layout = render.apply(this, args);
+        layout.key = this.classicUi ? 'classic' : 'modern';
+        return layout;
+    },
     components: {
         // [rphub 2.7.63] 输入行隔离组件
         RphubInputRow,
@@ -329,6 +337,11 @@ const app = createApp({
         };
 
         const currentView = ref('characters');
+        const uiPack = ref(window.RPThemePacks.current);
+        const classicUi = computed(() => uiPack.value === 'classic');
+        const syncUiPack = () => { uiPack.value = window.RPThemePacks.current; };
+        window.addEventListener('rp-ui-theme-change', syncUiPack);
+        onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', syncUiPack));
         const shellRoots = ['characters', 'album', 'advanced', 'settings'];
         const shellHistory = [];
         const streamImportPanel = ref(null);
@@ -384,20 +397,32 @@ const app = createApp({
                 showToast('读取记忆前保存失败：' + error.message, 'error');
             }
         };
-        const applyManagedMemories = ({ scope, memories }) => {
+        const applyManagedMemories = ({ scope, memories, state }) => {
             if (scope === getCurrentStoryBranchScopeId()) {
-                classicMemories.value = numberClassicMemories(prepareClassicMemoriesForRuntime(memories));
-                _classicMemoriesLoaded = true;
+                adoptMemoryState(state, numberClassicMemories(prepareClassicMemoriesForRuntime(memories)));
             }
         };
         const resourceScope = ref('character');
+        const selectedCompetition = ref(null);
+        const openCompetition = id => {
+            const event = window.RPCompetitions.events.find(item => item.id === id);
+            if (!event) return;
+            closeAnnouncement();
+            selectedCompetition.value = event;
+            navigateWorkspace('competition');
+        };
         const navigateWorkspace = target => {
             if (streamImportPanel.value?.isApplying) return;
             const view = typeof target === 'string' ? target : target.view;
+            if (view === 'appearance') { openSettingsSection('appearance'); return; }
             onlineOpen.value = false;
             isNavigationOpen.value = false;
+            if (view === 'lighthouse') {
+                lighthouseUrl.value = target.url || 'https://wxdt.duckdns.org/';
+                isLighthouseLoading.value = true;
+            }
             if (view === 'lighthouse' && window.AndroidBridge?.openLighthouse) {
-                try { window.AndroidBridge.openLighthouse('https://wxdt.duckdns.org/'); return; }
+                try { window.AndroidBridge.openLighthouse(lighthouseUrl.value); return; }
                 catch (error) { showToast('独立窗口打开失败，改用内嵌页面', 'warning'); }
             }
             if (view === currentView.value) return;
@@ -437,7 +462,7 @@ const app = createApp({
             for (const modal of [showCharacterEditor, showCharacterExportModal, showAddCharacterMenu,
                 showPresetEditor, showRegexEditor, showWorldInfoEditor, showUiTemplateEditor,
                 showModelSelector, showChatModelSelector, showStoryBranchModal, showAutoImageGenModal, showExportModal, showActiveToolEditor,
-                showContextViewerModal, showMemoryBackfillModal, showAutoBackupModal, showBackupManagerModal,
+                showContextViewerModal, showMemoryBackfillModal, showAutoBackupModal, showBackupManagerModal, showBackupSizeModal,
                 showPresetBatchMoveModal, showPresetGroupForm]) {
                 if (modal.value) { modal.value = false; return true; }
             }
@@ -558,6 +583,10 @@ const app = createApp({
         const modelSearchQuery = ref('');
         const activeModelTag = ref('all');
         const characterSearchQuery = ref('');
+        // [rphub 2.8.91] 检索防抖后的值。输入框仍绑 characterSearchQuery（打字即时回显），
+        // filteredCharacters 只认这个 applied 值，避免每敲一个字就全量重排一次卡片列表。
+        const characterSearchQueryApplied = ref('');
+        let characterSearchDebounceTimer = null;
         const availableModels = ref([]);
         const uiTemplateAvailableModels = ref([]);
         const isFetchingUiTemplateModels = ref(false);
@@ -665,7 +694,7 @@ const app = createApp({
         );
 
         const toggleNavigation = () => {
-            if (currentView.value === 'chat') isNavigationOpen.value = !isNavigationOpen.value;
+            if (classicUi.value || currentView.value === 'chat') isNavigationOpen.value = !isNavigationOpen.value;
             else if (!shellRoot.value) shellGoBack();
             else foldDock(false);
         };
@@ -855,7 +884,7 @@ const app = createApp({
             activeToolAggressiveness: 'adaptive',
 
             useCharacterBackground: true,
-            immersiveMode: true,
+            immersiveMode: false,
             showLatestUsageBar: false,
             preventTruncation: false,
             inputObfuscation: true,
@@ -1635,6 +1664,48 @@ const app = createApp({
             saveData();
             showToast('已批量' + (enable ? '开启 ' : '关闭 ') + count + ' 项预设', 'success');
         };
+        // --- 2.8.87 预设删除：多选批量删除 / 整组删除 ---
+        // 下标取自 presets 原始数组。倒序 splice，避免删掉前面一条后后面的下标整体前移，
+        // 把「下一条」当成「这一条」删掉。第二人称/第三人称不在任何分组里，也一并跳过。
+        const collectPresetDeletableIndices = candidates => (Array.isArray(candidates) ? candidates : [])
+            .map(index => Number(index))
+            .filter(index => Number.isInteger(index) && index >= 0 && index < presets.value.length)
+            .filter(index => {
+                const preset = presets.value[index];
+                return preset && preset.name !== '第二人称' && preset.name !== '第三人称';
+            });
+
+        const removePresetsAt = indices => {
+            const unique = Array.from(new Set(indices)).sort((a, b) => b - a);
+            unique.forEach(index => presets.value.splice(index, 1));
+            // 删完必须清空选中：这些下标已经指向别的条目了。
+            selectedPresetIndices.value = [];
+            return unique.length;
+        };
+
+        const batchDeletePresets = () => {
+            const indices = collectPresetDeletableIndices(selectedPresetIndices.value);
+            if (!indices.length) return;
+            confirmAction(`确定要删除选中的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
+                const removed = removePresetsAt(indices);
+                saveData();
+                showToast('已删除 ' + removed + ' 项预设', 'success');
+            });
+        };
+
+        const deletePresetGroup = group => {
+            const indices = collectPresetDeletableIndices(
+                (group && group.items ? group.items : []).map(entry => entry && entry.index)
+            );
+            if (!indices.length) return;
+            const label = (group && group.label) || '该分组';
+            confirmAction(`确定要删除「${label}」分组的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
+                const removed = removePresetsAt(indices);
+                saveData();
+                showToast(`已删除「${label}」分组的 ${removed} 项预设`, 'success');
+            });
+        };
+
         // [rphub 2.7.90] 上游 2.7.90 顶层解构已加兜底，但调用点仍可能传入 undefined
         //   （BUILTIN_PRESETS 退化成 {} 后，BUILTIN_PRESETS.deUserCentric 仍是 undefined）。
         // 原签名 `= ({ name, content, ... })` 对 undefined 解构会抛
@@ -1737,7 +1808,7 @@ const app = createApp({
                     .replace(blockedStyleClausePattern, match => { removedFragments.push(match.trim()); return ''; })
                     .replace(blockedStyleWordPattern, match => { removedFragments.push(match); return ''; })
                     .replace(/^[ \t]*[，,；;]+/gm, '')
-                    .replace(/[，,；;]{2,}/g, marks => marks.at(-1))
+                    .replace(/[，,；;]{2,}/g, marks => marks.charAt(marks.length - 1))
                     .replace(/[，,；;]+([。！？!?])/g, '$1')
                     .replace(/[ \t]+\n/g, '\n')
                     .replace(/\n{3,}/g, '\n\n'))
@@ -1860,12 +1931,6 @@ const app = createApp({
         const CLASSIC_SECONDARY_GROUP_SIZE = 5;
         const MEMORY_MODE_ENHANCED = 'enhanced';
         const MEMORY_MODE_CLASSIC = 'classic';
-        let HYBRID_SUMMARY_INTERVAL_TURNS = 30;
-        const HYBRID_SUMMARY_LEVELS = {
-            concise: { label: '精简', targetLength: 500 },
-            medium: { label: '中等', targetLength: 750 },
-            fine: { label: '精细', targetLength: 1000 }
-        };
         const SUMMARY_KEEP_FLOORS_MIN = 10;
         // 50 楼约等于 25 轮，正好接上二次压缩的起点（25 轮以前）；再高会让被切开的合并总结与保留的原文重复。
         const SUMMARY_KEEP_FLOORS_MAX = 300;
@@ -2013,9 +2078,22 @@ const app = createApp({
                     if (memory?.secondaryCompressed !== true) return;
                     const sources = Array.isArray(memory.sourceMemories) ? memory.sourceMemories : [];
                     if (!sources.length) return;
-                    const turns = [...new Set(
-                        sources.map(source => Number(source?.turn)).filter(turn => turn >= 1)
-                    )].sort((a, b) => a - b);
+                    // 递归到基础总结：三级结构里一层来源的 turn 只是子节点的 turnEnd，
+                    // 按一层取会得到「只有 1 条」，这段空洞检查就静默失效了。
+                    // 这里自带一份递归，避免依赖后面才声明的同名工具（const 暂时性死区）。
+                    const collectTurns = (item, out = new Set()) => {
+                        if (!item || typeof item !== 'object') return out;
+                        const children = Array.isArray(item.sourceMemories) ? item.sourceMemories : [];
+                        if (item.secondaryCompressed === true && children.length) {
+                            children.forEach(child => collectTurns(child, out));
+                            return out;
+                        }
+                        const turn = Number(item.turn);
+                        if (turn >= 1) out.add(turn);
+                        children.forEach(child => collectTurns(child, out));
+                        return out;
+                    };
+                    const turns = [...collectTurns(memory)].sort((a, b) => a - b);
                     if (turns.length < 2) return;
                     const holes = [];
                     for (let i = 1; i < turns.length; i++) {
@@ -2110,10 +2188,6 @@ const app = createApp({
                 return [];
             }
         };
-        const writeMemToolsVersions = async (scopeId, list) => {
-            if (!getMainDb()) await initDB();
-            await setScopedStoredValue(MEM_TOOLS_VERSIONS_KEY, scopeId, list, { clone: false });
-        };
         const loadMemToolsVersions = async () => {
             const scopeId = memToolsScopeId.value;
             memToolsVersions.loading = true;
@@ -2131,12 +2205,28 @@ const app = createApp({
             const scopeId = memToolsScopeId.value;
             if (!scopeId) { showToast('先选一个角色', 'error'); return false; }
             if (!_classicMemoriesLoaded) { showToast('记忆还没加载完，稍后再试', 'error'); return false; }
+            // B1: 同步上锁，早于第一个 await。否则手动存档与自动存档会在读-改-写之间互相覆盖，
+            // 后写的一方把前一份悄悄抹掉。UI 的 saving 只是显示，这里才是互斥。
+            if (memToolsVersions.saving) { showToast('上一份存档还没写完，稍等一下'); return false; }
+            // 存档源必须是已提交内容：视图被旁路改过时存下来的是「还没进库的样子」，
+            // 回滚它等于把从未生效的数据当保险。
+            if (memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) {
+                showToast('记忆有未保存的改动，先保存再存档', 'error');
+                return false;
+            }
             memToolsVersions.saving = true;
             try {
+                const store = window.RPHubStorage;
+                const versionsKey = store.scopedStorageKeyFor(MEM_TOOLS_VERSIONS_KEY, scopeId);
+                // 基线必须用未过滤的原始值：列表里有坏条目时，过滤后的数组和库里永远不相等，
+                // 条件写会退化成永久冲突。
+                const rawExisting = await getScopedStoredValue(MEM_TOOLS_VERSIONS_KEY, scopeId);
+                const existing = Array.isArray(rawExisting)
+                    ? rawExisting.filter(version => version && Array.isArray(version.memories))
+                    : [];
                 const source = Array.isArray(classicMemories.value)
                     ? cloneForStorage(classicMemories.value)
                     : [];
-                const existing = await readMemToolsVersions(scopeId);
                 // versionId 与 id 同值双写：老代码按 id 找、模板按 id 做 :key，
                 // 树形渲染按 parentVersionId 算深度。同一份数据两个视角，不另造别名逻辑。
                 const newVersionId = generateUUID();
@@ -2157,9 +2247,21 @@ const app = createApp({
                     memToolsVersions.list = existing;
                     return false;
                 }
-                // 淘汰走 rebase：砍最老的节点前先把它的子节点挂到它的父上，否则树会断出孤儿
-                const next = memToolsVersionsPrune([entry, ...existing], MEM_TOOLS_VERSIONS_MAX);
-                await writeMemToolsVersions(scopeId, next);
+                // 淘汰走 rebase：砍最老的节点前先把它的子节点挂到它的父上，否则树会断出孤儿。
+                // 当前所在节点不参与淘汰，否则「当前」指针会指向一个刚被砍掉的版本。
+                const next = memToolsVersionsPrune([entry, ...existing], MEM_TOOLS_VERSIONS_MAX,
+                    memToolsVersionsCurrentId.value);
+                const written = await store.commitStoredValueBatch({
+                    expected: [{ key: versionsKey, value: rawExisting }],
+                    writes: [{ key: versionsKey, value: next }]
+                });
+                if (written.status === 'conflict') {
+                    showToast('存档列表刚被别的操作改过，请再存一次', 'error');
+                    return false;
+                }
+                if (written.status !== 'committed') {
+                    throw written.error || Object.assign(new Error('存档未提交'), { name: written.status });
+                }
                 memToolsVersions.list = next;
                 showToast(`已存档 ${entry.count} 条`);
                 return true;
@@ -2217,27 +2319,28 @@ const app = createApp({
                     return;
                 }
                 // 用局部副本写库，不依赖共享的 classicMemories.value：中途切角色时它会被换掉，
-                // 直接读它就会把新角色的数组写进旧作用域。
+                // 直接读它就会把新角色的数组写进旧作用域。整表替换是回滚的本意，故严格核对基线。
                 const rollbackTarget = cloneForStorage(entry.memories);
-                classicMemories.value = rollbackTarget;
-                await saveClassicMemoriesNow(scopeId, rollbackTarget);
-                if (memToolsScopeMoved(scopeId)) {
-                    showToast('角色或分支已经切换，回滚已写入原角色，请刷新后确认', 'warning', 4000);
+                const versionId = String(entry.versionId || entry.id || '');
+                const currentKey = window.RPHubStorage.scopedStorageKeyFor(MEM_TOOLS_VERSIONS_CURRENT_KEY, scopeId);
+                const ok = await memToolsWriteMemoryList(scopeId, () => rollbackTarget, {
+                    // 记忆与「当前所在版本」指针同一事务：否则回滚成功、指针没写成，
+                    // 下次打开会把当前标记退回最新一份，用户看到的是错节点。
+                    changes: [{ key: currentKey, operation: 'set', value: { versionId, updatedAt: Date.now() } }]
+                });
+                if (!ok) {
+                    if (memToolsScopeMoved(scopeId)) {
+                        showToast('角色或分支已经切换，回滚已写入原角色，请刷新后确认', 'warning', 4000);
+                    }
                     return;
                 }
-                const stored = await getScopedStoredValue('classic_memories', scopeId);
-                const storedList = Array.isArray(stored) ? stored : [];
-                if (storedList.length !== entry.count
-                    || memToolsMemorySignature(storedList) !== memToolsMemorySignature(rollbackTarget)) {
-                    showToast(`回滚后校验不一致，库内 ${storedList.length} 条，请重新检查`, 'error');
-                } else if (memToolsNeedsReindex()) {
+                if (memToolsNeedsReindex()) {
                     showToast(`已回滚到 ${entry.count} 条。增强记忆模式需要重建索引后才会被召回`, 'warning', 4000);
                 } else {
                     showToast(`已回滚到 ${entry.count} 条`);
                 }
-                // 回滚成功后当前记忆就落在这个节点上
-                memToolsVersionsCurrentId.value = String(entry.versionId || entry.id || '');
-                await writeMemToolsVersionsCurrent(scopeId, memToolsVersionsCurrentId.value);
+                // 指针已在上面那次事务里落地，这里只更新内存状态，不再重复写库。
+                memToolsVersionsCurrentId.value = versionId;
                 await loadMemToolsVersions();
                 await runMemToolsAudit();
             } catch (error) {
@@ -2252,17 +2355,31 @@ const app = createApp({
             const confirmed = await showVueConfirmModal('删除存档', '删掉这一份存档？当前记忆不受影响。');
             if (!confirmed) return;
             try {
+                const store = window.RPHubStorage;
+                const versionsKey = store.scopedStorageKeyFor(MEM_TOOLS_VERSIONS_KEY, scopeId);
+                const currentKey = store.scopedStorageKeyFor(MEM_TOOLS_VERSIONS_CURRENT_KEY, scopeId);
+                const rawExisting = await getScopedStoredValue(MEM_TOOLS_VERSIONS_KEY, scopeId);
+                if (!Array.isArray(rawExisting)) { showToast('存档列表已经不存在，请刷新后确认', 'warning'); return; }
                 // memToolsVersions.list 是 reactive，读出来是 Vue 代理；IDB 的
-                // structuredClone 克隆不了代理。与 saveMemToolsSnapshot 里
-                // cloneForStorage(classicMemories.value) 同一个写法。
-                const next = cloneForStorage(memToolsVersionsRemoveNode(memToolsVersions.list, id));
-                await writeMemToolsVersions(scopeId, next);
-                memToolsVersions.list = next;
-                // 删掉的正好是「当前所在」时位置就失效了，清掉免得 UI 指着一个不存在的节点
-                if (String(memToolsVersionsCurrentId.value) === String(id)) {
-                    memToolsVersionsCurrentId.value = '';
-                    await writeMemToolsVersionsCurrent(scopeId, '');
+                // structuredClone 克隆不了代理。
+                const next = cloneForStorage(memToolsVersionsRemoveNode(rawExisting, id));
+                const clearsCurrent = String(memToolsVersionsCurrentId.value) === String(id);
+                const writes = [{ key: versionsKey, value: next }];
+                // 「删掉的正好是当前所在」时指针与列表必须一起落地，否则中途失败会留下悬空指针。
+                if (clearsCurrent) writes.push({ key: currentKey, value: { versionId: '', updatedAt: Date.now() } });
+                const written = await store.commitStoredValueBatch({
+                    expected: [{ key: versionsKey, value: rawExisting }],
+                    writes
+                });
+                if (written.status === 'conflict') {
+                    showToast('存档列表刚被别的操作改过，请刷新后重试', 'error');
+                    return;
                 }
+                if (written.status !== 'committed') {
+                    throw written.error || Object.assign(new Error('删除未提交'), { name: written.status });
+                }
+                memToolsVersions.list = next;
+                if (clearsCurrent) memToolsVersionsCurrentId.value = '';
                 showToast('已删除');
             } catch (error) {
                 showToast(`删除失败：${error?.message || error}`, 'error');
@@ -2314,7 +2431,7 @@ const app = createApp({
                 return undefined;
             }
         };
-        const writeMemToolsPinned = async (scopeId, list) => {
+        const writeMemToolsPinned = async (scopeId, list, options = {}) => {
             if (!getMainDb()) await initDB();
             // 必须过 cloneForStorage：memToolsPinned 是 reactive，读出来的 list 是
             // Vue 代理，IDB 的 structuredClone 克隆不了代理（"could not be cloned"）。
@@ -2322,7 +2439,23 @@ const app = createApp({
             // chat 写入）； reactive 值要先自己 cloneForStorage，与官网
             // setStoredValue('memory_settings', cloneForStorage(memorySettings), {clone:false})
             // 同一个写法。
+            if (Object.prototype.hasOwnProperty.call(options, 'expected')) {
+                // 用户点图钉走条件写：读-判-写之间若别的标签页改过，宁可报冲突也不覆盖。
+                const key = window.RPHubStorage.scopedStorageKeyFor(MEM_TOOLS_PINNED_KEY, scopeId);
+                const written = await window.RPHubStorage.commitStoredValueBatch({
+                    expected: [{ key, value: options.expected }],
+                    writes: [{ key, value: cloneForStorage(list) }]
+                });
+                if (written.status === 'conflict') {
+                    throw Object.assign(new Error('固定标记刚被改动，请重试'), { name: 'StorageConflictError' });
+                }
+                if (written.status !== 'committed') {
+                    throw written.error || Object.assign(new Error('固定标记未提交'), { name: written.status });
+                }
+                return true;
+            }
             await setScopedStoredValue(MEM_TOOLS_PINNED_KEY, scopeId, cloneForStorage(list), { clone: false });
+            return true;
         };
         const loadMemToolsPinned = async () => {
             const scopeId = memToolsScopeId.value;
@@ -2354,27 +2487,29 @@ const app = createApp({
         // 已钉 3–6 时再钉 3–4 ⇒ 合成一条 3–6，不能留下 3–4 与 5–6 两条；
         // 已钉 1–10 时取消 3–4 ⇒ 拆成 1–2 与 5–10，不能把整条一起取消。
         // start 非法时原样返回：不能把 0 / NaN 当成「钉住第 1 轮」。
-        const memToolsPinRange = (start, end) => {
+        const memToolsPinRange = (start, end, base = null) => {
+            const source = Array.isArray(base) ? base : memToolsPinnedEffective.value;
             const lo = Math.floor(Number(start));
-            if (!Number.isFinite(lo) || lo < 1) return memToolsPinnedEffective.value.slice();
+            if (!Number.isFinite(lo) || lo < 1) return source.slice();
             const hi = Math.max(lo, Math.floor(Number(end)) || lo);
             // 并集：与目标重叠的区间要一起并进来。只「删掉重叠的再添新的」会在
             // 新范围被旧区间包含时把钉子缩小 —— 已钉 3–6 再钉 3–4 会变成 3–4，
             // 于是 5–6 又被放回去参与压缩。
-            const overlapping = memToolsPinnedEffective.value
+            const overlapping = source
                 .filter(range => range.end >= lo && range.start <= hi);
-            const kept = memToolsPinnedEffective.value
+            const kept = source
                 .filter(range => range.end < lo || range.start > hi);
             const uLo = overlapping.length ? Math.min(lo, ...overlapping.map(range => range.start)) : lo;
             const uHi = overlapping.length ? Math.max(hi, ...overlapping.map(range => range.end)) : hi;
             return memToolsNormalizeRanges([...kept, { start: uLo, end: uHi }]);
         };
-        const memToolsUnpinRange = (start, end) => {
+        const memToolsUnpinRange = (start, end, base = null) => {
+            const source = Array.isArray(base) ? base : memToolsPinnedEffective.value;
             const lo = Math.floor(Number(start));
-            if (!Number.isFinite(lo) || lo < 1) return memToolsPinnedEffective.value.slice();
+            if (!Number.isFinite(lo) || lo < 1) return source.slice();
             const hi = Math.max(lo, Math.floor(Number(end)) || lo);
             const next = [];
-            memToolsPinnedEffective.value.forEach(range => {
+            source.forEach(range => {
                 if (range.end < lo || range.start > hi) { next.push({ ...range }); return; }
                 if (range.start < lo) next.push({ start: range.start, end: lo - 1 });
                 if (range.end > hi) next.push({ start: hi + 1, end: range.end });
@@ -2386,12 +2521,16 @@ const app = createApp({
             const start = Number(row && row.start) || 0;
             const end = Math.max(start, Number(row && row.end) || start);
             if (!scopeId || !start) { showToast('先选一个角色'); return; }
-            const pinned = memToolsRangePinned(start, end);
             const label = `第 ${start}${end !== start ? '–' + end : ''} 轮`;
             const before = (memToolsPinned.list || []).slice();
-            memToolsPinned.list = pinned ? memToolsUnpinRange(start, end) : memToolsPinRange(start, end);
             try {
-                await writeMemToolsPinned(scopeId, memToolsPinned.list);
+                // 判定与写入都要以库里的当前值为准：内存列表可能是别的标签页写入前的旧值。
+                const raw = await readMemToolsPinned(scopeId);
+                const base = Array.isArray(raw) ? memToolsNormalizeRanges(raw) : memToolsPinnedEffective.value.slice();
+                const pinned = base.some(range => range.end >= start && range.start <= end);
+                const next = pinned ? memToolsUnpinRange(start, end, base) : memToolsPinRange(start, end, base);
+                memToolsPinned.list = next;
+                await writeMemToolsPinned(scopeId, next, { expected: raw });
                 memToolsPinned.loaded = true;
                 memToolsPinned.error = '';
                 showToast(pinned ? `已取消固定${label}，它会重新参与自动总结` : `已固定${label}，自动总结会跳过它`);
@@ -2605,23 +2744,16 @@ const app = createApp({
                     sourceMemories: ordered.map(memory => cloneForStorage(memory))
                 };
                 const sourceSet = new Set(ids);
-                // 同上：先建局部副本再写库，避免中途切角色把别人的数组写进本作用域
-                const mergedTarget = [
-                    ...(Array.isArray(classicMemories.value) ? classicMemories.value : [])
-                        .filter(memory => !sourceSet.has(memory.id)),
+                // 按当前已发布列表重算：合并期间别处追加的无关条目不会被这份旧快照抹掉
+                const ok = await memToolsWriteMemoryList(scopeId, list => [
+                    ...list.filter(memory => !sourceSet.has(String(memory && memory.id || ''))),
                     merged
-                ];
-                classicMemories.value = mergedTarget;
-                await saveClassicMemoriesNow(scopeId, mergedTarget);
-                if (memToolsScopeMoved(scopeId)) {
-                    memToolsMerge.error = '角色或分支已经切换，合并结果已写入原角色，请刷新后确认';
+                ], {sourceIds: ids});
+                if (!ok) {
+                    if (memToolsScopeMoved(scopeId)) memToolsMerge.error = '角色或分支已经切换，合并结果已写入原角色，请刷新后确认';
                     return;
                 }
-                const stored = await getScopedStoredValue('classic_memories', scopeId);
-                const storedList = Array.isArray(stored) ? stored : [];
-                if (memToolsMemorySignature(storedList) !== memToolsMemorySignature(mergedTarget)) {
-                    showToast('写入后校验不一致，请用存档回滚', 'error');
-                } else if (memToolsNeedsReindex()) {
+                if (memToolsNeedsReindex()) {
                     showToast(`已把 ${ids.length} 条合并成 1 条。增强记忆模式需要重建索引后才会被召回`, 'warning', 4000);
                 } else {
                     showToast(`已把 ${ids.length} 条合并成 1 条`);
@@ -2640,16 +2772,27 @@ const app = createApp({
         };
         // ═══════════ 记忆工具 · 逐条动作：改 / 重试 / 撤销（批次 1，2.8.74） ═══════════
         // 写入骨架照 confirmMemToolsMergeWrite：存档 → 作用域守卫 → 写 → 指纹校验 → 刷新。
-        const memToolsWriteMemoryList = async (scopeId, nextList, options = {}) => {
-            classicMemories.value = nextList;
-            await saveClassicMemoriesNow(scopeId, nextList);
-            if (memToolsScopeMoved(scopeId)) {
-                memToolsEdit.error = '角色或分支已经切换，结果已写入原角色，请刷新后确认';
-                return false;
-            }
+        // 传入 transform 时按当前已发布列表重算，未受影响的条目不会被旧快照覆盖；
+        // sourceIds 只用于核对本次真正依赖的那几条来源。
+        const memToolsWriteMemoryList = async (scopeId, nextListOrTransform, options = {}) => {
+            const intent = options.intent || await beginMemoryIntent(options.label || '记忆工具保存');
+            if (intent.scopeId !== scopeId) throw memoryOperationError('MemoryScopeError', '记忆与作用域不匹配');
+            const transform = typeof nextListOrTransform === 'function'
+                ? nextListOrTransform
+                : () => nextListOrTransform;
+            const sourceIds = Array.isArray(options.sourceIds) ? options.sourceIds.map(String) : null;
+            // 把附加事务键透传下去：回滚要同时写「当前所在版本」指针，两键必须同一事务。
+            const extra = { expected: options.expected, changes: options.changes };
+            const result = sourceIds
+                ? await commitMemoryTransform(intent, transform, {
+                    ...extra,
+                    validate: (current, before) => sourceIds.every(id => sameMemorySources(current, before, [id]))
+                })
+                : await commitMemoryDraft(intent, transform(intent.source), extra);
+            if (!result.published) return false;   // 调用方按 memToolsScopeMoved 给出各自的提示
             const stored = await getScopedStoredValue('classic_memories', scopeId);
             const storedList = Array.isArray(stored) ? stored : [];
-            if (memToolsMemorySignature(storedList) !== memToolsMemorySignature(nextList)) {
+            if (memToolsMemorySignature(storedList) !== memToolsMemorySignature(result.list)) {
                 // 校验不过就返回 false：调用方据此不再显示「已保存」，批量任务也会停。
                 showToast('写入后校验不一致，请用存档回滚', 'error');
                 return false;
@@ -2667,12 +2810,18 @@ const app = createApp({
                 .find(item => String(item && item.id) === String(memoryId || ''));
             if (!memory) return;
             try {
-                await indexSummaryMemories(
+                const indexed = await indexSummaryMemories(
                     buildConversationTurnSnapshot(chatHistory.value, { includeSystem: false }),
                     null,
                     [memory]
                 );
-                showToast('已重建这一条的向量');
+                // 缺原文、被中断、没写成是三种状态，提示分开；都不报成功。
+                if (indexed.cancelled) showToast('向量重建被中断，这一条暂时不参与召回', 'warning', 5000);
+                else if (indexed.skippedParent) showToast('父摘要是压缩节点，本身不参与向量索引', 'info', 4000);
+                else if (indexed.skippedNoSource) showToast('这一条找不到对应原文，向量没重建，召回可能还是旧的', 'warning', 5000);
+                else if (indexed.requested && indexed.written < indexed.requested) showToast('总结已改，但向量没重建，召回可能还是旧的', 'warning', 5000);
+                else if (!indexed.requested) showToast('这一条的向量已是最新，无需重建');
+                else showToast('已重建这一条的向量');
             } catch (error) {
                 showToast(`总结已改，但向量没重建（${error?.message || error}），召回可能还是旧的`, 'warning', 5000);
             }
@@ -2710,11 +2859,17 @@ const app = createApp({
                     memToolsEdit.error = '角色或分支已经切换，本次修改已取消';
                     return;
                 }
-                const nextList = (Array.isArray(classicMemories.value) ? classicMemories.value : [])
-                    .map(item => (item && String(item.id) === String(memory.id))
-                        ? { ...item, summary: text }
-                        : item);
-                const ok = await memToolsWriteMemoryList(scopeId, nextList, { memoryId: memory.id });
+                const targetId = String(memory.id);
+                const ok = await memToolsWriteMemoryList(scopeId, list => list.map(item => {
+                    if (!item || String(item.id) !== targetId) return item;
+                    const next = { ...item, summary: text };
+                    // 正文改了旧坐标就作废。清掉而不是留着：重建失败时这条不参与召回，
+                    // 也不能拿旧文本的向量给新正文打分。
+                    if (!isSecondaryClassicMemory(next)) ['embeddingQ', 'embeddingScale', 'embeddingDims',
+                        'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl', 'embeddingInputFingerprint']
+                        .forEach(key => delete next[key]);
+                    return next;
+                }), { memoryId: memory.id, sourceIds: [targetId] });
                 if (!ok) return;
                 cancelMemToolsMemoryEdit();
                 memToolsEdit.notice = '已保存这一条的修改';
@@ -2751,11 +2906,15 @@ const app = createApp({
                     memToolsEdit.error = '角色或分支已经切换，本次重试未写入';
                     return;
                 }
-                const nextList = (Array.isArray(classicMemories.value) ? classicMemories.value : [])
-                    .map(item => (item && String(item.id) === String(memory.id))
-                        ? { ...item, summary: text }
-                        : item);
-                const ok = await memToolsWriteMemoryList(scopeId, nextList, { memoryId: memory.id });
+                const targetId = String(memory.id);
+                const ok = await memToolsWriteMemoryList(scopeId, list => list.map(item => {
+                    if (!item || String(item.id) !== targetId) return item;
+                    const next = { ...item, summary: text };
+                    if (!isSecondaryClassicMemory(next)) ['embeddingQ', 'embeddingScale', 'embeddingDims',
+                        'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl', 'embeddingInputFingerprint']
+                        .forEach(key => delete next[key]);
+                    return next;
+                }), { memoryId: memory.id, sourceIds: [targetId] });
                 if (!ok) return;
                 memToolsEdit.notice = `已重新总结第 ${row.start}${row.end !== row.start ? '–' + row.end : ''} 轮`;
             } catch (error) {
@@ -2801,8 +2960,19 @@ const app = createApp({
                     memToolsEdit.error = '角色或分支已经切换，本次撤销已取消';
                     return;
                 }
-                const reverted = memToolsRevertRange(classicMemories.value, parentList, start, end);
-                const ok = await memToolsWriteMemoryList(scopeId, reverted.list, {});
+                // 受影响来源 = 当前列表里与待恢复区间重叠的条目；只核对这些，别处新增不受牵连
+                const affectedIds = (Array.isArray(classicMemories.value) ? classicMemories.value : [])
+                    .filter(item => {
+                        const range = memToolsRange(item);
+                        return range.end >= probe.lo && range.start <= probe.hi;
+                    })
+                    .map(item => String(item && item.id || ''))
+                    .filter(Boolean);
+                const ok = await memToolsWriteMemoryList(
+                    scopeId,
+                    list => memToolsRevertRange(list, parentList, start, end).list,
+                    { sourceIds: affectedIds }
+                );
                 if (!ok) return;
                 cancelMemToolsMemoryEdit();
                 memToolsEdit.notice = `已撤销${label}，恢复为${target}`;
@@ -3075,12 +3245,10 @@ const app = createApp({
                     }
                     const merged = memToolsAutoMergedMemory(memories, summary);
                     const sourceSet = new Set(ids);
-                    const nextList = [
-                        ...(Array.isArray(classicMemories.value) ? classicMemories.value : [])
-                            .filter(memory => !sourceSet.has(String(memory && memory.id || ''))),
+                    const ok = await memToolsWriteMemoryList(scopeId, list => [
+                        ...list.filter(memory => !sourceSet.has(String(memory && memory.id || ''))),
                         merged
-                    ];
-                    const ok = await memToolsWriteMemoryList(scopeId, nextList, { memoryId: merged.id });
+                    ], { memoryId: merged.id, sourceIds: ids });
                     if (!ok) {
                         // 骨架返回 false 有两种：写后校验不过、写入期间切了角色。
                         // 前者它自己弹 toast，这里只补后者的卡片提示。
@@ -3839,15 +4007,6 @@ const app = createApp({
                 return '';
             }
         };
-        const writeMemToolsVersionsCurrent = async (scopeId, versionId) => {
-            if (!scopeId) return;
-            try {
-                await setScopedStoredValue(MEM_TOOLS_VERSIONS_CURRENT_KEY, scopeId,
-                    { versionId: String(versionId || ''), updatedAt: Date.now() }, { clone: false });
-            } catch (error) {
-                // 记不住当前位置不影响主流程，只是下次打开时「当前」标记会退回到最新一份
-            }
-        };
         // 老存档（2.8.70 及以前）没有 versionId / parentVersionId / type。
         // 只在内存里归一化、不写回 —— 打开页面就触发一次写库没有意义，下次存档自然落成新格式。
         const normalizeMemToolsVersions = list => {
@@ -3916,8 +4075,10 @@ const app = createApp({
         };
         // 上限淘汰：按 createdAt 找最老的砍，砍之前先 rebase 它的子节点。
         // 老实现是 slice(0, MAX) 直接截断 —— 树形下那会砍出孤儿。
-        const memToolsVersionsPrune = (list, max) => {
+        // B1: 当前所在节点受保护，否则淘汰完「当前」指针指向一个已不存在的版本。
+        const memToolsVersionsPrune = (list, max, protectedId = '') => {
             const limit = Math.max(1, Number(max) || 10);
+            const keepId = String(protectedId || '');
             let arr = Array.isArray(list) ? list.slice() : [];
             let guard = 0;
             while (arr.length > limit && guard < 64) {
@@ -3925,13 +4086,15 @@ const app = createApp({
                 // createdAt 只有毫秒精度，连着存两份会打平。打平时不能靠 sort 的稳定性：
                 // 列表是新→旧排的，稳定排序会把「最新那份」当成最老的先砍掉。
                 // 所以同 createdAt 时以「数组位置更靠后 = 更老」兜底，判据完全确定。
-                let victimIndex = 0;
-                let victimAt = Number(arr[0] && arr[0].createdAt) || 0;
-                for (let i = 1; i < arr.length; i += 1) {
+                let victimIndex = -1;
+                let victimAt = 0;
+                for (let i = 0; i < arr.length; i += 1) {
+                    const id = String(arr[i] && (arr[i].versionId || arr[i].id) || '');
+                    if (keepId && id === keepId) continue;
                     const at = Number(arr[i] && arr[i].createdAt) || 0;
-                    if (at <= victimAt) { victimAt = at; victimIndex = i; }
+                    if (victimIndex < 0 || at <= victimAt) { victimAt = at; victimIndex = i; }
                 }
-                const victim = arr[victimIndex];
+                const victim = victimIndex >= 0 ? arr[victimIndex] : null;
                 if (!victim) break;
                 arr = memToolsVersionsRemoveNode(arr, String(victim.versionId || victim.id || ''));
             }
@@ -4205,6 +4368,10 @@ const app = createApp({
             delete settings.activeToolAggressivenessVersion;
         };
         const activeTools = ref(getDefaultActiveToolDefinitions());
+        // loadData 是否真的从库里读过 active_tools。整段 loadData 只有一个 try，
+        // 前面任何一步读失败都会跳过 active_tools 那两行；此时内存里只剩默认工具（空 Tavily 密钥），
+        // 启动那次 saveData 若照常写回，就等于把用户配好的密钥永久抹掉。
+        let _activeToolsLoaded = false;
 
         const normalizeKeepFloors = (value, min, max, fallback) => {
             const floors = Number(value);
@@ -4262,6 +4429,9 @@ const app = createApp({
         const getActiveToolResultCountMax = () => ACTIVE_TOOL_MAX_RESULT_COUNT;
 
         const normalizeActiveTool = (tool = {}) => {
+            // 默认参数只吃 undefined，不吃 null ⇒ 数组里混进 null 时 tool.resultCount 直接抛 TypeError，
+            // 而这个函数在 loadData 的大 try 里被调用，一抛就把它后面的所有键一起带走（active_tools 首当其冲）。
+            if (!tool || typeof tool !== 'object') return null;
             const resultCount = Number(tool.resultCount);
             const rawCallName = normalizeActiveToolBaseCallName(tool.callName || tool.callPattern || 'tool_grep');
             const isLegacyWebTool = rawCallName === 'tool_web'
@@ -4343,7 +4513,15 @@ const app = createApp({
         const showWorldInfoSettings = ref(false);
         const showMemorySettings = ref(true);
         const settingsHelpTopic = ref('');
-        const showActiveToolSettings = ref(false);
+        // 工具页「工具全局设置」折叠状态：纯 UI 状态，用 localStorage（同步读写，没有初始化竞态）。
+        // 原来是裸 ref(false)，每次重进工具页都重新折叠，配好设置再进来还得再展开一次。
+        const ACTIVE_TOOL_SETTINGS_OPEN_KEY = 'rphub_active_tool_settings_open';
+        const showActiveToolSettings = ref((() => {
+            try { return localStorage.getItem(ACTIVE_TOOL_SETTINGS_OPEN_KEY) === '1'; } catch (e) { return false; }
+        })());
+        watch(showActiveToolSettings, (open) => {
+            try { localStorage.setItem(ACTIVE_TOOL_SETTINGS_OPEN_KEY, open ? '1' : '0'); } catch (e) { /* 写不进去就算了 */ }
+        });
         const showUiTemplateSettings = ref(false);
         const worldInfoSettings = reactive({
             scanDepth: 2,
@@ -4488,12 +4666,64 @@ const app = createApp({
         // 原来按 performance.memory / deviceMemory 动态收紧的逻辑，正是「数据涨过阈值后
         // 自动备份永久跳过」的成因，故移除。手动触发不受闸门限制（与全量导出一致）。
         const AUTO_BACKUP_SIZE_LIMIT_BYTES = 250 * 1024 * 1024;
+        // [rphub 2.8.97] 闸门放宽后的硬顶：再大的单份备份在手机上还原本身就不现实。
+        const AUTO_BACKUP_SIZE_CEILING_BYTES = 1024 * 1024 * 1024;
         const AUTO_BACKUP_SKIP_BACKOFF_MS = 6 * 60 * 60 * 1000; // 超限跳过后 6 小时内不重试
         const AUTO_BACKUP_FAIL_BACKOFF_MS = 30 * 60 * 1000;     // 失败后 30 分钟内不重试
         const AUTO_BACKUP_BUSY_DELAY_MS = 30 * 1000;            // 正在出卡时顺延
+        // [rphub 2.8.102] 顺延次数上限。旧实现是无上限递归重排：一直忙就一直排，
+        //   既不放弃也不留痕，用户只会看到「自动备份从来没跑过」。
+        const AUTO_BACKUP_BUSY_MAX_DEFER = 10;                  // ≈5 分钟后放弃
+        let _backupBusyDeferCount = 0;
         // 2.8.19：不再按堆余量动态收紧 —— 写入已流式化，内存不再是约束。
         // 这里只是一个纯粹的文件体积 sanity ceiling（等「流式恢复」落地后可再抬高）。
-        const getAutoBackupSizeLimit = () => AUTO_BACKUP_SIZE_LIMIT_BYTES;
+        // [rphub 2.8.97] 上面这条仍然成立，本条只补「放宽」的另一半：
+        //   250MB 是 2.8.14 按「还原还没流式化」的时代定的兜底。用户实测堆 2222MB /
+        //   可还原 816MB，256MB 的库被 250MB 卡住 ⇒ 自动备份长期停摆，而设备吃得下。
+        //   所以闸门跟还原上限走：max(250MB, 还原上限 × 0.9)。
+        //   **只取 max，绝不取 min** —— 按堆收紧正是 2.8.19 之前「数据涨过阈值后自动
+        //   备份永久跳过」的成因，那条路不能重走；小内存设备闸门仍是不变的 250MB。
+        //   getRestoreBudget 定义在本函数之后，靠调用时机求值；万一有人在它之前调用，
+        //   try/catch 会静默退回 250MB，不会抛 ReferenceError。
+        const getAutoBackupSizeLimit = () => {
+            try {
+                const byBudget = Math.floor(getRestoreBudget().maxFileBytes * 0.9);
+                if (byBudget > AUTO_BACKUP_SIZE_LIMIT_BYTES) {
+                    return Math.min(byBudget, AUTO_BACKUP_SIZE_CEILING_BYTES);
+                }
+            } catch (_) {}
+            return AUTO_BACKUP_SIZE_LIMIT_BYTES;
+        };
+
+        // [rphub 2.8.94] 备份体积归桶：纯诊断，不参与任何写入决策。
+        //   目的：把「数据量较大」这句零信息量的提示，换成「到底是哪一类数据撑爆的」。
+        //   不改变备份内容、顺序、字节数，只在写入过程中顺手累加一份账。
+        const backupBucketOf = (logicalKey) => {
+            const key = String(logicalKey || '');
+            if (key.startsWith('chat_')) return '聊天记录';
+            if (key === 'characters') return '角色卡';
+            if (key.startsWith('classic_memories_') || key.startsWith('b1_memory_state_')) return '记忆';
+            if (key.startsWith('memories_')) return '旧记忆';
+            if (key === 'worldinfo' || key === 'global_worldinfo') return '世界书';
+            if (key === 'global_ui_templates') return 'UI 模板';
+            if (key === 'branches' || key.startsWith('branches_')) return '分支';
+            if (key === 'token_usage_history') return '用量记录';
+            if (key === 'presets' || key === 'preset_groups') return '预设';
+            if (key === 'regex' || key === 'global_regex') return '正则';
+            if (key === 'settings' || key === 'worldinfo_settings' || key === 'memory_settings') return '设置';
+            if (key === 'user' || key === 'user_profiles' || key === 'active_profile_id') return '个人设定';
+            return '其他';
+        };
+        const fmtBackupMB = (bytes) => (Math.round((Number(bytes) || 0) / 1048576 * 10) / 10) + 'MB';
+        // 按体积降序取前 N 个桶，附带每桶条目数
+        const rankBackupBuckets = (bucketStat, topN) => [...bucketStat.entries()]
+            .map(([name, stat]) => ({ name, bytes: stat.bytes, entries: stat.entries }))
+            .sort((a, b) => b.bytes - a.bytes)
+            .slice(0, Math.max(1, Number(topN) || 5));
+        // 一句话摘要：「聊天记录 chat_* 152MB · 角色卡 characters 71MB · …」
+        const describeBackupBuckets = (bucketStat, topN) => rankBackupBuckets(bucketStat, topN)
+            .map(item => item.name + ' ' + fmtBackupMB(item.bytes))
+            .join(' · ');
 
         // ---- 2.8.19：还原体积预检 ----
         // 2.8.78：系数由实测校准，5 降为 2。用 30.8MB 真实结构样本（中文正文 + base64 头像 +
@@ -4504,6 +4734,11 @@ const app = createApp({
         // 所以「多一层拷贝就多一倍内存」在这里是错的。取 2 是给 Android WebView 的
         // IndexedDB 序列化与堆碎片留约 30% 余量。
         const RESTORE_BYTES_PER_FILE_BYTE = 2;
+        // [rphub 2.8.100] 本次会话观测到的最低已用堆。体积分析要逐条 stringify 量字节，
+        //   一次分析就在堆上留下几百 MB 临时对象；下一次分析读到的 usedJSHeapSize 里含着
+        //   这些垃圾，于是「可还原上限」显示得比真实值低一半，用户会误以为自己的备份还原不了。
+        //   拿它当基线，才判得出这次读数是不是被上一次污染了。
+        let _minHeapUsedSeen = 0;
         const getRestoreBudget = () => {
             let limit = 0, used = 0, source = '保守兜底';
             try {
@@ -4524,6 +4759,8 @@ const app = createApp({
                 } catch (_) {}
             }
             if (!limit) limit = 128 * 1048576;
+            // [rphub 2.8.100] 只降不升：每次调用顺手记下本次会话见过的最低已用堆。
+            if (used > 0 && (!_minHeapUsedSeen || used < _minHeapUsedSeen)) _minHeapUsedSeen = used;
             // 2.8.78：0.5 改为 0.85。perByte 系数已经表达了「导入期间堆会涨到文件的几倍」，
             // 再对预算砍半属于重复打折 —— 实测后果是 used 一旦超过堆上限的一半，预算立刻塌到 0，
             // 只剩下面 8MB 的兜底值，于是十几 MB 以上的备份全部被判「有风险」。
@@ -4550,9 +4787,11 @@ const app = createApp({
         };
         const autoBackupConfig = ref({
             enabled: true,
+            triggerMode: 'remind',
             retentionDays: 7, // 保留天数: 3, 7, 14, 30, 0(不限)
             maxCopies: 5,     // 历史保留份数: 3, 5, 10, 20, 0(不限)
             lastBackupDate: '',
+            lastRemindDate: '', // [rphub 2.8.102] 最近一次弹窗提醒的日期（YYYY-MM-DD）
             lastSkipAt: 0,    // 2.8.14：最近一次因体积超限跳过的 Unix ms
             lastFailAt: 0     // 2.8.14：最近一次备份失败的 Unix ms
         });
@@ -4560,15 +4799,22 @@ const app = createApp({
         const isAutoBackingUp = ref(false);
         const isRestoringAutoBackup = ref(false);
         const showAutoBackupModal = ref(false);
+        // [rphub 2.8.95] 体积分析结果：theme.css 的 .toast-text 是 nowrap + 42px 定高，
+        //   单行胶囊永远装不下桶表（上一版把 Top3 塞进 toast，用户只看到一串省略号）。
+        //   明细改由弹窗承载，toast 只留一句结论。
+        const showBackupSizeModal = ref(false);
+        const backupSizeReport = ref(null);
         const autoBackupFolderPath = ref('');
 
         const normalizeAutoBackupConfig = (raw) => {
             const cfg = raw && typeof raw === 'object' ? raw : {};
             return {
                 enabled: cfg.enabled !== false,
+                triggerMode: cfg.triggerMode === 'auto' ? 'auto' : 'remind',
                 retentionDays: typeof cfg.retentionDays === 'number' ? cfg.retentionDays : 7,
                 maxCopies: typeof cfg.maxCopies === 'number' ? cfg.maxCopies : 5,
                 lastBackupDate: typeof cfg.lastBackupDate === 'string' ? cfg.lastBackupDate : '',
+                lastRemindDate: typeof cfg.lastRemindDate === 'string' ? cfg.lastRemindDate : '',
                 lastSkipAt: typeof cfg.lastSkipAt === 'number' ? cfg.lastSkipAt : 0,
                 lastFailAt: typeof cfg.lastFailAt === 'number' ? cfg.lastFailAt : 0
             };
@@ -4711,6 +4957,48 @@ const app = createApp({
         };
 
         // 执行单次全量物理流式自动备份（2.8.14 重修，详见 readMainDbEntriesSlim 注释）
+        // [rphub 2.8.102] 每天提醒。
+        //   触发点只有两个：loadData 里的 6 秒定时器、回到前台的 visibilitychange。
+        //   两者都调这一个函数，条件全在里面判，谁先到谁生效，天然不会重复弹。
+        const getLocalDateStr = () => {
+            const d = new Date();
+            return d.getFullYear() + '-'
+                + String(d.getMonth() + 1).padStart(2, '0') + '-'
+                + String(d.getDate()).padStart(2, '0');
+        };
+        // 距上次备份的天数；-1 = 从未备份。日期算术只在 JS 里做，模板只做展示。
+        const backupOverdueDays = computed(() => {
+            const last = String(autoBackupConfig.value.lastBackupDate || '').trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(last)) return -1;
+            const parts = last.split('-').map(Number);
+            const lastDay = new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+            if (!Number.isFinite(lastDay)) return -1;
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            return Math.max(0, Math.round((today - lastDay) / 86400000));
+        });
+        const maybeRemindDailyBackup = async () => {
+            const cfg = autoBackupConfig.value;
+            if (!cfg.enabled) return;
+            if (cfg.triggerMode !== 'remind') return;
+            if (isAutoBackingUp.value || isRestoringAutoBackup.value) return;
+            if (showConfirmModal.value) return;   // 已经有确认弹窗在，不叠加
+            if (isConversationBusy.value) return; // 出卡时不打断；不重排，等下一个检查点
+            const todayStr = getLocalDateStr();
+            if (cfg.lastBackupDate === todayStr) return; // 今天已经备过
+            if (cfg.lastRemindDate === todayStr) return; // 今天已经问过一次
+            // 先落盘再弹：用户直接杀进程也不会导致下次启动重复问。
+            autoBackupConfig.value.lastRemindDate = todayStr;
+            await saveAutoBackupConfig();
+            markHeap('backup-remind');
+            const days = backupOverdueDays.value;
+            const when = days < 0 ? '还没有任何备份'
+                : (days === 0 ? '上次备份是今天' : ('上次备份是 ' + days + ' 天前'));
+            confirmAction(
+                '今天还没有备份。' + when + '。现在备份吗？',
+                () => { performDailyAutoBackup(true); }
+            );
+        };
         const performDailyAutoBackup = async (isManualTrigger = false) => {
             if (isAutoBackingUp.value) return;
             const now = new Date();
@@ -4727,13 +5015,18 @@ const app = createApp({
             // 旧实现只有「今日已完成」一条，备份从未成功时每次冷启动都全量重跑，是重启循环的一环。
             if (!isManualTrigger) {
                 const cfgNow = autoBackupConfig.value;
+                // [rphub 2.8.102] 三种早退各留一条采样。没有它们，「没跑」和「跑了被跳过」
+                //   在堆采样里长得一模一样 —— 2.8.101 就是因此只能定位到「没进函数体」。
                 if (cfgNow.lastBackupDate === todayStr) {
+                    markHeap('backup-skip:done');
                     return; // 今天已完成自动备份
                 }
                 if (Number(cfgNow.lastSkipAt) && nowMs - Number(cfgNow.lastSkipAt) < AUTO_BACKUP_SKIP_BACKOFF_MS) {
+                    markHeap('backup-skip:size');
                     return; // 体积超限退避期内
                 }
                 if (Number(cfgNow.lastFailAt) && nowMs - Number(cfgNow.lastFailAt) < AUTO_BACKUP_FAIL_BACKOFF_MS) {
+                    markHeap('backup-skip:fail');
                     return; // 失败退避期内
                 }
                 // 正在出卡时顺延，避免和生成抢主线程（旧实现启动 6s 后无条件开跑）
@@ -4741,12 +5034,25 @@ const app = createApp({
                 // isGenerating || hasActiveToolInlineWork，已覆盖出卡状态）。原条件在此抛
                 // ReferenceError，落在 setTimeout 的 async 调用里没人 catch ⇒ 自动备份静默不跑。
                 if (isConversationBusy.value) {
+                    // [rphub 2.8.102] 顺延加上限。原来无限递归重排，一直忙就一直排，
+                    //   既不放弃也不留痕；现在最多 10 次（≈5 分钟）后放弃，等下次启动
+                    //   或回到前台再试，并留一条采样让用户看得见。
+                    _backupBusyDeferCount += 1;
+                    markHeap('backup-busy-defer');
+                    if (_backupBusyDeferCount > AUTO_BACKUP_BUSY_MAX_DEFER) {
+                        console.warn('[AutoBackup] 连续 ' + AUTO_BACKUP_BUSY_MAX_DEFER
+                            + ' 次因出卡顺延，本次放弃；下次启动或回到前台再试');
+                        return;
+                    }
                     setTimeout(() => { performDailyAutoBackup(false); }, AUTO_BACKUP_BUSY_DELAY_MS);
                     return;
                 }
+                _backupBusyDeferCount = 0;
             }
 
             isAutoBackingUp.value = true;
+            // [rphub 2.8.101] 备份要逐条 stringify 整库，峰值就在这之间
+            markHeap('backup-begin');
             let session = null;
             try {
                 if (isManualTrigger) showToast('正在执行全量自动备份...', 'info');
@@ -4793,15 +5099,29 @@ const app = createApp({
                 const mainLogicalKeys = new Set();
                 let gateTripped = false;
                 let firstEntry = true;
+                const bucketStat = new Map();
+                const addBackupBucket = (logicalKey, bytes) => {
+                    const name = backupBucketOf(logicalKey);
+                    const prev = bucketStat.get(name) || { bytes: 0, entries: 0 };
+                    prev.bytes += bytes;
+                    prev.entries += 1;
+                    bucketStat.set(name, prev);
+                };
                 const writePart = (text) => {
-                    writeStat.bytes += writeBackupText(session, text);
+                    // [rphub 2.8.94] 返回本次真实写入的 UTF-8 字节数，供按条归桶
+                    const written = writeBackupText(session, text);
+                    writeStat.bytes += written;
                     if (writeStat.bytes > sizeLimit) gateTripped = true;
+                    return written;
                 };
                 const writeEntry = (entry) => {
                     if (gateTripped) return;
-                    writePart((firstEntry ? '' : ',') + jsonChunkStringifyEntry(entry));
+                    const written = writePart((firstEntry ? '' : ',') + jsonChunkStringifyEntry(entry));
                     firstEntry = false;
                     writeStat.entries++;
+                    // [rphub 2.8.94] 只累加账目，不改写入顺序与内容
+                    addBackupBucket(entry && entry.key !== undefined
+                        ? getStorageLogicalKey(String(entry.key)) : '', written);
                 };
 
                 writePart('{"type":"rp-hub-complete-backup","__rphub_backup__":1,"version":8,"exportedAt":"' + new Date().toISOString() + '","entries":[');
@@ -4818,9 +5138,17 @@ const app = createApp({
                     session = null;
                     autoBackupConfig.value.lastSkipAt = Date.now();
                     await saveAutoBackupConfig();
-                    const mb = Math.round(writeStat.bytes / 1048576);
-                    console.warn('[AutoBackup] 备份体积已超上限（' + mb + 'MB），本次中止（手动触发不受限）');
-                    showToast('数据量较大（已超 ' + mb + 'MB），本次后台自动备份已中止（可手动备份）', 'info', 4000);
+                    // [rphub 2.8.94] 中止时必须说清「是谁撑爆的」，否则用户无从下手
+                    const bucketFull = rankBackupBuckets(bucketStat, 10)
+                        .map((item, i) => (i + 1) + '. ' + item.name + ' ' + fmtBackupMB(item.bytes)
+                            + '（' + item.entries + ' 条）')
+                        .join('\n');
+                    console.warn('[AutoBackup] 备份体积已超上限（已写 ' + fmtBackupMB(writeStat.bytes)
+                        + '，上限 ' + fmtBackupMB(sizeLimit) + '），本次中止。体积构成：\n' + bucketFull);
+                    // [rphub 2.8.95] toast 只有一行：这里只说结论，明细交给「体积分析」弹窗。
+                    //   字数受 .toast-item 的 max-width 约束（360dp 下正文可用约 262px ≈ 18 个汉字），
+                    //   16 字是能留出余量的上限，再长就又变成省略号了。
+                    showToast('备份已中止，点「体积分析」看明细', 'warning', 5000);
                     return;
                 }
 
@@ -4878,6 +5206,148 @@ const app = createApp({
                 }
             } finally {
                 isAutoBackingUp.value = false;
+                // [rphub 2.8.101] 与 backup-begin 的差值 = 本次备份留下的临时占用
+                markHeap('backup-end');
+            }
+        };
+
+        // [rphub 2.8.94] 只读体积分析：走与自动备份完全相同的「游标逐条读 → 瘦身 → 量体积」
+        //   路径（含 shouldIncludeBackupEntry 过滤），但一个字节都不落盘。
+        //   纯 ASCII 条目（base64 头像）直接用 length，含中文才走 TextEncoder，避免无谓分配。
+        //   目的是定位「哪一类数据撑爆了备份」，不追求精确到字节。
+        // [rphub 2.8.99] 还原峰值采样。performance.memory 只有 Chromium 内核有，且被量化
+        //   （约 100KB 粒度、GC 后才更新），所以读数只能当量级参考，不能当精确值。
+        //   它的用途是校准 getRestoreBudget() 里「每 1 字节文件占 2 字节内存」那个假设 ——
+        //   2.8.98 把峰值压到 443MB 是按代码推算的，没有实测过。
+        //   每抬高 8MB 落一次 localStorage：万一还原中途闪退，最后一次读数也留得下来。
+        const RESTORE_PEAK_KEY = 'rphub_restore_peak_v1';
+        const RESTORE_PEAK_STEP_BYTES = 8 * 1024 * 1024;
+        let _restorePeak = null;
+        const readHeapUsed = () => {
+            try {
+                const mem = typeof performance !== 'undefined' ? performance.memory : null;
+                const used = mem ? Number(mem.usedJSHeapSize) : 0;
+                return used > 0 ? used : 0;
+            } catch (_) { return 0; }
+        };
+        // [rphub 2.8.101] 堆采样。用途单一：回答「谁把 usedJSHeapSize 抬上去的」。
+        //   静态读代码算不出峰值 —— 游标是逐条的、瘦身是浅拷贝、编码是 512KB 切片，
+        //   三项加起来对不上用户实测的 1020MB。只能在关键节点各记一条，看曲线在哪一步跳。
+        //   上限 40 条、落 localStorage：跨会话保留，下次打开还能看到上一次启动的形状。
+        const HEAP_MARK_KEY = 'rphub_heap_marks_v1';
+        const HEAP_MARK_MAX = 40;
+        // 加载完成时的堆 = 应用常驻占用。之后任何读数跟它比，多出来的才是临时对象。
+        let _loadEndHeapUsed = 0;
+        const readHeapMarks = () => {
+            try {
+                const raw = localStorage.getItem(HEAP_MARK_KEY);
+                const list = raw ? JSON.parse(raw) : null;
+                if (Array.isArray(list)) return list.filter(m => m && typeof m === 'object');
+            } catch (_) {}
+            return [];
+        };
+        const _heapMarks = readHeapMarks();
+        const markHeap = (tag) => {
+            const used = readHeapUsed();
+            if (!used) return 0;
+            try {
+                _heapMarks.push({ tag: String(tag), used, at: Date.now() });
+                while (_heapMarks.length > HEAP_MARK_MAX) _heapMarks.shift();
+                localStorage.setItem(HEAP_MARK_KEY, JSON.stringify(_heapMarks));
+            } catch (_) {}
+            return used;
+        };
+        const writeRestorePeak = (payload) => {
+            try { localStorage.setItem(RESTORE_PEAK_KEY, JSON.stringify(payload)); } catch (_) {}
+        };
+        const restorePeakStart = (fileBytes) => {
+            const used = readHeapUsed();
+            _restorePeak = used > 0
+                ? { fileBytes: Number(fileBytes) || 0, peak: used, written: used }
+                : null;
+        };
+        const restorePeakTick = () => {
+            if (!_restorePeak) return;
+            const used = readHeapUsed();
+            if (!used || used <= _restorePeak.peak) return;
+            _restorePeak.peak = used;
+            if (used - _restorePeak.written < RESTORE_PEAK_STEP_BYTES) return;
+            _restorePeak.written = used;
+            writeRestorePeak({
+                fileBytes: _restorePeak.fileBytes, peakBytes: used,
+                at: Date.now(), done: false
+            });
+        };
+        const restorePeakDone = (ok) => {
+            if (!_restorePeak) return;
+            const peakBytes = _restorePeak.peak;
+            const fileBytes = _restorePeak.fileBytes;
+            writeRestorePeak({ fileBytes, peakBytes, at: Date.now(), done: !!ok });
+            const ratio = fileBytes > 0 ? Math.round(peakBytes / fileBytes * 100) / 100 : 0;
+            console.warn('[RestorePeak] 文件 ' + fmtMB(fileBytes) + ' / 峰值 ' + fmtMB(peakBytes)
+                + ' / ' + ratio + ' 倍（预检按 ' + RESTORE_BYTES_PER_FILE_BYTE + ' 倍算）'
+                + (ok ? '' : ' / 还原未完成'));
+            _restorePeak = null;
+        };
+        // [rphub 2.8.103] 体积分析并进数据体检后，这个函数只剩「跑一次扫描并把体积弹窗打开」的作用。
+        //   保留它是为了「清完遗留键原地刷新」那条路径（purgeLegacyBackups 里 await analyzeBackupSize()），
+        //   以及任何仍按老名字调用的地方。界面上的「体积分析」按钮已删除，改由体检结果区的
+        //   「体积明细」走 openBackupSizeModal（只开弹窗不重扫）。
+        const analyzeBackupSize = async () => {
+            await performDataHealthScan({ openSizeModal: true });
+        };
+        // [rphub 2.8.103] 只把已有的体积报告弹出来，不重新扫库。
+        const openBackupSizeModal = () => {
+            if (!backupSizeReport.value || !backupSizeReport.value.checkedAt) {
+                showToast('先点一次「开始体检」', 'info');
+                return;
+            }
+            showBackupSizeModal.value = true;
+        };
+
+        // [rphub 2.8.99] 遗留键的导出与清理。删之前先给一条退路 —— 这些键当前版本
+        //   读不到，但里面是完整的历史备份快照，删掉就没有第二份了。
+        const exportLegacyBackups = async () => {
+            const report = backupSizeReport.value || {};
+            const keys = report.legacyBackupKeys || [];
+            if (!keys.length) { showToast('没有可导出的遗留备份', 'info'); return; }
+            try {
+                const payload = {};
+                for (const key of keys) {
+                    payload[key] = await getStoredValue(key);
+                }
+                const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+                downloadJsonFile(payload, '遗留备份-' + stamp + '.json');
+                showToast('已导出 ' + keys.length + ' 条遗留备份', 'success');
+            } catch (error) {
+                console.error('[LegacyBackup] 导出失败:', error);
+                showToast('导出失败: ' + (error.message || error), 'error', 5000);
+            }
+        };
+        const purgeLegacyBackups = async () => {
+            const report = backupSizeReport.value || {};
+            const keys = report.legacyBackupKeys || [];
+            if (!keys.length) { showToast('没有可清理的遗留备份', 'info'); return; }
+            const confirmed = await showVueConfirmModal('清理遗留备份',
+                '将删除 ' + keys.length + ' 条旧版遗留备份，共 '
+                + formatDataHealthSize(report.legacyBackupBytes) + '。'
+                + '这些数据当前版本已不读取，删除后无法从应用内找回。'
+                + '建议先点「导出」留一份。仍要删除吗？',
+                { confirmText: '确认删除' });
+            if (!confirmed) return;
+            try {
+                let done = 0;
+                for (const key of keys) {
+                    await deleteStoredValue(key);
+                    done += 1;
+                }
+                console.warn('[LegacyBackup] 已清理 ' + done + ' 条 / '
+                    + formatDataHealthSize(report.legacyBackupBytes));
+                showToast('已清理 ' + done + ' 条遗留备份', 'success');
+                await analyzeBackupSize();
+            } catch (error) {
+                console.error('[LegacyBackup] 清理失败:', error);
+                showToast('清理失败: ' + (error.message || error), 'error', 5000);
             }
         };
 
@@ -4908,6 +5378,67 @@ const app = createApp({
             return restored;
         };
 
+        // [rphub 2.8.105] 读一个本地自动备份文件，返回已解析的对象。
+        //
+        // 为什么要换：旧路径 bridge.readBackupFileText 把整份文件读成 Java String
+        //   （ByteArrayOutputStream 翻倍扩容 + toByteArray 再复制一份 + UTF-8→UTF-16 展开，
+        //   219MB 的文件峰值 ≈700MB），largeHeap 也扛不住，报 "Failed to allocate ..."。
+        //   而外部「导入全部数据」走 <input type="file"> + FileReader，字符串建在渲染进程
+        //   的 V8 堆里，同一份文件就能过 —— 这就是「外面能导入、里面还原失败」的全部原因。
+        //
+        // 现在优先走 prepareBackupFileRead + fetch 的流式通道：Java 侧只登记 Uri 不读内容，
+        //   字节由 WebView 自己的网络栈流式取，内存落点与外部导入一致。
+        //   只有小文件（≤64MB）且流式通道不可用时才回退老路径。
+        const LOCAL_BACKUP_READ_SAFE_BYTES = 64 * 1024 * 1024;
+        const putBackupEntry = (store, entry) => {
+            if (entry.key.startsWith('rp_hub_b1_memory_state_') && entry.value?.deleted === true) {
+                store.delete(entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
+            }
+            store.put(restoreRphubBinaryDeep(entry.value), entry.key);
+        };
+        const pauseBackupWrites = async () => {
+            if (isConversationBusy.value) throw new Error('请先停止当前生成再恢复数据');
+            await flushPendingChatHistorySave();
+            debouncedSave.cancel();
+            debouncedCharacterSave.cancel();
+            await window.RPLocalStore?.flush();
+            window.RPHubStorage.setWritesPaused(true);
+            window.RPLocalStore?.setWebWritesPaused(true);
+        };
+        const resumeBackupWrites = () => {
+            window.RPHubStorage.setWritesPaused(false);
+            window.RPLocalStore?.setWebWritesPaused(false);
+        };
+        const readLocalBackupJson = async (bridge, record) => {
+            const sizeBytes = Number(record?.sizeBytes || 0);
+            const reader = typeof window.RPLocalFiles?.prepareBackupFileRead === 'function'
+                ? window.RPLocalFiles : bridge;
+            if (bridge?.isNativeApp?.() && typeof reader?.prepareBackupFileRead === 'function') {
+                const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
+                if (token.startsWith('ERR:')) throw new Error(token.slice(4));
+                if (token) {
+                    const resp = await fetch('__rphub_backup_read__?t=' + encodeURIComponent(token), { cache: 'no-store' });
+                    if (!resp.ok) throw new Error('读取本地备份失败（HTTP ' + resp.status + '）');
+                    const data = await resp.json();
+                    if (data && typeof data === 'object' && !Array.isArray(data) && data.error) {
+                        throw new Error(String(data.error));
+                    }
+                    return data;
+                }
+            }
+            if (bridge?.isNativeApp?.() && typeof bridge.readBackupFileText === 'function') {
+                // 大文件走老路径必然 OOM。与其让用户再等一次失败，不如直接给能执行的做法。
+                if (sizeBytes > LOCAL_BACKUP_READ_SAFE_BYTES) {
+                    throw new Error('这个备份有 ' + fmtMB(sizeBytes)
+                        + '，无法直接读取。请改用「导入全部数据」选择同一个文件。');
+                }
+                const rawText = bridge.readBackupFileText(record.id, record.isTreeDoc);
+                if (rawText.startsWith('ERR:')) throw new Error(rawText.slice(4));
+                return JSON.parse(rawText);
+            }
+            throw new Error('当前环境不支持直接读取本地文件');
+        };
+
         const restoreAutoBackupRecord = async (record) => {
             if (!record?.id || isRestoringAutoBackup.value) return;
             const confirmed = await showVueConfirmModal(
@@ -4917,7 +5448,9 @@ const app = createApp({
             );
             if (!confirmed) return;
 
-            // 2.8.19：readBackupFileText 是整份读进内存的，读之前先量体积
+            // 2.8.19：读之前先量体积，超了就拦。
+            // 2.8.105：读法已改成流式（内容走 WebView 自己的网络栈，不进 Java 堆），
+            //   于是这里量体积对应的「可还原上限」口径终于对上了 —— 它算的正是渲染进程的堆。
             const restoreVerdict = checkRestoreSize(record.sizeBytes, record.fileName || record.name || '');
             if (restoreVerdict === 'refuse') {
                 showToast('这个备份有 ' + fmtMB(record.sizeBytes) + '，超过当前设备可还原的上限（约 '
@@ -4935,40 +5468,52 @@ const app = createApp({
             }
 
             isRestoringAutoBackup.value = true;
+            let writesPausedForRestore = false;
+            let restoreCommitted = false;
+            // [rphub 2.8.99] 从这里开始采峰值，采样点都放在 await 边界上 ——
+            //   同步代码块里 performance.memory 基本不会更新。
+            restorePeakStart(record.sizeBytes);
             try {
                 showToast('正在读取本地备份文件...', 'info');
                 const bridge = window.AndroidBridge;
-                let rawText = '';
-                if (bridge?.isNativeApp?.() && typeof bridge.readBackupFileText === 'function') {
-                    rawText = bridge.readBackupFileText(record.id, record.isTreeDoc);
-                    if (rawText.startsWith('ERR:')) {
-                        throw new Error(rawText.slice(4));
-                    }
-                } else {
-                    throw new Error('当前环境不支持直接读取本地文件');
-                }
-
-                const backupData = JSON.parse(rawText);
+                // [rphub 2.8.105] 改走流式通道，内容不再进 Java 堆（见 readLocalBackupJson）。
+                //   2.8.98 那段「rawText 用完手动置空」随之作废 —— 现在已经没有整份字符串了。
+                const backupData = await readLocalBackupJson(bridge, record);
                 const pack = await parseUniversalBackupPackage(backupData);
+                restorePeakTick();
                 if (!pack.entries || !pack.entries.length) {
                     throw new Error('不是有效的 RP-Hub 全量或扩展备份文件');
                 }
 
-                await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
+                await pauseBackupWrites();
+                writesPausedForRestore = true;
 
                 // 瘦身与写入主库
                 const report = await slimFullBackupImportEntries(pack.entries);
+                // 瘦身这一步会对最大一条整份 stringify，是峰值的主要来源之一
+                restorePeakTick();
+                // 记忆正文与版本键成对入账：旧备份补 revision，删除只留墓碑，冲突则整体拒绝
+                const restoredEntries = window.RPHubStorage.prepareRestoredMemoryEntries(report.entries);
                 const transaction = getMainDb().transaction(['store'], 'readwrite');
                 const store = transaction.objectStore('store');
-                report.entries.forEach(entry => {
-                    // 2.8.58：先 cloneForStorage 再还原二进制 —— 顺序不能反（见 restoreRphubBinaryDeep）
-                    store.put(restoreRphubBinaryDeep(entry.value), entry.key);
+                restoredEntries.forEach(entry => {
+                    // [rphub 2.8.98] 去掉这里的 cloneForStorage。value 全部来自 JSON.parse，
+                    //   既不是响应式代理，也不含 Date / ArrayBuffer，clone 只是白复制一份 ——
+                    //   characters 那一条 187MB 因此被复制两遍（clone 一遍 + restore 一遍）。
+                    //   2.8.58 那条「还原必须发生在 clone 之后」的约束，针对的是「先 restore
+                    //   再 clone」的顺序；clone 整个不存在时，Blob 只会在 restore 这一步产生，
+                    //   没有任何 unwrap 会碰到它。restoreRphubBinaryDeep 自己重建对象，
+                    //   代理同样进不了 IDB。
+                    putBackupEntry(store, entry);
+                    restorePeakTick();
                 });
                 await new Promise((resolve, reject) => {
                     transaction.oncomplete = resolve;
                     transaction.onerror = () => reject(transaction.error);
+                    transaction.onabort = () => reject(transaction.error || new Error('恢复写入已取消'));
                 });
+                restoreCommitted = true;
 
                 // 恢复 localStorage 记忆
                 (pack.entries || []).filter(entry => entry && typeof entry.key === 'string' && entry.key.indexOf(LOCAL_BACKUP_PREFIX) === 0).forEach(entry => {
@@ -4979,10 +5524,16 @@ const app = createApp({
 
                 await restoreCompanionDatabases(pack.extraDatabases);
                 showToast('数据还原成功，正在刷新应用', 'success');
+                // 必须在 reload 之前落盘，否则这次读数就丢了
+                restorePeakDone(true);
                 setTimeout(() => window.location.reload(), 600);
             } catch (err) {
+                if (writesPausedForRestore && !restoreCommitted) resumeBackupWrites();
+                if (restoreCommitted) setTimeout(() => window.location.reload(), 1500);
                 console.error('还原备份失败:', err);
                 showToast('还原备份失败: ' + (err.message || err), 'error', 5000);
+                // 失败路径也要落一次：失败时的峰值往往才是最有信息量的那个
+                restorePeakDone(false);
                 isRestoringAutoBackup.value = false;
             }
         };
@@ -4992,13 +5543,9 @@ const app = createApp({
             if (!record?.id) return;
             try {
                 const bridge = window.AndroidBridge;
-                if (bridge?.isNativeApp?.() && typeof bridge.readBackupFileText === 'function') {
-                    const rawText = bridge.readBackupFileText(record.id, record.isTreeDoc);
-                    if (rawText.startsWith('ERR:')) throw new Error(rawText.slice(4));
-                    const data = JSON.parse(rawText);
-                    downloadJsonFile(data, record.fileName || 'backup.json');
-                    showToast('已另存备份文件: ' + record.fileName, 'success');
-                }
+                const data = await readLocalBackupJson(bridge, record);
+                downloadJsonFile(data, record.fileName || 'backup.json');
+                showToast('已另存备份文件: ' + record.fileName, 'success');
             } catch (e) {
                 showToast('导出备份失败: ' + (e.message || e), 'error');
             }
@@ -5140,14 +5687,14 @@ const app = createApp({
         const exportBackupManagerFile = async (record) => {
             if (!record || !record.id) return;
             const bridge = window.AndroidBridge;
-            if (!bridge?.isNativeApp?.() || typeof bridge.readBackupFileText !== 'function') {
+            if (!bridge?.isNativeApp?.()
+                || (typeof bridge.prepareBackupFileRead !== 'function' && typeof bridge.readBackupFileText !== 'function')) {
                 showToast('当前环境不支持另存备份文件', 'error');
                 return;
             }
             try {
-                const text = String(bridge.readBackupFileText(record.id, record.isTreeDoc) || '');
-                if (text.indexOf('ERR:') === 0) throw new Error(text.slice(4));
-                downloadJsonFile(JSON.parse(text), record.fileName || 'backup.json');
+                const data = await readLocalBackupJson(bridge, record);
+                downloadJsonFile(data, record.fileName || 'backup.json');
                 showToast('已另存为 ' + (record.fileName || 'backup.json'), 'success');
             } catch (error) {
                 showToast('另存失败：' + (error?.message || error), 'error', 4000);
@@ -5264,7 +5811,7 @@ const app = createApp({
         ].includes(logicalKey);
         const shouldIncludeBackupEntry = (entry) => {
             const logicalKey = getStorageLogicalKey(entry.key);
-            if (logicalKey.startsWith('b1_memory_state_')) return false;
+            if (logicalKey.startsWith('b1_memory_state_')) return backupScope.value.summary;
             if (isCoreBackupKey(logicalKey)) return true;
             if (logicalKey.startsWith('chat_')) return backupScope.value.chat;
             // 旧正文分片向量库（memories_）官方已停用，且 isOrphanedEntry 无条件判为孤儿数据；
@@ -5315,7 +5862,6 @@ const app = createApp({
             }
             return btoa(binary);
         };
-        const jsonChunkStringifyCompact = (value) => JSON.stringify(value);
         const jsonChunkStringifyEntry = (entry) => JSON.stringify(entry);
         // 2.8.19：返回本次实际写入的 UTF-8 字节数（由 base64 长度反推，±2 字节）。
         // 体积闸门需要按「文件真实字节」计量，而这里已经是唯一知道编码后长度的地方。
@@ -5389,7 +5935,13 @@ const app = createApp({
         const getTokenUsageHealthLimit = () => Math.max(100, Number(settings.tokenUsageRetentionLimit) || 1000);
         const estimateDataHealthSize = (value) => {
             try {
-                return JSON.stringify(value ?? null).length;
+                const text = JSON.stringify(value ?? null);
+                // [rphub 2.8.103] 原来返回 text.length —— 那是 UTF-16 码元数，不是字节数。
+                //   中文一个字算 1 个码元、实际 3 个字节，于是体检的「总占用」比真实体积小
+                //   约 3 倍，和体积弹窗的「共 N 条 / X MB」对不上。改成 UTF-8 字节，两处一致。
+                //   用 Blob.size 而不是 TextEncoder().encode().length：后者会造出等长
+                //   Uint8Array 进堆（2.8.100 的教训）。纯 ASCII 时两者相同，走快路径。
+                return /[^\x00-\x7f]/.test(text) ? new Blob([text]).size : text.length;
             } catch (error) {
                 return 0;
             }
@@ -5462,13 +6014,28 @@ const app = createApp({
             });
             return { history: result, changed, savedBytes, cleanedCount };
         };
-        const performDataHealthScan = async () => {
+        const performDataHealthScan = async (options) => {
+            const opts = options || {};
+            const openSizeModal = opts.openSizeModal === true;
+            if (isAutoBackingUp.value) {
+                showToast('正在备份，请稍后再试', 'info');
+                return;
+            }
             isCheckingDataHealth.value = true;
+            // [rphub 2.8.103] 体检要逐条 stringify 整库（角色卡一条就 187MB），期间必须挡住备份与
+            //   每日提醒，否则两条路径同时持有整库副本，峰值直接翻倍。
+            isAutoBackingUp.value = true;
             dataHealthError.value = '';
             try {
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
-                const entries = await readMainDbEntries(getMainDb());
+                // [rphub 2.8.96] 还原预算必须在遍历之前取：遍历会把最大的一条（角色卡，用户实测
+                //   186.93MB / 1 条）整份 stringify 出来，usedJSHeapSize 会被短暂抬高；此时再取
+                //   budget = limit*0.85 - used 会把「可还原上限」算小一大截，显示出来就是错的。
+                const restoreBudget = getRestoreBudget();
+                // [rphub 2.8.101] 这个数就是弹窗里的「已用」：它在遍历之前取，
+                //   所以不含本次分析的分配。它高，说明分析之前堆就已经高了。
+                markHeap('analyze-begin');
                 const items = [];
                 let totalBytes = 0;
                 let duplicateUiCount = 0;
@@ -5480,12 +6047,25 @@ const app = createApp({
                 const imageDataUrls = new Map();
                 const dataUrlPattern = /data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g;
                 const tokenUsageLimit = getTokenUsageHealthLimit();
+                // ---- 口径二（备份体积）的累加器：字段与 2.8.94 起逐字一致 ----
+                let backupTotalBytes = 0;
+                let backupCount = 0;
+                const bucketStat = new Map();
+                const characterSizes = [];
+                let legacyBackupCount = 0;
+                let legacyBackupBytes = 0;
+                const legacyBackupKeys = [];
 
-                entries.forEach(entry => {
+                // [rphub 2.8.103] 一次 cursor 遍历算两套口径：
+                //   ① 体检：全部条目，estimateDataHealthSize 估算（含不进备份的条目）；
+                //   ② 备份体积：只算 shouldIncludeBackupEntry 放行的条目，量的是 slimBackupEntry
+                //      瘦身后 jsonChunkStringifyEntry 的 UTF-8 字节 —— 与真正写出去的文件同源。
+                //   两套口径的条目集不同（backupScope 勾选项、memories_ 硬排除），所以不能并成一个数；
+                //   但必须共用同一次遍历，否则 187MB 的角色卡要被 stringify 两遍。
+                await readMainDbEntriesStream((entry) => {
                     const logicalKey = getStorageLogicalKey(entry.key);
                     const value = unwrapForStorage(entry.value);
-                    const entryBytes = estimateDataHealthSize(value);
-                    totalBytes += entryBytes;
+                    totalBytes += estimateDataHealthSize(value);
 
                     if (logicalKey === 'characters' && Array.isArray(value)) {
                         value.forEach(character => {
@@ -5546,6 +6126,47 @@ const app = createApp({
                             imageDataUrls.set(key, info);
                         });
                     }
+
+                    // ===== 口径二：只算会进备份的条目 =====
+                    if (!shouldIncludeBackupEntry(entry)) return;
+                    const slim = slimBackupEntry(entry);
+                    const text = jsonChunkStringifyEntry(slim);
+                    // [rphub 2.8.100] 数一个数字不该复制一整份数据：Blob 的字节落在 blob 存储里、
+                    //   不进 JS 堆，Blob.size 就是同一个 UTF-8 字节数。
+                    const bytes = /[^\x00-\x7f]/.test(text) ? new Blob([text]).size : text.length;
+                    backupTotalBytes += bytes + 1;
+                    backupCount += 1;
+                    const bucketName = backupBucketOf(logicalKey);
+                    const prevBucket = bucketStat.get(bucketName) || { bytes: 0, entries: 0 };
+                    prevBucket.bytes += bytes + 1;
+                    prevBucket.entries += 1;
+                    bucketStat.set(bucketName, prevBucket);
+                    // [rphub 2.8.96] 角色卡整库存在一条记录里，桶表只能告诉你「角色卡 187MB」，
+                    //   告诉不了你是哪张卡。逐卡量一遍，才定位得到该删/该换封面的那张。
+                    if (logicalKey === 'characters' && Array.isArray(slim.value)) {
+                        slim.value.forEach((character) => {
+                            if (!character || typeof character !== 'object') return;
+                            let cardText = '';
+                            try { cardText = JSON.stringify(character); } catch (_) { return; }
+                            const cardBytes = /[^\x00-\x7f]/.test(cardText)
+                                ? new Blob([cardText]).size : cardText.length;
+                            const avatar = typeof character.avatar === 'string' ? character.avatar : '';
+                            const avatarBytes = /[^\x00-\x7f]/.test(avatar)
+                                ? new Blob([avatar]).size : avatar.length;
+                            characterSizes.push({
+                                name: String(character.name || character.characterName || '未命名角色'),
+                                bytes: cardBytes,
+                                avatarBytes
+                            });
+                        });
+                    }
+                    // [rphub 2.8.96/2.8.99] 旧版把整份备份再 setStoredValue 回主库，键名
+                    //   auto_backup_<日期>_<ts>；当前版本只认 auto_backup_config，这类键没有读取路径。
+                    if (logicalKey.indexOf('auto_backup_') === 0 && logicalKey !== 'auto_backup_config') {
+                        legacyBackupCount += 1;
+                        legacyBackupBytes += bytes + 1;
+                        legacyBackupKeys.push(logicalKey);
+                    }
                 });
 
                 if (duplicateUiCount > 0) {
@@ -5591,17 +6212,114 @@ const app = createApp({
                     });
                 }
 
+                // ---- 体积报告（口径二），字段与 2.8.101 逐字一致 ----
+                // [rphub 2.8.95] 占比条宽度在 JS 里算好，模板不做算术
+                const buckets = rankBackupBuckets(bucketStat, 12).map((item) => ({
+                    name: item.name,
+                    bytes: item.bytes,
+                    entries: item.entries,
+                    percent: backupTotalBytes > 0
+                        ? Math.round(item.bytes / backupTotalBytes * 1000) / 10 : 0
+                }));
+                const bucketFull = buckets
+                    .map((item, i) => (i + 1) + '. ' + item.name + ' ' + fmtBackupMB(item.bytes)
+                        + '（' + item.entries + ' 条）')
+                    .join('\n');
+                console.log('[BackupAnalyze] 共 ' + backupCount + ' 条 / 约 ' + fmtBackupMB(backupTotalBytes)
+                    + '\n摘要：' + (describeBackupBuckets(bucketStat, 3) || '未知')
+                    + '\n' + bucketFull);
+                characterSizes.sort((a, b) => b.bytes - a.bytes);
+                const topCharacters = characterSizes.slice(0, 8).map((item) => ({
+                    name: item.name,
+                    bytes: item.bytes,
+                    avatarBytes: item.avatarBytes,
+                    percent: backupTotalBytes > 0
+                        ? Math.round(item.bytes / backupTotalBytes * 1000) / 10 : 0
+                }));
+                const sizeLimit = getAutoBackupSizeLimit();
+                // [rphub 2.8.96] 三档判定与 checkRestoreSize 完全同源，避免弹窗与还原提示打架。
+                // [rphub 2.8.97] 闸门自该版起按还原上限放宽（基础 250MB，封顶 1GB）。
+                const restoreLevel = backupTotalBytes <= restoreBudget.maxFileBytes
+                    ? 'ok'
+                    : (backupTotalBytes > restoreBudget.maxFileBytes * 3 ? 'refuse' : 'confirm');
+                if (legacyBackupCount > 0) {
+                    console.warn('[BackupAnalyze] 旧版遗留备份记录 ' + legacyBackupCount + ' 条 / 共 '
+                        + fmtBackupMB(legacyBackupBytes) + '：当前版本不读取，也不参与还原');
+                }
+                // [rphub 2.8.99] 上一次还原的实测峰值（由 restorePeakDone 写入）。
+                let lastRestorePeak = null;
+                try {
+                    lastRestorePeak = JSON.parse(localStorage.getItem(RESTORE_PEAK_KEY) || 'null');
+                } catch (_) { lastRestorePeak = null; }
+                const lastRestorePeakBytes = lastRestorePeak && lastRestorePeak.peakBytes > 0
+                    ? Number(lastRestorePeak.peakBytes) : 0;
+                const lastRestoreFileBytes = lastRestorePeak && lastRestorePeak.fileBytes > 0
+                    ? Number(lastRestorePeak.fileBytes) : 0;
+                const lastRestoreRatio = lastRestoreFileBytes > 0
+                    ? Math.round(lastRestorePeakBytes / lastRestoreFileBytes * 100) / 100 : 0;
+                const lastRestoreAtText = lastRestorePeak && lastRestorePeak.at
+                    ? new Date(lastRestorePeak.at).toLocaleString() : '';
+                const lastRestoreOverBudget = lastRestoreFileBytes > 0
+                    && lastRestorePeakBytes > lastRestoreFileBytes * restoreBudget.perByte;
+                // [rphub 2.8.101] 干完活时的堆：与 analyze-begin 的差值才是「分析自己造的」
+                markHeap('analyze-end');
+                // [rphub 2.8.101] 乐观上限：假设内存回到「加载完成时」的水平能还原多大。
+                //   只用于显示，实际判据仍是 restoreMaxBytes（按当前已用），保守是对的。
+                const _restoreBaseline = _loadEndHeapUsed || _minHeapUsedSeen;
+                const restoreMaxBytesOptimistic = Math.max(8 * 1048576,
+                    Math.floor(Math.max(0, restoreBudget.limit * 0.85 - _restoreBaseline)
+                        / restoreBudget.perByte));
+                backupSizeReport.value = {
+                    checkedAt: new Date().toLocaleString(),
+                    totalBytes: backupTotalBytes,
+                    count: backupCount,
+                    limitBytes: sizeLimit,
+                    overLimit: backupTotalBytes > sizeLimit,
+                    gateBaseBytes: AUTO_BACKUP_SIZE_LIMIT_BYTES,
+                    gateCeilingBytes: AUTO_BACKUP_SIZE_CEILING_BYTES,
+                    restoreMaxBytes: restoreBudget.maxFileBytes,
+                    restoreLimit: restoreBudget.limit,
+                    restoreUsed: restoreBudget.used,
+                    restoreSource: restoreBudget.source,
+                    restorePerByte: restoreBudget.perByte,
+                    restoreLevel,
+                    characters: topCharacters,
+                    legacyBackupCount,
+                    legacyBackupBytes,
+                    legacyBackupKeys,
+                    lastRestorePeakBytes,
+                    lastRestoreFileBytes,
+                    lastRestoreRatio,
+                    lastRestoreAtText,
+                    lastRestoreOverBudget,
+                    restoreUsedBaselineBytes: _restoreBaseline,
+                    restoreMaxBytesOptimistic,
+                    restoreUsedPolluted: restoreBudget.used > 0 && _restoreBaseline > 0
+                        && restoreBudget.used - _restoreBaseline > 256 * 1048576
+                        && restoreBudget.used > backupTotalBytes * 2,
+                    heapMarks: readHeapMarks().map((m) => ({
+                        tag: String(m.tag || ''),
+                        usedText: fmtMB(m.used),
+                        atText: new Date(Number(m.at) || 0).toLocaleTimeString()
+                    })),
+                    buckets
+                };
+
                 dataHealthResult.value = {
                     checkedAt: new Date().toLocaleString(),
                     totalBytes,
                     items: items.sort((a, b) => b.bytes - a.bytes)
                 };
-                showToast('数据体检完成', 'success');
+                // [rphub 2.8.103] 体检默认只出内联结果；只有「清完遗留键原地刷新」那条路径
+                //   （analyzeBackupSize）才顺带把体积弹窗打开。
+                if (openSizeModal) showBackupSizeModal.value = true;
+                showToast(openSizeModal ? '体积分析完成' : '数据体检完成', 'success');
             } catch (error) {
                 console.error('Data health scan failed:', error);
                 dataHealthError.value = error?.message || String(error);
                 showToast('数据体检失败：' + (error?.message || error), 'error', 5000);
             } finally {
+                isAutoBackingUp.value = false;
                 isCheckingDataHealth.value = false;
             }
         };
@@ -5673,6 +6391,39 @@ const app = createApp({
             };
             request.onerror = () => reject(request.error);
         });
+
+        // [rphub 2.8.103] 不筛条目、逐条回调的流式读取。
+        //   数据体检原本用 readMainDbEntries 把**全部条目一次性读进数组**，153 条里含 187MB 的
+        //   characters，数组一直活到 forEach 结束，等于把整库钉在堆上。体积分析早就用流式
+        //   （readMainDbEntriesSlim），但它会按 shouldIncludeBackupEntry 过滤，体检要全量，两者
+        //   条目集不同。这里补一个不筛的流式版本，让体检也能逐条算完就丢。
+        const readMainDbEntriesStream = async (onEntry) => {
+            const targetDb = getMainDb();
+            if (!targetDb) return;
+            await new Promise((resolve, reject) => {
+                let settled = false;
+                const finish = () => { if (!settled) { settled = true; resolve(); } };
+                const fail = (error) => { if (!settled) { settled = true; reject(error); } };
+                try {
+                    const transaction = targetDb.transaction(['store'], 'readonly');
+                    const request = transaction.objectStore('store').openCursor();
+                    request.onsuccess = () => {
+                        const cursor = request.result;
+                        if (!cursor) return finish();
+                        const raw = { key: String(cursor.key), value: cursor.value };
+                        try {
+                            onEntry(raw);
+                        } catch (error) {
+                            console.warn('[DataHealth] 跳过无法处理的条目:', raw.key, error);
+                        }
+                        cursor.continue();
+                    };
+                    request.onerror = () => fail(request.error);
+                } catch (error) {
+                    fail(error);
+                }
+            });
+        };
                 // 2.8.14：indexedDB.open 对不存在的库会**创建空库**——没装插件的用户也会被留下
         // sf_moments_db 空库 litter。现代 WebView 有
         // indexedDB.databases() 时先探存在性；探测不可用按旧行为打开（打不开自然 resolve）。
@@ -6094,8 +6845,8 @@ const app = createApp({
                     if (!pack.entries || !pack.entries.length) throw new Error('备份文件中未找到有效的应用数据条目');
                     pack.entries = window.RPBackupFormat.prepareMemoryEntries(pack.entries);
                     const formatTip = pack.isZipFormat
-                        ? '检测到「柳贯一插件」ZIP 单文件全站备份，将完整解析并导入'
-                        : (pack.isPluginFormat ? '检测到「柳贯一插件」流式备份格式，将无缝互通解析' : '检测到 RP-Hub 标准全量备份');
+                        ? '检测到 RP-Hub 扩展 ZIP 备份，将完整解析并导入'
+                        : (pack.isPluginFormat ? '检测到 RP-Hub 扩展流式备份，将无缝互通解析' : '检测到 RP-Hub 标准全量备份');
                     const confirmed = await showVueConfirmModal('导入数据', formatTip + '。将覆盖当前软件数据，导入前建议先备份。确定继续吗？', { confirmText: '确认导入' });
                     if (!confirmed) return;
                     await flushPendingChatHistorySave();
@@ -6269,15 +7020,21 @@ const app = createApp({
                     let storageTouched = false;
                     let databaseCommitted = false;
                     try {
+                        await pauseBackupWrites();
                         // 旧总纲清理自己会抛错，必须排在写库之前，否则就是「库已覆盖 + 报失败」。
                         storageTouched = true;
                         writeWebStorageStrict(preflight.lsItems);
 
+                        // 同一道恢复屏障：放在建事务之前，损坏的版本记录不会写进半个库
+                        const restoredEntries = window.RPHubStorage.prepareRestoredMemoryEntries(preflight.idbEntries);
                         const transaction = getMainDb().transaction(['store'], 'readwrite');
                         const store = transaction.objectStore('store');
-                        preflight.idbEntries.forEach(entry => {
-                            // 2.8.58：同上，柳贯一包的二进制字段要还原成 Blob 再写库
-                            store.put(restoreRphubBinaryDeep(entry.value), entry.key);
+                        restoredEntries.forEach(entry => {
+                            // [rphub 2.8.98] 同自动备份还原那条：去掉多余 clone。
+                            //   preflight.idbEntries 同样来自 slimFullBackupImportEntries，
+                            //   即 JSON.parse 的纯对象，不含代理 / Date / ArrayBuffer。
+                            //   __rphub_bin__ 仍在 restore 这一步转 Blob，语义不变。
+                            putBackupEntry(store, entry);
                         });
                         await new Promise((resolve, reject) => {
                             transaction.oncomplete = resolve;
@@ -6289,6 +7046,8 @@ const app = createApp({
                         await restoreCompanionDatabases(pack.extraDatabases);
                     } catch (writeError) {
                         const rollbackFailed = storageTouched ? rollbackWebStorage(webStorageSnapshot) : [];
+                        if (!databaseCommitted) resumeBackupWrites();
+                        else setTimeout(() => window.location.reload(), 1500);
                         const stage = databaseCommitted
                             ? '（数据库已写入新数据，网页存储已回滚；请重新导入以补齐）'
                             : '（已回滚，数据保持导入前的状态）';
@@ -6643,12 +7402,18 @@ const app = createApp({
         let chatHistorySaveTimer = null;
         let chatHistorySaveQueue = Promise.resolve(true);
         let lastChatSaveErrorToastAt = 0;
-
-        const isRetryableChatStorageError = (error) => {
-            const name = String(error?.name || '');
-            return isDatabaseClosingError(error)
-                || ['AbortError', 'UnknownError', 'InvalidStateError', 'TransactionInactiveError'].includes(name);
-        };
+        let _b1ScopeEpoch = 0;
+        // [rphub 2.8.92] 这里原本有一句 watch(getCurrentStoryBranchScopeId, ...)，是 B1 那批加的作用域监听。
+        //   问题：watch 的「函数型 source」在注册时会**立即求值一次**，而 currentCharacter
+        //   的 computed 声明在本文件后面约 1300 行处 ⇒ 撞上 const 的 TDZ：
+        //     ReferenceError: Cannot access 'currentCharacter' before initialization
+        //   本地复现（2.8.90 与 2.8.91 都复现）：异常被 Vue 的 effect 错误处理吞掉，
+        //   页面照常 mount、DOM 52KB 正常渲染，但 **watcher 从未注册成功** ——
+        //   于是切换角色/分支时 _b1ScopeEpoch 不递增、_classicMemoriesLoaded 不重置，
+        //   记忆页可能沿用上一个作用域的「已加载」状态；每次启动还会往 console.error
+        //   刷一条（真机日志累计 36 条）。
+        //   修法：把这句 watch 挪到 currentCharacter 声明之后（见本文件下方 2.8.92 那条规则）。
+        const chatWriteIntents = new Map();
 
         const notifyChatSaveFailure = (error) => {
             console.error('Failed to save chat history after retries:', error);
@@ -6657,10 +7422,21 @@ const app = createApp({
             lastChatSaveErrorToastAt = now;
             const message = error?.name === 'QuotaExceededError'
                 ? '存储空间不足，聊天记录未能保存，请先释放浏览器存储空间'
-                : '聊天记录保存失败，旧记录未被覆盖，请不要刷新并稍后重试';
+                : error?.name === 'StorageConflictError' || error?.name === 'StoragePausedError'
+                    ? '聊天记录保存已暂停或来源已变化，本次旧候选未提交，请检查当前记录'
+                    : '聊天记录未能完成保存，请保留当前内容并检查存储状态';
             showToast(message, 'error', 5000);
         };
 
+        // [rphub 2.8.93] 「读到空」的 scope 集合，用于阻止开场白被自动回写固化。
+        //   见 loadStoredChatHistory：undefined 与 [] 都返回 createInitialChatHistory(char)，
+        //   与 clearChat 写入的 [{role:'assistant',content:first_mes}] 完全同形，无法区分。
+        const _chatScopePristineRead = new Set();
+        // 2.8.110: 聊天是否已经至少从库里 hydrate 过一次。
+        //   启动窗口内 saveData 的聊天段可能先于 loadStoredChatHistory 执行，那时 chatHistory 还是
+        //   初始的空数组，写进库就是「用空覆盖 N 条」。2.8.109 只挡住了 startupConfigOnly 那一支，
+        //   挡不住启动窗口里的全量 saveData（debouncedSave / 各处显式调用）。
+        let _chatHydrated = false;
         const saveChatHistoryNow = (storyScopeId = getCurrentStoryBranchScopeId(), history = chatHistory.value) => {
             if (chatHistorySaveTimer) {
                 clearTimeout(chatHistorySaveTimer);
@@ -6668,23 +7444,69 @@ const app = createApp({
             }
             if (!storyScopeId) return Promise.resolve(false);
 
+            // [rphub 2.8.93] 写入闸门：本 scope 这一轮读到的是「空」，而历史仍是开场白原形 ⇒ 不回写。
+            //   不拦的话，一次读取异常会被随后的自动保存固化成「本来就没有」，且全程无日志。
+            //   返回 true 而非 false：跳过不是失败，切卡 / 切分支 / flush 都不能被它阻断。
+            if (_chatScopePristineRead.has(storyScopeId) && Array.isArray(history) && (
+                history.length === 0
+                || (history.length === 1 && history[0] && history[0].role === 'assistant'
+                    && typeof history[0].content === 'string')
+            )) {
+                console.warn('[ChatScope] 跳过回写：该 scope 读取为空且历史仍是开场白原形 | scope=' + storyScopeId
+                    + ' | len=' + history.length);
+                return Promise.resolve(true);
+            }
+            if (_chatScopePristineRead.has(storyScopeId)) _chatScopePristineRead.delete(storyScopeId);
+
             try {
+                const storage = window.RPHubStorage;
+                const writeState = storage.getStorageWriteState();
+                if (writeState.paused) throw Object.assign(new Error('存储维护期间不接收聊天保存'), { name: 'StoragePausedError' });
+                // A requested character switch must still flush the old active scope before loading the new one.
+                const scopeEpoch = _b1ScopeEpoch;
+                const intentId = (chatWriteIntents.get(storyScopeId) || 0) + 1;
+                chatWriteIntents.set(storyScopeId, intentId);
                 const historyToSave = cloneForStorage(slimChatHistoryForStorage(history));
+                const guard = () => !storage.getStorageWriteState().paused
+                    && storage.getStorageWriteState().epoch === writeState.epoch
+                    && _b1ScopeEpoch === scopeEpoch
+                    && getCurrentStoryBranchScopeId() === storyScopeId
+                    && chatWriteIntents.get(storyScopeId) === intentId;
                 const saveTask = async () => {
-                    let lastError = null;
-                    for (let attempt = 1; attempt <= 3; attempt++) {
-                        try {
-                            if (!getMainDb()) await initDB();
-                            await setScopedStoredValue('chat', storyScopeId, historyToSave, { clone: false });
-                            return true;
-                        } catch (error) {
-                            lastError = error;
-                            if (attempt === 3 || !isRetryableChatStorageError(error)) break;
-                            await new Promise(resolve => setTimeout(resolve, attempt * 250));
+                    try {
+                        if (!guard()) throw Object.assign(new Error('聊天写入意图已过期'), { name: 'StorageConflictError' });
+                        // [rphub 2.8.106] 空数组不许覆盖非空记录。
+                        //   判据必须是「要写空 + 库里已有内容」两条同时成立：
+                        //   空数组本身是合法初始态（角色卡没有 first_mes 时 createInitialChatHistory 就返回 []），
+                        //   只判空会把没有开场白的卡永久锁死写不进去。
+                        if (Array.isArray(historyToSave) && historyToSave.length === 0) {
+                            let keptCount = 0;
+                            try {
+                                const existingChat = await getScopedStoredValue('chat', storyScopeId);
+                                if (Array.isArray(existingChat)) keptCount = existingChat.length;
+                            } catch (probeError) {
+                                // 读不到旧值按「不拦」处理：宁可放过一次，也不能把正常保存变成假报错
+                                console.warn('[ChatScope] 探测旧记录失败，本次不拦 | scope=' + storyScopeId, probeError);
+                            }
+                            if (keptCount > 0) {
+                                console.warn('[ChatScope] 拒绝用空数组覆盖 ' + keptCount + ' 条记录 | scope=' + storyScopeId);
+                                // 节流状态挂在函数对象上：补丁只能改一段文本，另开顶层变量得再加一条补丁
+                                const lastRefuseAt = saveChatHistoryNow.__lastEmptyRefuseAt || 0;
+                                if (Date.now() - lastRefuseAt > 8000) {
+                                    saveChatHistoryNow.__lastEmptyRefuseAt = Date.now();
+                                    showToast('当前对话为空，已保留原有 ' + keptCount + ' 条记录未覆盖', 'warning', 6000);
+                                }
+                                return true;
+                            }
                         }
+                        await setScopedStoredValue('chat', storyScopeId, historyToSave, { clone: false, writeEpoch: writeState.epoch, guard });
+                        return true;
+                    } catch (error) {
+                        // Only dbSet may retry a closing connection, with the original intent guard.
+                        if (_b1ScopeEpoch === scopeEpoch
+                            && chatWriteIntents.get(storyScopeId) === intentId) notifyChatSaveFailure(error);
+                        return false;
                     }
-                    notifyChatSaveFailure(lastError);
-                    return false;
                 };
 
                 chatHistorySaveQueue = chatHistorySaveQueue.then(saveTask, saveTask);
@@ -6705,11 +7527,9 @@ const app = createApp({
         };
 
         const flushPendingChatHistorySave = async () => {
-            if (chatHistorySaveTimer) {
-                await saveChatHistoryNow();
-                return;
-            }
-            await chatHistorySaveQueue;
+            const saved = chatHistorySaveTimer ? await saveChatHistoryNow() : await chatHistorySaveQueue;
+            if (saved !== true) throw Object.assign(new Error('聊天记录未保存，已停止后续操作'), { name: 'ChatSaveError' });
+            return true;
         };
 
         const saveMemorySettingsNow = async () => {
@@ -6718,80 +7538,289 @@ const app = createApp({
             await setStoredValue('memory_settings', cloneForStorage(memorySettings), { clone: false });
         };
 
-        const saveClassicMemoriesNow = async (
-            storyScopeId = getCurrentStoryBranchScopeId(),
-            memorySource = classicMemories.value
-        ) => {
-            if (!storyScopeId || (!_classicMemoriesLoaded && memorySource === classicMemories.value)) return;
-            if (!getMainDb()) await initDB();
-            await setScopedStoredValue('classic_memories', storyScopeId, cloneForStorage(memorySource), { clone: false });
+        // B1 memory coordinator: only adopted, committed state may be used as a new intent baseline.
+        let _b1MemoryState = null;
+        let _b1MemoryViewKey = '';
+        let _b1MemoryQueue = Promise.resolve();
+        const memoryContentKey = value => window.RPHubStorage.storageContentKey(value);
+        // 与 getSummarySources 内部的 keyOf 同一口径：向量回写按这个键定位顶层来源。
+        const summarySourceKey = memory => memory && memory.id ? 'id:' + String(memory.id)
+            : 't:' + Number(memory.turn || memory.turnEnd || 0) + '#' + String(memory.summary || '').slice(0, 64);
+        const memoryOperationError = (name, message, details = {}) => Object.assign(new Error(message), { name, ...details });
+        const adoptMemoryState = (state, runtimeList = null) => {
+            if (!state || state.scopeId !== getCurrentStoryBranchScopeId()) throw memoryOperationError('MemoryScopeError', '加载作用域已变化');
+            const list = runtimeList || numberClassicMemories(prepareClassicMemoriesForRuntime(state.list));
+            _b1MemoryState = state;
+            _b1MemoryViewKey = memoryContentKey(list);
+            classicMemories.value = list;
+            _classicMemoriesLoaded = true;
+        };
+        // 维护代次推进后，已提交基线失效。允许在「意图起点」重读：此时 payload 还没算，
+        // 用新基线不构成旧结果覆盖；只有视图与基线逐字一致才换，否则要求重载。
+        const refreshMemoryBaseline = async scopeId => {
+            const writeState = window.RPHubStorage.getStorageWriteState();
+            if (writeState.paused) throw memoryOperationError('StoragePausedError', '存储维护期间不接收记忆写入');
+            if (_b1MemoryState && _b1MemoryState.writeEpoch === writeState.epoch) return _b1MemoryState;
+            if (memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) {
+                throw memoryOperationError('MemoryProtocolError', '检测到未经提交的记忆改动，已阻止覆盖');
+            }
+            const viewKey = _b1MemoryViewKey;
+            const next = await window.RPHubStorage.readMemoryState(scopeId);
+            if (next.scopeId !== scopeId || getCurrentStoryBranchScopeId() !== scopeId) {
+                throw memoryOperationError('MemoryScopeError', '记忆作用域已变化');
+            }
+            if (memoryContentKey(next.list) !== viewKey) {
+                _classicMemoriesLoaded = false;
+                throw memoryOperationError('StorageConflictError', '库内记忆已被其他窗口修改，请重新载入');
+            }
+            _b1MemoryState = next;
+            return next;
+        };
+        const beginMemoryIntent = async (label = '记忆操作') => {
+            const scopeId = getCurrentStoryBranchScopeId();
+            // 先判未加载：此时作用域可能还没解析出来，报"未加载"比报"作用域不存在"更贴近真实原因
+            if (!_classicMemoriesLoaded || !_b1MemoryState) throw memoryOperationError('MemoryNotLoadedError', '记忆尚未加载完成，请重新载入');
+            if (!scopeId) throw memoryOperationError('MemoryScopeError', '记忆作用域不存在，未执行保存');
+            if (_b1MemoryState.scopeId !== scopeId) throw memoryOperationError('MemoryNotLoadedError', '记忆尚未加载完成，请重新载入');
+            if (memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) throw memoryOperationError('MemoryProtocolError', '检测到未经提交的记忆改动，已阻止覆盖');
+            const state = await refreshMemoryBaseline(scopeId);
+            const writeState = window.RPHubStorage.getStorageWriteState();
+            if (writeState.paused || writeState.epoch !== state.writeEpoch) throw memoryOperationError('StoragePausedError', '存储维护后需要重新载入记忆');
+            return Object.freeze({ label, scopeId, scopeEpoch: _b1ScopeEpoch, state,
+                viewKey: _b1MemoryViewKey, source: cloneForStorage(classicMemories.value), writeEpoch: state.writeEpoch });
+        };
+        const memoryIntentActive = intent => !!intent && _classicMemoriesLoaded
+            && intent.scopeId === getCurrentStoryBranchScopeId() && intent.scopeEpoch === _b1ScopeEpoch
+            && window.RPHubStorage.getStorageWriteState().epoch === intent.writeEpoch
+            && !window.RPHubStorage.getStorageWriteState().paused;
+        const commitMemoryTransform = (intent, transform, options = {}) => {
+            const task = async () => {
+                const guard = () => memoryIntentActive(intent) && !options.signal?.aborted
+                    && (!options.guard || options.guard() === true)
+                    && memoryContentKey(classicMemories.value) === _b1MemoryViewKey;
+                if (!guard()) throw memoryOperationError('StorageConflictError', '记忆操作已过期，未提交旧结果');
+                if (options.validate) {
+                    if (options.validate(classicMemories.value, intent.source) !== true) throw memoryOperationError('StorageConflictError', '原始来源已变化，未套用旧结果');
+                } else if (_b1MemoryState !== intent.state) throw memoryOperationError('StorageConflictError', '其他记忆操作已提交，请重新检查');
+                const state = _b1MemoryState;
+                const next = numberClassicMemories(prepareClassicMemoriesForRuntime(transform(cloneForStorage(classicMemories.value))));
+                const result = await window.RPHubStorage.commitMemoryState(state, next, {
+                    guard: () => guard() && _b1MemoryState === state,
+                    signal: options.signal, expected: options.expected, changes: options.changes
+                });
+                if (result.status !== 'committed' && result.status !== 'unchanged') {
+                    if (result.status === 'committed_unverified' || result.status === 'conflict') {
+                        if (memoryIntentActive(intent)) _classicMemoriesLoaded = false;
+                    }
+                    throw memoryOperationError(result.error?.name || 'MemoryCommitError', result.committed
+                        ? '记忆已提交但未完成核对，请重新载入；不会自动回滚旧副本'
+                        : (result.error?.message || '记忆未提交'), { committed: result.committed, status: result.status });
+                }
+                const published = memoryIntentActive(intent) && _b1MemoryState === state;
+                if (published) adoptMemoryState(result.state, next);
+                return { ...result, list: next, published };
+            };
+            const pending = _b1MemoryQueue.then(task, task);
+            _b1MemoryQueue = pending.catch(() => {});
+            return pending;
+        };
+        const commitMemoryDraft = (intent, nextList, options = {}) => {
+            const frozen = cloneForStorage(nextList);
+            return commitMemoryTransform(intent, () => frozen, options);
+        };
+        const requireMemoryPublished = result => {
+            if (!result.published) throw memoryOperationError('MemoryScopeError', '结果已提交原作用域，但当前界面已切换', { committed: true });
+            return result;
+        };
+        const sameMemorySources = (current, before, ids) => ids.every(id => {
+            const left = current.find(item => String(item.id) === String(id));
+            const right = before.find(item => String(item.id) === String(id));
+            return !!left && !!right && memoryContentKey(left) === memoryContentKey(right);
+        });
+        const saveClassicMemoriesNow = async (storyScopeId = getCurrentStoryBranchScopeId(), memorySource = classicMemories.value, intent = null) => {
+            if (!storyScopeId) throw memoryOperationError('MemoryScopeError', '记忆作用域不存在，未执行保存');
+            const captured = intent || await beginMemoryIntent('保存记忆');
+            if (captured.scopeId !== storyScopeId) throw memoryOperationError('MemoryScopeError', '记忆与作用域不匹配');
+            return requireMemoryPublished(await commitMemoryDraft(captured, memorySource));
         };
 
-        const saveCharactersNow = async () => {
+        // [rphub 2.8.117] 整库 characters 的写入屏障。
+        //   导入一张卡会经过三条路径各写一遍 characters：saveStoryBranchesAndRuntime（保存上一张卡状态）、
+        //   importCharacterData 的显式保存、characters 自动保存 watcher。
+        //   characters 是单键存整个数组，每写一遍都要把整份值序列化落盘 —— 库里那条 187MB 的角色卡
+        //   因此被完整复制三次，主线程被占满就是「导入后卡死几秒」；峰值撞上 V8 堆上限则渲染进程被杀、
+        //   页面被 recreate 重载。屏障期间只记 dirty，收尾统一写一次；需要立刻落盘的调用方传 { force: true }。
+        let _characterWriteBarrier = 0;
+        const saveCharactersNow = async (options = {}) => {
+            if (_characterWriteBarrier > 0 && options.force !== true) {
+                return;
+            }
             if (!getMainDb()) await initDB();
             await setStoredValue('characters', unwrapForStorage(characters.value), { clone: false });
         };
 
+        // B1: three explicit groups instead of one long chain of independent puts.
+        // config = one transaction (all or nothing); chat = its own intent queue; memory = revision protocol.
+        // The returned object reports each group separately, so a partial save is never reported as success.
         const saveData = async (options = {}) => {
-            const { saveMemories = true, saveCharacters = true } = options;
+            const { saveMemories = true, saveCharacters = true, startupConfigOnly = false } = options;
+            const outcome = { ok: true, config: 'skipped', chat: 'skipped', memory: 'skipped', error: null };
+            const failed = (group, error) => {
+                outcome.ok = false;
+                outcome[group] = error?.name === 'QuotaExceededError' ? 'quota' : (error?.name || 'error');
+                if (!outcome.error) outcome.error = error;
+                console.error(`Save failed (${group}):`, error);
+                if (error?.name === 'QuotaExceededError') showToast('存储空间不足，无法保存', 'error');
+                else if (group === 'config') showToast('设置保存失败，请重试', 'error');
+                return outcome;
+            };
             try {
                 if (!getMainDb()) await initDB();
                 settings.contextSize = MAX_CONTEXT_SIZE;
                 normalizeActiveToolAggressivenessSettings();
-                if (saveCharacters) await saveCharactersNow();
-                await setStoredValue('settings', { ...retainedSettingsExtras, ...settings });
-                await setStoredValue('presets', presets.value);
-                await setStoredValue('preset_groups', presetGroupNames.value);
-                await setStoredValue('regex', regexScripts.value);
-                await setStoredValue('global_regex', globalRegexScripts.value);
-                await setStoredValue('worldinfo', worldInfo.value);
-                await setStoredValue('global_worldinfo', globalWorldInfo.value);
-                await setStoredValue('worldinfo_settings', worldInfoSettings);
-                await setStoredValue('global_ui_templates', globalUiTemplates.value);
-                await setStoredValue('active_tools', normalizeActiveTools(), { clone: false });
+                const writes = [];
+                const keyOf = name => window.RPHubStorage.storageKeyFor(name);
+                if (saveCharacters && _characterWriteBarrier === 0) {
+                    writes.push({ key: keyOf('characters'), value: unwrapForStorage(characters.value) });
+                }
+                if (startupConfigOnly) {
+                    // 2.8.84: 启动那次只为落强制默认值（contextSize 归一化、工具强度归一化）。
+                    // 世界书/预设/正则体积大且内容未变，经分组 CAS 提交要多付一遍内容哈希与提交后回读；
+                    // 这些键在任一用户改动后的全量 saveData() 里仍会写回，不落库只影响"下次启动再归一化一次"。
+                    writes.push({ key: keyOf('settings'), value: { ...retainedSettingsExtras, ...settings } });
+                    // 只有本次启动真读到过 active_tools 才写回：读失败时内存里是默认工具（空 Tavily 密钥），
+                    // 写回去等于用默认值覆盖用户已配好的密钥。
+                    if (_activeToolsLoaded) writes.push({ key: keyOf('active_tools'), value: normalizeActiveTools() });
+                } else {
+                    writes.push(
+                        { key: keyOf('settings'), value: { ...retainedSettingsExtras, ...settings } },
+                        { key: keyOf('presets'), value: presets.value },
+                        { key: keyOf('preset_groups'), value: presetGroupNames.value },
+                        { key: keyOf('worldinfo_settings'), value: worldInfoSettings },
+                        { key: keyOf('global_ui_templates'), value: globalUiTemplates.value }
+                    );
+                    // [rphub 2.8.115] 初始化完成前不写这四键。
+                    //   故障现场：loadData 里 settings 先于 global_worldinfo / worldinfo 加载，
+                    //   settings.imageGenKey 赋值触发 watch -> enforceSpecialRules()（此刻表为空，
+                    //   按 enabled:false 重建「自动生图」「NAI画图正则」）-> 紧随其后的无参
+                    //   saveData() 把这份默认值写进库，覆盖掉刚导入的存档。
+                    //   症状：每次导入后自动生图被关，手动打开才恢复图片。
+                    //   同函数下方 user / user_profiles / memory_settings 早已有同样的守卫，
+                    //   这四键属于遗漏：初始化期间的正文 / 世界书 / 正则一律不落库。
+                    if (_initComplete) {
+                        writes.push(
+                            { key: keyOf('regex'), value: regexScripts.value },
+                            { key: keyOf('global_regex'), value: globalRegexScripts.value },
+                            { key: keyOf('worldinfo'), value: worldInfo.value },
+                            { key: keyOf('global_worldinfo'), value: globalWorldInfo.value }
+                        );
+                    }
+                    // 2.8.109: 全量保存同样不能无条件写 active_tools。
+                    // 启动那次（startupConfigOnly）有 _activeToolsLoaded 闸门，但用户之后只要动任何一个设置，
+                    // 就会走到这里把内存里的 active_tools 整份写回库。读失败时内存是默认定义（三个工具全关、
+                    // 密钥为空），于是「动一下设置」就把全关永久固化 —— 这才是「一重启工具全关了」的正解。
+                    // 判据：读到过（_activeToolsLoaded）或内存已偏离默认（用户确实改过）才写。
+                    const activeToolsForSave = normalizeActiveTools();
+                    if (_activeToolsLoaded || JSON.stringify(activeToolsForSave) !== JSON.stringify(getDefaultActiveToolDefinitions())) {
+                        writes.push({ key: keyOf('active_tools'), value: activeToolsForSave });
+                    }
+                }
                 // 守卫：初始化完成前不写入用户/记忆数据，防止默认值覆盖服务端已有数据
                 if (_initComplete) {
-                    await setStoredValue('user', user);
-                    await setStoredValue('user_profiles', JSON.parse(JSON.stringify(userProfiles.value)));
-                    if (activeProfileId.value) await setStoredValue('active_profile_id', activeProfileId.value);
+                    writes.push(
+                        { key: keyOf('user'), value: user },
+                        { key: keyOf('user_profiles'), value: userProfiles.value },
+                        { key: keyOf('memory_settings'), value: cloneForStorage(memorySettings) }
+                    );
+                    if (activeProfileId.value) writes.push({ key: keyOf('active_profile_id'), value: activeProfileId.value });
                 }
-
-                // Save Chat State
                 if (currentCharacterIndex.value >= 0) {
-                    await setStoredValue('last_active_char', currentCharacterIndex.value);
-                    await saveChatHistoryNow();
+                    writes.push({ key: keyOf('last_active_char'), value: currentCharacterIndex.value });
                 }
+                const config = await window.RPHubStorage.commitStoredValueBatch({ writes });
+                if (config.status !== 'committed' && config.status !== 'unchanged') {
+                    return failed('config', config.error || Object.assign(new Error('设置分组未提交'), { name: config.status }));
+                }
+                outcome.config = config.status;
 
-                // Save Memory State
-                await saveMemorySettingsNow();
+                // 2.8.109: startupConfigOnly 那次调用只为落强制默认值，不该碰聊天。
+                // 它没有 await，执行到这里时主流程早已把 currentCharacterIndex 恢复成有效值，
+                // 而 chatHistory 可能还没从库里读回来（仍是空数组）⇒ 拿空记录去写当前 scope。
+                // 空聊天闸门能拦住（321 条记录不会丢），但每次启动都会弹一条「已保留原有 N 条」。
+                // 2.8.110: 再加一道 _chatHydrated。启动那次 saveData 没有 await，它内部的
+                //   normalizeActiveToolAggressivenessSettings() 会改 settings，进而排上一个 1000ms 的
+                //   debouncedSave()；那个 timer 走的是全量分支，到点时大归档（几百条）可能还没读完。
+                //   只判 startupConfigOnly 挡不住它 —— 这就是 2.8.109 出包后仍然每次启动弹提示的原因。
+                if (!startupConfigOnly && _chatHydrated && currentCharacterIndex.value >= 0) {
+                    const chatOk = await saveChatHistoryNow();
+                    outcome.chat = chatOk ? 'committed' : 'error';
+                    if (!chatOk) {
+                        outcome.ok = false;
+                        if (!outcome.error) outcome.error = Object.assign(new Error('聊天记录未保存'), { name: 'ChatSaveError' });
+                    }
+                }
                 if (saveMemories) {
-                    await saveClassicMemoriesNow();
+                    try {
+                        await saveClassicMemoriesNow();
+                        outcome.memory = 'committed';
+                    } catch (error) {
+                        failed('memory', error);
+                    }
                 }
-            } catch (e) {
-                console.error('Save failed:', e);
-                if (e.name === 'QuotaExceededError') {
-                    showToast('存储空间不足，无法保存', 'error');
-                }
+            } catch (error) {
+                if (!outcome.error) failed('config', error);
             }
+            return outcome;
         };
 
-        const saveConversationMutationNow = async ({ saveTemplateRuntime = false } = {}) => {
+        // 记忆尚未加载（例如关掉记忆系统）时，对话变更只写聊天，不凭空造一份记忆。
+        const tryBeginMemoryIntent = async (label) => {
+            try { return await beginMemoryIntent(label); }
+            catch (error) {
+                if (error?.name === 'MemoryScopeError' || error?.name === 'MemoryNotLoadedError') return null;
+                throw error;
+            }
+        };
+        // 聊天与记忆放进同一个事务：任一侧基线被别的写者改过，就整体不提交，不留半套数据。
+        const commitConversationState = async ({ storyScopeId, history, intent, memories, saveTemplateRuntime = false }) => {
+            if (!intent) {
+                const ok = await saveChatHistoryNow(storyScopeId, history);
+                return { ok, published: true };
+            }
             try {
-                const storyScopeId = getCurrentStoryBranchScopeId();
-                const historySource = chatHistory.value;
-                const classicMemorySource = classicMemories.value;
-                if (saveTemplateRuntime) {
-                    saveGlobalUiTemplateRuntimeForCharacter(currentCharacter.value, activeStoryBranchId.value);
-                }
+                if (saveTemplateRuntime) saveGlobalUiTemplateRuntimeForCharacter(currentCharacter.value, activeStoryBranchId.value);
                 if (!getMainDb()) await initDB();
-                await saveChatHistoryNow(storyScopeId, historySource);
-                await saveClassicMemoriesNow(storyScopeId, classicMemorySource);
+                // 先让排在队列里的旧聊天写失效，否则它稍后仍会按自己的 guard 把旧文本盖回来
+                chatWriteIntents.set(storyScopeId, (chatWriteIntents.get(storyScopeId) || 0) + 1);
+                const chatKey = 'rp_hub_chat_' + storyScopeId;
+                const chatRecords = await window.RPHubStorage.readStoredValueSet([chatKey]);
+                const chatPayload = cloneForStorage(slimChatHistoryForStorage(history));
+                // [rphub 2.8.106] 同一个不变量在事务路径上再拦一次：空数组不许覆盖非空。
+                //   4 个调用点共用这里，其中「重新生成第 1 条」必然传 []（chatHistory.slice(0, 0)）。
+                //   返回 ok:false 之后调用方会在 chatHistory.value = nextHistory 之前 return，
+                //   于是内存和库都停在原值 —— 这是唯一能做到「零改动退出」的位置。
+                if (Array.isArray(chatPayload) && chatPayload.length === 0) {
+                    const existingChat = chatRecords[0] ? chatRecords[0].value : undefined;
+                    const keptCount = Array.isArray(existingChat) ? existingChat.length : 0;
+                    if (keptCount > 0) {
+                        console.warn('[ChatScope] 拒绝提交空聊天（事务路径） | key=' + chatKey + ' | 现有=' + keptCount + ' 条');
+                        showToast('第 1 条消息前面没有内容，重建会让整段记录变空，已取消。若要重来请先新建分支再操作', 'warning', 8000);
+                        return { ok: false, published: false, refusedEmpty: true };
+                    }
+                }
+                const result = await commitMemoryTransform(intent, () => memories, {
+                    expected: [{ key: chatKey, value: chatRecords[0].value }],
+                    changes: [{ key: chatKey, operation: 'set', value: chatPayload }]
+                });
+                if (!result.published) return { ok: false, published: false };
                 if (saveTemplateRuntime) {
                     await saveCharactersNow();
                     await setStoredValue('global_ui_templates', globalUiTemplates.value);
                 }
-            } catch (e) {
-                console.error('Save conversation mutation failed:', e);
+                return { ok: true, published: true };
+            } catch (error) {
+                console.error('Commit conversation state failed:', error);
+                return { ok: false, published: false, error };
             }
         };
 
@@ -6805,6 +7834,10 @@ const app = createApp({
         }, { deep: true });
 
         const loadData = async () => {
+            // [rphub 2.8.101] 启动即采一条，并顺手让 getRestoreBudget() 跑一次 ——
+            //   否则第一次体积分析的基线会被它自己赋值（差值恒 0），污染判据永远不生效。
+            markHeap('boot');
+            getRestoreBudget();
             try {
                 await initDB();
                 // 2.7.85：读回备份范围开关（必须在 initDB 之后，否则主库还没开）。
@@ -6814,16 +7847,31 @@ const app = createApp({
                     console.warn('读取备份范围开关失败，使用默认全开:', error);
                 }
                 // 2.8.4：读回自动备份配置并启动每日避峰检测
+                // [rphub 2.8.102] 定时器必须**先挂**，历史列表后加载。
+                //   2.8.101 实测：设置页显示「已启用」、上次备份仍是 2 号手动点的、
+                //   堆采样里没有 backup-begin ⇒ 说明 loadAutoBackupHistory() 抛异常把
+                //   setTimeout 一起带走了（它内部只给 JSON.parse 包了 try，
+                //   getBackupFolder / getDefaultBackupFolderPath 两个桥调用在 try 之外），
+                //   而外层 catch 只留一条 console.warn，用户端零可见。
+                //   一个「只用于显示历史列表」的加载，不该有权限阻止备份启动。
                 try {
                     autoBackupConfig.value = normalizeAutoBackupConfig(await getStoredValue(AUTO_BACKUP_CONFIG_KEY));
-                    await loadAutoBackupHistory();
                     if (autoBackupConfig.value.enabled) {
                         setTimeout(() => {
-                            performDailyAutoBackup(false);
+                            if (autoBackupConfig.value.triggerMode === 'remind') maybeRemindDailyBackup();
+                            else performDailyAutoBackup(false);
                         }, 6000);
+                    } else {
+                        markHeap('backup-no-timer:disabled');
                     }
                 } catch (autoBackupErr) {
+                    markHeap('backup-no-timer:config-error');
                     console.warn('加载自动备份状态失败:', autoBackupErr);
+                }
+                try {
+                    await loadAutoBackupHistory();
+                } catch (historyErr) {
+                    console.warn('[AutoBackup] 加载备份历史失败（不影响备份启动）:', historyErr);
                 }
 
 
@@ -6832,17 +7880,22 @@ const app = createApp({
                 if (savedChars) {
                     // Migration: Ensure all characters have a UUID and createdAt
                     let migrated = false;
+                    const legacyChatMigrations = [];
                     characters.value = savedChars.filter(char => char).map((char, index) => {
                         if (!char.uuid) {
                             char.uuid = generateUUID();
                             migrated = true;
                             // Try to migrate old index-based chat history to UUID-based
-                            getScopedStoredValue('chat', index).then(oldChat => {
-                                if (oldChat) {
-                                    setScopedStoredValue('chat', char.uuid, oldChat);
-                                    deleteScopedStoredValue('chat', index); // Clean up old key
-                                }
-                            }).catch(() => { });
+                            legacyChatMigrations.push(getScopedStoredValue('chat', index).then(async oldChat => {
+                                if (!oldChat) return;
+                                // B1: the old index key is removed only after the new key's transaction
+                                // completes. A failed copy must leave the source intact instead of
+                                // trading a duplicate for a lost conversation.
+                                await setScopedStoredValue('chat', char.uuid, oldChat);
+                                await deleteScopedStoredValue('chat', index); // Clean up old key
+                            }).catch(error => {
+                                console.warn('旧索引聊天迁移未完成，已保留源键:', error);
+                            }));
                         }
                         if (!char.createdAt) {
                             // Use a slightly offset timestamp based on index to preserve some order for old cards
@@ -6858,7 +7911,11 @@ const app = createApp({
                     if (migrated) {
                         await saveCharactersNow();
                     }
+                    // 迁移在后台跑，但初始化收尾要等它落定，否则用户可能在旧键已删前就切角色。
+                    if (legacyChatMigrations.length) await Promise.allSettled(legacyChatMigrations);
                 }
+                // [rphub 2.8.101] 角色卡是最大的一条（用户实测 186.93MB / 3 张卡挤一条）
+                markHeap('characters-loaded');
 
                 const savedSettings = await getStoredValue('settings');
                 if (savedSettings) {
@@ -6879,8 +7936,6 @@ const app = createApp({
                 } else {
                     normalizeApiProviderSettings();
                 }
-                if (retainedSettingsExtras.localImmersiveDefault !== true) settings.immersiveMode = true;
-                retainedSettingsExtras.localImmersiveDefault = true;
                 settings.fontSize = normalizeFontSize(settings.fontSize);
                 if (settings.reasoningEffort === 'xhigh') settings.reasoningEffort = 'max';
                 if (!imageModelOptions.some(option => option.value === settings.imageModel)) {
@@ -6956,7 +8011,17 @@ const app = createApp({
                 if (savedGlobalUiTemplates) globalUiTemplates.value = savedGlobalUiTemplates.map(template => normalizeUiTemplate({ ...template, scope: 'global' }));
 
                 const savedActiveTools = await getStoredValue('active_tools');
-                normalizeActiveTools(savedActiveTools || activeTools.value);
+                // 只有读到「非空数组」才算读成功。
+                // 原写法 `savedActiveTools || activeTools.value` 里 [] 是 truthy ⇒ 空数组被当成有效值，
+                // normalizeActiveTools 拿它补默认定义（三个工具 enabled 全 false）⇒ 界面全关；
+                // 更糟的是随后 _activeToolsLoaded = true 会让启动那次 saveData 把这份默认值写回库，
+                // 等于用默认值永久覆盖用户配置。读不到有效值就什么都不做：不覆盖内存、不标记已加载。
+                if (Array.isArray(savedActiveTools) && savedActiveTools.length) {
+                    normalizeActiveTools(savedActiveTools);
+                    _activeToolsLoaded = true;
+                } else {
+                    console.warn('[ActiveTools] 库里的 active_tools 不是非空数组，本次不覆盖内存也不写回', savedActiveTools);
+                }
 
                 const savedWISettings = await getStoredValue('worldinfo_settings');
                 if (savedWISettings) {
@@ -7021,9 +8086,25 @@ const app = createApp({
                 return true;
             } catch (e) {
                 console.error('Failed to load saved data', e);
+                // 大 try 一旦在中途抛错，排在后面的键全部读不到。active_tools 排在读取序列末尾附近、
+                // 又没有独立兜底 ⇒ 每次冷启动都回默认（三个工具全关），表现为「工具设置不保存」。
+                // 这里补一次独立读取：读到非空数组就恢复；读不到就不动内存、也不标记已加载。
+                try {
+                    const rescueActiveTools = await getStoredValue('active_tools');
+                    if (Array.isArray(rescueActiveTools) && rescueActiveTools.length) {
+                        normalizeActiveTools(rescueActiveTools);
+                        _activeToolsLoaded = true;
+                        console.warn('[ActiveTools] loadData 中途失败，已单独恢复 ' + rescueActiveTools.length + ' 个工具配置');
+                    }
+                } catch (rescueError) {
+                    console.warn('[ActiveTools] 单独恢复也失败，本次保持默认且不写回', rescueError);
+                }
                 showToast('加载保存的数据失败', 'error');
                 return false;
             }
+            // [rphub 2.8.101] 加载完成时的堆 = 应用常驻占用。之后任何读数跟它比，
+            //   多出来的部分才是「临时对象」，不是「数据本来就占这么多」。
+            _loadEndHeapUsed = markHeap('load-end') || _loadEndHeapUsed;
         };
 
         // Sync World Info and Regex to Current Character
@@ -7330,11 +8411,11 @@ const app = createApp({
         // 存储走 localStorage 独立键：不塞 settings，避免被「恢复默认」清掉、不污染存档。
         const IMAGE_GEN_PARAM_STORAGE_KEY = 'rphub_image_gen_params';
         const IMAGE_GEN_PARAM_SPEC = Object.freeze({
-            steps: { min: 1, max: 50, def: 28, label: '迭代步数' },
-            scale: { min: 1, max: 20, def: 6, label: '提示词引导强度' },
-            cfg: { min: 0, max: 1, def: 0, label: '引导重缩放' },
-            sampler: { def: 'k_dpmpp_2m_sde', label: '采样器' },
-            noise_schedule: { def: 'karras', label: '噪声调度' }
+            steps: { min: 1, max: 50, def: 28, site: 40, label: '迭代步数' },
+            scale: { min: 1, max: 20, def: 6, site: 6, label: '提示词引导强度' },
+            cfg: { min: 0, max: 1, def: 0, site: 0, label: '引导重缩放' },
+            sampler: { def: 'k_dpmpp_2m_sde', site: 'k_dpmpp_2m_sde', label: '采样器' },
+            noise_schedule: { def: 'karras', site: 'karras', label: '噪声调度' }
         });
         const IMAGE_GEN_SAMPLER_OPTIONS = Object.freeze([
             { value: 'k_dpmpp_2m_sde', label: 'DPM++ 2M SDE' },
@@ -7386,7 +8467,7 @@ const app = createApp({
                 let confirmed;
                 try {
                     confirmed = await showVueConfirmModal('提高迭代步数？',
-                        '默认迭代步数为 28。更高步数通常需要更长时间，也可能消耗更多额度，画质不一定提升。继续使用这个步数吗？',
+                        '超过 28 步通常需要更长时间，也可能消耗更多额度，画质不一定提升。继续使用这个步数吗？',
                         { confirmText: '继续使用', cancelText: '保持原步数' });
                 } finally { imageStepsConfirmationPending = false; }
                 if (!confirmed) return;
@@ -7814,11 +8895,17 @@ const app = createApp({
 
         // Debounce function
         const debounce = (fn, delay) => {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => fn(...args), delay);
+            let timeoutId = null;
+            const wrapped = (...args) => {
+                if (timeoutId) clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => { timeoutId = null; fn(...args); }, delay);
             };
+            // [rphub 2.8.117] 导入收尾要能取消排队中的自动保存：屏障释放后它若再触发一次，
+            //   等于白省一遍整库写。
+            wrapped.cancel = () => {
+                if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            };
+            return wrapped;
         };
 
         // Debounced Save
@@ -7858,6 +8945,13 @@ const app = createApp({
         const currentCharacter = computed(() => {
             return currentCharacterIndex.value >= 0 ? characters.value[currentCharacterIndex.value] : null;
         });
+        // [rphub 2.8.92] 作用域 watcher 的正确位置：必须在 currentCharacter 声明**之后**。
+        //   原位置（let chatHistorySaveTimer 那一带）在 currentCharacter 之前约 1300 行，
+        //   函数型 source 会立即求值 ⇒ TDZ ReferenceError ⇒ watcher 静默不注册。
+        //   挪到这里后首次求值可以正常执行：此刻 currentCharacterIndex(1248)、
+        //   characters(1246)、activeStoryBranchId(4344)、_classicMemoriesLoaded(4152)、
+        //   _b1ScopeEpoch(6642)、getCurrentStoryBranchScopeId(6637) 全部已初始化。
+        watch(getCurrentStoryBranchScopeId, () => { _b1ScopeEpoch++; _classicMemoriesLoaded = false; }, { flush: 'sync' });
         // PNG 角色卡的头像连同整张卡的数据一起保存，可达十几 MB。界面显示改用短的 blob 地址，
         // 否则每次重绘背景样式、每新建一个消息头像，浏览器都要重新解析整段 data URL。
         let avatarDisplayCache = { source: '', url: '' };
@@ -8386,11 +9480,47 @@ const app = createApp({
 
         const isCharacterFavorite = (char) => getCharacterFavoriteTime(char) > 0;
 
-        const filteredCharacters = computed(() => {
-            let result = characters.value.map((char, originalIndex) => ({ char, originalIndex }));
+        // [rphub 2.8.91] 角色卡列表头像 blob 化（多槽缓存，不再是单槽）。
+        // 列表 :src 原本直接吃原始 data URL，DOM 属性里挂的是几百 KB 到 1MB 的 base64 串；
+        // 这里换成 64 字符的 blob 地址，同一张卡的地址只建一次。
+        // 键用「长度 + 首 64 + 末 32」，避免把整串塞进 Map 当 key 反复算哈希。
+        // 刻意不做容量驱逐、也不 revokeObjectURL：卡片滚出屏幕后仍留在 DOM 里
+        // （列表容器有 content-visibility:auto），此时 revoke 会让它滚回来时直接裂图。
+        // blob 地址随页面重载一起释放，生命周期与 characters 里的原始 data URL 同阶。
+        const listAvatarCache = new Map();
+        const listAvatarUrl = (source) => {
+            const raw = String(source || '');
+            const comma = raw.indexOf(',');
+            if (raw.length < 65536 || comma < 0 || !/^data:[^,]*;base64$/.test(raw.slice(0, comma))) return raw;
+            const key = raw.length + ':' + raw.slice(0, 64) + ':' + raw.slice(-32);
+            const cached = listAvatarCache.get(key);
+            if (cached) return cached;
+            let url = raw;
+            try {
+                const binary = atob(raw.slice(comma + 1));
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                url = URL.createObjectURL(new Blob([bytes], { type: raw.slice(5, comma).split(';')[0] }));
+            } catch (_) {
+                url = raw;
+            }
+            listAvatarCache.set(key, url);
+            return url;
+        };
 
-            if (characterSearchQuery.value) {
-                const query = characterSearchQuery.value.toLowerCase();
+        const filteredCharacters = computed(() => {
+            // [rphub 2.8.91] 排序键在这里算一次。原来比较函数里每条都比较一次
+            // getCharacterFavoriteTime()，排序要 O(n log n) 次比较，卡多时纯重复计算。
+            let result = characters.value.map((char, originalIndex) => ({
+                char,
+                originalIndex,
+                _favTime: getCharacterFavoriteTime(char),
+                _createdAt: char.createdAt || 0,
+                _uuid: char.uuid || ''
+            }));
+
+            if (characterSearchQueryApplied.value) {
+                const query = characterSearchQueryApplied.value.toLowerCase();
                 result = result.filter(({ char }) =>
                     String(char.name || '').toLowerCase().includes(query) ||
                     String(char.description || '').toLowerCase().includes(query)
@@ -8398,14 +9528,11 @@ const app = createApp({
             }
 
             // Favorites stay on top, with the most recently favorited first.
+            // 与改动前完全等价：先比收藏时间，再比创建时间，最后用 uuid 兜底。
             result.sort((a, b) => {
-                const favoriteDiff = getCharacterFavoriteTime(b.char) - getCharacterFavoriteTime(a.char);
-                if (favoriteDiff !== 0) return favoriteDiff;
-                const timeA = a.char.createdAt || 0;
-                const timeB = b.char.createdAt || 0;
-                if (timeB !== timeA) return timeB - timeA;
-                // Fallback to UUID if timestamps are missing or identical
-                return (b.char.uuid || '').localeCompare(a.char.uuid || '');
+                if (b._favTime !== a._favTime) return b._favTime - a._favTime;
+                if (b._createdAt !== a._createdAt) return b._createdAt - a._createdAt;
+                return b._uuid.localeCompare(a._uuid);
             });
 
             return result;
@@ -8416,7 +9543,7 @@ const app = createApp({
                 originalIndex,
                 uuid: char.uuid,
                 name: char.name,
-                avatar: char.avatar,
+                avatar: listAvatarUrl(char.avatar),
                 favoriteAt: char.favoriteAt,
                 worldInfoCount: getCharacterWICount(char),
                 regexCount: getCharacterRegexCount(char)
@@ -8431,6 +9558,70 @@ const app = createApp({
             chatRenderLimit.value = CHAT_RENDER_INITIAL_LIMIT;
             isChatTopUnlockArmed = true;
         };
+
+        // [rphub 2.8.107] 只读运行环境探测：不改任何行为，只把「这台机器跑的是什么内核、
+        //   多少内存、堆上限多大、渲染窗口多宽」摆到设置页上，让兼容性问题可观测。
+        //   判定口径来自产物实测：?. 出现 437 处（语法，内核 <80 整份解析失败）、
+        //   structuredClone 2 处（运行时，内核 <98 才缺）、Array.at 1 处（<92）。
+        const runtimeEnv = ref(null);
+        const refreshRuntimeEnv = () => {
+            const pick = (fn, fallback) => {
+                try {
+                    const value = fn();
+                    return (value === undefined || value === null || value === '') ? fallback : value;
+                } catch (_) {
+                    return fallback;
+                }
+            };
+            const ua = pick(() => String(navigator.userAgent || ''), '');
+            // Android 4.4 时代的 WebView UA 里是 Version/4.0，没有 Chrome/ 字样
+            //   ⇒ 解析失败不报「未知版本」，直接把 UA 原文摆出来，原文比结论有用。
+            const chromeMatch = ua.match(/Chrome\/(\d+)/);
+            const chromeMajor = chromeMatch ? Number(chromeMatch[1]) : 0;
+            let engineVerdict;
+            if (!chromeMajor) engineVerdict = '内核版本未识别，请把下面的 UA 原文发出来';
+            else if (chromeMajor < 80) engineVerdict = '内核低于 80：脚本可能整份解析失败（白屏）';
+            else if (chromeMajor < 98) engineVerdict = '内核 80-97：缺少 structuredClone，个别功能会报错';
+            else engineVerdict = '内核满足全部语法与 API 要求';
+            // performance.memory 不是标准 API，非 Chromium 内核没有 ⇒ 显示「不可用」而不是抛错
+            const mem = pick(() => performance.memory, null);
+            const heapLimit = mem && Number(mem.jsHeapSizeLimit) > 0 ? Number(mem.jsHeapSizeLimit) : 0;
+            const heapUsed = mem && Number(mem.usedJSHeapSize) > 0 ? Number(mem.usedJSHeapSize) : 0;
+            const deviceRam = pick(() => Number(navigator.deviceMemory) || 0, 0);
+            const toMb = (bytes) => (bytes > 0 ? Math.round(bytes / 1048576) + ' MB' : '不可用');
+            runtimeEnv.value = {
+                ua: ua || '不可用',
+                chrome: chromeMajor ? String(chromeMajor) : '未识别',
+                engineVerdict: engineVerdict,
+                deviceRam: deviceRam > 0 ? deviceRam + ' GiB（浏览器上报值，精度被降档）' : '不可用',
+                heapLimit: toMb(heapLimit),
+                heapUsed: toMb(heapUsed),
+                heapRatio: (heapLimit > 0 && heapUsed > 0) ? Math.round(heapUsed / heapLimit * 100) + '%' : '不可用',
+                renderWindow: CHAT_RENDER_INITIAL_LIMIT + ' 条起，上限 ' + (Number(settings.chatRenderMessageLimit) || 0) + ' 条',
+                charPage: characterDisplayLimit.value + ' 张起，每次 +8'
+            };
+        };
+        const copyRuntimeEnv = () => {
+            const env = runtimeEnv.value;
+            if (!env) { showToast('还没有读到环境信息', 'error'); return; }
+            const lines = [
+                'RP-Hub 运行环境',
+                'WebView 内核: ' + env.chrome,
+                '判定: ' + env.engineVerdict,
+                '设备内存: ' + env.deviceRam,
+                'JS 堆上限: ' + env.heapLimit,
+                'JS 堆已用: ' + env.heapUsed + ' (' + env.heapRatio + ')',
+                '聊天渲染: ' + env.renderWindow,
+                '角色列表: ' + env.charPage,
+                'UA: ' + env.ua
+            ];
+            // 这条路径已被 AndroidBridge.copyText 全局包装成同步 ClipboardManager，
+            //   不会撞 WebView 的 NotAllowedError（那是「点了没反应」的老病根）
+            navigator.clipboard.writeText(lines.join('\n'))
+                .then(() => showToast('已复制运行环境'))
+                .catch(() => showToast('复制失败，请长按选择文本', 'error'));
+        };
+        refreshRuntimeEnv();
 
         const hasMobileUiTemplateBlocks = (message) => Boolean(
             message?.role === 'assistant'
@@ -8627,9 +9818,15 @@ const app = createApp({
         };
 
         // Reset limit when search query changes
-        watch(characterSearchQuery, () => {
-            characterDisplayLimit.value = 8;
-        });
+        // [rphub 2.8.91] 改为防抖 180ms 后再生效。原来每敲一个字符就重算全量
+        // filteredCharacters 并把 characterDisplayLimit 打回 8；卡越多这一步越贵。
+        watch(characterSearchQuery, (value) => {
+            clearTimeout(characterSearchDebounceTimer);
+            characterSearchDebounceTimer = setTimeout(() => {
+                characterSearchQueryApplied.value = value;
+                characterDisplayLimit.value = 8;
+            }, 180);
+        }, { immediate: true });
 
         const conversationBodyLength = computed(() => getConversationBodyLength(chatHistory.value));
         // 楼层数只看条数，不必给每条回复跑文风过滤。
@@ -8737,6 +9934,27 @@ const app = createApp({
             const end = Math.max(start, Number(memory?.turnEnd) || fallbackTurn);
             return { start, end };
         };
+        // 压缩总结覆盖的轮次集合必须递归到基础总结：三级结构里孙节点的轮次不在父节点的一层来源上，
+        // 只看一层会让「这条总结管哪几轮」的引用/召回判断错位。
+        // 定义位置要早于任何 computed 求值，否则 const 的暂时性死区会在首屏就抛错。
+        const collectClassicMemoryTurns = (memory, out = new Set()) => {
+            if (!memory || typeof memory !== 'object') return out;
+            if (isSecondaryClassicMemory(memory)) {
+                const sources = Array.isArray(memory.sourceMemories) ? memory.sourceMemories : [];
+                if (sources.length) sources.forEach(item => collectClassicMemoryTurns(item, out));
+                else {
+                    const range = getClassicMemoryTurnRange(memory);
+                    for (let t = range.start; t <= range.end; t++) out.add(t);
+                }
+                return out;
+            }
+            const turn = Number(memory.turn);
+            if (turn > 0) out.add(turn);
+            if (Array.isArray(memory.sourceMemories)) {
+                memory.sourceMemories.forEach(item => collectClassicMemoryTurns(item, out));
+            }
+            return out;
+        };
         const getClassicSecondaryMemoryMarker = (memory) => {
             const range = getClassicMemoryTurnRange(memory);
             return `总结记忆 第 ${range.start}-${range.end} 轮`;
@@ -8753,7 +9971,7 @@ const app = createApp({
                     secondaryRanges.push({
                         memory, ...getClassicMemoryTurnRange(memory),
                         turns: memory.sourceMemories?.length
-                            ? new Set(memory.sourceMemories.map(source => Number(source.turn)))
+                            ? collectClassicMemoryTurns(memory)
                             : null
                     });
                     return;
@@ -8926,6 +10144,20 @@ const app = createApp({
         // --- Methods ---
 
         // Toast Notification
+        // 2.8.112：多行 toast 离场时按真实高度折叠。
+        // 原实现（theme.css:358）用固定单行高 --toast-height 折叠 margin-bottom，
+        // 两行以上只折掉一行的高度，剩下的那截在过渡结束瞬间消失 ⇒ 收尾跳一下。
+        // 这里在 leave 开始前把实际高度写成内联 height，样式侧再把 height 压到 0，
+        // 起点终点都是确定值，过渡自然、收尾不跳。
+        const onToastBeforeLeave = (el) => {
+            if (!el || !el.style) return;
+            try {
+                el.style.height = el.offsetHeight + 'px';
+                el.style.marginBottom = '0px';
+            } catch (error) {
+                // 拿不到高度就退回原行为，不影响离场本身
+            }
+        };
         const showToast = (message, type = 'info', duration = 2000) => {
             const id = `${Date.now()}-${toastIdSeed++}`;
             toasts.value.push({ id, message, type, icon: getToastIcon(message, type) });
@@ -9607,22 +10839,43 @@ const app = createApp({
         };
 
         const clearChat = () => {
-            confirmAction('确定要清空聊天记录吗？记忆也将一并清空，此操作无法撤销。', () => {
+            confirmAction('确定要清空聊天记录吗？记忆也将一并清空，此操作无法撤销。', async () => {
                 clearPendingChatImages();
                 clearPendingCardInteraction();
                 abortConversationBackgroundWork();
                 resetChatRenderWindow();
-                chatHistory.value = [];
+                const nextHistory = [];
                 if (currentCharacter.value && currentCharacter.value.first_mes) {
-                    chatHistory.value.push({
+                    nextHistory.push({
                         role: 'assistant',
                         name: currentCharacter.value.name,
                         content: currentCharacter.value.first_mes
                     });
                 }
-                classicMemories.value = [];
+                const storyScopeId = getCurrentStoryBranchScopeId();
+                // [rphub 2.8.93] 清空是用户显式意图，先解除「读到空」保护，否则这次清空写不进库
+                if (storyScopeId) _chatScopePristineRead.delete(storyScopeId);
+                if (storyScopeId) {
+                    let committed;
+                    try {
+                        committed = await commitConversationState({
+                            storyScopeId,
+                            history: nextHistory,
+                            intent: await tryBeginMemoryIntent('清空对话'),
+                            memories: []
+                        });
+                    } catch (error) {
+                        console.error('Clear chat failed:', error);
+                        committed = { ok: false, error };
+                    }
+                    if (!committed.ok) {
+                        showToast(`清空未完整保存：${committed.error?.message || '请重试'}`, 'error');
+                        return;
+                    }
+                }
+                chatHistory.value = nextHistory;
                 resetUiTemplateRuntimeState();
-                saveData();
+                await saveData({ saveMemories: false, saveCharacters: false });
                 showToast('聊天记录、记忆和变量记录已清空', 'success');
             });
         };
@@ -9664,6 +10917,38 @@ const app = createApp({
             isChatFullscreen.value = !!getNativeFullscreenElement();
         };
 
+        // ═══════════ 剪贴板 · 原生桥优先（2.8.82） ═══════════
+        // 官网 copyMessage 直接调 navigator.clipboard.writeText，失败只弹「复制失败」，
+        // 没有任何兜底。而 WebView 里这个 API 会以 NotAllowedError 被拒 ——
+        // 真机日志实测：Copy failed: NotAllowedError: Write permission denied.
+        // 成因是 clipboard-write 的权限态为 ASK，浏览器会弹权限提示、WebView 没得弹，
+        // 直接降级成 deny；无头 Edge 148 同引擎复现出同样的报错，与机型无关。
+        // 更麻烦的是它有时既不 resolve 也不 reject（挂在原地），那种情况下
+        // 官网那个 .catch 永远不触发，用户看到的是「点了没反应」。
+        // ⇒ 不依赖异步剪贴板 API，App 内改走 AndroidBridge.copyText（ClipboardManager，同步）。
+        // 做成包装而不是改 copyMessage：一次覆盖全部调用点（消息复制、云备份密钥复制），
+        // 且失败时把原错误原样抛回，官网的提示文案与逻辑一个字都不用动。
+        (function () {
+            var clip = navigator.clipboard;
+            if (!clip || typeof clip.writeText !== 'function') return;
+            if (clip.writeText.__rphubWrapped) return;
+            var bridge = window.AndroidBridge;
+            if (!bridge || typeof bridge.copyText !== 'function') return;
+            var raw = clip.writeText.bind(clip);
+            var wrapped = function (text) {
+                var plain = String(text == null ? '' : text);
+                try {
+                    if (bridge.copyText(plain)) return Promise.resolve();
+                } catch (e) {
+                }
+                return raw(text);
+            };
+            wrapped.__rphubWrapped = 1;
+            try {
+                clip.writeText = wrapped;
+            } catch (e) {
+            }
+        })();
         const copyMessage = (content) => {
             navigator.clipboard.writeText(stripMemoryCitations(stripUiTemplateUpdateBlock(content))).then(() => {
                 showToast('已复制到剪贴板', 'success');
@@ -9747,9 +11032,24 @@ const app = createApp({
                 const affectedTurn = snapshot.turns.find(turnInfo =>
                     turnInfo.sourceIndexes.includes(index)
                 )?.turn || null;
-                syncMemoryConversationBindings(snapshot, { backfill: true });
-                await removeClassicMemoriesForConversationTurn(snapshot, affectedTurn);
-                await saveConversationMutationNow();
+                let committed;
+                try {
+                    const intent = await tryBeginMemoryIntent('编辑消息');
+                    let nextMemories = intent ? syncMemoryConversationBindings(snapshot, { backfill: true }, intent.source) : [];
+                    if (intent && affectedTurn) {
+                        nextMemories = await removeClassicMemoriesForConversationTurn(snapshot, affectedTurn, nextMemories);
+                    }
+                    committed = await commitConversationState({
+                        storyScopeId: intent ? intent.scopeId : getCurrentStoryBranchScopeId(),
+                        history: chatHistory.value,
+                        intent,
+                        memories: nextMemories
+                    });
+                } catch (error) {
+                    console.error('Save edited message failed:', error);
+                    committed = { ok: false, error };
+                }
+                if (!committed.ok) { showToast('消息尚未完整保存，请保留当前内容并重试', 'error'); return; }
                 await saveMemorySettingsNow();
                 if (affectedTurn && memorySettings.enabled) {
                     nextTick(startAutomaticMemoryPatrol);
@@ -9978,36 +11278,36 @@ const app = createApp({
 
 
 
-        const filterClassicMemoriesAsync = async (keepMemory) => {
-            const source = classicMemories.value;
-            const kept = [];
-            for (let i = 0; i < source.length; i++) {
-                if (keepMemory(source[i], i)) kept.push(source[i]);
-                if (i > 0 && i % 512 === 0) await yieldToUi();
-            }
-            classicMemories.value = kept;
-        };
-
-        const removeClassicMemoriesForConversationTurn = async (snapshot, turn) => {
-            if (!Number.isFinite(turn) || turn <= 0) return;
+        // 这些函数不再就地改共享数组：返回新列表，由调用方提交成功后再发布。
+        // 删轮：覆盖该轮的记忆要么整块作废、要么拆到子层继续判断。
+        // 只展开一层再整体过滤，在三级结构里会把子块连同它的孙一起抹掉。
+        const removeClassicMemoriesForConversationTurn = async (snapshot, turn, source = classicMemories.value) => {
+            if (!Number.isFinite(turn) || turn <= 0) return source;
             const turnInfo = snapshot.turns.find(item => item.turn === turn);
             const assistantIds = new Set(getClassicTurnSourceIds(turnInfo, 'assistant'));
-            classicMemories.value = classicMemories.value.flatMap(memory => {
-                if (!isSecondaryClassicMemory(memory)) return [memory];
-                const range = getClassicMemoryTurnRange(memory);
-                const matchesSource = (memory.sourceAssistantIds || []).some(id => assistantIds.has(id));
-                return matchesSource || (turn >= range.start && turn <= range.end)
-                    ? getSecondaryClassicSourceMemories(memory)
-                    : [memory];
-            });
-            return filterClassicMemoriesAsync(memory => {
-                const memoryIds = memory.sourceAssistantIds || [];
-                const matchesSource = memoryIds.some(id => assistantIds.has(id));
-                return !matchesSource && Number(memory.turn) !== turn;
-            });
+            const hitsTurn = memory => (memory.sourceAssistantIds || []).some(id => assistantIds.has(id));
+            const drop = memory => {
+                if (isSecondaryClassicMemory(memory)) {
+                    const range = getClassicMemoryTurnRange(memory);
+                    if (!hitsTurn(memory) && (turn < range.start || turn > range.end)) return [memory];
+                    const sources = getSecondaryClassicSourceMemories(memory);
+                    if (!sources.length) return [];
+                    return sources.flatMap(drop);
+                }
+                return hitsTurn(memory) || Number(memory.turn) === turn ? [] : [memory];
+            };
+            const kept = [];
+            const list = (Array.isArray(source) ? source : []).flatMap(drop);
+            // 大列表仍分段让出主线程，避免几千条时冻住界面。
+            for (let i = 0; i < list.length; i++) {
+                kept.push(list[i]);
+                if (i > 0 && i % 512 === 0) await yieldToUi();
+            }
+            return kept;
         };
 
-        const syncMemoryConversationBindings = (snapshot, { backfill = false } = {}) => {
+        // 返回重新绑定后的副本；不再改写传入对象（那些对象可能是已提交基线的克隆）。
+        const syncMemoryConversationBindings = (snapshot, { backfill = false } = {}, source = classicMemories.value) => {
             const turns = snapshot.turns;
             const turnByMessageId = new Map();
             const sourcesByTurn = new Map();
@@ -10019,27 +11319,33 @@ const app = createApp({
                 messageIds.forEach(id => turnByMessageId.set(id, Number(turnInfo.turn)));
             });
 
-            classicMemories.value.flatMap(memory => [memory, ...(memory.sourceMemories || [])]).forEach(memory => {
-                if (backfill && !(memory.sourceUserIds || []).length && !(memory.sourceAssistantIds || []).length) {
-                    const sources = sourcesByTurn.get(Number(memory.turn));
+            const rebind = memory => {
+                const next = { ...memory };
+                if (Array.isArray(memory?.sourceMemories)) {
+                    next.sourceMemories = memory.sourceMemories.map(rebind);
+                }
+                if (backfill && !(next.sourceUserIds || []).length && !(next.sourceAssistantIds || []).length) {
+                    const sources = sourcesByTurn.get(Number(next.turn));
                     if (sources) {
-                        memory.sourceUserIds = sources.userIds;
-                        memory.sourceAssistantIds = sources.assistantIds;
+                        next.sourceUserIds = [...sources.userIds];
+                        next.sourceAssistantIds = [...sources.assistantIds];
                     }
                 }
-                const sourceIds = (memory.sourceAssistantIds || []).length
-                    ? memory.sourceAssistantIds
-                    : (memory.sourceUserIds || []);
+                const sourceIds = (next.sourceAssistantIds || []).length
+                    ? next.sourceAssistantIds
+                    : (next.sourceUserIds || []);
                 const liveTurns = sourceIds.map(id => turnByMessageId.get(id)).filter(Number.isFinite);
-                if (!liveTurns.length) return;
-                if (isSecondaryClassicMemory(memory)) {
-                    memory.turnStart = Math.min(...liveTurns);
-                    memory.turnEnd = Math.max(...liveTurns);
-                    memory.turn = memory.turnEnd;
+                if (!liveTurns.length) return next;
+                if (isSecondaryClassicMemory(next)) {
+                    next.turnStart = Math.min(...liveTurns);
+                    next.turnEnd = Math.max(...liveTurns);
+                    next.turn = next.turnEnd;
                 } else {
-                    memory.turn = liveTurns[0];
+                    next.turn = liveTurns[0];
                 }
-            });
+                return next;
+            };
+            return source.map(rebind);
         };
 
         const playMessageActionFeedback = (event) => {
@@ -10054,9 +11360,8 @@ const app = createApp({
             }, 280);
         };
 
-        const removeClassicMemoriesFromTurn = (firstRemovedTurn) => {
-            classicMemories.value = trimClassicMemoriesToTurn(classicMemories.value, firstRemovedTurn - 1);
-        };
+        const removeClassicMemoriesFromTurn = (firstRemovedTurn, source = classicMemories.value) =>
+            trimClassicMemoriesToTurn(source, firstRemovedTurn - 1);
 
         const deleteMessage = (index) => {
             const targetMessage = chatHistory.value[index];
@@ -10086,14 +11391,32 @@ const app = createApp({
                 recentGenerationTimes.value = recentGenerationTimes.value.filter(t => !removedMessageIds.has(t.id || t));
                 const nextHistory = chatHistory.value.filter((_, messageIndex) => !removedIndexes.has(messageIndex));
                 const uiCleanup = pruneUiTemplateChangesFromTurn(affectedTurn);
-                if (affectedTurn) {
-                    await removeClassicMemoriesForConversationTurn(snapshot, affectedTurn);
+                let committed;
+                try {
+                    const intent = await tryBeginMemoryIntent('删除对话轮次');
+                    let nextMemories = intent ? syncMemoryConversationBindings(snapshot, { backfill: true }, intent.source) : [];
+                    if (intent && affectedTurn) {
+                        nextMemories = await removeClassicMemoriesForConversationTurn(snapshot, affectedTurn, nextMemories);
+                    }
+                    if (intent) {
+                        nextMemories = restoreSecondaryClassicMemoriesForTurnCount(
+                            buildConversationTurnSnapshot(nextHistory, { includeSystem: false }).turns.length,
+                            nextMemories
+                        );
+                    }
+                    committed = await commitConversationState({
+                        storyScopeId: intent ? intent.scopeId : getCurrentStoryBranchScopeId(),
+                        history: nextHistory,
+                        intent,
+                        memories: nextMemories,
+                        saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0
+                    });
+                } catch (error) {
+                    console.error('Delete message commit failed:', error);
+                    committed = { ok: false, error };
                 }
+                if (!committed.ok) { showToast('对话变更尚未完整保存，已停止后续操作', 'error'); return; }
                 chatHistory.value = nextHistory;
-                restoreSecondaryClassicMemoriesForTurnCount(
-                    buildConversationTurnSnapshot(nextHistory, { includeSystem: false }).turns.length
-                );
-                await saveConversationMutationNow({ saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0 });
                 await saveMemorySettingsNow();
                 const deletedLabel = deletesUserTurn ? '该轮次' : 'AI 消息';
                 showToast(`${deletedLabel}已删除，相关项已一并清除`, 'success');
@@ -10119,10 +11442,22 @@ const app = createApp({
                 abortConversationBackgroundWork();
                 // 只删除最新一轮的记忆，保留之前的
                 const snapshot = await ensureConversationMessageIds();
-                syncMemoryConversationBindings(snapshot, { backfill: true });
-                const currentTurn = snapshot.turns.length;
-                removeClassicMemoriesFromTurn(currentTurn);
-                await Promise.all([saveClassicMemoriesNow(), saveMemorySettingsNow()]);
+                try {
+                    const intent = await tryBeginMemoryIntent('重试轮次');
+                    if (intent) {
+                        const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, intent.source);
+                        const nextMemories = removeClassicMemoriesFromTurn(snapshot.turns.length, bound);
+                        const result = await commitMemoryTransform(intent, () => nextMemories);
+                        if (!result.published) {
+                            showToast('记忆已写入原角色，但界面已切换，已停止重试', 'warning');
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    showToast(`记忆更新失败：${error?.message || error}，已停止重试`, 'error');
+                    return;
+                }
+                await saveMemorySettingsNow();
                 await generateResponse(startTime, { reuseGeneratingState: true });
             } else {
                 // 如果是 AI 消息，删除它（及之后）然后重新生成
@@ -10131,19 +11466,37 @@ const app = createApp({
                 abortConversationBackgroundWork();
                     // 计算被删除区间的 assistant 轮次，只删除 >= 该轮次的记忆
                     const snapshot = await ensureConversationMessageIds();
-                    syncMemoryConversationBindings(snapshot, { backfill: true });
                     const turnAtIndex = getConversationTurnAtIndexFromSnapshot(snapshot, index);
                     const uiTurnAtIndex = turnAtIndex;
-                    removeClassicMemoriesFromTurn(turnAtIndex);
                     const uiCleanup = pruneUiTemplateChangesFromTurn(uiTurnAtIndex);
                     // Remove timing record for the message being regenerated
                     if (msg.id) {
                         recentGenerationTimes.value = recentGenerationTimes.value.filter(t => (t.id || t) !== msg.id);
                     }
-                    chatHistory.value = chatHistory.value.slice(0, index);
-                    syncMemoryConversationBindings(buildConversationTurnSnapshot());
+                    const nextHistory = chatHistory.value.slice(0, index);
+                    let committed;
+                    try {
+                        const intent = await tryBeginMemoryIntent('重新生成消息');
+                        let nextMemories = intent ? intent.source : [];
+                        if (intent) {
+                            const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, nextMemories);
+                            nextMemories = removeClassicMemoriesFromTurn(turnAtIndex, bound);
+                            nextMemories = syncMemoryConversationBindings(buildConversationTurnSnapshot(nextHistory), {}, nextMemories);
+                        }
+                        committed = await commitConversationState({
+                            storyScopeId: intent ? intent.scopeId : getCurrentStoryBranchScopeId(),
+                            history: nextHistory,
+                            intent,
+                            memories: nextMemories,
+                            saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0
+                        });
+                    } catch (error) {
+                        console.error('Regenerate commit failed:', error);
+                        committed = { ok: false, error };
+                    }
+                    if (!committed.ok) { showToast('对话变更尚未完整保存，已停止后续操作', 'error'); return; }
+                    chatHistory.value = nextHistory;
                     removeOrphanedUiTemplateCorrections();
-                    await saveConversationMutationNow({ saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0 });
                     await saveMemorySettingsNow();
                     await generateResponse(startTime, { reuseGeneratingState: true });
                 });
@@ -11071,20 +12424,28 @@ const app = createApp({
             return requestClassicMemoryCompletion(requestMessages, signal);
         };
 
+        // 拆父/裁剪要的是「这一层的来源」。过去这里 filter 掉同为压缩总结的子节点，
+        // 三级结构里那等于把整棵子树连根丢掉；损坏与过深由 prepareClassicMemoriesForRuntime 抛出，不静默截断。
         const getSecondaryClassicSourceMemories = (memory) => prepareClassicMemoriesForRuntime(
             Array.isArray(memory?.sourceMemories) ? memory.sourceMemories : []
-        ).filter(item => !isSecondaryClassicMemory(item));
+        );
 
-        const trimClassicMemoriesToTurn = (items, lastTurn) => items.flatMap(memory => {
-            if (!isSecondaryClassicMemory(memory)) {
-                return Number(memory?.turn) <= lastTurn ? [memory] : [];
-            }
-            const range = getClassicMemoryTurnRange(memory);
-            if (range.end <= lastTurn) return [memory];
-            if (range.start > lastTurn) return [];
-            return getSecondaryClassicSourceMemories(memory)
-                .filter(sourceMemory => Number(sourceMemory.turn) <= lastTurn);
-        });
+        const trimClassicMemoriesToTurn = (items, lastTurn) => {
+            const limit = Number(lastTurn);
+            if (!Number.isFinite(limit)) return Array.isArray(items) ? items.slice() : [];
+            const trimOne = memory => {
+                if (!isSecondaryClassicMemory(memory)) {
+                    return Number(memory?.turn) <= limit ? [memory] : [];
+                }
+                const range = getClassicMemoryTurnRange(memory);
+                if (range.end <= limit) return [memory];
+                if (range.start > limit) return [];
+                // 跨越裁剪线才拆。拆出来的子节点可能仍是压缩总结，继续按同一判据递归，
+                // 不能只展开一层后按粗粒度条件过滤——那会把仍在范围内的子块连带删掉。
+                return getSecondaryClassicSourceMemories(memory).flatMap(trimOne);
+            };
+            return (Array.isArray(items) ? items : []).flatMap(trimOne);
+        };
 
         const getEligibleClassicSecondaryGroups = (totalTurns, memories = classicMemories.value) => {
             const compressionLimit = Math.max(0, Number(totalTurns) - CLASSIC_SECONDARY_KEEP_TURNS);
@@ -11117,7 +12478,6 @@ const app = createApp({
             const epoch = _classicExtractionEpoch;
             const concurrency = normalizeClassicMemoryConcurrency(memorySettings.classicConcurrency);
             let completed = 0;
-            let memorySourceForSave = null;
             onProgress?.(0, groups.length);
             try {
                 for (let offset = 0; offset < groups.length; offset += concurrency) {
@@ -11170,7 +12530,7 @@ const app = createApp({
                             }
                         }
                         const { group, summary } = result;
-                        const sourceIds = new Set(group.map(memory => memory.id));
+                        const sourceIds = new Set(group.map(memory => String(memory.id)));
                         if (!group.every(memory => classicMemories.value.some(item => item.id === memory.id))) continue;
                         const startTurn = Number(group[0].turn);
                         const endTurn = Number(group[group.length - 1].turn);
@@ -11191,29 +12551,36 @@ const app = createApp({
                             sourceAssistantIds: [...new Set(group.flatMap(memory => memory.sourceAssistantIds || []))],
                             sourceMemories
                         });
-                        classicMemories.value = [
-                            ...classicMemories.value.filter(memory => !sourceIds.has(memory.id)),
+                        // 逐组合并：每条都走版本协议，成功后才能真正算完成
+                        const intent = await tryBeginMemoryIntent('二次压缩');
+                        if (!intent) break;
+                        const merged = await commitMemoryTransform(intent, list => [
+                            ...list.filter(memory => !sourceIds.has(String(memory && memory.id || ''))),
                             mergedMemory
-                        ];
-                        memorySourceForSave = classicMemories.value;
+                        ], {
+                            validate: (current, before) => [...sourceIds].every(id => sameMemorySources(current, before, [id]))
+                        });
+                        if (!merged.published) break;
                         completed++;
                         onProgress?.(completed, groups.length);
                     }
                     if (failed) break;
                 }
             } finally {
-                if (completed > 0) await saveClassicMemoriesNow(storyScopeId, memorySourceForSave);
+                // 每组已在提交成功时就落盘，不再需要整表补写
             }
         };
 
-        const restoreSecondaryClassicMemoriesForTurnCount = (totalTurns) => {
+        const restoreSecondaryClassicMemoriesForTurnCount = (totalTurns, source = classicMemories.value) => {
             const compressionLimit = Math.max(0, Number(totalTurns) - CLASSIC_SECONDARY_KEEP_TURNS);
-            classicMemories.value = classicMemories.value.flatMap(memory => {
+            const restore = memory => {
                 if (!isSecondaryClassicMemory(memory) || getClassicMemoryTurnRange(memory).end <= compressionLimit) return [memory];
                 const sourceMemories = getSecondaryClassicSourceMemories(memory);
                 if (!sourceMemories.length) return [memory];
-                return sourceMemories;
-            });
+                // 子节点可能仍是压缩总结且同样越界，继续展开；只展开一层会漏掉更深的块。
+                return sourceMemories.flatMap(restore);
+            };
+            return (Array.isArray(source) ? source : []).flatMap(restore);
         };
 
         // [rphub 2.8.65] 经典记忆单条编辑。
@@ -11236,30 +12603,31 @@ const app = createApp({
             if (!memoryId || savingClassicMemoryId.value) return;
             const text = String(editingClassicMemoryText.value || '').trim();
             if (!text) { showToast('总结内容不能为空', 'warning'); return; }
-            const memoryIndex = classicMemories.value.findIndex(item => item.id === memoryId);
+            const intent = await beginMemoryIntent('编辑总结');
+            const memoryIndex = intent.source.findIndex(item => item.id === memoryId);
             if (memoryIndex < 0) {
                 showToast('找不到这条记忆，可能已被重新生成', 'warning');
                 cancelEditClassicMemory();
                 return;
             }
-            const previous = classicMemories.value[memoryIndex];
+            const previous = intent.source[memoryIndex];
             if (String(previous.summary || '') === text) { cancelEditClassicMemory(); return; }
             savingClassicMemoryId.value = memoryId;
             try {
                 const updated = markRuntimeRaw({ ...previous, summary: text });
                 // 文案改了，旧坐标就废了：清 6 个 embedding 字段，交给下次补录重建。
-                ['embeddingQ', 'embeddingScale', 'embeddingDims', 'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl']
+                if (!isSecondaryClassicMemory(updated)) ['embeddingQ', 'embeddingScale', 'embeddingDims', 'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl', 'embeddingInputFingerprint']
                     .forEach(key => delete updated[key]);
-                classicMemories.value[memoryIndex] = updated;
-                await saveClassicMemoriesNow();
+                requireMemoryPublished(await commitMemoryTransform(intent, list => list.map(item => item.id === memoryId ? updated : item), {
+                    validate: (list, before) => sameMemorySources(list, before, [memoryId])
+                }));
                 cancelEditClassicMemory();
                 showToast(memorySettings.mode === MEMORY_MODE_ENHANCED
                     ? '已保存，向量坐标将在下次补录时重建'
                     : '已保存', 'success');
             } catch (error) {
                 console.error('Edit classic memory failed:', error);
-                classicMemories.value[memoryIndex] = previous;
-                showToast(`保存失败：${error.message}`, 'error');
+                if (memoryIntentActive(intent)) showToast(`保存失败：${error.message}`, 'error');
             } finally {
                 if (savingClassicMemoryId.value === memoryId) savingClassicMemoryId.value = '';
             }
@@ -11283,22 +12651,25 @@ const app = createApp({
             retryingClassicMemoryId.value = memoryId;
             try {
                 if (isSecondaryClassicMemory(memory)) {
-                    const sourceMemories = getSecondaryClassicSourceMemories(memory);
-                    if (sourceMemories.length !== CLASSIC_SECONDARY_GROUP_SIZE) {
+                    // 重算要用最底层的基础总结：三级结构里一层来源可能只有 1 个压缩节点，
+                    // 按「长度等于分组大小」判断会把合法结构误判成「找不到原始总结」。
+                    const leafMemories = flattenClassicMemories([memory])
+                        .filter(item => !isSecondaryClassicMemory(item));
+                    if (leafMemories.length !== CLASSIC_SECONDARY_GROUP_SIZE) {
                         showToast('找不到这条二次压缩记忆的原始总结', 'warning');
                         return;
                     }
-                    const summary = await requestClassicSecondarySummary(sourceMemories);
+                    const summary = await requestClassicSecondarySummary(leafMemories);
                     if (retryEpoch !== _classicExtractionEpoch || currentCharacter.value?.uuid !== retryCharacterId
                         || getCurrentStoryBranchScopeId() !== retryStoryScopeId) return;
-                    const memoryIndex = classicMemories.value.findIndex(item => item.id === memoryId);
-                    if (memoryIndex < 0) return;
-                    classicMemories.value[memoryIndex] = markRuntimeRaw({
-                        ...classicMemories.value[memoryIndex],
-                        summary,
-                        summaryModel: String(memorySettings.classicModel || '').trim()
-                    });
-                    await saveClassicMemoriesNow(retryStoryScopeId, classicMemories.value);
+                    const intent = await tryBeginMemoryIntent('重试二次总结');
+                    if (!intent || !intent.source.some(item => String(item && item.id) === String(memoryId))) return;
+                    const summaryModel = String(memorySettings.classicModel || '').trim();
+                    const committed = await commitMemoryTransform(intent, list => list.map(item =>
+                        String(item && item.id) === String(memoryId)
+                            ? markRuntimeRaw({ ...item, summary, summaryModel })
+                            : item));
+                    if (!committed.published) return;
                     const range = getClassicMemoryTurnRange(memory);
                     showToast(`第 ${range.start}-${range.end} 轮总结已重新生成`, 'success');
                     return;
@@ -11320,24 +12691,42 @@ const app = createApp({
                 const summary = await requestClassicMemorySummary(job);
                 if (retryEpoch !== _classicExtractionEpoch || currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId) return;
 
-                const memoryIndex = classicMemories.value.findIndex(item => item.id === memoryId);
-                if (memoryIndex < 0) return;
-                classicMemories.value[memoryIndex] = markRuntimeRaw({
-                    ...classicMemories.value[memoryIndex],
-                    turn: job.turn,
-                    summary,
-                    summaryModel: String(memorySettings.classicModel || '').trim(),
-                    sourceUserIds: job.sourceUserIds,
-                    sourceAssistantIds: job.sourceAssistantIds,
-                    sourceUserText: job.sourceUserText,
-                    sourceAssistantText: job.sourceAssistantText
-                });
-                const updated = classicMemories.value[memoryIndex];
-                ['embeddingQ', 'embeddingScale', 'embeddingDims', 'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl']
-                    .forEach(key => delete updated[key]);
-                await saveClassicMemoriesNow();
-                if (memorySettings.mode === MEMORY_MODE_ENHANCED) await indexSummaryMemories(snapshot, undefined, [updated]);
-                showToast(`第 ${job.turn} 轮总结已重新生成`, 'success');
+                const intent = await tryBeginMemoryIntent('重试总结');
+                if (!intent || !intent.source.some(item => String(item && item.id) === String(memoryId))) return;
+                const committed = await commitMemoryTransform(intent, list => list.map(item => {
+                    if (String(item && item.id) !== String(memoryId)) return item;
+                    const updated = markRuntimeRaw({
+                        ...item,
+                        turn: job.turn,
+                        summary,
+                        summaryModel: String(memorySettings.classicModel || '').trim(),
+                        sourceUserIds: job.sourceUserIds,
+                        sourceAssistantIds: job.sourceAssistantIds,
+                        sourceUserText: job.sourceUserText,
+                        sourceAssistantText: job.sourceAssistantText
+                    });
+                    ['embeddingQ', 'embeddingScale', 'embeddingDims', 'embeddingEncoding', 'embeddingModel', 'embeddingApiUrl', 'embeddingInputFingerprint']
+                        .forEach(key => delete updated[key]);
+                    return updated;
+                }));
+                if (!committed.published) return;
+                const updated = committed.list.find(item => String(item && item.id) === String(memoryId));
+                // 正文在上面已经提交。向量再失败也不能把这次操作报成「重试失败」——
+                // 那会让用户以为这一轮总结没了。单独说明，口径与记忆工具编辑一致。
+                let vectorWarning = '';
+                if (memorySettings.mode === MEMORY_MODE_ENHANCED && updated) {
+                    try {
+                        const indexed = await indexSummaryMemories(snapshot, undefined, [updated]);
+                        if (indexed.cancelled) vectorWarning = '，但向量重建被中断';
+                        else if (indexed.skippedNoSource) vectorWarning = '，但找不到这一轮的原文，向量没重建';
+                        else if (indexed.requested && indexed.written < indexed.requested) vectorWarning = '，但向量没重建';
+                    } catch (error) {
+                        console.error('Rebuild embedding after retry failed:', error);
+                        vectorWarning = `，但向量没重建（${error?.message || error}）`;
+                    }
+                }
+                showToast(`第 ${job.turn} 轮总结已重新生成${vectorWarning}`,
+                    vectorWarning ? 'warning' : 'success', vectorWarning ? 5000 : 2000);
             } catch (error) {
                 console.error('Retry classic memory failed:', error);
                 showToast(`重试失败：${error.message}`, 'error');
@@ -11357,9 +12746,17 @@ const app = createApp({
                 const summary = await requestClassicMemorySummary(job, signal);
                 if (signal?.aborted || job.epoch !== _classicExtractionEpoch) return false;
                 if (currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId || hasClassicMemoryForJob(job)) return false;
-                classicMemories.value.push(markRuntimeRaw({
+                const intent = await tryBeginMemoryIntent('生成总结');
+                if (!intent) return false;
+                const targetIds = new Set(job.sourceAssistantIds || []);
+                const alreadyStored = list => list.some(memory => {
+                    const memoryIds = memory?.sourceAssistantIds || [];
+                    if (targetIds.size > 0 && memoryIds.some(id => targetIds.has(id))) return true;
+                    return targetIds.size === 0 && Number(memory?.turn) === Number(job.turn);
+                });
+                if (alreadyStored(intent.source)) return false;
+                const created = markRuntimeRaw({
                     id: generateUUID(),
-                    no: getNextClassicMemoryNo(classicMemories.value),
                     timestamp: Date.now(),
                     turn: job.turn,
                     summary,
@@ -11370,8 +12767,13 @@ const app = createApp({
                     sourceAssistantIds: job.sourceAssistantIds,
                     sourceUserText: job.sourceUserText,
                     sourceAssistantText: job.sourceAssistantText
-                }));
-                return true;
+                });
+                // 追加式变换：并发任务各自提交时按最新列表合并，不覆盖别人刚写的条目
+                const committed = await commitMemoryTransform(intent, list => (alreadyStored(list)
+                    ? list
+                    : [...list, markRuntimeRaw({ ...created, no: getNextClassicMemoryNo(list) })]),
+                { validate: () => true });
+                return committed.published;
             } finally {
                 _classicSummaryInFlightKeys.delete(inFlightKey);
             }
@@ -11421,23 +12823,66 @@ const app = createApp({
             memory.embeddingModel === model && memory.embeddingApiUrl === apiUrl
             && getSummaryEmbedding(memory).length > 0;
 
+        // 坐标是否「脏」：只有带指纹且与当前文本不符才判定为脏。
+        // 旧条目没有指纹，无法反推它算的是哪段文本，按批准的策略保留原样、不自动批量重建。
+        const hasStaleSummaryEmbedding = (memory, sourceUserText = memory?.sourceUserText) =>
+            typeof memory?.embeddingInputFingerprint === 'string'
+            && memory.embeddingInputFingerprint !== summaryEmbeddingFingerprint({
+                summary: memory.summary, sourceUserText
+            });
+
+        // 向量状态分类器：任务筛选与各类计数共用同一份判据。
+        // 分开写两份判据的后果是计划数、实际任务数、召回口径各说一套，进度里出现永远跑不完的任务。
+        const classifySummaryEmbedding = (memory, sourceUserText, model, apiUrl) => {
+            if (!String(sourceUserText || '').trim()) return 'noSource';
+            if (hasStaleSummaryEmbedding(memory, sourceUserText)) return 'stale';
+            if (!hasCurrentSummaryEmbedding(memory, model, apiUrl)
+                || sourceUserText !== memory.sourceUserText) return 'broken';
+            return typeof memory.embeddingInputFingerprint === 'string' ? 'current' : 'unverified';
+        };
+        const createSummarySourceResolver = snapshot => {
+            const messagesById = new Map(chatHistory.value.filter(message => message.id).map(message => [message.id, message]));
+            const turnsByNumber = new Map(snapshot.turns.map(turn => [turn.turn, turn]));
+            return memory => {
+                const inputs = (memory.sourceUserIds || []).map(id => messagesById.get(id))
+                    .filter(message => message?.role === 'user').map(message => String(message.content || ''));
+                if (inputs.length) return inputs.join('\n\n');
+                const turn = turnsByNumber.get(Number(memory.turn));
+                return memory.sourceUserText || String(turn?.user?.content || '');
+            };
+        };
+        // 五态互斥计数：待补 / 脏 / 破损 / 待验证 / 当前。
+        // 「待验证」是旧条目没有指纹、无法反推算的是哪段文本：它参与召回但不占待办名额，
+        // 与「需重建」分开报，才不会把历史数据算成一批注定跑不完的任务。
+        const summarizeSummaryEmbeddingCoverage = (snapshot, sources = getSummarySources(classicMemories.value),
+            model = getMemoryEmbeddingModel(), apiUrl = getMemoryApiEndpoint('embeddings')) => {
+            const resolve = createSummarySourceResolver(snapshot);
+            const counts = { total: sources.length, current: 0, unverified: 0, stale: 0, broken: 0, noSource: 0, parents: 0 };
+            sources.forEach(memory => {
+                // 压缩父条目本身不参与索引：它没有坐标，也不该有。单独一桶，
+                // 否则会被算进 broken，让「计划数 = stale + broken」这条等式失真。
+                if (isSecondaryClassicMemory(memory)) { counts.parents++; return; }
+                counts[classifySummaryEmbedding(memory, resolve(memory), model, apiUrl)]++;
+            });
+            return counts;
+        };
         const getSummaryEmbeddingJobs = (snapshot, sources = getSummarySources(classicMemories.value)) => {
             const model = getMemoryEmbeddingModel();
             // 2.7.84：本行的 apiUrl 会显式传给 hasCurrentMemoryEmbedding 覆盖其默认值，
             // 必须与写入侧同源，否则「坐标是否需重算」的判定仍用聊天站口径。
             const apiUrl = getMemoryApiEndpoint('embeddings');
-            const messagesById = new Map(chatHistory.value.filter(message => message.id).map(message => [message.id, message]));
-            const turnsByNumber = new Map(snapshot.turns.map(turn => [turn.turn, turn]));
-            return sources.map(memory => {
-                const inputs = (memory.sourceUserIds || []).map(id => messagesById.get(id))
-                    .filter(message => message?.role === 'user').map(message => String(message.content || ''));
-                const turn = turnsByNumber.get(Number(memory.turn));
-                const sourceUserText = inputs.length ? inputs.join('\n\n')
-                    : memory.sourceUserText || String(turn?.user?.content || '');
-                return { memory, sourceUserText };
-            }).filter(({ memory, sourceUserText }) =>
-                !hasCurrentSummaryEmbedding(memory, model, apiUrl) || sourceUserText !== memory.sourceUserText
-            );
+            const resolve = createSummarySourceResolver(snapshot);
+            // 父条目永不进任务表：记忆工具会把父摘要也列出来，直接把它交给索引会发一次
+            // 注定写不回的请求（它不在 getSummarySources 的结果里，写回身份检查必然拦下）。
+            return sources.filter(memory => !isSecondaryClassicMemory(memory)).map(memory => {
+                const sourceUserText = resolve(memory);
+                return { memory, sourceUserText, state: classifySummaryEmbedding(memory, sourceUserText, model, apiUrl) };
+            })
+                // 缺坐标、原文变了、或指纹与当前文本不符 ⇒ 需要重算。
+                // 指纹不符这条专治「文案改了但坐标没清」：过去只有 sourceUserText 变才重算，
+                // 编辑总结正文的路径不会触发，召回就一直拿旧坐标打分。
+                // 缺原文（noSource）不进任务表：它发不出请求，占住名额只会让进度永远差一截。
+                .filter(job => job.state === 'stale' || job.state === 'broken');
         };
 
         const indexSummaryMemories = async (snapshot, signal, sources, onProgress) => {
@@ -11450,41 +12895,91 @@ const app = createApp({
             const isCurrent = () => !signal?.aborted && epoch === _classicExtractionEpoch
                 && scopeId === getCurrentStoryBranchScopeId()
                 && memorySettings.mode === MEMORY_MODE_ENHANCED;
+            // 缺原文的条目根本不进 jobs：既不该发请求，也不该占进度名额。
+            // 计数单独报给调用方，由它提示「待补」，避免一条缺来源把整批带停。
+            const coverage = summarizeSummaryEmbeddingCoverage(snapshot, sources, model, apiUrl);
             const jobs = getSummaryEmbeddingJobs(snapshot, sources);
-            if (!jobs.length) return;
+            let written = 0, skippedChanged = 0, cancelled = false;
+            // 返回值把「请求了几条 / 写成几条 / 缺几条原文 / 几条在请求期间变了 / 是否被取消」
+            // 分开报：调用方据此区分正常跳过、过期丢弃与失败，不把正文已提交的操作报成失败。
+            const settle = () => ({
+                requested: jobs.length, written,
+                skippedNoSource: coverage.noSource, skippedParent: coverage.parents,
+                skippedChanged, cancelled
+            });
+            if (!jobs.length) return settle();
             if (!model) throw new Error('请先选择向量模型');
             onProgress?.(0, jobs.length);
-            let completed = 0;
             for (let offset = 0; offset < jobs.length; offset += SUMMARY_EMBEDDING_BATCH_SIZE) {
-                if (!isCurrent()) return;
+                if (!isCurrent()) { cancelled = true; return settle(); }
                 const batch = jobs.slice(offset, offset + SUMMARY_EMBEDDING_BATCH_SIZE);
-                if (batch.some(job => !job.sourceUserText.trim())) {
-                    throw new Error('部分总结找不到用户原输入，无法生成坐标，请重新补录对应对话');
-                }
                 const vectors = await requestMemoryEmbeddings(batch.map(job => buildSummaryEmbeddingText({
                     ...job.memory, sourceUserText: job.sourceUserText
                 })), signal, model);
-                if (!isCurrent()) return;
+                if (!isCurrent()) { cancelled = true; return settle(); }
                 const packed = vectors.map(quantizeEmbeddingForStorage);
                 if (packed.some(value => !value)) throw new Error('嵌入接口返回了无效坐标');
                 const currentSources = new Set(getSummarySources(classicMemories.value));
+                const updateByKey = new Map();
                 batch.forEach((job, index) => {
                     if (!currentSources.has(job.memory)) return;
-                    Object.assign(job.memory, packed[index], {
+                    updateByKey.set(summarySourceKey(job.memory), {
+                        packed: packed[index],
+                        sourceUserText: job.sourceUserText,
+                        summary: job.memory.summary
+                    });
+                });
+                let batchWritten = 0;
+                const intent = await tryBeginMemoryIntent('建立向量索引');
+                if (!intent || !updateByKey.size) { skippedChanged += batch.length; continue; }
+                const applyVectorUpdates = list => list.map(item => {
+                    const update = updateByKey.get(summarySourceKey(item));
+                    if (!update) {
+                        // 压缩父条目下的基础叶才是真正被索引的对象。只映射顶层会让嵌套叶的任务
+                        // 「请求成功、写不进去」，下一轮又判脏，变成永远空转的重建。
+                        if (!Array.isArray(item.sourceMemories) || !item.sourceMemories.length) return item;
+                        const children = applyVectorUpdates(item.sourceMemories);
+                        return children.every((child, index) => child === item.sourceMemories[index])
+                            ? item : { ...item, sourceMemories: children };
+                    }
+                    // 过期结果不写回：请求发出后这条正文已经变了，坐标对应的是旧文本。
+                    // 正常路径下任何正文改动都会推进基线、让上面的 intent 先失败；这里是第二道闸，
+                    // 专门挡「基线没动但对象被就地改过」的情形，避免写出坐标与指纹对不上的记录。
+                    if (String(item.summary || '') !== String(update.summary || '')) return item;
+                    batchWritten++;
+                    // 指纹按「实际送进模型的那段文本」算：summary 取请求时的快照，
+                    // sourceUserText 取同一份 job。用提交时的 next.summary 会在正文已变时
+                    // 写出「坐标对应 A、指纹对应 B」的自相矛盾记录。
+                    const next = {
+                        ...item, ...update.packed,
                         embeddingModel: model,
                         embeddingApiUrl: apiUrl,
-                        sourceUserText: job.sourceUserText
-                    });
-                    completed++;
+                        sourceUserText: update.sourceUserText,
+                        embeddingInputFingerprint: summaryEmbeddingFingerprint({
+                            summary: update.summary, sourceUserText: update.sourceUserText
+                        })
+                    };
+                    return next;
                 });
-                classicMemories.value = [...classicMemories.value];
-                await saveClassicMemoriesNow(scopeId, classicMemories.value);
-                if (isCurrent()) onProgress?.(completed, jobs.length);
+                const result = await commitMemoryTransform(intent, applyVectorUpdates);
+                // 过期不写回：既不算失败也不算成功，单独计成「请求期间已变」。
+                skippedChanged += batch.length - batchWritten;
+                if (!result.published) return settle();
+                written += batchWritten;
+                if (isCurrent()) onProgress?.(written, jobs.length);
             }
+            return settle();
         };
 
         const selectEnhancedMemories = async signal => {
-            const sources = getSummarySources(classicMemories.value).filter(memory => hasCurrentSummaryEmbedding(memory));
+            // 这次查询用的模型与端点：请求发出后一律按它们比对，不按「当下的设置」比对，
+            // 否则查询期间换端点会把旧端点算出的查询向量和新坐标混在一起打分。
+            const model = getMemoryEmbeddingModel();
+            const apiUrl = getMemoryApiEndpoint('embeddings');
+            // 脏坐标（指纹与当前正文不符）不参与打分：宁可不召回，也不拿一段别的文本的向量冒充相似度。
+            const sources = getSummarySources(classicMemories.value)
+                .filter(memory => hasCurrentSummaryEmbedding(memory, model, apiUrl))
+                .filter(memory => !hasStaleSummaryEmbedding(memory));
             if (!sources.length) return [];
             const latestUser = [...chatHistory.value].reverse().find(message => message.role === 'user');
             const query = String(latestUser?.content || '').trim();
@@ -11494,14 +12989,25 @@ const app = createApp({
             const isCurrent = () => !signal?.aborted && epoch === _classicExtractionEpoch
                 && scopeId === getCurrentStoryBranchScopeId() && memorySettings.enabled
                 && memorySettings.mode === MEMORY_MODE_ENHANCED;
+            // 冻结每条候选的输入指纹。查询要等网络，返回时可能已经删条目、改正文、换端点；
+            // 代次只看抽取与分支，删条目不推进它，所以必须逐条比对指纹。
+            const frozen = new Map(sources.map(memory => [summarySourceKey(memory), summaryEmbeddingFingerprint(memory)]));
             try {
                 const [queryVector] = await requestMemoryEmbeddings([query], signal);
                 if (!isCurrent()) return [];
+                if (getMemoryEmbeddingModel() !== model || getMemoryApiEndpoint('embeddings') !== apiUrl) return [];
+                const liveByKey = new Map(getSummarySources(classicMemories.value)
+                    .map(memory => [summarySourceKey(memory), memory]));
                 const selected = [];
                 for (let index = 0; index < sources.length; index++) {
                     const memory = sources[index];
-                    const score = cosineSimilarity(queryVector, getSummaryEmbedding(memory));
-                    if (score >= SUMMARY_RECALL_MIN_SIMILARITY) selected.push({ ...memory, score });
+                    const key = summarySourceKey(memory);
+                    const live = liveByKey.get(key);
+                    // 三项都要过：条目还在、正文与来源没变、坐标仍是这次请求用的模型与端点。
+                    if (!live || frozen.get(key) !== summaryEmbeddingFingerprint(live)) continue;
+                    if (!hasCurrentSummaryEmbedding(live, model, apiUrl) || hasStaleSummaryEmbedding(live)) continue;
+                    const score = cosineSimilarity(queryVector, getSummaryEmbedding(live));
+                    if (score >= SUMMARY_RECALL_MIN_SIMILARITY) selected.push({ ...live, score });
                     if (index > 0 && index % 256 === 0) {
                         await yieldToUi();
                         if (!isCurrent()) return [];
@@ -12228,6 +13734,7 @@ const app = createApp({
                 };
             };
 
+            let vectorSkippedNoSource = 0;
             try {
                 while (_classicBatchExtractAbort === batchController && !batchController.signal.aborted) {
                     _classicBatchRescanRequested = false;
@@ -12299,8 +13806,10 @@ const app = createApp({
                     const currentTurnCount = buildConversationTurnSnapshot(chatHistory.value, { includeSystem: false }).turns.length;
                     if (jobs.length > 0 || _classicBatchRescanRequested || currentTurnCount !== safeTurnCount) continue;
                     if (memorySettings.mode === MEMORY_MODE_ENHANCED) {
-                        await indexSummaryMemories(snapshot, batchController.signal, undefined,
+                        const indexed = await indexSummaryMemories(snapshot, batchController.signal, undefined,
                             stageProgress('vector'));
+                        // 缺原文的条目不占任务名额，也不该无声消失：累计后在收尾里单独说一句。
+                        vectorSkippedNoSource = indexed.skippedNoSource;
                     }
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
                     await compressEligibleClassicMemories(
@@ -12326,8 +13835,10 @@ const app = createApp({
                 if (_classicBatchExtractAbort === batchController) {
                     const incomplete = progress.stages.some(stage => stage.current < stage.total);
                     progress.status = incomplete ? 'error' : 'done';
+                    const noSourceNote = vectorSkippedNoSource > 0
+                        ? `${vectorSkippedNoSource} 条总结找不到对应原文，未建立向量；补齐对话后可再次补录。` : '';
                     progress.message = incomplete ? '部分任务未完成，已完成的记忆已保留，可再次补录。'
-                        : progress.stages.some(stage => stage.total > 0) ? '' : '当前没有需要补录的记忆。';
+                        : noSourceNote || (progress.stages.some(stage => stage.total > 0) ? '' : '当前没有需要补录的记忆。');
                 }
             } catch (error) {
                 if (_classicBatchExtractAbort !== batchController) return;
@@ -12617,6 +14128,9 @@ const app = createApp({
             suppressStoryRouteNodeClick = false;
             showStoryBranchModal.value = false;
             _classicMemoriesLoaded = false;
+            // 角色上下文已卸载：连同已提交基线一起清掉，避免下次加载前被当成可用基线
+            _b1MemoryState = null;
+            _b1MemoryViewKey = '';
         };
 
         const deleteCharacter = (index) => {
@@ -12792,6 +14306,13 @@ const app = createApp({
             if (isAutoImageGenEnabled.value) {
                 updateImageGenRegexState({ enableRegex: true });
             }
+            // [rphub 2.8.115] 初始化窗口内只重建内存态，不落库。
+            //   此刻 worldInfo 还没从库加载，enforceSpecialRules() 会在空表上重建
+            //   默认关闭的两条规则；这里若调 saveData()（无参 = 全量）就会把它写进库。
+            //   内存里这份重建随后会被 loadData 的 worldInfo 赋值整体替换，无需清理。
+            //   保留 enforceSpecialRules 调用是为了新装用户也能拿到这两个条目，
+            //   只是不让它在初始化期间污染存档。
+            if (!_initComplete) return;
             saveData();
             fetchQuota();
         });
@@ -12855,16 +14376,26 @@ const app = createApp({
             if (savedChat === undefined && storyScopeId === char?.uuid && Number.isInteger(fallbackIndex)) {
                 savedChat = await getStoredChatHistoryWithRetry(fallbackIndex);
             }
-            if (savedChat === undefined) return createInitialChatHistory(char);
+            if (savedChat === undefined) {
+                // [rphub 2.8.93] 记下「本 scope 读到空」，禁止后续自动保存把开场白写回库
+                _chatScopePristineRead.add(storyScopeId);
+                console.warn('[ChatScope] 读取为空（无条目），已阻止自动回写 | scope=' + storyScopeId);
+                return createInitialChatHistory(char);
+            }
             if (!Array.isArray(savedChat)) {
                 throw new TypeError('保存的聊天记录格式不是数组');
             }
             if (savedChat.some(message => message !== null && (typeof message !== 'object' || Array.isArray(message)))) {
                 throw new TypeError('保存的聊天记录包含无效消息');
             }
-            return savedChat.length > 0
-                ? prepareLoadedChatHistoryForDisplay(savedChat)
-                : createInitialChatHistory(char);
+            if (savedChat.length > 0) {
+                _chatScopePristineRead.delete(storyScopeId);
+                return prepareLoadedChatHistoryForDisplay(savedChat);
+            }
+            // [rphub 2.8.93] 有条目但为空数组：与「无条目」同等对待，登记后禁止回写
+            _chatScopePristineRead.add(storyScopeId);
+            console.warn('[ChatScope] 读取为空（空数组），已阻止自动回写 | scope=' + storyScopeId);
+            return createInitialChatHistory(char);
         };
 
         const saveStoryBranchesForCharacter = async (char = currentCharacter.value, branchState = {}) => {
@@ -12889,9 +14420,15 @@ const app = createApp({
             const saved = await getScopedStoredValue('branches', char.uuid);
             const branches = normalizeStoryBranches(char, saved);
             const requestedActiveId = String(saved?.activeBranchId || STORY_BRANCH_MAIN_ID);
-            const activeBranchId = branches.some(branch => branch.id === requestedActiveId)
-                ? requestedActiveId
-                : STORY_BRANCH_MAIN_ID;
+            // [rphub 2.8.106] 回退主线过去是完全静默的：分支被删或键损坏时表现就是「记录没了」。
+            //   这里只加日志不改行为，但当这类事故再发生时，日志能直接看到请求了哪个 id、现有哪几个。
+            const requestedBranchExists = branches.some(branch => branch.id === requestedActiveId);
+            if (!requestedBranchExists) {
+                console.warn('[StoryBranch] activeBranchId 指向不存在的分支，已回退主线 | char=' + (char && char.uuid)
+                    + ' | 请求=' + requestedActiveId
+                    + ' | 现有=' + branches.map(branch => branch.id).join(','));
+            }
+            const activeBranchId = requestedBranchExists ? requestedActiveId : STORY_BRANCH_MAIN_ID;
             const mainNameWasChanged = saved?.branches?.some(branch => (
                 String(branch?.id) === STORY_BRANCH_MAIN_ID && branch?.name !== '主线'
             ));
@@ -12899,6 +14436,28 @@ const app = createApp({
                 await saveStoryBranchesForCharacter(char, { activeBranchId, branches });
             }
             return { activeBranchId, branches };
+        };
+
+        // [rphub 2.8.106] 当前分支读出来是空的，就看看别的分支还有没有记录。
+        //   存在的理由：樱见学园那次 183 条一直躺在分支 1，界面打开却是空的，
+        //   全应用没有任何一处告诉用户「东西还在，只是不在当前分支」。
+        //   只读分支摘要（messageCount / floorCount，由 updateCurrentStoryBranchSummary 写入），
+        //   不去读聊天本体 —— getScopedStoredValue('chat', ...) 会把整份聊天反序列化进内存，
+        //   而这里只需要一个「有没有内容」。摘要滞后只会让条数偏小，不会把有读成无，
+        //   最坏情况是少一次提示，等于现状。
+        const findRecoverableBranchHistory = async (char, branchState, loadedHistory) => {
+            if (Array.isArray(loadedHistory) && loadedHistory.length > 0) return null;
+            if (!char || !char.uuid || !Array.isArray(branchState && branchState.branches)) return null;
+            const candidates = branchState.branches.filter(branch => branch && branch.id && branch.id !== branchState.activeBranchId);
+            let best = null;
+            for (let i = 0; i < candidates.length; i++) {
+                const branch = candidates[i];
+                const count = Math.max(Number(branch.messageCount) || 0, Number(branch.floorCount) || 0);
+                if (count > 0 && (!best || count > best.count)) {
+                    best = { branchId: branch.id, name: branch.name || branch.id, count };
+                }
+            }
+            return best;
         };
 
         const loadStoryBranchesForCharacter = async (char) => {
@@ -12952,7 +14511,7 @@ const app = createApp({
                 branches: cloneForStorage(storyBranches.value)
             };
             saveGlobalUiTemplateRuntimeForCharacter();
-            await saveChatHistoryNow(storyScopeId, historySource);
+            if (!await saveChatHistoryNow(storyScopeId, historySource)) return false;
             await saveClassicMemoriesNow(storyScopeId, classicMemorySource);
             if (!isCurrentRequest()) return false;
             await saveStoryBranchesAndRuntime(char, branchState);
@@ -13079,7 +14638,8 @@ const app = createApp({
             const previousState = {
                 activeId: activeStoryBranchId.value,
                 chatHistory: chatHistory.value,
-                classicMemories: classicMemories.value
+                classicMemories: classicMemories.value,
+                memoryState: _b1MemoryState
             };
             try {
                 if (!await saveCurrentStoryBranchState()) return;
@@ -13113,8 +14673,15 @@ const app = createApp({
                 const floorCount = postprocessChatHistory(sourceChatHistory, { includeSystem: false }).length;
                 const wordCount = getConversationBodyLength(sourceChatHistory);
 
-                await setScopedStoredValue('chat', branchScopeId, cloneForStorage(sourceChatHistory), { clone: false });
-                await setScopedStoredValue('classic_memories', branchScopeId, cloneForStorage(branchClassicMemories), { clone: false });
+                const newMemoryState = await window.RPHubStorage.readMemoryState(branchScopeId, { migrate: false });
+                const newChatKey = 'rp_hub_chat_' + branchScopeId;
+                const branchCommit = await window.RPHubStorage.commitMemoryState(newMemoryState, branchClassicMemories, {
+                    expected: [{ key: newChatKey, value: undefined }],
+                    changes: [{ key: newChatKey, operation: 'set', value: cloneForStorage(sourceChatHistory) }],
+                    guard: () => currentCharacter.value?.uuid === char.uuid && activeStoryBranchId.value === previousState.activeId
+                });
+                if (branchCommit.status !== 'committed') throw memoryOperationError('MemoryCommitError', '新分支未完整提交，请检查存储', { committed: branchCommit.committed });
+                createdBranch.memoryState = branchCommit.state;
 
                 getUiTemplatesForRuntime(char).forEach(template => {
                     if (!template.runtimeByCharacter || typeof template.runtimeByCharacter !== 'object') {
@@ -13152,8 +14719,7 @@ const app = createApp({
                 _isApplyingCharacterScopedData = true;
                 resetChatRenderWindow();
                 chatHistory.value = sourceChatHistory;
-                classicMemories.value = numberClassicMemories(prepareClassicMemoriesForRuntime(branchClassicMemories));
-                _classicMemoriesLoaded = true;
+                adoptMemoryState(createdBranch.memoryState);
                 clearStoryBranchTransientContext();
                 finishApplyingCharacterScopedData();
                 selectedStoryBranchId.value = branchId;
@@ -13164,7 +14730,7 @@ const app = createApp({
                     storyBranches.value = storyBranches.value.filter(branch => branch.id !== createdBranch.branchId);
                     activeStoryBranchId.value = previousState.activeId;
                     chatHistory.value = previousState.chatHistory;
-                    classicMemories.value = previousState.classicMemories;
+                    if (previousState.memoryState) adoptMemoryState(previousState.memoryState, previousState.classicMemories);
                     getUiTemplatesForRuntime(char).forEach(template => {
                         if (template.runtimeByCharacter) delete template.runtimeByCharacter[createdBranch.branchScopeId];
                     });
@@ -13198,15 +14764,14 @@ const app = createApp({
                 const targetScopeId = getStoryBranchScopeId(char.uuid, branchId);
                 const [loadedChatHistory, savedClassicMemories] = await Promise.all([
                     loadStoredChatHistory(char, null, targetScopeId),
-                    getScopedStoredValue('classic_memories', targetScopeId)
+                    readCharacterMemories(targetScopeId)
                 ]);
 
                 _isApplyingCharacterScopedData = true;
                 activeStoryBranchId.value = branchId;
                 resetChatRenderWindow();
                 chatHistory.value = loadedChatHistory;
-                classicMemories.value = numberClassicMemories(prepareClassicMemoriesForRuntime(savedClassicMemories));
-                _classicMemoriesLoaded = true;
+                adoptMemoryState(savedClassicMemories.memoryState, savedClassicMemories.summaryMemories);
                 loadGlobalUiTemplateRuntimeForCharacter(char);
                 clearStoryBranchTransientContext();
                 updateCurrentStoryBranchSummary();
@@ -13239,16 +14804,9 @@ const app = createApp({
         };
 
         const readCharacterMemories = async (characterId, errorContext = '') => {
-            let summaryMemories = [];
-            let summaryLoaded = false;
-            try {
-                const savedMemories = await getScopedStoredValue('classic_memories', characterId);
-                summaryMemories = numberClassicMemories(prepareClassicMemoriesForRuntime(savedMemories));
-                summaryLoaded = true;
-            } catch (error) {
-                console.error(`Error loading classic memories${errorContext}:`, error);
-            }
-            return { summaryMemories, summaryLoaded };
+            const memoryState = await window.RPHubStorage.readMemoryState(characterId);
+            const summaryMemories = numberClassicMemories(prepareClassicMemoriesForRuntime(memoryState.list));
+            return { summaryMemories, summaryLoaded: true, memoryState };
         };
 
         const loadCharacterMemories = async (characterId, errorContext = '') => {
@@ -13258,8 +14816,7 @@ const app = createApp({
             if (loadEpoch !== _characterSwitchEpoch || getCurrentStoryBranchScopeId() !== characterId) {
                 return;
             }
-            classicMemories.value = loaded.summaryMemories;
-            _classicMemoriesLoaded = loaded.summaryLoaded;
+            adoptMemoryState(loaded.memoryState, loaded.summaryMemories);
         };
 
         const selectCharacter = async (index, isNewImport = false, { silent = false } = {}) => {
@@ -13320,6 +14877,20 @@ const app = createApp({
                     readCharacterMemories(storyScopeId)
                 ]);
                 if (!isLatestSwitch()) return;
+                // [rphub 2.8.106] 当前分支空、别的分支有 ⇒ 直接问要不要切过去。
+                //   放在 setTimeout 0 里：先让本次载入把界面状态铺完，模态框不跟载入抢同一帧。
+                //   只在非 silent 载入时弹，后台切卡不该打断用户手上的事。
+                if (!silent) {
+                    const recoverable = await findRecoverableBranchHistory(char, branchState, loadedChatHistory);
+                    if (recoverable && isLatestSwitch()) {
+                        setTimeout(() => {
+                            confirmAction(
+                                '当前分支没有记录，但「' + recoverable.name + '」里有 ' + recoverable.count + ' 条，要切过去吗？',
+                                () => switchStoryBranch(recoverable.branchId, { closeModal: true })
+                            );
+                        }, 0);
+                    }
+                }
             } catch (error) {
                 if (!isLatestSwitch()) return;
                 console.error('Error loading chat history:', error);
@@ -13337,8 +14908,7 @@ const app = createApp({
                 loadGlobalUiTemplateRuntimeForCharacter(char);
             }
             chatHistory.value = loadedChatHistory;
-            classicMemories.value = loadedMemories.summaryMemories;
-            _classicMemoriesLoaded = loadedMemories.summaryLoaded;
+            adoptMemoryState(loadedMemories.memoryState, loadedMemories.summaryMemories);
 
             // Load Character Specific Data
             applyCharacterScopedResources(char);
@@ -13445,9 +15015,10 @@ const app = createApp({
             editingWorldInfo.data.keys = parseWorldInfoKeysText(worldInfoKeysText.value, editingWorldInfo.data.useRegex);
         };
 
-        const importCharacterData = async (rawData, avatarUrl, { askImageGeneration = true, activate = true } = {}) => {
+        const importCharacterData = async (rawData, avatarUrl, { askImageGeneration = true, activate = true, sourceBytes = 0 } = {}) => {
                     const imported = cardUtils.parseImportedCharacterCard(rawData);
-                    inspectImportedCharacterCard(imported, avatarUrl);
+            // [rphub 2.8.117] 体积用文件自身字节数，不再为体检把整张卡 stringify 一遍
+            inspectImportedCharacterCard(imported, avatarUrl, sourceBytes);
             const char = {
                 name: imported.name,
                 importedName: imported.name,
@@ -13475,36 +15046,67 @@ const app = createApp({
                 createdAt: Date.now()
             };
 
+            // [rphub 2.8.117] 这一趟只写一次整库 characters（见 saveCharactersNow 的屏障说明）。
+            //   原来：push 后显式写一遍，1 秒后自动保存 watcher 再写一遍，切卡前
+            //   saveStoryBranchesAndRuntime 里还要写一遍 —— 三遍整份序列化。
+            //   失败语义严格分开：切卡失败不回滚（卡本身是好的），只有写库失败才回滚内存。
             characters.value.push(char);
+            _characterWriteBarrier++;
+            let _importError = null;
             try {
-                await saveCharactersNow();
-            } catch (error) {
+                try {
+                    if (activate) {
+                        showAddCharacterMenu.value = false;
+                        if (currentView.value === 'characters' && useCharacterDeck.value) {
+                            characterSearchQuery.value = '';
+                            await nextTick();
+                            await characterDeck.value?.revealImportedCard(char.uuid);
+                        }
+                        const newCharacterIndex = characters.value.findIndex(item => item.uuid === char.uuid);
+                        await selectCharacter(newCharacterIndex, askImageGeneration);
+                    }
+                } catch (error) {
+                    // 切卡失败不等于导入失败：只记下来，等落盘之后再抛，不删卡
+                    _importError = error;
+                }
+                // 落盘是导入的终点，只在这里写一次，且包含切卡带来的全部运行时变更
+                await saveCharactersNow({ force: true });
+            } catch (saveError) {
                 const index = characters.value.findIndex(item => item.uuid === char.uuid);
-                if (index >= 0) characters.value.splice(index, 1);
-                throw error;
+                if (index >= 0 && saveError.committed !== true) characters.value.splice(index, 1);
+                throw saveError;
+            } finally {
+                _characterWriteBarrier--;
+                // 收尾那次无论成败，脏标记与排队中的自动保存都没有意义了：
+                //   成功 = 库已是最新；失败 = 已 splice 回滚，内存与库同为旧状态。
+                debouncedCharacterSave.cancel();
             }
-
-            if (!activate) return char;
-            showAddCharacterMenu.value = false;
-            if (currentView.value === 'characters' && useCharacterDeck.value) {
-                characterSearchQuery.value = '';
-                await nextTick();
-                await characterDeck.value?.revealImportedCard(char.uuid);
-            }
-            const newCharacterIndex = characters.value.findIndex(item => item.uuid === char.uuid);
-            await selectCharacter(newCharacterIndex, askImageGeneration);
+            if (_importError) throw _importError;
             return char;
         };
 
-        const inspectImportedCharacterCard = (imported = {}, avatarUrl = '') => {
-            const serialized = JSON.stringify({ ...imported, avatar: avatarUrl || '' });
-            const sizeMb = serialized.length / 1024 / 1024;
-            const imageMatches = serialized.match(/data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g) || [];
+        // [rphub 2.8.117] 原实现把整张卡 JSON.stringify 一遍，只为算体积和找重复图。
+        //   一张 20MB 的卡因此白造一份 20MB 字符串，再对这根巨串跑一遍全局正则 —— 纯诊断开销。
+        //   现在体积用文件自身字节数（调用方传入），图片只扫真正可能内嵌 base64 的三处：
+        //   头像、UI 模板的 htmlTemplate、世界书正文。不再生成整卡副本。
+        const inspectImportedCharacterCard = (imported = {}, avatarUrl = '', sourceBytes = 0) => {
+            const sizeMb = Number(sourceBytes) > 0 ? Number(sourceBytes) / 1048576 : 0;
+            const imageSources = [avatarUrl || ''];
+            (Array.isArray(imported.uiTemplates) ? imported.uiTemplates : []).forEach(template => {
+                if (template && typeof template.htmlTemplate === 'string') imageSources.push(template.htmlTemplate);
+            });
+            (Array.isArray(imported.worldInfoEntries) ? imported.worldInfoEntries : []).forEach(entry => {
+                if (entry && typeof entry.content === 'string') imageSources.push(entry.content);
+            });
+            const imageRe = /data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g;
             const seenImages = new Map();
             let duplicateImageCount = 0;
-            imageMatches.forEach(dataUrl => {
-                const key = dataUrl.length + ':' + dataUrl.slice(-64);
-                seenImages.set(key, (seenImages.get(key) || 0) + 1);
+            imageSources.forEach(source => {
+                const matches = source.match(imageRe) || [];
+                matches.forEach(dataUrl => {
+                    const key = dataUrl.length + ':' + dataUrl.slice(-64);
+                    seenImages.set(key, (seenImages.get(key) || 0) + 1);
+                });
             });
             seenImages.forEach(count => {
                 duplicateImageCount += Math.max(0, count - 1);
@@ -13653,8 +15255,7 @@ const app = createApp({
                                     if (!savedMemory) continue;
                                     const memoryScopeId = getStoryBranchScopeId(char.uuid, branch.id);
                                     if (Array.isArray(savedMemory.classicMemories) && savedMemory.classicMemories.length) {
-                                        await setScopedStoredValue(
-                                            'classic_memories',
+                                        await window.RPHubStorage.replaceMemoryScopeList(
                                             memoryScopeId,
                                             cloneForStorage(savedMemory.classicMemories)
                                         );
@@ -13711,7 +15312,7 @@ const app = createApp({
                 reader.onload = async (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
-                        await importCharacterData(data, null);
+                        await importCharacterData(data, null, { sourceBytes: file.size });
                     } catch (err) {
                         showToast('JSON解析失败: ' + err.message, 'error');
                     }
@@ -13725,7 +15326,7 @@ const app = createApp({
                         const { data } = cardUtils.parsePngCharacterData(buffer);
                         const blob = new Blob([buffer], { type: 'image/png' });
                         const avatarUrl = await cardUtils.blobToDataUrl(blob);
-                        await importCharacterData(data, avatarUrl);
+                        await importCharacterData(data, avatarUrl, { sourceBytes: file.size });
                     } catch (err) {
                         if (err.chunks) console.warn("Available chunks:", Object.keys(err.chunks));
                         console.error(err);
@@ -14018,6 +15619,16 @@ const app = createApp({
             nextTick(scheduleMobileLazyUiTemplates);
             document.addEventListener('fullscreenchange', syncChatFullscreenState);
             document.addEventListener('webkitfullscreenchange', syncChatFullscreenState);
+            // [rphub 2.8.102] 回到前台再检查一次。loadData 里那个 6 秒定时器只在启动时挂
+            //   一次，页面重载或进程被杀就永久丢失（2.8.101 实测正是这种情形）。
+            //   1.5 秒延迟是让切回后的首帧渲染先跑完，别在回来的瞬间弹窗。
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState !== 'visible') return;
+                setTimeout(() => {
+                    if (autoBackupConfig.value.triggerMode === 'remind') maybeRemindDailyBackup();
+                    else performDailyAutoBackup(false);
+                }, 1500);
+            });
 
             if (!await loadData()) {
                 window.__rpDataError = true;
@@ -14142,8 +15753,8 @@ const app = createApp({
             ], syncDynamicPresetContent);
             removeLegacyUserRegex();
 
-            // Save enforced defaults immediately (仅保存预设/正则等结构性数据)
-            saveData({ saveMemories: false, saveCharacters: false });
+            // Save enforced defaults immediately (2.8.84: 只提交 settings / active_tools，大件世界书留给后续全量保存)
+            saveData({ saveMemories: false, saveCharacters: false, startupConfigOnly: true });
 
             // 初始化守卫解除：此后 saveData 才允许写入 user / memorySettings
             _initComplete = true;
@@ -14168,6 +15779,8 @@ const app = createApp({
                         currentCharacterIndex.value,
                         getStoryBranchScopeId(char.uuid)
                     );
+                    // 2.8.110: 到这一步聊天才算真正装载完毕，此前任何 saveData 都不该写聊天。
+                    _chatHydrated = true;
                 } catch (error) {
                     console.error('Error loading chat history on restore:', error);
                     currentCharacterIndex.value = -1;
@@ -14407,8 +16020,10 @@ const app = createApp({
             };
             const sortedMemories = [...classicMemories.value]
                 .map(memory => {
+                    // 用最底层基础总结的原文做兜底：三级结构里父节点的一层来源仍是压缩总结，
+                    // 那些节点没有逐轮原文，只取一层会算成「原文 0 字」。
                     const sourceMemories = isSecondaryClassicMemory(memory)
-                        ? getSecondaryClassicSourceMemories(memory)
+                        ? flattenClassicMemories([memory]).filter(item => !isSecondaryClassicMemory(item))
                         : [];
                     const userFallback = memory.sourceUserText
                         || sourceMemories.map(item => item.sourceUserText || '').filter(Boolean).join('\n\n');
@@ -14508,12 +16123,12 @@ const app = createApp({
             showCharacterExportModal, openCharacterExportModal, confirmCharacterExport, // Character Export Modal
             showConfirmModal, confirmMessage, modelMode, isGeminiModel, isTruncationEnabled, isPresetEnabled, chatModelSlots, selectChatModelSlot, slotTemperature, reasoningEffortSlider, reasoningEffortLabel, // Export for template
             isGenerating, isReceiving, isThinking, hasActiveToolInlineWork, isConversationBusy, activeToolContinuationMessageId, activeToolContinuationHasResponse, userInput, pendingCardInteraction, clearPendingCardInteraction, pendingChatImages, pendingChatImageReadCount, isRecognizingImages, requestChatImageSelection, handleChatImageSelection, removePendingChatImage, modelSearchQuery, activeModelTag, modelTags, characterSearchQuery, filteredModels, filteredCharacters,
-            user, settings, apiProviderOptions, selectedApiProvider, isCustomApiProvider, customApiProviderOptions, showApiProviderSelector, selectApiProvider, createCustomApiProvider, removeCustomApiProvider, updateCustomApiProvider, updateCustomApiKey, showCustomArtistEditor, showCustomApiSites, activeCustomArtist, selectCustomArtist, removeCustomArtist, toggleFreezeGeneratedImages, characters, currentCharacter, currentCharacterAvatar, currentCharacterIndex, switchingCharacterIndex, chatHistory, displayedChatMessages, handleChatScroll, presets, presetRoleOptions, fontSizeOptions, availableImageStyleOptions, imageModelOptions, imageSizeOptions, imageGenCountOptions, imageGenParams, setImageGenParam, resetImageGenParams, imageGenSamplerOptions: IMAGE_GEN_SAMPLER_OPTIONS, imageGenNoiseOptions: IMAGE_GEN_NOISE_OPTIONS, scopeOptions, uiTemplatePlacementOptions, worldInfoPositionOptions, getPresetRoleLabel, getPresetRoleDisplayLabel, getPresetRoleBadgeClass, getSortableItemKey, regexScripts, worldInfo,
+            user, settings, apiProviderOptions, selectedApiProvider, isCustomApiProvider, customApiProviderOptions, showApiProviderSelector, selectApiProvider, createCustomApiProvider, removeCustomApiProvider, updateCustomApiProvider, updateCustomApiKey, showCustomArtistEditor, showCustomApiSites, activeCustomArtist, selectCustomArtist, removeCustomArtist, toggleFreezeGeneratedImages, characters, currentCharacter, currentCharacterAvatar, currentCharacterIndex, switchingCharacterIndex, chatHistory, displayedChatMessages, runtimeEnv, refreshRuntimeEnv, copyRuntimeEnv, handleChatScroll, presets, presetRoleOptions, fontSizeOptions, availableImageStyleOptions, imageModelOptions, imageSizeOptions, imageGenCountOptions, imageGenParams, setImageGenParam, resetImageGenParams, imageGenSamplerOptions: IMAGE_GEN_SAMPLER_OPTIONS, imageGenNoiseOptions: IMAGE_GEN_NOISE_OPTIONS, scopeOptions, uiTemplatePlacementOptions, worldInfoPositionOptions, getPresetRoleLabel, getPresetRoleDisplayLabel, getPresetRoleBadgeClass, getSortableItemKey, regexScripts, worldInfo,
             activeTools, activeToolAggressivenessOptions: ACTIVE_TOOL_AGGRESSIVENESS_OPTIONS, editingActiveTool, normalizeActiveTools, isWebActiveTool, getActiveToolDisplayDescription, getActiveToolResultCountMin, getActiveToolResultCountMax,
             getToolCallModeText, hasThinkingOrTools, isMessageThinkingOrRunning, isThinkingSummaryOpen, toggleThinkingSummary, markThinkingSummaryDetailOpened, getTimelineSteps,
             isStyleFilterDetailsOpen, toggleStyleFilterDetails, getStyleFilterHitSegments,
             chatRoundStats, conversationBodyLength, summaryCompressedBodyLength, summaryCompressionRate,
-            editingCharacter, editingPreset, editingUiTemplate, toasts, chatContainer, isChatFullscreen, isInputBarHidden, toggleInputBarVisibility, isAnyMessageEditing, keepEditBlockVisible, isMobileKeyboardOpen, inputBox, messageElements,
+            editingCharacter, editingPreset, editingUiTemplate, toasts, onToastBeforeLeave, chatContainer, isChatFullscreen, isInputBarHidden, toggleInputBarVisibility, isAnyMessageEditing, keepEditBlockVisible, isMobileKeyboardOpen, inputBox, messageElements,
             isGeneratorLoading, generatorUrl, onGeneratorLoad, // Generator exports
             isSquareLoading, squareUrl, onSquareLoad, // Square exports
             isNovelLoading, novelUrl, onNovelLoad, // Novel exports
@@ -14544,12 +16159,21 @@ const app = createApp({
             clearAllMemories: () => {
                 confirmAction('确定要清空所有总结记忆及其向量吗？两个模式共享这些记忆，此操作无法撤销。', async () => {
                     abortClassicBatchExtraction();
-                    classicMemories.value = [];
-                    await saveClassicMemoriesNow();
+                    try {
+                        const intent = await beginMemoryIntent('清空全部记忆');
+                        const result = await commitMemoryDraft(intent, []);
+                        if (!result.published) {
+                            showToast('记忆已清空原角色，但界面已切换，请刷新确认', 'warning');
+                            return;
+                        }
+                    } catch (error) {
+                        showToast(`清空失败：${error?.message || error}`, 'error');
+                        return;
+                    }
                     showToast('记忆已清空', 'success');
                 });
             },
-            toggleNavigation, closeNavigation, navigateWorkspace, shellRoot, shellParent,
+            toggleNavigation, closeNavigation, navigateWorkspace, shellRoot, shellParent, selectedCompetition, openCompetition, classicUi,
             onlineOpen, dockFolded, foldDock, galleryPage, shellGoBack, streamImportPanel,
             showAnnouncement, openAnnouncement, closeAnnouncement,
             prepareStreamImport, restoreRphubBinaryDeep, showVueConfirmModal,
@@ -14592,7 +16216,7 @@ const app = createApp({
             memToolsPinned, memToolsRangePinned, toggleMemToolsPin,
             memToolsImport, memToolsImportLabel, clearMemToolsImport, pickMemToolsImportFile, readMemToolsImportFile,
             memToolsAuto, memToolsAutoPlan, saveMemToolsAuto, runMemToolsAuto, abortMemToolsAuto,
-            createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, showAutoBackupModal, openAutoBackupModal, performDailyAutoBackup, restoreAutoBackupRecord, downloadAutoBackupRecord, deleteAutoBackupRecord, showBackupManagerModal, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, openBackupManager, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled,
+            createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, showAutoBackupModal, openAutoBackupModal, performDailyAutoBackup, backupOverdueDays, maybeRemindDailyBackup, analyzeBackupSize, openBackupSizeModal, backupSizeReport, showBackupSizeModal, exportLegacyBackups, purgeLegacyBackups, restoreAutoBackupRecord, downloadAutoBackupRecord, deleteAutoBackupRecord, showBackupManagerModal, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, openBackupManager, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled, batchDeletePresets, deletePresetGroup,
             activePresetGroupName, activePresetGroup, visiblePresetGroups, openPresetGroup, showPresetGroupForm,
             presetGroupDraft, presetGroupEditing, presetGroupError, openPresetGroupForm, savePresetGroup, exportPresetGroups, importPresets,
             renderMarkdown, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
@@ -14734,7 +16358,11 @@ const app = createApp({
                     ...previous,
                     resultCount: editingActiveTool.data.resultCount,
                     resultCountVersion: ACTIVE_TOOL_RESULT_COUNT_VERSION,
-                    tavilyApiKey: editingActiveTool.data.tavilyApiKey
+                    // 只有编辑器确实给出字符串时才覆盖：undefined 会被 unwrapForStorage 直接丢掉，
+                    // 落库读回就是空串，等于把已配好的密钥清掉。
+                    tavilyApiKey: typeof editingActiveTool.data.tavilyApiKey === 'string'
+                        ? editingActiveTool.data.tavilyApiKey
+                        : previous.tavilyApiKey
                 });
                 activeTools.value[index] = data;
                 normalizeActiveTools();
@@ -14908,6 +16536,7 @@ app.component('ShellChatMenu', window.RPAppShell.ChatMenu);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('ShellUtilities', window.RPAppShell.Utilities);
+app.component('CompetitionDetail', window.RPAppShell.CompetitionDetail);
 app.component('GalleryPage', window.RPGalleryPage);
 app.component('ReleaseAnnouncement', window.RPAppShell.ReleaseAnnouncement);
 app.mount('#app');

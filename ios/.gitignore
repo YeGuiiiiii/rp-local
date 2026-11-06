@@ -1,0 +1,9 @@
+Resources/site/
+Resources/Assets.xcassets/
+Resources/icon-source.png
+Version.xcconfig
+build/
+*.xcodeproj/
+*.xcworkspace/
+*.ipa
+.DS_Store

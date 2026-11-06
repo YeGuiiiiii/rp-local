@@ -5,6 +5,11 @@
 .method public static intercept(Landroid/content/Context;Ljava/lang/String;)Landroid/webkit/WebResourceResponse;
     .locals 7
 
+    invoke-static {p0, p1}, Lcom/rphub/app/LocalFiles;->backupResponse(Landroid/content/Context;Ljava/lang/String;)Landroid/webkit/WebResourceResponse;
+    move-result-object v0
+    if-eqz v0, :images
+    return-object v0
+    :images
     invoke-static {p0, p1}, Lcom/rphub/app/LocalFiles;->imageResponse(Landroid/content/Context;Ljava/lang/String;)Landroid/webkit/WebResourceResponse;
     move-result-object v0
     if-eqz v0, :site

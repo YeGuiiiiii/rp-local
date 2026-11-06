@@ -56,6 +56,6 @@
     invoke-virtual {v2, v0}, Landroid/view/ViewGroup;->removeView(Landroid/view/View;)V
     :destroy
     invoke-virtual {v0}, Landroid/webkit/WebView;->destroy()V
-    invoke-virtual {v1}, Landroid/app/Activity;->recreate()V
+    invoke-static {v1}, Lcom/rphub/app/RenderRecovery;->recreate(Landroid/app/Activity;)V
     return-void
 .end method

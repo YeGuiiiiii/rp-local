@@ -6,6 +6,9 @@ android/dist/
 android/assets/local-site/
 reference/
 dist/*.apk
+dist/*.zip
+.impeccable/review/
+artwork/promo-*/cards.json
 node_modules/
 __pycache__/
 *.pyc

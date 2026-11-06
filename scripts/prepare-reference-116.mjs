@@ -4,7 +4,9 @@ import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const reference=path.join(root,'reference/original-2.8.116');
+const version=process.argv[2]||'2.8.116';
+if(!/^2\.8\.\d+$/.test(version))throw new Error('Invalid reference version');
+const reference=path.join(root,`reference/original-${version}`);
 const assets=path.join(reference,'apk-extracted/assets');
 const output=path.join(reference,'patched');
 fs.mkdirSync(output,{recursive:true});
@@ -23,5 +25,5 @@ for(const file of fs.readdirSync(path.join(assets,'patch-seed'))){
   fs.writeFileSync(path.join(output,file),source);
   reports.push({file,prebuilt:fs.existsSync(built),missing});
 }
-fs.writeFileSync(path.join(root,'verification/reference-116.json'),JSON.stringify(reports,null,2));
+fs.writeFileSync(path.join(root,`verification/reference-${version.split('.').at(-1)}.json`),JSON.stringify(reports,null,2));
 console.log(JSON.stringify(reports.filter(item=>item.prebuilt||item.missing.length),null,2));

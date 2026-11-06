@@ -1,0 +1,46 @@
+[
+  {
+    "output": "RP本地版-白昼手账.png",
+    "size": [
+      1536,
+      2048
+    ],
+    "illustration": "day-generated\\Create_a_single_portrait_advertising_illustration_background_3_4_It_will_be_combined_with_a_REAL_mobile_app_sc_e344add4\\result_images_0_url.png",
+    "meowaJob": "job_e1cc3e44ce7c4926aa15216123529ef7",
+    "screenshot": "screen-day-home.png",
+    "appVersion": "1.22",
+    "cards": [
+      "C:\\Users\\pzh\\Downloads\\新建文件夹\\地牢小馆：炒翻日常 V1.5.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\05-现在是“安可”时间~\\角色卡含头像.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\04-漆黑的子弹\\角色卡含头像.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\02-来研究研究--洛茜极限⚡v2.2\\角色卡含头像.png"
+    ],
+    "prompts": [
+      "day-prompt.txt",
+      "night-prompt.txt"
+    ],
+    "method": "Meowa illustration with unchanged real application screenshot and locally typeset text"
+  },
+  {
+    "output": "RP本地版-夜蔷薇.png",
+    "size": [
+      1536,
+      2048
+    ],
+    "illustration": "night-generated\\Create_a_single_portrait_advertising_illustration_background_3_4_A_real_software_screenshot_and_real_Chinese_t_4f11a269\\result_images_0_url.png",
+    "meowaJob": "job_1e2332f76ee5409f9f6ac3d88838683f",
+    "screenshot": "screen-night-gallery.png",
+    "appVersion": "1.22",
+    "cards": [
+      "C:\\Users\\pzh\\Downloads\\新建文件夹\\地牢小馆：炒翻日常 V1.5.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\05-现在是“安可”时间~\\角色卡含头像.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\04-漆黑的子弹\\角色卡含头像.png",
+      "D:\\大模型用\\rp\\rp可导入数据-最终\\分项导入\\02-来研究研究--洛茜极限⚡v2.2\\角色卡含头像.png"
+    ],
+    "prompts": [
+      "day-prompt.txt",
+      "night-prompt.txt"
+    ],
+    "method": "Meowa illustration with unchanged real application screenshot and locally typeset text"
+  }
+]

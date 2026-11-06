@@ -1,11 +1,12 @@
-RP Local 1.19 - personal preview build
+RP Local 2.9 - personal preview build
 
 RP-Hub: STA1N156, https://github.com/STA1N156/RP-Hub
 Original project license: Creative Commons Attribution-NonCommercial 4.0.
 The complete original license is included as RP-Hub-LICENSE.txt.
 
 This build preserves the enhanced frontend and native integration from the
-user-supplied RP-Hub 2.8.80 APK. It changes startup to packaged web assets,
+user-supplied RP-Hub 2.8.80 APK, with fixes merged from the supplied 2.8.118 APK.
+It changes startup to packaged web assets,
 uses a separate Android application ID, and uses the user-supplied icon.
 Existing source credits and third-party library headers are retained.
 

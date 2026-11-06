@@ -26,7 +26,10 @@ fs.mkdirSync(output, { recursive: true });
     const mascot = () => page.getByRole('button', { name: '戳戳玥玥', exact: true }).filter({ visible: true });
     const screenshots = [];
     async function bounds(name) {
-        await page.waitForFunction(() => [...document.images].filter(img => img.getClientRects().length).every(img => img.complete && img.naturalWidth));
+        await page.waitForFunction(() => [...document.images].filter(img => {
+            const rect = img.getBoundingClientRect();
+            return rect.width && rect.height && rect.bottom > 0 && rect.top < innerHeight;
+        }).every(img => img.complete && img.naturalWidth));
         const rect = await speech().boundingBox(), size = page.viewportSize();
         assert.ok(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= size.width && rect.y + rect.height <= size.height, name);
         assert.equal(await speech().evaluate(el => getComputedStyle(el).pointerEvents), 'none');

@@ -10,11 +10,12 @@
     let mainDb = null;
     let legacyDb = null;
     let initPromise = null;
+    let reopenPromise = null;
     // A cloud restore pauses the page's own saves so its stale state cannot overwrite what comes in; the page
     // reloads afterwards. Writes passed `force` still go through.
     let writesPaused = false;
 
-    const openAppDB = (name, version = 1) => new Promise((resolve, reject) => {
+    const openAppDB = (name, version = DB_VERSION) => new Promise((resolve, reject) => {
         const request = indexedDB.open(name, version);
         let settled = false;
         const fail = error => { settled = true; clearTimeout(timer); reject(error); };
@@ -36,6 +37,7 @@
     });
 
     const initDB = async () => {
+        if (reopenPromise) return reopenPromise;
         if (initPromise) return initPromise;
         if (mainDb) return mainDb;
         initPromise = (async () => {
@@ -54,7 +56,7 @@
             }
             if (window.RPLocalStore?.available) {
                 await window.RPLocalStore.initialize(await readStorageEntries(mainDb),
-                    (key, value) => dbSetTo(mainDb, key, value, { clone: true }));
+                    (key, value) => dbSetTo(mainDb, key, value, { clone: true, mirror: false }));
             }
             return mainDb;
         })();
@@ -75,9 +77,23 @@
     };
 
     const reopenMainDB = async () => {
-        try { mainDb?.close(); } catch (_) { }
-        mainDb = await openAppDB(DB_NAME, DB_VERSION);
-        return mainDb;
+        if (reopenPromise) return reopenPromise;
+        const previous = mainDb;
+        mainDb = null;
+        try { previous?.close(); } catch (_) { }
+        reopenPromise = openAppDB(DB_NAME).then(database => {
+            mainDb = database;
+            return database;
+        });
+        try { return await reopenPromise; }
+        finally { reopenPromise = null; }
+    };
+    const reopenAfterStorageError = async (originalError) => {
+        try { return await reopenMainDB(); }
+        catch (error) {
+            try { if (error && error !== originalError && error.cause === undefined) error.cause = originalError; } catch (_) { }
+            throw error;
+        }
     };
 
     const unwrapForStorage = (value, seen = new WeakMap()) => {
@@ -116,39 +132,120 @@
         }
         return JSON.parse(JSON.stringify(plainValue));
     };
+    // 2.8.84: 普通对象/数组/标量的“可存储性”由下面的指纹计算兜住，不必在克隆前再整树遍历一遍。
+    // 大对象（世界书等）每启动一次省掉一次全量 storageContentKey；非普通原型的值仍走原校验路径，
+    // 保证 class 实例/函数等依旧按原样抛 StorageDataError，而不是被克隆悄悄降级成普通对象。
+    const isPlainStorable = (value) => {
+        if (value === null) return true;
+        const type = typeof value;
+        if (type === 'string' || type === 'number' || type === 'boolean') return true;
+        if (type !== 'object') return false;
+        if (Array.isArray(value)) return true;
+        const proto = Object.getPrototypeOf(value);
+        return proto === Object.prototype || proto === null;
+    };
 
     const storageKey = (name) => `${STORAGE_PREFIX}${name}`;
     const legacyStorageKey = (name) => `${LEGACY_STORAGE_PREFIX}${name}`;
     const scopedStorageKey = (name, id) => `${storageKey(name)}_${id}`;
     const legacyScopedStorageKey = (name, id) => `${legacyStorageKey(name)}_${id}`;
 
-    const dbSetTo = (targetDb, key, value, options) => new Promise((resolve, reject) => {
-        const request = targetDb.transaction(['store'], 'readwrite')
-            .objectStore('store')
-            .put(options.clone === false ? value : cloneForStorage(value), key);
-        request.transaction.oncomplete = () => resolve();
-        request.onerror = (event) => reject(event.target.error);
-    });
-
-    const dbSet = async (key, value, options = {}) => {
-        if (writesPaused && !options.force) return;
-        if (!mainDb || initPromise) await initDB();
-        if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
+    // B1: requests can succeed before a transaction aborts. Only complete means committed.
+    let storageWriteEpoch = 0;
+    const storageActiveWrites = new Map();
+    const storageWriteError = (name, message) => Object.assign(new Error(message), { name });
+    const assertStorageWriteAllowed = (options = {}, epoch = storageWriteEpoch) => {
+        if (options.signal?.aborted) throw storageWriteError('AbortError', '写入已取消');
+        if (writesPaused && !options.force) throw storageWriteError('StoragePausedError', '存储恢复期间暂停写入');
+        if (epoch !== storageWriteEpoch) throw storageWriteError('StorageConflictError', '存储维护代次已变化，请重新载入后再试');
+        if (options.guard && options.guard() !== true) throw storageWriteError('StorageConflictError', '写入来源已变化，未提交旧数据');
+    };
+    const runStorageWriteTransaction = (targetDb, schedule, options = {}) => new Promise((resolve, reject) => {
+        let transaction = null;
+        let settled = false;
+        let failure = null;
+        let result;
+        let onSignalAbort = null;
+        const mirrors = new Map();
+        const settle = (ok, value) => {
+            if (settled) return;
+            settled = true;
+            if (transaction) storageActiveWrites.delete(transaction);
+            if (onSignalAbort) options.signal?.removeEventListener('abort', onSignalAbort);
+            if (ok) resolve(value); else reject(value);
+        };
+        const abortWith = (error) => {
+            if (!failure) failure = error || storageWriteError('AbortError', '存储事务已中止');
+            if (!transaction) { settle(false, failure); return; }
+            // abort() can fail after commit has begun. Wait for the actual terminal event.
+            try { transaction.abort(); } catch (_) { }
+        };
         try {
-            await dbSetTo(mainDb, key, value, options);
-        } catch (error) {
-            if (!isDatabaseClosingError(error)) throw error;
-            await reopenMainDB();
-            await dbSetTo(mainDb, key, value, options);
-        }
-        await window.RPLocalStore?.save(key, cloneForStorage(value));
+            assertStorageWriteAllowed(options, options.writeEpoch);
+            transaction = targetDb.transaction(['store'], 'readwrite');
+            transaction.oncomplete = () => {
+                storageActiveWrites.delete(transaction);
+                Promise.all([...mirrors].map(([key, value]) => value === undefined
+                    ? window.RPLocalStore.remove(key) : window.RPLocalStore.save(key, value)))
+                    .then(() => settle(true, result),
+                        error => settle(false, Object.assign(error, { committed: true })));
+            };
+            transaction.onabort = () => settle(false, failure || transaction.error || storageWriteError('AbortError', '存储事务已中止'));
+            transaction.onerror = (event) => abortWith(event.target?.error || transaction.error || storageWriteError('UnknownError', '存储事务失败'));
+            storageActiveWrites.set(transaction, abortWith);
+            if (options.signal) {
+                onSignalAbort = () => abortWith(storageWriteError('AbortError', '写入已取消'));
+                options.signal.addEventListener('abort', onSignalAbort, { once: true });
+                if (options.signal.aborted) { onSignalAbort(); return; }
+            }
+            const store = transaction.objectStore('store');
+            const mirror = targetDb === mainDb && options.mirror !== false && window.RPLocalStore?.available;
+            result = schedule({
+                get: key => store.get(key),
+                put: (value, key) => {
+                    if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
+                    if (mirror) mirrors.set(key, cloneForStorage(value));
+                    return store.put(value, key);
+                },
+                delete: key => {
+                    if (mirror) mirrors.set(key, undefined);
+                    return store.delete(key);
+                }
+            }, transaction, abortWith);
+            if (result && typeof result.then === 'function') throw storageWriteError('InvalidStateError', '存储事务内不允许异步准备');
+        } catch (error) { abortWith(error); }
+    });
+    const dbSetTo = (targetDb, key, value, options = {}) => {
+        // Prepare the payload before opening the transaction; synchronous clone errors remain errors.
+        let payload;
+        try { payload = options.clone === false ? value : cloneForStorage(value); }
+        catch (error) { return Promise.reject(error); }
+        return runStorageWriteTransaction(targetDb, store => { store.put(payload, key); }, options);
     };
 
-    const dbGetFrom = (targetDb, key) => new Promise((resolve, reject) => {
-        const request = targetDb.transaction(['store'], 'readonly').objectStore('store').get(key);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = (event) => reject(event.target.error);
-    });
+    const dbSet = async (key, value, options = {}) => {
+        const memoryScope = memoryScopeFromKey(key);
+        if (memoryScope !== null) return setMemoryWithState(memoryScope, value, options);
+        if (String(key).startsWith(storageKey(MEMORY_STATE_NAME) + '_')) throw storageWriteError('MemoryProtocolError', '版本键不能单独覆盖');
+        const writeEpoch = options.writeEpoch ?? storageWriteEpoch;
+        assertStorageWriteAllowed(options, writeEpoch);
+        const payload = options.clone === false ? value : cloneForStorage(value);
+        const writeOptions = { ...options, clone: false, writeEpoch };
+        if (!mainDb) await initDB();
+        assertStorageWriteAllowed(writeOptions, writeEpoch);
+        try {
+            return await dbSetTo(mainDb, key, payload, writeOptions);
+        } catch (error) {
+            if (!isDatabaseClosingError(error)) throw error;
+            // Reopen for subsequent operations. A blind retry could overwrite a newer value.
+            await reopenAfterStorageError(error);
+            assertStorageWriteAllowed(writeOptions, writeEpoch);
+            if (typeof options.guard !== 'function') throw error;
+            return dbSetTo(mainDb, key, payload, writeOptions);
+        }
+    };
+
+    const dbGetFrom = async (targetDb, key) => (await readStoredValueSetFrom(targetDb, [key]))[0].value;
 
     const dbGet = async (key) => {
         if (!mainDb || initPromise) await initDB();
@@ -156,30 +253,51 @@
             return await dbGetFrom(mainDb, key);
         } catch (error) {
             if (!isDatabaseClosingError(error)) throw error;
-            await reopenMainDB();
+            await reopenAfterStorageError(error);
             return dbGetFrom(mainDb, key);
         }
     };
 
-    const dbGetWithLegacy = async (key, oldKey) => {
+    const dbGetWithLegacy = async (key, oldKey, options = {}) => {
+        const memoryScope = memoryScopeFromKey(key);
+        if (memoryScope !== null) {
+            const state = await readMemoryState(memoryScope, options);
+            return state.exists ? state.list : undefined;
+        }
+        const writeEpoch = storageWriteEpoch;
         const value = await dbGet(key);
         if (value !== undefined || !legacyDb) return value;
         const legacyValue = await dbGetFrom(legacyDb, oldKey);
-        if (legacyValue !== undefined) await dbSet(key, legacyValue);
-        return legacyValue;
+        if (legacyValue === undefined || options.migrate === false) return legacyValue;
+        const payload = cloneForStorage(legacyValue);
+        let migratedValue = legacyValue;
+        await runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
+            const request = store.get(key);
+            request.onsuccess = () => {
+                try {
+                    assertStorageWriteAllowed({ writeEpoch }, writeEpoch);
+                    if (request.result !== undefined) migratedValue = request.result;
+                    else store.put(payload, key);
+                } catch (error) { abortWith(error); }
+            };
+        }, { writeEpoch });
+        return migratedValue;
     };
 
-    const dbDeleteFrom = (targetDb, key) => new Promise((resolve, reject) => {
-        const request = targetDb.transaction(['store'], 'readwrite').objectStore('store').delete(key);
-        request.onsuccess = () => resolve();
-        request.onerror = (event) => reject(event.target.error);
-    });
+    const dbDeleteFrom = (targetDb, key, options = {}) => runStorageWriteTransaction(
+        targetDb, store => { store.delete(key); }, options
+    );
 
-    const dbDeleteWithLegacy = async (key, oldKey) => {
-        if (!mainDb || initPromise) await initDB();
-        await dbDeleteFrom(mainDb, key);
-        if (legacyDb) await dbDeleteFrom(legacyDb, oldKey);
-        if (window.RPLocalStore?.available) await window.RPLocalStore.remove(key);
+    const dbDeleteWithLegacy = async (key, oldKey, inputOptions = {}) => {
+        const memoryScope = memoryScopeFromKey(key);
+        if (memoryScope !== null) return deleteMemoryScope(memoryScope, inputOptions);
+        if (String(key).startsWith(storageKey(MEMORY_STATE_NAME) + '_')) throw storageWriteError('MemoryProtocolError', '删除标记不得移除');
+        const options = { ...inputOptions, writeEpoch: inputOptions.writeEpoch ?? storageWriteEpoch };
+        assertStorageWriteAllowed(options, options.writeEpoch);
+        if (!mainDb) await initDB();
+        await dbDeleteFrom(mainDb, key, options);
+        // Separate databases cannot be committed atomically; propagate a legacy-delete failure.
+        if (legacyDb) await dbDeleteFrom(legacyDb, oldKey, options);
     };
 
     const readStorageKeys = (targetDb) => new Promise((resolve, reject) => {
@@ -210,22 +328,418 @@
         request.onerror = () => reject(request.error);
     });
 
+    // B1 storage CAS primitives. Callers must capture expected values when intent is created.
+    // This layer neither invents a current revision for an old payload nor publishes UI state.
+    const storageContentKey = (value) => {
+        const ancestors = new Set();
+        const encode = (item, depth) => {
+            if (depth > 256) throw storageWriteError('StorageDataError', '存储结构过深，未执行写入');
+            if (item === undefined) return ['undefined'];
+            if (item === null) return ['null'];
+            if (typeof item === 'string' || typeof item === 'boolean') return [typeof item, item];
+            if (typeof item === 'number') {
+                if (!Number.isFinite(item)) throw storageWriteError('StorageDataError', '存储包含非法数值');
+                return ['number', Object.is(item, -0) ? '-0' : item];
+            }
+            if (typeof item !== 'object' || ancestors.has(item)) throw storageWriteError('StorageDataError', '存储包含循环或不支持的数据');
+            const proto = Object.getPrototypeOf(item);
+            if (!Array.isArray(item) && proto !== Object.prototype && proto !== null) throw storageWriteError('StorageDataError', '存储内容必须是普通对象或数组');
+            ancestors.add(item);
+            const body = Object.keys(item).sort().map(key => [key, encode(item[key], depth + 1)]);
+            ancestors.delete(item);
+            return Array.isArray(item) ? ['array', item.length, body] : ['object', body];
+        };
+        return JSON.stringify(encode(value, 0));
+    };
+    const readStoredValueSetFrom = (targetDb, keys) => {
+        const names = [...keys];
+        if (!names.length || names.some(key => typeof key !== 'string' || !key) || new Set(names).size !== names.length) {
+            throw storageWriteError('StorageDataError', '读取键必须非空且不重复');
+        }
+        return new Promise((resolve, reject) => {
+            let transaction = null, failure = null, finished = false;
+            const records = new Array(names.length);
+            const finish = (ok, value) => {
+                if (finished) return;
+                finished = true;
+                if (ok) resolve(value); else reject(value);
+            };
+            try {
+                transaction = targetDb.transaction(['store'], 'readonly');
+                transaction.oncomplete = () => failure ? finish(false, failure) : finish(true, records);
+                transaction.onabort = () => finish(false, failure || transaction.error || storageWriteError('AbortError', '读取事务已中止'));
+                transaction.onerror = event => {
+                    failure = event.target?.error || transaction.error || storageWriteError('UnknownError', '读取事务失败');
+                    try { transaction.abort(); } catch (_) { finish(false, failure); }
+                };
+                const store = transaction.objectStore('store');
+                names.forEach((key, index) => {
+                    const request = store.get(key);
+                    request.onsuccess = () => { records[index] = {key, value: request.result}; };
+                });
+            } catch (error) {
+                failure = error;
+                if (transaction) { try { transaction.abort(); } catch (_) { finish(false, error); } }
+                else finish(false, error);
+            }
+        });
+    };
+    const readStoredValueSet = async (keys) => {
+        if (!mainDb) await initDB();
+        return readStoredValueSetFrom(mainDb, keys);
+    };
+    const compareAndWriteStoredValues = async (command = {}) => {
+        const writeEpoch = command.writeEpoch ?? storageWriteEpoch;
+        let committed = false;
+        let expected, changes, options;
+        try {
+            options = {guard: command.guard, signal: command.signal, writeEpoch};
+            assertStorageWriteAllowed(options, writeEpoch);
+            if (!Array.isArray(command.expected) || !command.expected.length || !Array.isArray(command.changes)) {
+                throw storageWriteError('StorageDataError', '提交必须携带意图起点的完整基线');
+            }
+            // Clone and fingerprint before the first await, never borrow a mutable UI reference.
+            expected = command.expected.map(item => {
+                if (!item || typeof item.key !== 'string' || !item.key) throw storageWriteError('StorageDataError', '提交基线键无效');
+                return {key: item.key, fingerprint: storageContentKey(item.value)};
+            });
+            const names = new Set(expected.map(item => item.key));
+            if (names.size !== expected.length) throw storageWriteError('StorageDataError', '提交基线键重复');
+            changes = command.changes.map(item => {
+                if (item && (memoryScopeFromKey(item.key) !== null || String(item.key).startsWith(storageKey(MEMORY_STATE_NAME) + '_'))
+                    && command.memoryPermit !== memoryProtocolPermit) throw storageWriteError('MemoryProtocolError', '记忆比较写入必须经过版本协议');
+                if (!item || !names.has(item.key) || !['set', 'delete'].includes(item.operation)) throw storageWriteError('StorageDataError', '每个变更键必须有对应基线');
+                if (item.operation === 'delete') return {key: item.key, operation: 'delete', fingerprint: storageContentKey(undefined)};
+                if (!isPlainStorable(item.value)) storageContentKey(item.value);
+                const value = cloneForStorage(item.value);
+                if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
+                if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
+                return {key: item.key, operation: 'set', value, fingerprint: storageContentKey(value)};
+            });
+            if (new Set(changes.map(item => item.key)).size !== changes.length) throw storageWriteError('StorageDataError', '变更键重复');
+            if (!mainDb) await initDB();
+            const perform = () => runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
+                let remaining = expected.length;
+                const actual = new Array(expected.length);
+                expected.forEach((item, index) => {
+                    const request = store.get(item.key);
+                    request.onsuccess = () => {
+                        try {
+                            actual[index] = request.result;
+                            if (--remaining !== 0) return;
+                            assertStorageWriteAllowed(options, writeEpoch);
+                            if (expected.some((entry, i) => storageContentKey(actual[i]) !== entry.fingerprint)) {
+                                throw storageWriteError('StorageConflictError', '基线已被其他操作修改，未覆盖新数据');
+                            }
+                            for (const change of changes) {
+                                if (change.operation === 'delete') store.delete(change.key);
+                                else store.put(change.value, change.key);
+                            }
+                        } catch (error) { abortWith(error); }
+                    };
+                });
+            }, options);
+            try { await perform(); }
+            catch (error) {
+                if (!isDatabaseClosingError(error)) throw error;
+                await reopenAfterStorageError(error);
+                assertStorageWriteAllowed(options, writeEpoch);
+                // CAS repeats the persistent comparison inside the new transaction, not a blind put.
+                await perform();
+            }
+            committed = true;
+            if (!changes.length) return {status: 'unchanged', committed: false, writeEpoch};
+            const actual = await readStoredValueSet(changes.map(item => item.key));
+            if (actual.some((item, i) => storageContentKey(item.value) !== changes[i].fingerprint)) {
+                throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');
+            }
+            return {status: 'committed', committed: true, writeEpoch, records: actual};
+        } catch (error) {
+            committed ||= error?.committed === true;
+            const status = committed ? 'committed_unverified'
+                : error?.name === 'StoragePausedError' ? 'paused'
+                : error?.name === 'StorageConflictError' ? 'conflict'
+                : error?.name === 'AbortError' && command.signal?.aborted ? 'cancelled' : 'error';
+            return {status, committed, writeEpoch, error};
+        }
+    };
+
+    // B1: sidecar is outside classic_memories_*; deletion retains only an opaque revision tombstone.
+    // Existing arrays/keys/DB version are unchanged. This metadata must not be reused by a restore.
+    const MEMORY_STATE_NAME = 'b1_memory_state';
+    const memoryProtocolPermit = Symbol('memory-commit');
+    const memoryStates = new WeakMap();
+    const memoryScopeFromKey = key => typeof key === 'string' && key.startsWith(storageKey('classic_memories') + '_')
+        ? key.slice((storageKey('classic_memories') + '_').length) : null;
+    const memoryStateKey = scopeId => scopedStorageKey(MEMORY_STATE_NAME, scopeId);
+    const newMemoryRevision = () => {
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    };
+    const isProtectedMemoryKey = key => memoryScopeFromKey(key) !== null
+        || String(key).startsWith(storageKey(MEMORY_STATE_NAME) + '_');
+    const validateMemoryRecords = (data, metadata) => {
+        if (data !== undefined && !Array.isArray(data)) throw storageWriteError('StorageDataError', '记忆数据不是数组，已阻止覆盖');
+        if (metadata !== undefined && (!metadata || metadata.schema !== 1 || !/^[a-f0-9]{32}$/.test(metadata.revision)
+            || typeof metadata.deleted !== 'boolean')) throw storageWriteError('StorageDataError', '记忆版本记录损坏，已阻止覆盖');
+        if (metadata?.deleted && data !== undefined) throw storageWriteError('StorageDataError', '已删除记忆仍有正文，请先检查恢复数据');
+        // A live revision with no body means the pair was broken outside this protocol (partial restore,
+        // hand-edited record). Refusing it stops a legacy read from silently resurrecting stale content.
+        if (metadata !== undefined && !metadata.deleted && data === undefined) {
+            throw storageWriteError('StorageDataError', '记忆版本记录缺少正文，请先检查恢复数据');
+        }
+        storageContentKey(data);
+    };
+    const makeMemoryState = (scopeId, data, metadata, writeEpoch) => {
+        validateMemoryRecords(data, metadata);
+        const frozenData = data === undefined ? undefined : cloneForStorage(data);
+        const frozenMeta = metadata === undefined ? undefined : cloneForStorage(metadata);
+        const state = Object.freeze({ scopeId, revision: metadata?.revision || null, deleted: metadata?.deleted === true,
+            exists: data !== undefined, list: cloneForStorage(data || []), writeEpoch });
+        // The public list is a detached working copy; mutating it cannot change the captured baseline.
+        memoryStates.set(state, { scopeId, data: frozenData, metadata: frozenMeta, writeEpoch });
+        return state;
+    };
+    const readMemoryState = async (scopeId, options = {}) => {
+        if (typeof scopeId !== 'string' || !scopeId) throw storageWriteError('MemoryScopeError', '记忆作用域不存在');
+        const writeEpoch = storageWriteEpoch;
+        const dataKey = scopedStorageKey('classic_memories', scopeId), metaKey = memoryStateKey(scopeId);
+        const records = await readStoredValueSet([dataKey, metaKey]);
+        if (writeEpoch !== storageWriteEpoch) throw storageWriteError('StorageConflictError', '读取期间存储已切换维护代次');
+        let state = makeMemoryState(scopeId, records[0].value, records[1].value, writeEpoch);
+        if (state.exists || state.deleted || !legacyDb || options.migrate === false) return state;
+        const legacy = await dbGetFrom(legacyDb, legacyScopedStorageKey('classic_memories', scopeId));
+        if (legacy === undefined) return state;
+        validateMemoryRecords(legacy, undefined);
+        const migrated = await commitMemoryState(state, legacy, { guard: options.guard });
+        if (migrated.status === 'conflict') return readMemoryState(scopeId, { ...options, migrate: false });
+        if (migrated.status !== 'committed') throw Object.assign(migrated.error || new Error('旧记忆迁移未完成'), { committed: migrated.committed });
+        return migrated.state;
+    };
+    const commitMemoryState = async (state, nextList, options = {}) => {
+        const captured = memoryStates.get(state);
+        if (!captured) return { status: 'error', committed: false, error: storageWriteError('MemoryProtocolError', '缺少真实读取的记忆基线') };
+        const { scopeId, data, metadata, writeEpoch } = captured;
+        try {
+            if (metadata?.deleted && !options.delete && options.recreate !== true) throw storageWriteError('MemoryDeletedError', '作用域已删除，不能由旧任务复活');
+            if (!options.delete) validateMemoryRecords(nextList, undefined);
+            const nextMeta = { schema: 1, revision: newMemoryRevision(), deleted: options.delete === true };
+            const nextData = options.delete ? undefined : cloneForStorage(nextList);
+            const dataKey = scopedStorageKey('classic_memories', scopeId), metaKey = memoryStateKey(scopeId);
+            const extraExpected = options.expected || [], extraChanges = options.changes || [];
+            // Extra keys ride in this transaction, so they must never touch any memory body or sidecar:
+            // another scope would be written without its own captured revision, defeating the protocol.
+            if (extraExpected.some(item => isProtectedMemoryKey(item?.key))
+                || extraChanges.some(item => isProtectedMemoryKey(item?.key))
+                || extraExpected.some(item => item?.key === dataKey || item?.key === metaKey)
+                || extraChanges.some(item => item?.key === dataKey || item?.key === metaKey)) {
+                throw storageWriteError('MemoryProtocolError', '附加事务键不得写入记忆正文或版本键');
+            }
+            const unchanged = !options.delete && extraChanges.length === 0 && storageContentKey(data) === storageContentKey(nextData);
+            const result = await compareAndWriteStoredValues({
+                expected: [{ key: dataKey, value: data }, { key: metaKey, value: metadata }, ...extraExpected],
+                changes: unchanged ? [] : [options.delete ? { key: dataKey, operation: 'delete' } : { key: dataKey, operation: 'set', value: nextData },
+                    { key: metaKey, operation: 'set', value: nextMeta }, ...extraChanges],
+                guard: options.guard, signal: options.signal, writeEpoch, memoryPermit: memoryProtocolPermit
+            });
+            if (result.status === 'committed') result.state = makeMemoryState(scopeId, nextData, nextMeta, writeEpoch);
+            if (result.status === 'unchanged') result.state = state;
+            return result;
+        } catch (error) { return { status: 'error', committed: false, error }; }
+    };
+    const requireMemoryCommit = result => {
+        if (!['committed', 'unchanged'].includes(result.status)) throw Object.assign(result.error || new Error('记忆未提交'), { status: result.status, committed: result.committed === true });
+        return result;
+    };
+    const setMemoryWithState = async (scopeId, value, options) => {
+        if (!options.memoryState || options.memoryState.scopeId !== scopeId) throw storageWriteError('MemoryProtocolError', '记忆写入必须提供意图起点的版本基线');
+        return requireMemoryCommit(await commitMemoryState(options.memoryState, value, options));
+    };
+    const deleteMemoryScope = async (scopeId, options = {}) => {
+        const state = options.memoryState || await readMemoryState(scopeId, { migrate: false });
+        if (state.scopeId !== scopeId) throw storageWriteError('MemoryProtocolError', '删除基线作用域不一致');
+        // Keep a tombstone even if the main key was absent: legacy reads must never resurrect it.
+        return requireMemoryCommit(await commitMemoryState(state, undefined, { ...options, delete: true }));
+    };
+
+    // Restores write raw records, so the pair must be normalized before it reaches the store.
+    // Old backups carry a body with no sidecar (synthesize a revision); a tombstone must never
+    // arrive with a body. Anything else is corrupt and aborts the restore instead of half-writing.
+    const prepareRestoredMemoryEntries = (entries) => {
+        if (!Array.isArray(entries)) throw storageWriteError('StorageDataError', '恢复数据条目无效');
+        const bodies = new Map(), metas = new Map();
+        for (const entry of entries) {
+            if (!entry || typeof entry.key !== 'string') continue;
+            const bodyScope = memoryScopeFromKey(entry.key);
+            if (bodyScope !== null) { bodies.set(bodyScope, entry.value); continue; }
+            const metaScope = entry.key.startsWith(storageKey(MEMORY_STATE_NAME) + '_')
+                ? entry.key.slice((storageKey(MEMORY_STATE_NAME) + '_').length) : null;
+            if (metaScope) metas.set(metaScope, entry.value);
+        }
+        const fixes = new Map();
+        const validMeta = meta => !!meta && meta.schema === 1 && /^[a-f0-9]{32}$/.test(meta.revision)
+            && typeof meta.deleted === 'boolean';
+        for (const scopeId of new Set([...bodies.keys(), ...metas.keys()])) {
+            const body = bodies.get(scopeId), meta = metas.get(scopeId);
+            if (meta !== undefined) {
+                if (!validMeta(meta)) throw storageWriteError('StorageDataError', `备份中的记忆版本记录损坏（${scopeId}）`);
+                fixes.set(memoryStateKey(scopeId), { schema: 1, revision: newMemoryRevision(), deleted: meta.deleted });
+                if (meta.deleted) {
+                    // 墓碑优先：已删除的作用域即便备份里残留正文，也不能写回正文
+                    if (body !== undefined) fixes.set(memoryScopeKeyOf(scopeId), undefined);
+                    continue;
+                }
+                if (body === undefined) throw storageWriteError('StorageDataError', `备份中的记忆版本记录缺少正文（${scopeId}）`);
+                if (!Array.isArray(body)) throw storageWriteError('StorageDataError', `备份中的记忆数据不是数组（${scopeId}）`);
+                continue;
+            }
+            if (body === undefined) continue;
+            if (!Array.isArray(body)) throw storageWriteError('StorageDataError', `备份中的记忆数据不是数组（${scopeId}）`);
+            fixes.set(memoryStateKey(scopeId), { schema: 1, revision: newMemoryRevision(), deleted: false });
+        }
+        if (!fixes.size) return entries.map(entry => ({ key: entry.key, value: entry.value }));
+        const out = entries.map(entry => ({ key: entry.key, value: entry.value }));
+        for (const [key, value] of fixes) {
+            const index = out.findIndex(entry => entry.key === key);
+            if (value === undefined) { if (index >= 0) out.splice(index, 1); continue; }
+            if (index >= 0) out[index] = { key, value };
+            else out.push({ key, value });
+        }
+        return out;
+    };
+    const memoryScopeKeyOf = scopeId => scopedStorageKey('classic_memories', scopeId);
+    // Explicit whole-scope replacement for import/restore flows; the fresh read is the baseline,
+    // so a concurrent writer still wins through the CAS instead of being overwritten.
+    const replaceMemoryScopeList = async (scopeId, list, options = {}) => {
+        const state = options.memoryState || await readMemoryState(scopeId, { migrate: false });
+        return requireMemoryCommit(await commitMemoryState(state, list, { ...options, recreate: true }));
+    };
+
+    // B1: grouped commit for keys that share no revision protocol. One readwrite transaction, and only
+    // complete counts as success, so a quota failure cannot leave half of the settings block rewritten.
+    // Memory keys are refused here on purpose: they must carry a baseline through commitMemoryState.
+    const commitStoredValueBatch = async (command = {}) => {
+        const writeEpoch = command.writeEpoch ?? storageWriteEpoch;
+        let committed = false;
+        let expected, changes, options;
+        try {
+            options = { guard: command.guard, signal: command.signal, writeEpoch };
+            assertStorageWriteAllowed(options, writeEpoch);
+            // Optional baseline: when present, the whole group is conditional on those keys being
+            // unchanged, so two read-modify-write callers cannot silently drop each other's edit.
+            expected = (Array.isArray(command.expected) ? command.expected : []).map(item => {
+                if (!item || typeof item.key !== 'string' || !item.key) throw storageWriteError('StorageDataError', '分组提交基线键无效');
+                if (isProtectedMemoryKey(item.key)) throw storageWriteError('MemoryProtocolError', '记忆键必须经过版本协议提交');
+                return { key: item.key, fingerprint: storageContentKey(item.value) };
+            });
+            if (new Set(expected.map(item => item.key)).size !== expected.length) {
+                throw storageWriteError('StorageDataError', '分组提交基线键重复');
+            }
+            if (!Array.isArray(command.writes)) throw storageWriteError('StorageDataError', '分组提交必须提供写入列表');
+            changes = command.writes.map(item => {
+                if (!item || typeof item.key !== 'string' || !item.key) throw storageWriteError('StorageDataError', '分组提交键无效');
+                if (isProtectedMemoryKey(item.key)) throw storageWriteError('MemoryProtocolError', '记忆键必须经过版本协议提交');
+                const operation = item.operation || 'set';
+                if (!['set', 'delete'].includes(operation)) throw storageWriteError('StorageDataError', '分组提交操作无效');
+                if (operation === 'delete') return { key: item.key, operation, fingerprint: storageContentKey(undefined) };
+                if (!isPlainStorable(item.value)) storageContentKey(item.value);
+                const value = cloneForStorage(item.value);
+                if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
+                if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
+                return { key: item.key, operation, value, fingerprint: storageContentKey(value) };
+            });
+            if (new Set(changes.map(item => item.key)).size !== changes.length) {
+                throw storageWriteError('StorageDataError', '分组提交键重复');
+            }
+            if (!changes.length) return { status: 'unchanged', committed: false, writeEpoch, records: [] };
+            if (!mainDb) await initDB();
+            const perform = () => runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
+                const applyChanges = () => {
+                    for (const change of changes) {
+                        if (change.operation === 'delete') store.delete(change.key);
+                        else store.put(change.value, change.key);
+                    }
+                };
+                if (!expected.length) { applyChanges(); return; }
+                let remaining = expected.length;
+                const actual = new Array(expected.length);
+                expected.forEach((item, index) => {
+                    const request = store.get(item.key);
+                    request.onsuccess = () => {
+                        try {
+                            actual[index] = request.result;
+                            if (--remaining !== 0) return;
+                            assertStorageWriteAllowed(options, writeEpoch);
+                            if (expected.some((entry, i) => storageContentKey(actual[i]) !== entry.fingerprint)) {
+                                throw storageWriteError('StorageConflictError', '基线已被其他操作修改，未覆盖新数据');
+                            }
+                            applyChanges();
+                        } catch (error) { abortWith(error); }
+                    };
+                });
+            }, options);
+            try { await perform(); }
+            catch (error) {
+                if (!isDatabaseClosingError(error)) throw error;
+                await reopenAfterStorageError(error);
+                assertStorageWriteAllowed(options, writeEpoch);
+                // Same rule as dbSet: no blind retry without an explicit source guard.
+                if (typeof command.guard !== 'function') throw error;
+                await perform();
+            }
+            committed = true;
+            const actual = await readStoredValueSet(changes.map(item => item.key));
+            if (actual.some((item, index) => storageContentKey(item.value) !== changes[index].fingerprint)) {
+                throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');
+            }
+            return { status: 'committed', committed: true, writeEpoch, records: actual };
+        } catch (error) {
+            committed ||= error?.committed === true;
+            const status = committed ? 'committed_unverified'
+                : error?.name === 'StoragePausedError' ? 'paused'
+                : error?.name === 'StorageConflictError' ? 'conflict'
+                : error?.name === 'AbortError' && command.signal?.aborted ? 'cancelled' : 'error';
+            return { status, committed, writeEpoch, error };
+        }
+    };
+
     const setRawStoredValue = (key, value) => dbSet(String(key), value);
 
     window.RPHubStorage = Object.freeze({
+        readMemoryState,
+        commitMemoryState,
+        deleteMemoryScope,
+        prepareRestoredMemoryEntries,
+        replaceMemoryScopeList,
+        commitStoredValueBatch,
+        storageKeyFor: storageKey,
+        scopedStorageKeyFor: scopedStorageKey,
+        storageContentKey,
+        readStoredValueSet,
+        compareAndWriteStoredValues,
         cloneForStorage,
-        deleteScopedStoredValue: (name, id) => dbDeleteWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id)),
-        deleteStoredValue: (name) => dbDeleteWithLegacy(storageKey(name), legacyStorageKey(name)),
+        deleteScopedStoredValue: (name, id, options = {}) => dbDeleteWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id), options),
+        deleteStoredValue: (name, options = {}) => dbDeleteWithLegacy(storageKey(name), legacyStorageKey(name), options),
         getLegacyDb: () => legacyDb,
         getMainDb: () => mainDb,
-        getScopedStoredValue: (name, id) => dbGetWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id)),
-        getStoredValue: (name) => dbGetWithLegacy(storageKey(name), legacyStorageKey(name)),
+        getScopedStoredValue: (name, id, options = {}) => dbGetWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id), options),
+        getStoredValue: (name, options = {}) => dbGetWithLegacy(storageKey(name), legacyStorageKey(name), options),
         getStorageLogicalKey,
         initDB,
         isDatabaseClosingError,
         readStorageKeys,
         setScopedStoredValue: (name, id, value, options = {}) => dbSet(scopedStorageKey(name, id), value, options),
-        setWritesPaused: (paused) => { writesPaused = paused; },
+        setWritesPaused: (paused) => {
+            const next = !!paused;
+            if (writesPaused !== next) {
+                storageWriteEpoch++;
+                writesPaused = next;
+                const reason = storageWriteError(next ? 'StoragePausedError' : 'StorageConflictError', '存储维护状态变化，未提交事务已中止');
+                for (const abort of storageActiveWrites.values()) abort(reason);
+            }
+        },
+        getStorageWriteState: () => ({ paused: writesPaused, epoch: storageWriteEpoch }),
         setStoredValue: (name, value, options = {}) => dbSet(storageKey(name), value, options),
         unwrapForStorage
     });
@@ -282,8 +796,12 @@
     };
 
 
-    const normalizeClassicMemoryForRuntime = (memory, includeSources = true) => {
-        if (memory?.classicMemory !== true || !String(memory.summary || '').trim()) return null;
+    const normalizeClassicMemoryForRuntime = (memory, depth = 0, ancestors = new Set()) => {
+        if (depth > 128 || !memory || typeof memory !== 'object' || ancestors.has(memory)
+            || memory.classicMemory !== true || !String(memory.summary || '').trim()) {
+            throw Object.assign(new Error('记忆来源树损坏或过深，未加载缩水副本'), { name: 'MemoryTreeError' });
+        }
+        ancestors.add(memory);
         const { storyTime: _storedStoryTime, ...memoryData } = memory;
         const fallbackTurn = Math.max(1, Number(memory.turn) || 1);
         const secondaryCompressed = memory.secondaryCompressed === true;
@@ -304,20 +822,39 @@
             normalized.secondaryCompressed = true;
             normalized.turnStart = turnStart;
             normalized.turnEnd = turnEnd;
-            normalized.sourceMemories = includeSources && Array.isArray(memory.sourceMemories)
-                ? memory.sourceMemories.map(item => normalizeClassicMemoryForRuntime(item, false)).filter(Boolean)
-                : [];
         }
+        if (memory.sourceMemories !== undefined && !Array.isArray(memory.sourceMemories)) {
+            throw Object.assign(new Error('记忆来源必须是数组，未加载缩水副本'), { name: 'MemoryTreeError' });
+        }
+        if (Array.isArray(memory.sourceMemories)) {
+            normalized.sourceMemories = memory.sourceMemories.map(item => normalizeClassicMemoryForRuntime(item, depth + 1, ancestors));
+        } else if (secondaryCompressed) normalized.sourceMemories = [];
+        ancestors.delete(memory);
         return markRuntimeRaw(normalized);
     };
 
-    const prepareClassicMemoriesForRuntime = (items) => Array.isArray(items)
-        ? items.map(memory => normalizeClassicMemoryForRuntime(memory)).filter(Boolean)
-        : [];
+    const prepareClassicMemoriesForRuntime = (items) => {
+        if (items === undefined) return [];
+        if (!Array.isArray(items)) throw Object.assign(new Error('记忆列表损坏，未用空表替代'), { name: 'MemoryTreeError' });
+        return items.map(memory => normalizeClassicMemoryForRuntime(memory));
+    };
 
     // 每条总结记忆有一个持久编号（显示为 M编号），上下文、召回和正文引用共用；旧数据按轮次顺序补号。
-    const flattenClassicMemories = items => (Array.isArray(items) ? items : [])
-        .flatMap(memory => [...(memory?.sourceMemories || []), memory]);
+    const flattenClassicMemories = items => {
+        const out = [], ancestors = new Set(), emitted = new Set();
+        const visit = (list, depth) => {
+            if (!Array.isArray(list) || depth > 128) throw Object.assign(new Error('记忆来源树损坏或过深'), { name: 'MemoryTreeError' });
+            for (const memory of list) {
+                if (!memory || typeof memory !== 'object' || ancestors.has(memory)) throw Object.assign(new Error('记忆来源树存在循环或无效节点'), { name: 'MemoryTreeError' });
+                ancestors.add(memory);
+                if (memory.sourceMemories !== undefined) visit(memory.sourceMemories, depth + 1);
+                ancestors.delete(memory);
+                if (!emitted.has(memory)) { emitted.add(memory); out.push(memory); }
+            }
+        };
+        visit(items === undefined ? [] : items, 0);
+        return out;
+    };
     const getNextClassicMemoryNo = items => flattenClassicMemories(items)
         .reduce((max, memory) => Math.max(max, Number.isInteger(memory?.no) ? memory.no : 0), 0) + 1;
     const numberClassicMemories = items => {
@@ -407,6 +944,21 @@
     const buildSummaryEmbeddingText = memory =>
         `用户原输入：\n${memory.sourceUserText || ''}\n\n本轮总结：\n${memory.summary || ''}`;
 
+    // 向量坐标必须能自证「算的是哪段文本」。旧条目没有这个字段时不能靠它反推历史输入，
+    // 因此它只用于两种情况：写入时记录、以及「有指纹但不符」时判定坐标为脏。
+    // 双通道 FNV + 长度参与，避免单路 32 位碰撞把两段不同文本判成同一坐标。
+    const summaryEmbeddingFingerprint = memory => {
+        const text = buildSummaryEmbeddingText(memory || {});
+        let h1 = 0x811c9dc5, h2 = 0x01000193;
+        for (let i = 0; i < text.length; i++) {
+            const code = text.charCodeAt(i);
+            h1 = Math.imul(h1 ^ code, 0x01000193) >>> 0;
+            h2 = Math.imul(h2 ^ code, 0x85ebca6b) >>> 0;
+            h2 = (h2 ^ (h2 >>> 13)) >>> 0;
+        }
+        return `${h1.toString(16).padStart(8, '0')}${h2.toString(16).padStart(8, '0')}:${text.length.toString(36)}`;
+    };
+
     window.RPHubMemoryUtils = Object.freeze({
         buildSummaryEmbeddingText,
         cosineSimilarity,
@@ -420,6 +972,7 @@
         numberClassicMemories,
         prepareClassicMemoriesForRuntime,
         quantizeEmbeddingForStorage,
+        summaryEmbeddingFingerprint,
         trimMemoryText
     });
 })();

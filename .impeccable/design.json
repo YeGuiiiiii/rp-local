@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-06T14:32:03+08:00",
-  "title": "Design System: RP 本地版 · 白昼手账与夜蔷薇",
+  "generatedAt": "2026-11-07T01:18:52+08:00",
+  "title": "Design System: RP 本地版 · 经典、白昼手账与夜蔷薇",
   "extensions": {
     "colorMeta": {
       "night-canvas": { "role": "neutral", "displayName": "炭黑书布", "tonalRamp": ["oklch(15% 0.008 310)", "oklch(26% 0.008 310)", "oklch(38% 0.008 310)", "oklch(49% 0.008 310)", "oklch(61% 0.008 310)", "oklch(72% 0.008 310)", "oklch(84% 0.008 310)", "oklch(95% 0.008 310)"] },
@@ -84,7 +84,7 @@
     {
       "name": "底部导航",
       "kind": "nav",
-      "description": "58px紧凑胶囊，四个图标入口，夜间28px徽章；整体最大360px，右侧独立54px在线圆钮。名称由提示与无障碍标签提供。",
+      "description": "白昼手账与夜蔷薇的58px紧凑胶囊，四个图标入口，夜间28px徽章；整体最大360px，右侧独立54px在线圆钮。经典保留原版导航菜单及昼夜开关。名称由提示与无障碍标签提供。",
       "html": "<nav class=\"ds-dock\" aria-label=\"主要入口\"><button class=\"ds-dock-item ds-dock-active\" type=\"button\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"2\"/><circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M8 17c0-4 8-4 8 0\"/></svg><span>角色卡</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"m3 16 5-5 4 4 4-6 5 7\"/></svg><span>画廊</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 4h16v16H4zM8 4v16M11 9h6M11 13h6\"/></svg><span>高级</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M12 2v3M12 19v3M2 12h3M19 12h3\"/></svg><span>设置</span></button></nav>",
       "css": ".ds-dock{display:flex;max-width:296px;height:58px;padding:6px;background:linear-gradient(180deg,var(--ui-polish-soft,#eedee615),transparent 38%),var(--yy-paper,#211d23);border:1px solid var(--yy-line,#57434e);border-radius:30px;box-shadow:inset 0 1px 0 var(--ui-polish,#eedee64d),inset 0 -2px 0 var(--ui-recess,#0000005c)}.ds-dock-item{position:relative;flex:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 2px;background:transparent;border:0;border-radius:24px;color:var(--shell-muted,#c5b7bf);cursor:pointer}.ds-dock-item svg{width:28px;height:28px}.ds-dock-item span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.ds-dock-active{background:linear-gradient(170deg,var(--ui-polish-soft,#eedee615),transparent),var(--shell-tint,#442732);color:var(--yy-rose,#e7acbb);box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615)}.ds-dock-item:hover{color:var(--shell-text,#f2e9eb)}.ds-dock-item:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-dock-item:active{translate:0 1px}"
     },
@@ -92,7 +92,7 @@
       "name": "外观套装卡",
       "kind": "card",
       "refersTo": "theme-pack",
-      "description": "每套UI关联昼夜与配色；预览区在应用中使用实际玥玥美术，并显示模式标记和色样。",
+      "description": "界面主题可选经典、白昼手账与夜蔷薇。经典预览展示布局示意，另外两套使用实际玥玥美术并关联昼夜与配色。入口为导航 → 设置 → 外观 → 界面主题；初次默认经典一次，之后记住手动选择。",
       "html": "<label class=\"ds-pack\"><span class=\"ds-pack-title\"><input type=\"radio\" name=\"ds-pack\" checked>夜蔷薇</span><span class=\"ds-pack-subtitle\">银月、酒红与玥玥的夜晚</span><span class=\"ds-pack-subtitle\">夜间</span></label>",
       "css": ".ds-pack{display:flex;flex-direction:column;min-width:140px;gap:6px;padding:14px 12px 16px;background:var(--shell-surface,#211d23);border:1px solid var(--shell-accent,#e7acbb);border-radius:8px;cursor:pointer;font-family:var(--font-sans,system-ui)}.ds-pack-title{display:flex;align-items:center;gap:7px;color:var(--shell-text,#f2e9eb);font-size:14px;font-weight:700}.ds-pack-title input{width:16px;height:16px;accent-color:var(--shell-accent,#e7acbb);flex:none}.ds-pack-subtitle{font-size:12px;color:var(--shell-muted,#c5b7bf);overflow-wrap:anywhere}.ds-pack:hover{border-color:var(--shell-accent,#e7acbb)}.ds-pack:focus-within{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-pack input:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:2px}"
     },
@@ -100,7 +100,7 @@
       "name": "套装模式标签",
       "kind": "chip",
       "refersTo": "mode-badge",
-      "description": "套装自带的日间或夜间标记；不提供独立模式切换。",
+      "description": "套装自带的经典、日间或夜间信息标记；经典保留原版导航中的昼夜开关。",
       "html": "<span class=\"ds-category\">夜间</span>",
       "css": ".ds-category{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--shell-surface,#211d23);color:var(--shell-text,#f2e9eb);font:500 10px var(--font-sans,system-ui)}"
     },
@@ -112,30 +112,37 @@
       "css": ".ds-tilt{display:flex;align-items:center;gap:16px;min-height:58px;color:var(--yy-ink,#f2e9eb);font:500 14px var(--font-sans,system-ui);cursor:pointer}.ds-tilt>span:first-child{flex:1}.ds-tilt-input{position:absolute;width:1px;height:1px;opacity:0}.ds-tilt-track{display:block;flex:none;width:42px;height:24px;border:1px solid var(--yy-line,#57434e);border-radius:12px;background:var(--yy-field,#19161b);position:relative;transition:background-color 180ms ease}.ds-tilt-track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 180ms ease}.ds-tilt-input:checked+.ds-tilt-track{background:var(--ui-command,#853e59)}.ds-tilt-input:checked+.ds-tilt-track::after{transform:translateX(18px)}.ds-tilt:hover .ds-tilt-track{border-color:var(--yy-rose,#e7acbb)}.ds-tilt-input:focus-visible+.ds-tilt-track{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:3px}.ds-tilt:active .ds-tilt-track::after{box-shadow:0 0 0 2px #ffffff33}@media(prefers-reduced-motion:reduce){.ds-tilt-track,.ds-tilt-track::after{transition:none}}"
     },
     {
+      "name": "Competition",
+      "kind": "custom",
+      "description": "赛事横幅的真实文字与手动切换控件示例，预览省略专绘背景。应用一次显示一张静止横幅，左右箭头、底部指示点和方向键切换；从详情返回保留本次运行的选择，不自动播放。公告使用紧凑文字入口；详情沿用日夜配色，正文14px、行高1.8、最大850px，底部完整海报不附重复标题，海报下方24px后只放一个灯塔原帖入口；赛事素材不进入玩家画廊或下载。",
+      "html": "<section class=\"ds-competition\" aria-label=\"灯塔赛事\"><div class=\"ds-competition-slides\"><button class=\"ds-competition-banner\" type=\"button\" aria-label=\"奇幻杯周赛\"><span class=\"ds-competition-copy\"><strong>奇幻杯周赛</strong><span>1000 饼干奖池</span><small>投稿中 · 11月12日 23:59 截稿</small></span></button><button class=\"ds-competition-arrow ds-competition-previous\" type=\"button\" aria-label=\"上一场赛事\" title=\"上一场赛事\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m15 18-6-6 6-6\"/></svg></button><button class=\"ds-competition-arrow ds-competition-next\" type=\"button\" aria-label=\"下一场赛事\" title=\"下一场赛事\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button></div><div class=\"ds-competition-dots\" role=\"group\" aria-label=\"选择赛事\"><button type=\"button\" aria-label=\"查看奇幻杯周赛\" aria-pressed=\"true\"><span></span></button><button type=\"button\" aria-label=\"查看科技／科幻杯\" aria-pressed=\"false\"><span></span></button></div></section>",
+      "css": ".ds-competition{width:100%;min-width:0;font-family:var(--font-sans,system-ui);letter-spacing:0}.ds-competition-slides{position:relative;min-width:0}.ds-competition-banner{position:relative;isolation:isolate;display:flex;align-items:flex-end;width:100%;min-height:180px;overflow:hidden;padding:20px 64px;border:0;border-radius:8px;background:#e4ece2;color:#193c30;text-align:left;cursor:pointer}.ds-competition-banner::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#eff4eaf2,#eff4ead6 48%,#eff4ea40 76%,transparent)}.ds-competition-copy{position:relative;display:grid;gap:8px;min-width:0;line-height:1.5;overflow-wrap:anywhere}.ds-competition-copy strong{font-size:22px;font-weight:700;line-height:1.35}.ds-competition-copy>span{font-size:14px}.ds-competition-copy small{font-size:12px;line-height:1.6}.ds-competition-arrow{position:absolute;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:#fffffff0;color:#343b46;cursor:pointer}.ds-competition-previous{left:10px}.ds-competition-next{right:10px}.ds-competition-arrow svg{width:20px;height:20px}.ds-competition-arrow:hover{background:#fff}.ds-competition-dots{display:flex;justify-content:center}.ds-competition-dots button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--shell-accent,#e7acbb);cursor:pointer}.ds-competition-dots span{width:6px;height:6px;border-radius:3px;background:var(--shell-line,#57434e)}.ds-competition-dots [aria-pressed=true] span{width:18px;background:currentColor}.ds-competition-banner:hover,.ds-competition button:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:2px}@media(min-width:700px){.ds-competition-banner{min-height:220px}}"
+    },
+    {
       "name": "公告阅读区",
       "kind": "custom",
-      "description": "示意公告固定顶部与滚动正文；正式公告含六项变化，右下秘书玥玥浮于渐变上方，正文末尾留白避让人物。",
-      "html": "<section class=\"ds-release\" aria-label=\"更新公告\"><header class=\"ds-release-header\"><div><h2>玥玥的更新简报</h2><p>RP 本地版 1.10<span>与 RP-Hub 2.8.116 对照</span></p></div><button class=\"ds-release-close\" type=\"button\" aria-label=\"关闭更新公告\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></header><div class=\"ds-release-reading\" tabindex=\"0\" role=\"region\" aria-label=\"更新内容\"><section><h3>角色相簿</h3><p>图片按角色卡分别保存，相簿封面完整显示，不再拉伸或留白边。新增玻璃反光，随手机倾斜变化，可在外观中关闭。保存的仍是原图；软件装饰不再出现下载按钮。</p></section></div></section>",
+      "description": "经典复用当前秘书装玥玥公告，固定顶部与滚动正文、右下人物及底部避让保留。鸣谢注明更新群472441481、132292045；经典说明写明导航 → 设置 → 外观 → 界面主题的位置。",
+      "html": "<section class=\"ds-release\" aria-label=\"更新公告\"><header class=\"ds-release-header\"><div><h2>玥玥的更新简报</h2><p>RP 本地版 1.23<span>与 RP-Hub 2.8.118 对照</span></p></div><button class=\"ds-release-close\" type=\"button\" aria-label=\"关闭更新公告\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></header><div class=\"ds-release-reading\" tabindex=\"0\" role=\"region\" aria-label=\"更新内容\"><section><h3>经典皮肤与界面切换</h3><p>默认使用 RP-Hub 2.8.118 的经典布局。打开导航 → 设置 → 外观 → 界面主题，可切换经典、白昼手账或夜蔷薇。原版导航的“外观”入口也可直接进入。切换后保留角色卡、聊天和记忆。</p></section></div></section>",
       "css": ".ds-release{display:flex;flex-direction:column;max-width:660px;max-height:360px;overflow:hidden;border:1px solid var(--yy-line,#57434e);border-radius:8px;background:var(--yy-paper,#211d23);color:var(--yy-ink,#f2e9eb);font-family:var(--font-sans,system-ui);letter-spacing:0;box-shadow:0 18px 55px #0004}.ds-release-header{display:flex;align-items:flex-start;gap:12px;flex:none;padding:24px 24px 17px;border-bottom:1px solid var(--yy-line,#57434e)}.ds-release-header>div{flex:1;min-width:0}.ds-release-header h2{margin:0;font-size:24px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}.ds-release-header p{margin:8px 0 0;color:var(--yy-rose,#e7acbb);font-size:13px;line-height:1.7}.ds-release-header p span{display:block;color:var(--yy-muted,#c5b7bf);font-size:12px}.ds-release-close{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:10px;border:1px solid var(--yy-line,#57434e);border-radius:6px;background:var(--yy-field,#19161b);color:inherit;cursor:pointer;transition:background-color 120ms ease,transform 120ms ease}.ds-release-close svg{width:24px;height:24px}.ds-release-close:hover{background:var(--shell-tint,#442732)}.ds-release-close:active{transform:translateY(1px)}.ds-release-close:focus-visible,.ds-release-reading:focus-visible{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:-3px}.ds-release-reading{min-height:96px;overflow-y:auto;padding:20px 24px 158px;scroll-padding-bottom:158px;font-size:15px;line-height:1.85;overflow-wrap:anywhere}.ds-release-reading h3{margin:0 0 7px;color:var(--yy-rose,#e7acbb);font-size:16px;font-weight:700;line-height:1.6}.ds-release-reading p{margin:0}"
     }
   ],
   "narrative": {
     "northStar": "月下手账",
-    "overview": "白昼手账与夜蔷薇分别拥有日间、夜间模式和配套颜色。夜间使用炭黑书布、酒红内衬、珍珠色文字与银月配饰；控件带细腻亮边，画廊使用随倾斜变化的玻璃反光，保持适合长时间阅读与操作的安静密度。\n\n软件美术与角色卡正文各有边界。玥玥陪伴菜单、页面标题、空状态和操作区域，正文继续按角色卡自身内容渲染。图案负责气氛，文字、输入框、选项和点击区域保持真实控件。",
+    "overview": "版本 1.23 默认使用 RP-Hub 2.8.118 的经典完整布局，保留原版页面、导航菜单与昼夜开关。经典是原版界面的局部接入；下述“月下手账”、前置 token 与美术规范继续适用于白昼手账和夜蔷薇，不重新定义经典的视觉系统。\n\n白昼手账与夜蔷薇分别拥有日间、夜间模式和配套颜色。夜间使用炭黑书布、酒红内衬、珍珠色文字与银月配饰；控件带细腻亮边，画廊使用随倾斜变化的玻璃反光，保持适合长时间阅读与操作的安静密度。\n\n软件美术与角色卡正文各有边界。玥玥陪伴菜单、页面标题、空状态和操作区域，正文继续按角色卡自身内容渲染。图案负责气氛，文字、输入框、选项和点击区域保持真实控件。",
     "keyCharacteristics": [
-      "白昼手账对应日间，夜蔷薇对应夜间；切换 UI 同步模式和配色。",
+      "经典保留原版布局与独立昼夜开关；白昼手账对应日间，夜蔷薇对应夜间。",
       "紧凑标题、分组列表、明确的资源按钮和低干扰聊天输入栏。",
       "炭黑层次、酒红操作色、柔和亮文字与银色小配饰。",
       "玻璃反光默认开启，只在外观提供独立开关；反光移动，原图保持不动。",
       "玥玥保留圆脸、黑发、暗红瞳和角色自身左右不同的配饰。"
     ],
     "rules": [
-      { "name": "The Pack and Mode Rule", "body": "每套 UI 决定自己的显示模式、配色与美术；选择 UI 同步三者，外观不再提供独立模式和主色选择。", "section": "colors" },
+      { "name": "The Pack and Mode Rule", "body": "白昼手账与夜蔷薇各自绑定显示模式、配色与美术；经典保留原版昼夜开关，不因切换昼夜离开经典布局。", "section": "colors" },
       { "name": "The Composer Surface Rule", "body": "聊天输入栏在各尺寸使用对应 UI 的不透明底色和细亮边；移动端不启用实时背景模糊，保证输入清楚。", "section": "layout" },
       { "name": "The Original Image Rule", "body": "倾斜只移动玻璃反光层，不位移、拉伸或修改原图；保存图片直接读取原始文件，不包含玻璃效果。", "section": "elevation" }
     ],
     "dos": [
-      "**Do** 让 UI 选择同步对应的昼夜模式与配色，并保持重新打开时一致。",
+      "**Do** 保留经典的原版布局与昼夜开关，让白昼手账和夜蔷薇同步各自配色，并记住手动选择。",
       "**Do** 用真实文本、字段、单选和按钮承载功能，用玥玥与小配饰补充气氛。",
       "**Do** 让倾斜反光默认开启，只在外观用独立开关保存选择。",
       "**Do** 保持原图比例与保存字节，反光只作用于显示层。",
@@ -146,7 +153,7 @@
       "**Don't** 把软件立绘或大面积装饰叠到角色卡阅读正文上。",
       "**Don't** 用惨白恐怖形象、亮红星星瞳或尖下巴替代玥玥的既定形象。",
       "**Don't** 为玻璃效果拉伸原图、扩大白边或阻挡图片操作。",
-      "**Don't** 恢复与 UI 分离的模式、主色选择或画廊启用按钮。",
+      "**Don't** 把手账材质和底部四入口导航套进经典，或改变现有白昼手账与夜蔷薇设计。",
       "**Don't** 把尚未制作的季节套装写成已经可用的内容。"
     ]
   }

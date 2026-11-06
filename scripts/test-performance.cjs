@@ -54,7 +54,7 @@ fs.mkdirSync(output, { recursive: true });
           id: `${card.uuid}-${i}`, role: i % 2 ? 'assistant' : 'user',
           content: '用于加载检查的虚构剧情。'.repeat(60), shouldAnimate: false
         })));
-        await RPHubStorage.setScopedStoredValue('classic_memories', card.uuid, [
+        await RPHubStorage.replaceMemoryScopeList(card.uuid, [
           { classicMemory: true, no: 1, turn: 1, summary: `${card.name}已有记忆` }
         ]);
       }

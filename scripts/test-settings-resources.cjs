@@ -193,12 +193,22 @@ fs.mkdirSync(output, { recursive: true });
         });
         await check('sorting a later page only changes the rows on that page', async () => {
             const handles = page.locator('#worldinfo-list .sortable-list-handle');
+            await page.waitForFunction(() => {
+                const sortable = Sortable.get(document.getElementById('worldinfo-list'));
+                return sortable && !sortable.option('disabled');
+            });
+            await handles.first().hover();
             const from = await handles.nth(0).boundingBox(), to = await handles.nth(2).boundingBox();
             await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
             await page.mouse.down();
-            await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 15 });
-            await page.mouse.up();
-            await page.waitForTimeout(300);
+            try {
+                await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2 + 8, { steps: 3 });
+                await page.locator('.sortable-list-preview').waitFor();
+                await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 15 });
+                await page.waitForFunction(() =>
+                    document.querySelector('#worldinfo-list .sortable-list-item').dataset.resourceIndex !== '100');
+            } finally { await page.mouse.up(); }
+            await page.waitForFunction(() => __qa.worldInfo[100].comment !== '世界书条目 101');
             const result = await page.evaluate(() => ({
                 beforePage: __qa.worldInfo[99].comment,
                 page: __qa.worldInfo.slice(100, 103).map(entry => entry.comment),

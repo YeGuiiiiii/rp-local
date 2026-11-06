@@ -1,8 +1,21 @@
-module.exports = function installFileBridge() {
+module.exports = function installFileBridge({ skin = 'journal' } = {}) {
   if (window.top !== window) return;
+  // Existing UI fixtures use the journal layout; installation-default tests opt out with skin:null.
+  if (skin && !localStorage.getItem('rphub-layout118')) {
+    localStorage.setItem('rphub-layout118', '1');
+    localStorage.setItem('rphub-ui-pack', skin);
+  }
   const originalSet = Storage.prototype.setItem;
   const storeKey = '__qa_native_files';
   const files = window.__qaNativeFiles = JSON.parse(localStorage.getItem(storeKey) || '{}');
+  if (skin) {
+    // Older UI checks are unrelated to the daily reminder; mark today's question as already shown.
+    const config = { enabled: true, triggerMode: 'remind', lastRemindDate: new Date().toLocaleDateString('en-CA') };
+    files['个人数据/qa-backup-config.json'] ||= { text: JSON.stringify({ key: 'rp_hub_auto_backup_config', value: config }) };
+    const index = JSON.parse(files['个人数据/文件索引.json']?.text || '{}');
+    index.rp_hub_auto_backup_config ||= '个人数据/qa-backup-config.json';
+    files['个人数据/文件索引.json'] = { text: JSON.stringify(index) };
+  }
   const response = value => JSON.stringify({ ok: true, value });
   const persist = () => originalSet.call(localStorage, storeKey, JSON.stringify(files));
   const validate = name => {

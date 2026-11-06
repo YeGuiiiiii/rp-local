@@ -92,7 +92,7 @@ const web = path.join(root, 'web');
       const card = (uuid, name) => ({ uuid, name, first_mes: '', description: '', worldInfo: [], regexScripts: [], uiTemplates: [] });
       __qa.characters = [card('memory-card-a', '记忆测试甲'), card('memory-card-b', '记忆测试乙')];
       await RPHubStorage.setStoredValue('characters', RPHubStorage.cloneForStorage(__qa.characters));
-      await RPHubStorage.setScopedStoredValue('classic_memories', 'memory-card-b',
+      await RPHubStorage.replaceMemoryScopeList('memory-card-b',
         [{ id: 'b-sentinel', classicMemory: true, no: 1, turn: 1, summary: '乙角色原有记忆' }]);
       await __qa.selectCharacter(0);
       __qa.chatHistory = [

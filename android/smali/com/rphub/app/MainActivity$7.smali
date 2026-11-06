@@ -228,7 +228,11 @@
 
     const-wide/16 v0, 0x258
 
-    invoke-virtual {p1, p2, v0, v1}, Landroid/webkit/WebView;->postDelayed(Ljava/lang/Runnable;J)Z
+    new-instance p1, Landroid/os/Handler;
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+    move-result-object v2
+    invoke-direct {p1, v2}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+    invoke-virtual {p1, p2, v0, v1}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
     const/4 p1, 0x1
 

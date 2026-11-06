@@ -40,6 +40,9 @@
         return out;
     };
     const prepareMemoryEntries = entries => {
+        if (window.RPHubStorage?.prepareRestoredMemoryEntries) {
+            return window.RPHubStorage.prepareRestoredMemoryEntries(entries);
+        }
         const records = new Map(entries.map(entry => [entry.key, entry]));
         for (const entry of entries) {
             if (!entry.key.startsWith(memoryStatePrefix)) continue;

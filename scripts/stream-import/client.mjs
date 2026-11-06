@@ -123,8 +123,13 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             const deleted = new Set(session.deleted);
             const records = session.plan.filter(item => !item.key.startsWith('__ls__:')
                 && !item.key.startsWith('rp_hub_b1_memory_state_') && !deleted.has(item.key));
-            for (const key of deleted) store.put([], key);
-            for (const record of session.plan.filter(item => item.key.startsWith('rp_hub_b1_memory_state_'))) store.delete(record.key);
+            for (const key of deleted) {
+                for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
+                    { key: key.replace('rp_hub_classic_memories_', 'rp_hub_b1_memory_state_'),
+                        value: { schema: 1, revision: crypto.randomUUID().replaceAll('-', ''), deleted: true } }
+                ])) store.put(entry.value, entry.key);
+                store.delete(key);
+            }
             const next = index => {
                 try {
                     cancelled(signal);
@@ -144,7 +149,9 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
                                 if (record.array) value.push(item); else value = item;
                                 cursor.continue();
                             } else {
-                                store.put(value, record.key);
+                                for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
+                                    { key: record.key, value }
+                                ])) store.put(entry.value, entry.key);
                                 value = null;
                                 progress?.(index + 1, records.length);
                                 next(index + 1);

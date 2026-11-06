@@ -640,37 +640,29 @@
         });
     }
 
-    /**
-     * 在导航抽屉「高级」分组的空位插入入口（当前是「灯塔」右边那一格）。
-     *
-     * 刻意不写进官方的 advancedItems 数组：那会让官方把 currentView 切成 'gallery'，
-     * 而没有任何视图块与之对应 ⇒ 主区域空白。这里克隆一个同款按钮塞进同一个网格，
-     * 点击只开浮层、不改 Vue 状态，官方改版最多丢入口，不会白屏。
-     *
-     * 锚点不能只认某一个文案：这个格子先后叫过「在线时长」「灯塔」，
-     * 每次改名都会让入口凭空消失。先按已知文案找，找不到就退回「最后一个按钮」，
-     * 保证只要高级分组还在，入口就挂得上。
-     */
-    var NAV_ANCHOR_LABELS = ['灯塔', '在线时长'];
+    // 2.8.118 places the gallery before backup and repairs its position after a menu rerender.
+    var NAV_ANCHOR_LABELS = ['数据备份', '灯塔', '在线时长'];
 
     function mountNavItem() {
-        if (window.RPLocalWorkspace) return;
+        if (window.RPThemePacks.current !== 'classic') return;
         var existing = document.getElementById(NAV_ITEM_ID);
-        if (existing && existing.isConnected) return;
         var items = document.querySelectorAll('.app-navigation-grid .app-navigation-item');
         var target = null;
         var tail = null;
         for (var i = 0; i < items.length; i++) {
+            if (existing && items[i] === existing) continue;
             var spans = items[i].querySelectorAll('span');
             var text = spans.length ? String(spans[spans.length - 1].textContent || '').trim() : '';
             if (NAV_ANCHOR_LABELS.indexOf(text) >= 0) { target = items[i]; break; }
             tail = items[i];
         }
-        if (!target) target = tail;
-        if (!target) return;
+        if (existing && existing.isConnected && target && existing.nextElementSibling === target) return;
+        if (existing && existing.isConnected && !target) return;
+        if (existing && existing.isConnected) existing.remove();
+        if (!target && !tail) return;
 
         ensureStyle();
-        var btn = target.cloneNode(true);
+        var btn = (target || tail).cloneNode(true);
         btn.id = NAV_ITEM_ID;
         btn.removeAttribute('aria-current');
         btn.classList.remove('is-current');
@@ -691,7 +683,8 @@
             openGallery();
         }, true);
 
-        target.parentElement.appendChild(btn);
+        if (target) target.parentElement.insertBefore(btn, target);
+        else tail.parentElement.appendChild(btn);
     }
 
     /* ============================================================

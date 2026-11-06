@@ -221,6 +221,7 @@ const fixture = () => ({
         cards: (await get('characters')).map(card => ({ uuid: card.uuid, worldInfo: card.worldInfo, regexScripts: card.regexScripts, uiTemplates: card.uiTemplates })),
         chat: await get('chat_stream-new'), memory: await get('classic_memories_stream-new'),
         deleted: await get('classic_memories_deleted'), meta: await get('b1_memory_state_stream-new'),
+        deletedState: await RPHubStorage.readMemoryState('deleted'),
         probe: await get('stream_probe'), pref: localStorage.getItem('stream-pref'),
         presetGroups: await get('preset_groups'),
         binary: binary.image instanceof Blob ? Array.from(new Uint8Array(await binary.image.arrayBuffer())) : null,
@@ -229,7 +230,11 @@ const fixture = () => ({
     });
     assert.equal(restored.cards[0].uuid, 'stream-new'); assert.equal(restored.cards[0].uiTemplates[0].htmlTemplate, '<div>保留</div>');
     assert.equal(restored.chat[0].content, '聊天正文'); assert.equal(restored.memory[0].summary, '记忆正文');
-    assert.deepEqual(restored.deleted, []); assert.equal(restored.meta, undefined);
+    assert.equal(restored.deleted, undefined);
+    assert.equal(restored.deletedState.deleted, true);
+    assert.equal(restored.meta.deleted, false);
+    assert.match(restored.meta.revision, /^[a-f0-9]{32}$/);
+    assert.notEqual(restored.meta.revision, revision);
     assert.equal(restored.probe, 'last'); assert.equal(restored.pref, 'entry-wins');
     assert.deepEqual(restored.presetGroups, ['STA1N官方分组', '流式恢复的空组']);
     assert.deepEqual(restored.binary, [1, 2, 3]); assert.ok(restored.files > 0);

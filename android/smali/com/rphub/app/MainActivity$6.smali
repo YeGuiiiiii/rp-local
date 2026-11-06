@@ -19,6 +19,17 @@
 
 
 # direct methods
+.method public copyText(Ljava/lang/String;)Z
+    .locals 1
+    .annotation runtime Landroid/webkit/JavascriptInterface;
+    .end annotation
+
+    iget-object v0, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
+    invoke-static {v0, p1}, Lcom/rphub/app/WebViewSupport;->copyText(Landroid/content/Context;Ljava/lang/String;)Z
+    move-result v0
+    return v0
+.end method
+
 .method constructor <init>(Lcom/rphub/app/MainActivity;)V
     .locals 0
 

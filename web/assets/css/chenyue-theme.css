@@ -144,7 +144,7 @@
 .yy-poke-mascot > img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .yy-poke-mascot:focus-visible { outline: 2px solid var(--yy-rose); outline-offset: 3px; }
 .yy-mascot-speech {
-    position: fixed; z-index: 20000; box-sizing: border-box; margin: 0; padding: 10px 14px;
+    position: fixed; z-index: 84; box-sizing: border-box; margin: 0; padding: 10px 14px;
     border-radius: 8px; background: var(--yy-paper); color: var(--yy-ink);
     box-shadow: 0 5px 20px #20112530; font-size: 14px; font-weight: 500; line-height: 1.65;
     overflow-wrap: anywhere; pointer-events: none; text-align: center; letter-spacing: 0;

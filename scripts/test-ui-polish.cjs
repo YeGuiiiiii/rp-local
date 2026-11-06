@@ -142,7 +142,7 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(geometry.pageOverflow, false, `${screen}-${width}-${mode}`);
         if (screen === 'album') {
           assert.equal(geometry.fit, 'contain');
-          assert.equal(geometry.searchBackground, 'none');
+          assert.equal(/url\(/i.test(geometry.searchBackground), false, 'Search field has no stretched bitmap decoration');
           assert.equal(geometry.searchInputBackground, 'rgba(0, 0, 0, 0)');
           assert.ok(Math.abs(geometry.aperture.left - geometry.cover.left) < 1);
           assert.ok(Math.abs(geometry.aperture.right - geometry.cover.right) < 1);

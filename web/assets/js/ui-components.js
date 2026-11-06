@@ -307,16 +307,12 @@
             const centered = ref(false);
             let returnFocus = null;
             const sections = [
-                { label: '常用', items: [
-                    ...primaryItems.filter(item => ['chat', 'characters'].includes(item.view)),
-                    { view: 'cardconfig', label: '当前角色配置', requiresCharacter: true, icon: advancedItems.find(item => item.view === 'worldinfo').icon },
-                    { view: 'album', label: '相册', icon: 'M4 4h16v16H4zM4 16l5-6 4 5 3-3 4 4M16 8h.01' },
-                    { view: 'settings', label: '设置' }
-                ] },
-                { label: '在线', items: [
-                    ...onlineItems.filter(item => item.view === 'square'),
-                    ...advancedItems.filter(item => item.view === 'lighthouse')
-                ] }
+                { label: '常用', items: [...primaryItems, { view: 'settings', label: '设置' }] },
+                { label: '在线', items: onlineItems },
+                { label: '高级', items: [
+                    ...advancedItems.filter(item => item.view !== 'patchlist'),
+                    { view: 'appearance', label: '外观', icon: 'M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-4 2 2 0 0 1 1-4h2a4 4 0 0 0 4-4c0-4-4-6-9-6Z' }
+                ], extra: 'patchlist' }
             ];
             // Running index for the opening cascade (--i in CSS).
             let order = 0;
@@ -338,14 +334,6 @@
                     }
                 }
                 emit('update:current-view', view);
-                emit('close');
-            };
-            const foldFloating = () => {
-                window.dispatchEvent(new Event('rp:hide-floating'));
-                emit('close');
-            };
-            const showFloating = () => {
-                window.dispatchEvent(new Event('rp:show-floating'));
                 emit('close');
             };
             watch(() => props.open, async open => {
@@ -381,7 +369,7 @@
                     first?.focus();
                 }
             };
-            return { panel, position, centered, sections, footerOrder, selectView, restoreFocus, trapFocus, isDark, toggleTheme, foldFloating, showFloating };
+            return { panel, position, centered, sections, footerOrder, selectView, restoreFocus, trapFocus, isDark, toggleTheme };
         },
         template: `
             <transition name="app-navigation" :duration="{ enter: 560, leave: 250 }" @after-leave="restoreFocus">
@@ -403,7 +391,15 @@
                         </header>
                         <nav class="app-navigation-content custom-scrollbar" aria-label="页面">
                             <section v-for="section in sections" :key="section.label" class="app-navigation-section">
-                                <h3 :style="{ '--i': section.offset }">{{ section.label }}</h3>
+                                <div class="classic-nav-section-heading">
+                                    <h3 :style="{ '--i': section.offset }">{{ section.label }}</h3>
+                                    <button v-if="section.extra === 'patchlist'" type="button" class="classic-patch-button"
+                                        aria-label="补丁清单" title="补丁清单" @click.stop="selectView('patchlist')">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div class="app-navigation-grid" :class="{ 'app-navigation-grid--online': section.label === '在线' }">
                                     <button v-for="(item, itemIndex) in section.items" :key="item.view" type="button"
                                         class="app-navigation-item" :class="{ 'is-current': item.view === currentView }"
@@ -429,11 +425,6 @@
                                     </button>
                                 </div>
                             </section>
-                            <p v-if="characterName" class="px-5 text-xs text-gray-500 truncate">{{characterName}}</p>
-                            <div class="workspace-links px-5">
-                                <button type="button" class="settings-action" @click="foldFloating">收起悬浮入口</button>
-                                <button type="button" class="settings-action" @click="showFloating">显示悬浮入口</button>
-                            </div>
                         </nav>
                         <footer class="app-navigation-user" :style="{ '--i': footerOrder }">
                             <img v-if="user.avatar" :src="user.avatar" alt="">
@@ -572,13 +563,16 @@
     };
 
     const SettingsPageHeader = {
-        props: { title: String },
+        props: { title: String, classic: Boolean },
         emits: ['menu'],
         template: `
             <div class="settings-page-header">
                 <div class="management-page-heading">
-                    <button @click="$emit('menu')" class="app-nav-trigger" aria-label="返回">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6M9 12h12" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button @click="$emit('menu')" class="app-nav-trigger" :aria-label="classic ? '打开导航' : '返回'">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <use v-if="classic" href="#icon-menu"></use>
+                            <path v-else d="m15 18-6-6 6-6M9 12h12" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
                     </button>
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
                         <slot name="icon"></slot>
@@ -2622,6 +2616,7 @@
         },
         template: `
             <div class="char-grid-item relative rounded-2xl overflow-hidden transition-[transform,shadow,border-color] duration-300"
+                style="content-visibility:auto;contain-intrinsic-size:auto 240px;"
                 :class="mobile
                     ? ['aspect-[2/3] shadow-md', deck ? 'character-card--deck' : 'border border-gray-100', active && !batchMode && !deck ? 'ring-4 ring-primary-500 ring-offset-2' : '']
                     : ['bg-white border border-gray-200 hover:border-primary-400 hover:shadow-xl cursor-pointer group shadow-sm flex flex-col', active && !batchMode ? 'ring-4 ring-primary-500 ring-offset-2' : '', batchMode && selected ? 'ring-2 ring-red-500 border-red-500' : '']"

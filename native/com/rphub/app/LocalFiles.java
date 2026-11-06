@@ -3,6 +3,7 @@ package com.rphub.app;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -10,6 +11,9 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,6 +22,8 @@ public final class LocalFiles {
     private final File personal;
     private final File shared;
     private Context context;
+    private static final ConcurrentHashMap<String, Uri> backupReads = new ConcurrentHashMap<>();
+    private static final String BACKUP_READ_URL = "https://sta1n156.github.io/RP-Hub/__rphub_backup_read__";
 
     public LocalFiles(Context context) {
         this(new File(context.getFilesDir(), "RP数据"),
@@ -197,6 +203,47 @@ public final class LocalFiles {
                 .put("characters", new File(shared, "角色卡数据").getAbsolutePath())
                 .put("images", new File(shared, "图片").getAbsolutePath()), null);
         } catch (Exception error) { return response(null, error); }
+    }
+
+    @JavascriptInterface
+    public String prepareBackupFileRead(String id, boolean treeDocument) {
+        try {
+            Uri uri;
+            if (treeDocument) {
+                String folder = context.getSharedPreferences("rphub_settings", 0).getString("backup_folder", "");
+                if (folder.isEmpty()) throw new IOException("Backup folder unavailable");
+                Uri tree = Uri.parse(folder);
+                uri = DocumentsContract.buildDocumentUriUsingTree(tree, id);
+            } else {
+                File root = new File(context.getExternalFilesDir(null), "backups").getCanonicalFile();
+                File target = new File(id).getCanonicalFile();
+                if (!target.getPath().startsWith(root.getPath() + File.separator) || !target.isFile())
+                    throw new IOException("Backup unavailable");
+                uri = Uri.fromFile(target);
+            }
+            String token = UUID.randomUUID().toString();
+            if (backupReads.size() >= 8) backupReads.clear();
+            backupReads.put(token, uri);
+            return token;
+        } catch (Exception error) { return "ERR:" + error.getMessage(); }
+    }
+
+    public static WebResourceResponse backupResponse(Context context, String url) {
+        if (url == null || !url.startsWith(BACKUP_READ_URL + "?")) return null;
+        try {
+            Uri uri = backupReads.remove(Uri.parse(url).getQueryParameter("t"));
+            if (uri == null) throw new IOException("Backup read expired");
+            InputStream stream = context.getContentResolver().openInputStream(uri);
+            if (stream == null) throw new IOException("Backup unavailable");
+            WebResourceResponse result = new WebResourceResponse("application/json", "UTF-8", stream);
+            result.setResponseHeaders(Collections.singletonMap("Cache-Control", "no-store"));
+            return result;
+        } catch (Exception error) {
+            WebResourceResponse result = new WebResourceResponse("application/json", "UTF-8",
+                new ByteArrayInputStream("{\"error\":\"Backup unavailable\"}".getBytes(StandardCharsets.UTF_8)));
+            result.setStatusCodeAndReasonPhrase(404, "Not Found");
+            return result;
+        }
     }
 
     public static WebResourceResponse imageResponse(Context context, String url) {
