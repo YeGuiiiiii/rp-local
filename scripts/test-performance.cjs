@@ -11,9 +11,10 @@ fs.mkdirSync(output, { recursive: true });
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  await context.addInitScript(installFiles);
+  if (!process.argv.includes('--no-files')) await context.addInitScript(installFiles, { skin: process.argv.includes('--classic') ? null : 'journal' });
   await context.addInitScript(() => {
     window.__bridgeStats = { calls: {}, returnedBytes: 0 };
+    if (!window.RPLocalFiles) return;
     for (const name of ['readText', 'writeText', 'writeTextIfChanged', 'list']) {
       if (!RPLocalFiles[name]) continue;
       const original = RPLocalFiles[name];
@@ -93,7 +94,7 @@ fs.mkdirSync(output, { recursive: true });
     assert.deepEqual(errors, []);
     const median = values => [...values].sort((a,b) => a-b)[Math.floor(values.length/2)];
     const report = {
-      environment: 'Desktop Edge, CPU throttled 4x; simulated file bridge, 24 cards and 48 scoped records. Not Android timing.',
+      environment: `Desktop Edge, CPU throttled 4x; ${process.argv.includes('--no-files') ? 'file bridge disabled for diagnosis' : 'simulated file bridge'}, 24 cards and 48 scoped records. Not Android timing.`,
       runs, medianDataReadyMs: median(runs.map(run => run.dataReadyMs)),
       medianVisibleMs: median(runs.map(run => run.visibleMs)),
       medianOpenCharacterMs: median(runs.flatMap(run => run.openCharacterMs)), errors

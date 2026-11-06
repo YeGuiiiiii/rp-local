@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>window.RP_LOCAL_VERSION = '2.9'; window.RP_LOCAL_RELEASE = 264;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.001'; window.RP_LOCAL_RELEASE = 265;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/themes/catalog.js"></script>
     <script src="assets/js/local-files.js"></script>
@@ -426,6 +426,7 @@
     </style>
     <div id="app" v-cloak class="h-full flex flex-col md:flex-row relative"
         :class="{ 'app-native-fullscreen': isChatFullscreen, 'mobile-keyboard-active': isMobileKeyboardOpen }">
+        <template id="rphub-main-template">
         <component is="style" v-if="settings.fontSize">
             .markdown-body :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(small):not(sub):not(sup):not(code):not(.memory-cite) {
             font-size: inherit !important;
@@ -1489,7 +1490,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.001 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -4432,6 +4433,7 @@
             </div>
         </modal-shell>
 
+        </template>
     </div>
 
     <script>

@@ -14,6 +14,7 @@ const web=path.join(root,'web');
   let release;
   let gate=new Promise(resolve=>{release=resolve;});
   let blockApp=true;
+  let navigation;
   await context.route('**/*',async route=>{
     const url=new URL(route.request().url());
     if(url.origin!=='https://sta1n156.github.io')return route.abort();
@@ -24,7 +25,7 @@ const web=path.join(root,'web');
     return route.fulfill({path:file,contentType:({'.html':'text/html','.css':'text/css','.js':'application/javascript','.webp':'image/webp'})[path.extname(file)]||'application/octet-stream'});
   });
   try{
-    const navigation=page.goto('https://sta1n156.github.io/RP-Hub/',{waitUntil:'load'});
+    navigation=page.goto('https://sta1n156.github.io/RP-Hub/',{waitUntil:'load'});
     await page.getByRole('status',{name:'启动欢迎页',exact:true}).waitFor();
     await page.waitForFunction(()=>document.querySelector('.startup-mascot')?.complete && document.querySelector('.startup-mascot').naturalWidth>0);
     await page.screenshot({path:path.join(root,'verification/startup-home-390.png')});
@@ -33,6 +34,8 @@ const web=path.join(root,'web');
     const two=await page.screenshot({clip:await page.locator('.startup-mascot').boundingBox()});
     assert.notDeepEqual(one,two,'Loading mascot must move');
     assert.equal(await page.evaluate(()=>!!window.__rpDataReady),false);
+    assert.equal(await page.locator('#app input, #app textarea, #app select').count(), 0,
+      'Startup must not instantiate inactive forms before the compiled interface is ready');
     release();blockApp=false;
     await navigation;
     await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
@@ -84,8 +87,8 @@ const web=path.join(root,'web');
     await page.screenshot({path:path.join(root,'verification/startup-home-360.png')});
     release();blockApp=false;await smallNav;
     await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
-    const report={existingPersonaStickersRendered:true,realLoadingWaitsForData:true,loadingMotionChanges:true,emptyUserGoesToCardDirectory:true,savedSessionResumesChat:true,backgroundVisibilityDoesNotReplay:true,onlineCloseAlignedToTrigger:true,twoRadialChoices:true,smallScreenAndReducedMotion:true};
+    const report={existingPersonaStickersRendered:true,realLoadingWaitsForData:true,inactiveFormsStayUninstantiated:true,loadingMotionChanges:true,emptyUserGoesToCardDirectory:true,savedSessionResumesChat:true,backgroundVisibilityDoesNotReplay:true,onlineCloseAlignedToTrigger:true,twoRadialChoices:true,smallScreenAndReducedMotion:true};
     fs.writeFileSync(path.join(root,'verification/startup-home.json'),JSON.stringify(report,null,2));
     console.log(JSON.stringify(report,null,2));
-  }finally{release();await browser.close();}
+  }finally{release();await navigation?.catch(()=>{});await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

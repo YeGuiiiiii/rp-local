@@ -407,9 +407,9 @@ const app = createApp({
         const openCompetition = id => {
             const event = window.RPCompetitions.events.find(item => item.id === id);
             if (!event) return;
-            closeAnnouncement();
             selectedCompetition.value = event;
             navigateWorkspace('competition');
+            closeAnnouncement();
         };
         const navigateWorkspace = target => {
             if (streamImportPanel.value?.isApplying) return;
@@ -429,7 +429,9 @@ const app = createApp({
             if (shellRoots.includes(view)) {
                 shellHistory.length = 0;
             } else {
-                shellHistory.push({ view: currentView.value, section: settingsSection.value, scope: resourceScope.value });
+                shellHistory.push({ view: currentView.value, section: settingsSection.value, scope: resourceScope.value,
+                    announcement: showAnnouncement.value,
+                    announcementScroll: document.querySelector('.release-reading')?.scrollTop || 0 });
             }
             shellParent.value = shellHistory.at(-1)?.view || (view === 'chat' ? 'characters' : 'advanced');
             if (['worldinfo', 'regex', 'uitemplates'].includes(view)) resourceScope.value = target.scope || 'character';
@@ -478,6 +480,13 @@ const app = createApp({
             resourceScope.value = previous?.scope || 'character';
             currentView.value = previous?.view || (['settings-detail','cache','backup','usage','patchlist'].includes(currentView.value) ? 'settings' : 'characters');
             shellParent.value = shellHistory.at(-1)?.view || 'characters';
+            if (previous?.announcement) {
+                openAnnouncement();
+                nextTick(() => {
+                    const reading = document.querySelector('.release-reading');
+                    if (reading) reading.scrollTop = previous.announcementScroll;
+                });
+            }
             return true;
         };
         const shellNotice = event => showToast(event.detail.message, event.detail.error ? 'error' : 'success', 5000);

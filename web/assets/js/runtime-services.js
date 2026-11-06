@@ -690,8 +690,8 @@
 // --- Sidebar watermark (cumulative left-to-right fade in/out) ---
 (function () {
     const STYLE_ID = 'rphub-sidebar-watermark-style';
-    const CHARS = ['鸣', '谢', '红', '花', '铃', '🔔'];
-    const CHAR_MS = 200;   // per-character stagger: 5 chars => ~1s to fully appear
+    const CHARS = Array.from('红花玲🌹🔔 /⚡');
+    const CHAR_MS = 200;   // per-character stagger
     const FADE_MS = 340;   // opacity transition duration per character
     const HOLD_MS = 420;   // fully visible hold
     const EXIT_START_MS = 120;
@@ -746,7 +746,7 @@
         clearTimers(container);
         spans.forEach(span => span.classList.remove('rphub-wm-on', 'rphub-wm-out'));
 
-        // Fade in left -> right: all five become visible by ~1s.
+        // Fade in left -> right.
         spans.forEach((span, i) => {
             later(container, () => {
                 span.classList.remove('rphub-wm-out');

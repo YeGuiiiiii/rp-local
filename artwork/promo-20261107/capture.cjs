@@ -87,6 +87,6 @@ const cards = JSON.parse(fs.readFileSync(path.join(__dirname, 'cards.json'), 'ut
         await page.evaluate(() => __promo.navigateWorkspace('album'));
         await capture('screen-night-gallery');
         assert.deepEqual(errors, []);
-        console.log('Captured three actual 1.22 pages at 1170 x 2532, using four existing character cards in isolated storage.');
+        console.log('Captured three actual application pages at 1170 x 2532, using four existing character cards in isolated storage.');
     } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -64,6 +64,27 @@ const filesModule = source('assets/js/local-files.js');
     assert.ok(initial.files.some(file => file.name.startsWith('个人数据/') && file.text.includes('FAKE_TEST_KEY')));
     assert.ok(!initial.files.some(file => file.name.startsWith('角色卡数据/') && file.text.includes('FAKE_TEST_KEY')));
     assert.ok(initial.files.some(file => file.name.startsWith('角色卡数据/同名卡/') && file.text.includes('frozen')));
+    await load();
+    const repeatedStartup = await page.evaluate(async () => {
+      const digest = crypto.subtle.digest.bind(crypto.subtle);
+      const put = IDBObjectStore.prototype.put;
+      let hashes = 0, cardWrites = 0;
+      crypto.subtle.digest = (...args) => { hashes++; return digest(...args); };
+      IDBObjectStore.prototype.put = function (value, key) {
+        if (key === 'rp_hub_characters') cardWrites++;
+        return put.call(this, value, key);
+      };
+      try {
+        await RPHubStorage.initDB();
+        await RPLocalStore.flush();
+        return { hashes, cardWrites };
+      } finally {
+        crypto.subtle.digest = digest;
+        IDBObjectStore.prototype.put = put;
+      }
+    });
+    assert.deepEqual(repeatedStartup, { hashes: 0, cardWrites: 0 },
+      'Reopening unchanged data must reuse file paths and avoid rewriting the full character library');
     await page.evaluate(async () => {
       RPHubStorage.getMainDb().close();
       await new Promise((resolve, reject) => {
@@ -101,7 +122,7 @@ const filesModule = source('assets/js/local-files.js');
       return rejected;
     });
     assert.equal(failures, true);
-    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, folders: initial.folders };
+    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, folders: initial.folders };
     fs.writeFileSync(path.join(root, 'verification', process.argv.includes('--legacy-bridge') ? 'storage-legacy-bridge.json' : 'storage.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }

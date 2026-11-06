@@ -138,6 +138,9 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await page.getByRole('button', { name: '科技／科幻杯', exact: true }).isVisible(), true, 'Returning preserves the selected banner');
         await page.evaluate(() => __qa.openAnnouncement());
         assert.match(await page.locator('.release-section').first().innerText(), /鸣谢.*红花铃.*启元.*472441481/s);
+        await page.locator('.release-reading').evaluate(element => { element.scrollTop = 90; });
+        await page.locator('.release-overlay').getByRole('button', { name: '奇幻杯周赛', exact: true }).scrollIntoViewIfNeeded();
+        const announcementScroll = await page.locator('.release-reading').evaluate(element => element.scrollTop);
         await select('奇幻杯周赛');
         assert.equal(await page.evaluate(() => __qa.showAnnouncement), false);
         await page.getByRole('button', { name: '前往灯塔查看赛事' }).click();
@@ -146,6 +149,17 @@ fs.mkdirSync(output, { recursive: true });
         await page.evaluate(() => __qa.shellGoBack());
         await page.evaluate(() => __qa.shellGoBack());
         assert.equal(await page.evaluate(() => __qa.currentView), 'advanced', 'Announcement entry returns to its original page');
+        await page.locator('.release-notice').waitFor();
+        assert.equal(await page.locator('.release-reading').evaluate(element => element.scrollTop), announcementScroll,
+            'Returning from an event restores the announcement at the same reading position');
+        await page.getByRole('button', { name: '关闭更新公告', exact: true }).click();
+        await page.locator('.release-overlay').waitFor({ state: 'detached' });
+        await page.evaluate(() => { RPThemePacks.set('classic'); __qa.openAnnouncement(); });
+        await select('科技／科幻杯');
+        await page.getByRole('button', { name: '返回', exact: true }).click();
+        await page.locator('.release-notice').waitFor();
+        await page.getByRole('button', { name: '关闭更新公告', exact: true }).click();
+        await page.locator('.release-overlay').waitFor({ state: 'detached' });
         for (const theme of ['journal', 'vampire']) {
             await page.evaluate(theme => RPThemePacks.set(theme), theme);
             for (const [width, height] of [[360, 800], [390, 844], [1280, 900], [844, 390]]) {
@@ -209,7 +223,8 @@ fs.mkdirSync(output, { recursive: true });
         assert.deepEqual(missing, []);
         fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify({
             distinctRules: true, exactDeadlineBoundaries: true, submissionDraft: true,
-            nativeAndEmbeddedTopicLinks: true, parentNavigation: true, manualCarouselWithArrowsDotsAndKeyboard: true, repeatedKeyboardFocus: true,
+            nativeAndEmbeddedTopicLinks: true, parentNavigation: true, announcementReturnAndScroll: true,
+            classicAnnouncementReturn: true, manualCarouselWithArrowsDotsAndKeyboard: true, repeatedKeyboardFocus: true,
             customBannersWithReadableText: true, artworkExcludedFromGallery: true,
             viewports: [360, 390, 1280, 844], themes: ['journal', 'vampire'], errors, missing,
             actualAndroidTested: false

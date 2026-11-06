@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -10,6 +11,8 @@ output.mkdir(exist_ok=True)
 size = (1536, 2048)
 regular = "C:/Windows/Fonts/msyh.ttc"
 bold = "C:/Windows/Fonts/msyhbd.ttc"
+version = re.search(r"RP_LOCAL_VERSION = '([^']+)'",
+                    (work.parents[1] / "web/index.html").read_text(encoding="utf-8"))[1]
 
 
 def text(image, position, value, pixels, color, heavy=False):
@@ -52,7 +55,7 @@ posters = [
         "name": "RP本地版-白昼手账",
         "art": "day-generated",
         "screen": "screen-day-home.png",
-        "edition": "1.22  /  白昼手账",
+        "edition": f"{version}  /  白昼手账",
         "tagline": "把故事，写成你的世界。",
         "features": "角色卡管理   ·   世界书   ·   分支记忆",
         "night": False,
@@ -62,7 +65,7 @@ posters = [
         "name": "RP本地版-夜蔷薇",
         "art": "night-generated",
         "screen": "screen-night-gallery.png",
-        "edition": "1.22  /  夜蔷薇",
+        "edition": f"{version}  /  夜蔷薇",
         "tagline": "今夜，也有故事等你。",
         "features": "夜蔷薇主题   ·   角色相簿   ·   倾斜反光",
         "night": True,
@@ -85,7 +88,7 @@ for item in posters:
     ImageDraw.Draw(poster).line((107, 423, 251, 423), fill=accent, width=5)
     phone(poster, work / item["screen"], night)
     text(poster, (105, 1870), item["features"], 38, primary, True)
-    text(poster, (105, 1943), "更新发布 · QQ 472441481 / 132292045", 34, accent)
+    text(poster, (105, 1943), "更新发布 · QQ 群 472441481 / 132292045", 38, accent, True)
     text(poster, (105, 2008), "基于 STA1N156 / RP-Hub", 22, secondary)
     final = poster.convert("RGB")
     final.save(output / (item["name"] + ".png"), optimize=True)
@@ -95,7 +98,7 @@ for item in posters:
     record.append({
         "output": item["name"] + ".png", "size": list(size),
         "illustration": str(illustration.relative_to(work)), "meowaJob": item["job"],
-        "screenshot": item["screen"], "appVersion": "1.22",
+        "screenshot": item["screen"], "appVersion": version,
         "cards": [card["source"] for card in json.loads((work / "cards.json").read_text(encoding="utf-8"))],
         "prompts": ["day-prompt.txt", "night-prompt.txt"],
         "method": "Meowa illustration with unchanged real application screenshot and locally typeset text",

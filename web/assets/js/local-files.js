@@ -50,10 +50,10 @@
     };
     const pathOf = async key => {
         const owner = ownerOf(key);
+        const directory = owner ? `角色卡数据/${folderOf(owner)}/` : '个人数据/';
+        if (typeof inventory[key] === 'string' && inventory[key].startsWith(directory)) return inventory[key];
         const name = safeName(key.replace('rp_hub_', '')).slice(0, 48) + '-' + (await hash(key)).slice(0, 16);
-        return owner
-            ? `角色卡数据/${folderOf(owner)}/${name}.json`
-            : `个人数据/${name}.json`;
+        return `${directory}${name}.json`;
     };
     async function saveEntry(key, value) {
         if (!bridge) return;
@@ -73,6 +73,7 @@
         if (!bridge) return;
         const existing = entries.find(entry => entry.key === 'rp_hub_characters');
         if (existing) {
+            const previous = existing.value.map(card => [card.uuid, card.storageFolder, card.importedName]);
             const index = read('个人数据/角色卡索引.json') || [];
             for (const card of existing.value) {
                 const old = index.find(item => item.uuid === card.uuid);
@@ -82,7 +83,10 @@
                 }
             }
             assignFolders(existing.value);
-            await put(existing.key, existing.value);
+            if (existing.value.some((card, i) => card.uuid !== previous[i][0]
+                || card.storageFolder !== previous[i][1] || card.importedName !== previous[i][2])) {
+                await put(existing.key, existing.value);
+            }
         }
         // A full backup import can replace the database directly; remove stale file references.
         if (existing) {
