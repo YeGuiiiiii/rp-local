@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "dependencies": {
+    "@babel/parser": "7.29.13",
+    "@streamparser/json": "0.0.22",
+    "@vue/compiler-dom": "3.5.41",
+    "esbuild": "0.25.12",
+    "parse5": "7.3.0"
+  }
+}

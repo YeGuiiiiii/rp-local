@@ -1,0 +1,25 @@
+RP Local 1.09 - personal preview build
+
+RP-Hub: STA1N156, https://github.com/STA1N156/RP-Hub
+Original project license: Creative Commons Attribution-NonCommercial 4.0.
+The complete original license is included as RP-Hub-LICENSE.txt.
+
+This build preserves the enhanced frontend and native integration from the
+user-supplied RP-Hub 2.8.80 APK. It changes startup to packaged web assets,
+uses a separate Android application ID, and uses the user-supplied icon.
+Existing source credits and third-party library headers are retained.
+
+The four navigation illustrations were generated with Meowa for this build.
+The startup persona illustrations reuse the user's existing sticker collection.
+Chen Yue (Yueyue) is the user's original mascot character. The hand-drawn
+interface surfaces and corrected mascot cutouts were generated with Meowa
+using the user's references. Her spare red hair ribbon is on her right wrist.
+Standard interface symbols use Lucide; its ISC license is included separately.
+The supplied Skland APK was inspected only for design research. No Skland
+code, logos, fonts, animations or images are included.
+
+This build uses fonts installed on the user's device. No font files are bundled.
+
+AI chat, image generation, cloud backups and online community content still
+require their respective network services. Local startup does not provide
+an offline AI model or a local image generation engine.

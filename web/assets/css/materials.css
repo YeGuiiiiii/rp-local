@@ -1,0 +1,161 @@
+/* Software surfaces only. Card HTML and image files keep their original rendering. */
+:root {
+    --ui-polish: #ffffffb8;
+    --ui-polish-soft: #ffffff45;
+    --ui-recess: #45314312;
+    --ui-shadow: #251a2b17;
+    --ui-composer: #fffefa;
+    --ui-composer-text: #393440;
+    --ui-composer-muted: #706778;
+    --ui-command: #8e4e60;
+    --ui-command-text: #fffafa;
+}
+:root[data-app-theme="dark"] {
+    --ui-polish: #eedee64d;
+    --ui-polish-soft: #eedee615;
+    --ui-recess: #0000005c;
+    --ui-shadow: #00000055;
+    --ui-composer: #211d23;
+    --ui-composer-text: #f2e9eb;
+    --ui-composer-muted: #c5b7bf;
+    --ui-command: #853e59;
+    --ui-command-text: #fff1f6;
+}
+.image-glass { position: relative; isolation: isolate; }
+.shell-album-aperture.image-glass { position: absolute; }
+.image-glass::before, .image-glass::after {
+    content: ""; position: absolute; pointer-events: none; border-radius: inherit;
+}
+.image-glass::before {
+    z-index: 1; inset: -65%;
+    background: linear-gradient(118deg, transparent 24%, #ffffff06 32%, #ffffff48 40%, #ffffff08 48%, transparent 57%, #b8d7ff0b 69%, transparent 77%);
+    transform: translate3d(calc(var(--glass-x,0) * 19%),calc(var(--glass-y,0) * 12%),0);
+    transition: transform 180ms cubic-bezier(.22,1,.36,1);
+}
+.image-glass::after {
+    z-index: 2; inset: 0;
+    background: linear-gradient(145deg,#ffffff12,transparent 35%,transparent 75%,#130f210e);
+    box-shadow: inset 0 1px 0 #ffffffc4,inset 1px 0 0 #ffffff78,inset -1px -1px 0 #ffffff52,inset 0 -3px 4px #0b07131c;
+}
+.chenyue-theme .shell-album-aperture { box-shadow: 0 4px 9px var(--ui-shadow); }
+.shell-photo-grid .image-glass { border: 0; }
+.shell-photo-grid small { z-index: 3; padding: 4px 7px; border: 1px solid #ffffff38; border-radius: 4px; background: #151119b8; color: #fff; }
+.shell-photo-glass { display: inline-flex; flex: none; max-width: 100%; max-height: 100%; overflow: hidden; border-radius: 6px; }
+.shell-photo-glass > img { display: block; max-height: calc(100dvh - 160px); }
+.shell-photo-stage.is-zoomed .shell-photo-glass { display: block; width: max-content; max-width: none; max-height: none; }
+.shell-photo-stage.is-zoomed .image-glass::before { opacity: .35; }
+
+/* Satin enamel buttons, recessed fields and a clear focus edge share one material vocabulary. */
+:root .chenyue-theme :is(.app-main,.app-modal-panel) :is(.settings-icon-button,.settings-create-button,.modal-secondary-button,.shell-button,.pagination-button) {
+    min-width: 42px; min-height: 42px; border-radius: 6px;
+    background: linear-gradient(180deg,var(--ui-polish-soft),transparent 48%),var(--yy-paper);
+    border: 1px solid var(--yy-line); color: var(--yy-ink);
+    box-shadow: inset 0 1px 0 var(--ui-polish),inset 0 -1px 0 var(--ui-recess),0 3px 7px -4px var(--ui-shadow);
+}
+:root .chenyue-theme :is(.app-main,.app-modal-panel) :is(.settings-icon-button,.settings-create-button,.modal-secondary-button,.shell-button):active:not(:disabled) {
+    box-shadow: inset 0 2px 4px var(--ui-recess); transform: translateY(1px);
+}
+:root .chenyue-theme :is(.app-main,.app-modal-panel) :is(.settings-control,.preset-group-form input) {
+    border: 1px solid var(--yy-line); border-radius: 6px; color: var(--yy-ink);
+    background-image: linear-gradient(180deg,var(--ui-recess),transparent 12px);
+    box-shadow: inset 0 1px 2px var(--ui-recess),0 1px 0 var(--ui-polish-soft);
+    font-size: 16px;
+}
+:root .chenyue-theme .ui-select-trigger {
+    min-height: 46px; border: 1px solid var(--yy-line); border-radius: 6px;
+    background: linear-gradient(180deg,var(--ui-polish-soft),transparent 60%),var(--yy-field);
+    color: var(--yy-ink); box-shadow: inset 0 1px 0 var(--ui-polish-soft),inset 0 -1px 0 var(--ui-recess);
+}
+:root .chenyue-theme .ui-select-menu {
+    border: 1px solid var(--yy-line); border-radius: 8px; background: var(--yy-paper);
+    box-shadow: 0 8px 22px var(--ui-shadow); backdrop-filter: none;
+}
+:root .chenyue-theme .ui-select-menu [role="option"] { min-height: 44px; color: var(--yy-ink); border-radius: 5px; }
+:root .chenyue-theme .ui-select-menu [role="option"][aria-selected="true"] { background: var(--shell-tint); color: var(--yy-rose); }
+:root .chenyue-theme .ui-select-menu [role="option"]:focus-visible { outline: 2px solid var(--yy-rose); outline-offset: -2px; }
+:root .chenyue-theme .shell-search {
+    border-radius: 8px; border-color: var(--yy-line);
+    background: linear-gradient(180deg,var(--ui-recess),transparent 16px),var(--yy-paper);
+    box-shadow: inset 0 1px 3px var(--ui-recess),0 1px 0 var(--ui-polish-soft);
+}
+:root .chenyue-theme .shell-search input { font-size: 16px; }
+:root .chenyue-theme .shell-search input::placeholder { color: var(--shell-muted); opacity: 1; }
+:root .chenyue-theme :is(.settings-control,.preset-group-form input):focus-visible {
+    border-color: var(--yy-rose); outline: 2px solid var(--yy-rose); outline-offset: 2px;
+}
+:root .chenyue-theme :is(.app-main,.app-modal-panel) .modal-primary-button {
+    background: linear-gradient(180deg,#ffffff18,transparent 75%),var(--ui-command);
+    color: var(--ui-command-text); border-radius: 6px;
+    box-shadow: inset 0 1px 0 var(--ui-polish-soft),inset 0 -1px 0 var(--ui-recess);
+}
+:root .chenyue-theme .shell-action-grid > button {
+    background: linear-gradient(160deg,var(--ui-polish-soft),transparent 52%),var(--yy-paper);
+    border-color: var(--yy-line); box-shadow: inset 0 1px 0 var(--ui-polish-soft);
+}
+:root .chenyue-theme .shell-settings-detail { background: transparent; }
+:root .chenyue-theme .shell-row-list > button { transition: background-color 140ms ease; }
+:root .chenyue-theme .shell-row-list > button:active { background: var(--shell-tint); }
+
+/* The composer is opaque on mobile so text stays clear without a costly live blur. */
+:root .chenyue-theme .app-main .input-island {
+    padding: 10px 8px 6px; border: 1px solid var(--yy-line); border-radius: 8px;
+    background: linear-gradient(175deg,var(--ui-polish-soft),transparent 58%),var(--ui-composer);
+    box-shadow: inset 0 1px 0 var(--ui-polish),0 7px 18px -9px var(--ui-shadow);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+:root .chenyue-theme .input-island:focus-within { border-color: var(--yy-rose); box-shadow: inset 0 1px 0 var(--ui-polish),0 4px 14px -7px var(--ui-shadow); }
+:root .chenyue-theme .input-island .island-input { padding: 10px 10px 8px; color: var(--ui-composer-text); font-size: 16px; caret-color: var(--yy-rose); }
+:root .chenyue-theme .input-island .island-input::placeholder { color: var(--ui-composer-muted); }
+:root .chenyue-theme .island-toolbar { border-top: 1px solid var(--yy-line); padding: 6px 2px 2px; margin-top: 3px; }
+:root .chenyue-theme .island-button { width: 36px; height: 36px; border-radius: 6px; color: var(--ui-composer-muted); }
+:root .chenyue-theme .island-send {
+    width: 42px; height: 42px; border-radius: 6px;
+    background: linear-gradient(180deg,#ffffff1c,transparent),var(--ui-command); color: var(--ui-command-text);
+    box-shadow: inset 0 1px 0 var(--ui-polish-soft),inset 0 -1px 0 var(--ui-recess);
+}
+:root .chenyue-theme .island-send:disabled { background: var(--yy-field); color: var(--yy-muted); box-shadow: inset 0 1px 2px var(--ui-recess); }
+:root .chenyue-theme .island-send--stop { background: #a33c55; color: #fff; }
+
+/* Compact pill navigation with a separate round online entry. */
+:root .chenyue-theme .shell-dock-wrap { bottom: max(14px,env(safe-area-inset-bottom)); }
+:root .chenyue-theme .shell-dock-row { gap: 10px; }
+:root .chenyue-theme .shell-dock {
+    border-radius: 30px; height: 58px; padding: 6px; border: 1px solid var(--yy-line);
+    background: linear-gradient(180deg,var(--ui-polish-soft),transparent 38%),var(--yy-paper);
+    box-shadow: inset 0 1px 0 var(--ui-polish),inset 0 -2px 0 var(--ui-recess),0 7px 18px -10px var(--ui-shadow);
+}
+:root .chenyue-theme .shell-dock-indicator {
+    border-radius: 24px; background: linear-gradient(170deg,var(--ui-polish-soft),transparent),var(--shell-tint);
+    box-shadow: inset 0 1px 0 var(--ui-polish-soft),inset 0 -1px 0 var(--ui-recess);
+}
+:root .chenyue-theme .shell-dock > button { border-radius: 24px; gap: 0; min-height: 44px; }
+:root .chenyue-theme .shell-dock > button span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:root .chenyue-theme .shell-dock-art { width: 26px; height: 26px; }
+:root .chenyue-theme .shell-online-trigger {
+    width: 54px; height: 54px; border-radius: 50%; border: 1px solid var(--yy-line);
+    background: linear-gradient(160deg,var(--ui-polish-soft),transparent 70%),var(--shell-tint);
+    box-shadow: inset 0 1px 0 var(--ui-polish),inset 0 -2px 0 var(--ui-recess);
+    color: var(--yy-rose);
+}
+:root .chenyue-theme .shell-dock-fold { min-width: 44px; height: 28px; border-radius: 16px; margin-bottom: 7px; }
+:root[data-ui-skin="vampire"] .chenyue-theme .shell-dock-art { display: none; }
+:root[data-ui-skin="vampire"] .chenyue-theme .shell-dock-symbol { display: none; }
+.shell-dock-night-art { width: 28px; height: 28px; object-fit: contain; opacity: .8; }
+.shell-dock .is-active .shell-dock-night-art { opacity: 1; }
+:root[data-ui-skin="vampire"] .chenyue-theme .shell-dock-fold { width: 56px; padding-left: 20px; position: relative; }
+:root[data-ui-skin="vampire"] .shell-dock-fold::before {
+    content: ""; position: absolute; width: 22px; height: 24px; top: 0; left: 4px;
+    background: url("../themes/vampire/clasp.webp") center/contain no-repeat; pointer-events: none;
+}
+.theme-mode-badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; background: #14121699; color: #fff; border: 1px solid #ffffff30; border-radius: 4px; font-size: 11px; }
+.theme-pack-palette { display: flex; gap: 6px; padding: 0 14px 14px; }
+.theme-pack-palette i { width: 16px; height: 6px; border-radius: 2px; border: 1px solid #8e7c8c55; background: #e8dce5; }
+:root .theme-pack { border-radius: 8px; background: var(--yy-paper); }
+:root .theme-pack.is-selected { border-color: var(--yy-rose); box-shadow: inset 0 0 0 1px var(--yy-rose); }
+:root .theme-pack-preview { height: 150px; }
+:root .theme-pack-name { font-size: 15px; }
+:root .theme-pack-subtitle { font-size: 12px; line-height: 1.7; min-height: 48px; }
+@media (prefers-reduced-motion: reduce) {
+    .image-glass::before { transform: none; transition: none; }
+    :root .chenyue-theme :is(.shell-dock,.input-island) { transition: border-color 90ms ease; }
+}

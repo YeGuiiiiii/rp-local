@@ -1,0 +1,107 @@
+[
+  {
+    "file": "api-utils.js",
+    "applied": 18,
+    "missing": []
+  },
+  {
+    "file": "app.js",
+    "applied": 224,
+    "missing": [
+      4,
+      5,
+      6,
+      11,
+      23,
+      24,
+      50,
+      51,
+      135
+    ]
+  },
+  {
+    "file": "built-in-content.js",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "character-index.html",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "cloud-backup.js",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "core-utils.js",
+    "applied": 4,
+    "missing": []
+  },
+  {
+    "file": "data-services.js",
+    "applied": 5,
+    "missing": [
+      2
+    ]
+  },
+  {
+    "file": "index.html",
+    "applied": 71,
+    "missing": [
+      2,
+      5,
+      6,
+      7,
+      8,
+      11,
+      12,
+      17,
+      18,
+      33,
+      37,
+      38
+    ]
+  },
+  {
+    "file": "novel-index.html",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "runtime-services.js",
+    "applied": 4,
+    "missing": []
+  },
+  {
+    "file": "styles.css",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "tailwind-theme.js",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "theme.css",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "theme.js",
+    "applied": 0,
+    "missing": []
+  },
+  {
+    "file": "ui-components.js",
+    "applied": 14,
+    "missing": []
+  },
+  {
+    "file": "update-check.js",
+    "applied": 0,
+    "missing": []
+  }
+]

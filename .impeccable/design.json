@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T14:32:03+08:00",
+  "title": "Design System: RP 本地版 · 白昼手账与夜蔷薇",
+  "extensions": {
+    "colorMeta": {
+      "night-canvas": { "role": "neutral", "displayName": "炭黑书布", "tonalRamp": ["oklch(15% 0.008 310)", "oklch(26% 0.008 310)", "oklch(38% 0.008 310)", "oklch(49% 0.008 310)", "oklch(61% 0.008 310)", "oklch(72% 0.008 310)", "oklch(84% 0.008 310)", "oklch(95% 0.008 310)"] },
+      "night-paper": { "role": "neutral", "displayName": "夜色纸页", "tonalRamp": ["oklch(15% 0.012 320)", "oklch(26% 0.012 320)", "oklch(38% 0.012 320)", "oklch(49% 0.012 320)", "oklch(61% 0.012 320)", "oklch(72% 0.012 320)", "oklch(84% 0.012 320)", "oklch(95% 0.012 320)"] },
+      "night-field": { "role": "neutral", "displayName": "深色笔槽", "tonalRamp": ["oklch(15% 0.01 315)", "oklch(26% 0.01 315)", "oklch(38% 0.01 315)", "oklch(49% 0.01 315)", "oklch(61% 0.01 315)", "oklch(72% 0.01 315)", "oklch(84% 0.01 315)", "oklch(95% 0.01 315)"] },
+      "night-line": { "role": "neutral", "displayName": "灰玫瑰细线", "tonalRamp": ["oklch(15% 0.03 345)", "oklch(26% 0.03 345)", "oklch(38% 0.03 345)", "oklch(49% 0.03 345)", "oklch(61% 0.03 345)", "oklch(72% 0.03 345)", "oklch(84% 0.03 345)", "oklch(95% 0.03 345)"] },
+      "night-text": { "role": "neutral", "displayName": "珍珠文字", "tonalRamp": ["oklch(15% 0.01 355)", "oklch(26% 0.01 355)", "oklch(38% 0.01 355)", "oklch(49% 0.01 355)", "oklch(61% 0.01 355)", "oklch(72% 0.01 355)", "oklch(84% 0.01 355)", "oklch(95% 0.01 355)"] },
+      "night-muted": { "role": "neutral", "displayName": "灰银文字", "tonalRamp": ["oklch(15% 0.02 345)", "oklch(26% 0.02 345)", "oklch(38% 0.02 345)", "oklch(49% 0.02 345)", "oklch(61% 0.02 345)", "oklch(72% 0.02 345)", "oklch(84% 0.02 345)", "oklch(95% 0.02 345)"] },
+      "night-rose": { "role": "primary", "displayName": "夜蔷薇", "tonalRamp": ["rgb(51 30 41)", "rgb(68 39 50)", "rgb(88 45 62)", "rgb(126 62 83)", "rgb(175 104 128)", "rgb(209 143 164)", "rgb(231 172 187)", "rgb(250 235 239)"] },
+      "night-wine": { "role": "primary", "displayName": "酒红内衬", "tonalRamp": ["rgb(51 30 41)", "rgb(68 39 50)", "rgb(88 45 62)", "rgb(126 62 83)", "rgb(175 104 128)", "rgb(209 143 164)", "rgb(231 172 187)", "rgb(250 235 239)"] },
+      "day-canvas": { "role": "neutral", "displayName": "淡灰紫桌面", "tonalRamp": ["oklch(15% 0.009 310)", "oklch(26% 0.009 310)", "oklch(38% 0.009 310)", "oklch(49% 0.009 310)", "oklch(61% 0.009 310)", "oklch(72% 0.009 310)", "oklch(84% 0.009 310)", "oklch(95% 0.009 310)"] },
+      "day-paper": { "role": "neutral", "displayName": "白昼纸页", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(49% 0.006 95)", "oklch(61% 0.006 95)", "oklch(72% 0.006 95)", "oklch(84% 0.006 95)", "oklch(95% 0.006 95)"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "页面标题", "purpose": "紧凑页面标题，不附口号副标题；画廊数量并入标题。窄屏夜蔷薇降至22px。" },
+      "body": { "displayName": "界面正文", "purpose": "设置行与普通说明；资源按钮另用600字重。" },
+      "label": { "displayName": "辅助说明", "purpose": "必要的辅助信息与套装副标题。" },
+      "composer": { "displayName": "聊天输入", "purpose": "聊天编辑区域，保留16px和1.6行高。" }
+    },
+    "shadows": [
+      { "name": "album-aperture", "value": "0 4px 9px var(--ui-shadow)", "purpose": "相簿玻璃开口。" },
+      { "name": "night-menu", "value": "0 20px 50px #0006", "purpose": "遮罩之上的聊天菜单。" },
+      { "name": "composer", "value": "inset 0 1px 0 var(--ui-polish),0 7px 18px -9px var(--ui-shadow)", "purpose": "不透明输入栏的亮边与轻投影，不启用背景模糊。" },
+      { "name": "recessed-field", "value": "inset 0 1px 2px var(--ui-recess),0 1px 0 var(--ui-polish-soft)", "purpose": "字段凹槽与下沿亮边。" },
+      { "name": "glass-edge", "value": "inset 0 1px 0 #ffffffc4,inset 1px 0 0 #ffffff78,inset -1px -1px 0 #ffffff52,inset 0 -3px 4px #0b07131c", "purpose": "图片表面玻璃层，不改变原图。" }
+    ],
+    "motion": [
+      { "name": "control-color", "value": "background-color 120ms ease, color 120ms ease, translate 100ms ease", "purpose": "页面、导航和设置详情按钮反馈。" },
+      { "name": "dock-selection", "value": "transform 200ms cubic-bezier(.22,1,.36,1)", "purpose": "底部导航选中块。" },
+      { "name": "segmented-selection", "value": "transform 180ms cubic-bezier(.22,1,.36,1)", "purpose": "现有设置分段控件。" },
+      { "name": "glass-reflection", "value": "transform 180ms cubic-bezier(.22,1,.36,1)", "purpose": "姿态或指针只推动反光层；关闭、后台、离开画廊或减少动态效果时停止。" }
+    ],
+    "breakpoints": [
+      { "name": "compact-heading", "value": "max-width: 400px" },
+      { "name": "desktop-shell", "value": "min-width: 768px" },
+      { "name": "mobile-composer", "value": "max-width: 768px" },
+      { "name": "short-menu", "value": "max-height: 660px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "资源操作按钮",
+      "kind": "button",
+      "refersTo": "resource-button",
+      "description": "高级页真实操作入口；右上角银色短线。",
+      "html": "<button class=\"ds-resource\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 4h16v16H4zM8 4v16M11 9h6M11 13h6\"/></svg><strong>预设管理</strong></button>",
+      "css": ".ds-resource{position:relative;display:flex;align-items:center;gap:14px;min-height:82px;padding:16px 12px;background:linear-gradient(160deg,var(--ui-polish-soft,#eedee615),transparent 52%),var(--yy-paper,#211d23);border:1px solid var(--yy-line,#57434e);border-radius:6px;box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615);color:var(--shell-text,#f2e9eb);font:500 14px var(--font-sans,system-ui);text-align:left;cursor:pointer}.ds-resource strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}.ds-resource svg{width:28px;height:34px;flex:none;color:var(--shell-accent,#e7acbb)}.ds-resource::after{content:'';position:absolute;right:5px;top:5px;width:10px;height:10px;border-top:1px solid #b9a4b0;border-right:1px solid #b9a4b0;pointer-events:none}.ds-resource:hover:not(:disabled){border-color:var(--shell-accent,#e7acbb)}.ds-resource:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-resource:active:not(:disabled){translate:0 1px}.ds-resource:disabled{opacity:.4;cursor:default}"
+    },
+    {
+      "name": "聊天发送",
+      "kind": "button",
+      "refersTo": "button-send",
+      "description": "42px缎面发送按钮，含禁用与按下反馈。",
+      "html": "<button class=\"ds-send\" type=\"button\" aria-label=\"发送\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m5 12 7-7 7 7M12 5v14\"/></svg></button>",
+      "css": ".ds-send{display:grid;place-items:center;width:42px;height:42px;background:linear-gradient(180deg,#ffffff1c,transparent),var(--ui-command,#853e59);color:var(--ui-command-text,#fff1f6);border:0;border-radius:6px;box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615),inset 0 -1px 0 var(--ui-recess,#0000005c);cursor:pointer;transition:transform 220ms cubic-bezier(.22,1,.36,1)}.ds-send svg{width:18px;height:18px}.ds-send:hover:not(:disabled){filter:brightness(1.08)}.ds-send:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-send:active:not(:disabled){transform:scale(.92)}.ds-send:disabled{background:var(--yy-field,#19161b);color:var(--yy-muted,#c5b7bf);cursor:not-allowed}"
+    },
+    {
+      "name": "聊天工具",
+      "kind": "button",
+      "description": "36px图标工具，激活时出现酒红底。",
+      "html": "<button class=\"ds-tool\" type=\"button\" aria-label=\"添加内容\" title=\"添加内容\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button>",
+      "css": ".ds-tool{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:6px;background:transparent;color:#e0c6d2;cursor:pointer;transition:background-color 220ms ease,transform 220ms cubic-bezier(.34,1.36,.64,1)}.ds-tool svg{width:17px;height:17px}.ds-tool:hover:not(:disabled),.ds-tool.is-active{background:var(--shell-tint,#442732);color:#f4dce5}.ds-tool:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-tool:active:not(:disabled){transform:scale(.88)}.ds-tool:disabled{opacity:.4;cursor:not-allowed}"
+    },
+    {
+      "name": "设置字段",
+      "kind": "input",
+      "refersTo": "settings-field",
+      "description": "真实可编辑字段，使用深色笔槽与焦点轮廓。",
+      "html": "<label class=\"ds-field-label\">名称<input class=\"ds-field\" type=\"text\" placeholder=\"输入名称\"></label>",
+      "css": ".ds-field-label{display:grid;gap:8px;color:var(--yy-ink,#f2e9eb);font:500 13px var(--font-sans,system-ui)}.ds-field{min-height:44px;padding:0 12px;background:linear-gradient(180deg,var(--ui-recess,#0000005c),transparent 12px),var(--yy-field,#19161b);color:var(--shell-text,#f2e9eb);border:1px solid var(--yy-line,#57434e);border-radius:6px;box-shadow:inset 0 1px 2px var(--ui-recess,#0000005c),0 1px 0 var(--ui-polish-soft,#eedee615);font:500 16px var(--font-sans,system-ui);caret-color:var(--yy-rose,#e7acbb)}.ds-field::placeholder{color:var(--shell-muted,#c5b7bf);opacity:1}.ds-field:hover{border-color:var(--yy-rose,#e7acbb)}.ds-field:focus-visible{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:2px}"
+    },
+    {
+      "name": "设置列表行",
+      "kind": "custom",
+      "refersTo": "settings-row",
+      "description": "连续分组列表中的平直操作行。",
+      "html": "<button class=\"ds-row\" type=\"button\"><svg class=\"ds-row-leading\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 7v5l3 2\"/></svg><span>阅读与性能</span><svg class=\"ds-row-trailing\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-row{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:12px 8px;border:0;border-bottom:1px solid #3b3038;border-radius:0;background:transparent;color:#eee2e7;text-align:left;font:500 14px var(--font-sans,system-ui);cursor:pointer;transition:background-color 120ms ease,translate 100ms ease}.ds-row span{flex:1;min-width:0;overflow-wrap:anywhere}.ds-row-leading{width:34px;height:34px;flex:none;color:var(--shell-accent,#e7acbb)}.ds-row-trailing{width:16px;height:16px;flex:none;color:#bd9fac}.ds-row:hover{background:#30202b}.ds-row:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-row:active{translate:0 1px}"
+    },
+    {
+      "name": "底部导航",
+      "kind": "nav",
+      "description": "58px紧凑胶囊，四个图标入口，夜间28px徽章；整体最大360px，右侧独立54px在线圆钮。名称由提示与无障碍标签提供。",
+      "html": "<nav class=\"ds-dock\" aria-label=\"主要入口\"><button class=\"ds-dock-item ds-dock-active\" type=\"button\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"2\"/><circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M8 17c0-4 8-4 8 0\"/></svg><span>角色卡</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"m3 16 5-5 4 4 4-6 5 7\"/></svg><span>画廊</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 4h16v16H4zM8 4v16M11 9h6M11 13h6\"/></svg><span>高级</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M12 2v3M12 19v3M2 12h3M19 12h3\"/></svg><span>设置</span></button></nav>",
+      "css": ".ds-dock{display:flex;max-width:296px;height:58px;padding:6px;background:linear-gradient(180deg,var(--ui-polish-soft,#eedee615),transparent 38%),var(--yy-paper,#211d23);border:1px solid var(--yy-line,#57434e);border-radius:30px;box-shadow:inset 0 1px 0 var(--ui-polish,#eedee64d),inset 0 -2px 0 var(--ui-recess,#0000005c)}.ds-dock-item{position:relative;flex:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 2px;background:transparent;border:0;border-radius:24px;color:var(--shell-muted,#c5b7bf);cursor:pointer}.ds-dock-item svg{width:28px;height:28px}.ds-dock-item span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.ds-dock-active{background:linear-gradient(170deg,var(--ui-polish-soft,#eedee615),transparent),var(--shell-tint,#442732);color:var(--yy-rose,#e7acbb);box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615)}.ds-dock-item:hover{color:var(--shell-text,#f2e9eb)}.ds-dock-item:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-dock-item:active{translate:0 1px}"
+    },
+    {
+      "name": "外观套装卡",
+      "kind": "card",
+      "refersTo": "theme-pack",
+      "description": "每套UI关联昼夜与配色；预览区在应用中使用实际玥玥美术，并显示模式标记和色样。",
+      "html": "<label class=\"ds-pack\"><span class=\"ds-pack-title\"><input type=\"radio\" name=\"ds-pack\" checked>夜蔷薇</span><span class=\"ds-pack-subtitle\">银月、酒红与玥玥的夜晚</span><span class=\"ds-pack-subtitle\">夜间</span></label>",
+      "css": ".ds-pack{display:flex;flex-direction:column;min-width:140px;gap:6px;padding:14px 12px 16px;background:var(--shell-surface,#211d23);border:1px solid var(--shell-accent,#e7acbb);border-radius:8px;cursor:pointer;font-family:var(--font-sans,system-ui)}.ds-pack-title{display:flex;align-items:center;gap:7px;color:var(--shell-text,#f2e9eb);font-size:14px;font-weight:700}.ds-pack-title input{width:16px;height:16px;accent-color:var(--shell-accent,#e7acbb);flex:none}.ds-pack-subtitle{font-size:12px;color:var(--shell-muted,#c5b7bf);overflow-wrap:anywhere}.ds-pack:hover{border-color:var(--shell-accent,#e7acbb)}.ds-pack:focus-within{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-pack input:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:2px}"
+    },
+    {
+      "name": "套装模式标签",
+      "kind": "chip",
+      "refersTo": "mode-badge",
+      "description": "套装自带的日间或夜间标记；不提供独立模式切换。",
+      "html": "<span class=\"ds-category\">夜间</span>",
+      "css": ".ds-category{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--shell-surface,#211d23);color:var(--shell-text,#f2e9eb);font:500 10px var(--font-sans,system-ui)}"
+    },
+    {
+      "name": "倾斜反光开关",
+      "kind": "custom",
+      "description": "外观中的独立开关，默认开启并保存选择；关闭后保留静态玻璃。",
+      "html": "<label class=\"ds-tilt\"><span>倾斜反光</span><input class=\"ds-tilt-input\" type=\"checkbox\" role=\"switch\" checked><span class=\"ds-tilt-track\" aria-hidden=\"true\"></span></label>",
+      "css": ".ds-tilt{display:flex;align-items:center;gap:16px;min-height:58px;color:var(--yy-ink,#f2e9eb);font:500 14px var(--font-sans,system-ui);cursor:pointer}.ds-tilt>span:first-child{flex:1}.ds-tilt-input{position:absolute;width:1px;height:1px;opacity:0}.ds-tilt-track{display:block;flex:none;width:42px;height:24px;border:1px solid var(--yy-line,#57434e);border-radius:12px;background:var(--yy-field,#19161b);position:relative;transition:background-color 180ms ease}.ds-tilt-track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 180ms ease}.ds-tilt-input:checked+.ds-tilt-track{background:var(--ui-command,#853e59)}.ds-tilt-input:checked+.ds-tilt-track::after{transform:translateX(18px)}.ds-tilt:hover .ds-tilt-track{border-color:var(--yy-rose,#e7acbb)}.ds-tilt-input:focus-visible+.ds-tilt-track{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:3px}.ds-tilt:active .ds-tilt-track::after{box-shadow:0 0 0 2px #ffffff33}@media(prefers-reduced-motion:reduce){.ds-tilt-track,.ds-tilt-track::after{transition:none}}"
+    },
+    {
+      "name": "公告阅读区",
+      "kind": "custom",
+      "description": "示意公告固定顶部与滚动正文；正式公告含六项变化，右下秘书玥玥浮于渐变上方，正文末尾留白避让人物。",
+      "html": "<section class=\"ds-release\" aria-label=\"更新公告\"><header class=\"ds-release-header\"><div><h2>玥玥的更新简报</h2><p>RP 本地版 1.10<span>与 RP-Hub 2.8.116 对照</span></p></div><button class=\"ds-release-close\" type=\"button\" aria-label=\"关闭更新公告\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></header><div class=\"ds-release-reading\" tabindex=\"0\" role=\"region\" aria-label=\"更新内容\"><section><h3>角色相簿</h3><p>图片按角色卡分别保存，相簿封面完整显示，不再拉伸或留白边。新增玻璃反光，随手机倾斜变化，可在外观中关闭。保存的仍是原图；软件装饰不再出现下载按钮。</p></section></div></section>",
+      "css": ".ds-release{display:flex;flex-direction:column;max-width:660px;max-height:360px;overflow:hidden;border:1px solid var(--yy-line,#57434e);border-radius:8px;background:var(--yy-paper,#211d23);color:var(--yy-ink,#f2e9eb);font-family:var(--font-sans,system-ui);letter-spacing:0;box-shadow:0 18px 55px #0004}.ds-release-header{display:flex;align-items:flex-start;gap:12px;flex:none;padding:24px 24px 17px;border-bottom:1px solid var(--yy-line,#57434e)}.ds-release-header>div{flex:1;min-width:0}.ds-release-header h2{margin:0;font-size:24px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}.ds-release-header p{margin:8px 0 0;color:var(--yy-rose,#e7acbb);font-size:13px;line-height:1.7}.ds-release-header p span{display:block;color:var(--yy-muted,#c5b7bf);font-size:12px}.ds-release-close{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:10px;border:1px solid var(--yy-line,#57434e);border-radius:6px;background:var(--yy-field,#19161b);color:inherit;cursor:pointer;transition:background-color 120ms ease,transform 120ms ease}.ds-release-close svg{width:24px;height:24px}.ds-release-close:hover{background:var(--shell-tint,#442732)}.ds-release-close:active{transform:translateY(1px)}.ds-release-close:focus-visible,.ds-release-reading:focus-visible{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:-3px}.ds-release-reading{min-height:96px;overflow-y:auto;padding:20px 24px 158px;scroll-padding-bottom:158px;font-size:15px;line-height:1.85;overflow-wrap:anywhere}.ds-release-reading h3{margin:0 0 7px;color:var(--yy-rose,#e7acbb);font-size:16px;font-weight:700;line-height:1.6}.ds-release-reading p{margin:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "月下手账",
+    "overview": "白昼手账与夜蔷薇分别拥有日间、夜间模式和配套颜色。夜间使用炭黑书布、酒红内衬、珍珠色文字与银月配饰；控件带细腻亮边，画廊使用随倾斜变化的玻璃反光，保持适合长时间阅读与操作的安静密度。\n\n软件美术与角色卡正文各有边界。玥玥陪伴菜单、页面标题、空状态和操作区域，正文继续按角色卡自身内容渲染。图案负责气氛，文字、输入框、选项和点击区域保持真实控件。",
+    "keyCharacteristics": [
+      "白昼手账对应日间，夜蔷薇对应夜间；切换 UI 同步模式和配色。",
+      "紧凑标题、分组列表、明确的资源按钮和低干扰聊天输入栏。",
+      "炭黑层次、酒红操作色、柔和亮文字与银色小配饰。",
+      "玻璃反光默认开启，只在外观提供独立开关；反光移动，原图保持不动。",
+      "玥玥保留圆脸、黑发、暗红瞳和角色自身左右不同的配饰。"
+    ],
+    "rules": [
+      { "name": "The Pack and Mode Rule", "body": "每套 UI 决定自己的显示模式、配色与美术；选择 UI 同步三者，外观不再提供独立模式和主色选择。", "section": "colors" },
+      { "name": "The Composer Surface Rule", "body": "聊天输入栏在各尺寸使用对应 UI 的不透明底色和细亮边；移动端不启用实时背景模糊，保证输入清楚。", "section": "layout" },
+      { "name": "The Original Image Rule", "body": "倾斜只移动玻璃反光层，不位移、拉伸或修改原图；保存图片直接读取原始文件，不包含玻璃效果。", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** 让 UI 选择同步对应的昼夜模式与配色，并保持重新打开时一致。",
+      "**Do** 用真实文本、字段、单选和按钮承载功能，用玥玥与小配饰补充气氛。",
+      "**Do** 让倾斜反光默认开启，只在外观用独立开关保存选择。",
+      "**Do** 保持原图比例与保存字节，反光只作用于显示层。",
+      "**Do** 按 `陈玥-视觉规范.md` 维护外貌与角色自身左右配饰。",
+      "**Do** 区分浏览器界面检查与 Android 真机验证。"
+    ],
+    "donts": [
+      "**Don't** 把软件立绘或大面积装饰叠到角色卡阅读正文上。",
+      "**Don't** 用惨白恐怖形象、亮红星星瞳或尖下巴替代玥玥的既定形象。",
+      "**Don't** 为玻璃效果拉伸原图、扩大白边或阻挡图片操作。",
+      "**Don't** 恢复与 UI 分离的模式、主色选择或画廊启用按钮。",
+      "**Don't** 把尚未制作的季节套装写成已经可用的内容。"
+    ]
+  }
+}

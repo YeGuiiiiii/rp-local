@@ -1,0 +1,91 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const installFileBridge = require('./mock-files.cjs');
+const root=path.resolve(__dirname,'..');
+const web=path.join(root,'web');
+
+(async()=>{
+  const browser=await chromium.launch({channel:'msedge',headless:true});
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  await context.addInitScript(installFileBridge);
+  const page=await context.newPage();
+  let release;
+  let gate=new Promise(resolve=>{release=resolve;});
+  let blockApp=true;
+  await context.route('**/*',async route=>{
+    const url=new URL(route.request().url());
+    if(url.origin!=='https://sta1n156.github.io')return route.abort();
+    if(blockApp && url.pathname.endsWith('/app.js'))await gate;
+    const relative=url.pathname.slice('/RP-Hub/'.length)||'index.html';
+    const file=path.resolve(web,relative);
+    if(!file.startsWith(web+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile())return route.fulfill({status:404,body:''});
+    return route.fulfill({path:file,contentType:({'.html':'text/html','.css':'text/css','.js':'application/javascript','.webp':'image/webp'})[path.extname(file)]||'application/octet-stream'});
+  });
+  try{
+    const navigation=page.goto('https://sta1n156.github.io/RP-Hub/',{waitUntil:'load'});
+    await page.getByRole('status',{name:'启动欢迎页',exact:true}).waitFor();
+    await page.waitForFunction(()=>document.querySelector('.startup-mascot')?.complete && document.querySelector('.startup-mascot').naturalWidth>0);
+    await page.screenshot({path:path.join(root,'verification/startup-home-390.png')});
+    const one=await page.screenshot({clip:await page.locator('.startup-mascot').boundingBox()});
+    await page.waitForTimeout(180);
+    const two=await page.screenshot({clip:await page.locator('.startup-mascot').boundingBox()});
+    assert.notDeepEqual(one,two,'Loading mascot must move');
+    assert.equal(await page.evaluate(()=>!!window.__rpDataReady),false);
+    release();blockApp=false;
+    await navigation;
+    await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
+    await page.evaluate(()=>{
+      window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState;
+      __qa.showUserSetupModal=false;
+    });
+    assert.equal(await page.evaluate(()=>__qa.currentView),'characters');
+    await page.getByRole('button',{name:'在线入口',exact:true}).click();
+    const wheel=await page.getByRole('dialog',{name:'在线入口',exact:true}).boundingBox();
+    const close=await page.getByRole('button',{name:'关闭在线入口',exact:true}).boundingBox();
+    const trigger=await page.locator('.shell-online-trigger').boundingBox();
+    assert.equal(wheel.width,390);
+    assert.ok(Math.abs(trigger.x+trigger.width/2-close.x-close.width/2)<1);
+    assert.ok(Math.abs(trigger.y+trigger.height/2-close.y-close.height/2)<1);
+    assert.equal(await page.locator('.shell-online-choice').count(),2);
+    await page.screenshot({path:path.join(root,'verification/online-radial-390.png')});
+    await page.getByRole('button',{name:'关闭在线入口',exact:true}).click();
+    await page.getByRole('dialog',{name:'在线入口',exact:true}).waitFor({state:'detached'});
+    assert.equal(await page.getByRole('dialog',{name:'在线入口',exact:true}).count(),0);
+    await page.evaluate(async()=>{
+      __qa.characters=[{uuid:'startup-card',name:'正在玩的卡',first_mes:'开场',description:'',worldInfo:[],regexScripts:[],uiTemplates:[]}];
+      await __qa.selectCharacter(0);
+      __qa.chatHistory=[{id:'startup-user',role:'user',content:'继续上次的冒险。'},{id:'startup-assistant',role:'assistant',content:'这里是保存的剧情。',shouldAnimate:false}];
+    });
+    await page.waitForTimeout(1800);
+    await page.reload({waitUntil:'load'});
+    await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
+    await page.evaluate(()=>window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState);
+    assert.equal(await page.evaluate(()=>__qa.currentView),'chat');
+    assert.equal(await page.evaluate(()=>__qa.currentCharacter.uuid),'startup-card');
+    assert.equal(await page.evaluate(()=>__qa.chatHistory[1].content),'这里是保存的剧情。');
+    await page.evaluate(()=>{
+      Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.waitForTimeout(250);
+    assert.equal(await page.locator('.entry-transition').count(),0);
+    assert.equal(await page.evaluate(()=>__qa.currentView),'chat');
+    await page.setViewportSize({width:360,height:640});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    blockApp=true;gate=new Promise(resolve=>{release=resolve;});
+    const smallNav=page.reload({waitUntil:'load'});
+    await page.locator('.startup-mascot').waitFor();
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    assert.equal(await page.locator('.startup-mascot').evaluate(el=>getComputedStyle(el).animationName),'none');
+    await page.screenshot({path:path.join(root,'verification/startup-home-360.png')});
+    release();blockApp=false;await smallNav;
+    await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
+    const report={existingPersonaStickersRendered:true,realLoadingWaitsForData:true,loadingMotionChanges:true,emptyUserGoesToCardDirectory:true,savedSessionResumesChat:true,backgroundVisibilityDoesNotReplay:true,onlineCloseAlignedToTrigger:true,twoRadialChoices:true,smallScreenAndReducedMotion:true};
+    fs.writeFileSync(path.join(root,'verification/startup-home.json'),JSON.stringify(report,null,2));
+    console.log(JSON.stringify(report,null,2));
+  }finally{release();await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

@@ -1,0 +1,371 @@
+/* Meowa-painted surfaces sit behind semantic controls; narrative content keeps its own style. */
+:root {
+    --yy-label: url("../images/chenyue/title-label.webp");
+    --yy-button: url("../images/chenyue/button-paper.webp");
+    --yy-moon: url("../images/chenyue/album-corner-moon.webp");
+    --yy-leaf: url("../images/chenyue/album-corner-leaf.webp");
+    --yy-close: url("../images/chenyue/close.webp");
+    --yy-ink: #47414d;
+    --yy-rose: #8e4e60;
+    --yy-muted: #706778;
+    --yy-paper: #fffefa;
+    --yy-line: #d8d0db;
+    --yy-field: #f7f4f8;
+    --yy-depth: 0 5px 16px #34213d0d;
+}
+:root:not([data-app-theme="dark"]) {
+    --shell-bg: #f4f1f7;
+    --shell-surface: #fffefa;
+    --shell-text: #393440;
+    --shell-muted: #706778;
+    --shell-line: #e3dce7;
+    --shell-accent: #866079;
+    --shell-tint: #f3e7ee;
+    --shell-online: #cee9d7;
+}
+:root[data-app-theme="dark"] {
+    --yy-label: url("../images/chenyue/title-label-night.webp");
+    --yy-button: url("../images/chenyue/button-paper-night.webp");
+    --yy-moon: url("../images/chenyue/album-corner-moon-night.webp");
+    --yy-leaf: url("../images/chenyue/album-corner-leaf-night.webp");
+    --yy-close: url("../images/chenyue/close-night.webp");
+    --yy-ink: #e4dbe9;
+    --yy-rose: #e5a8b8;
+    --yy-muted: #afa2ba;
+    --yy-paper: #292832;
+    --yy-line: #595060;
+    --yy-field: #322e3a;
+    --yy-depth: 0 5px 16px #0002;
+    --shell-bg: #211f29;
+    --shell-surface: #2c2935;
+    --shell-text: #ece4f0;
+    --shell-muted: #b0a4bb;
+    --shell-line: #484151;
+    --shell-accent: #d8a5ba;
+    --shell-tint: #423240;
+    --shell-online: #b7d6c1;
+}
+.chenyue-theme .app-main:not([data-view="chat"]) {
+    --c-canvas: var(--shell-bg);
+    --c-surface: var(--yy-paper);
+    --c-elevated: var(--yy-paper);
+    --c-field: var(--yy-field);
+    --c-border: var(--yy-line);
+    --c-border-soft: var(--shell-line);
+    --c-border-strong: var(--yy-muted);
+    --c-text: var(--shell-text);
+    --c-text-2: var(--yy-ink);
+    --c-text-3: var(--shell-muted);
+    --c-text-4: var(--shell-muted);
+    --c-accent-text: var(--yy-rose);
+    --r-md: 6px;
+    --r-lg: 8px;
+    --r-xl: 8px;
+    --gray-400: 112 103 120;
+    --gray-500: 112 103 120;
+}
+:root:not([data-rphub-accent="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
+    --primary-50: 247 239 243;
+    --primary-100: 241 225 233;
+    --primary-200: 224 194 208;
+    --primary-300: 202 161 181;
+    --primary-400: 166 108 136;
+    --primary-500: 150 91 119;
+    --primary-600: 142 78 96;
+    --primary-700: 121 64 83;
+    --primary-800: 99 51 67;
+    --primary-900: 78 41 55;
+}
+:root[data-app-theme="dark"] .chenyue-theme .app-main:not([data-view="chat"]) {
+    --gray-400: 176 164 187;
+    --gray-500: 176 164 187;
+}
+:root[data-app-theme="dark"]:not([data-rphub-accent="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
+    --primary-50: 58 42 53;
+    --primary-100: 72 49 64;
+    --primary-200: 104 65 86;
+    --primary-300: 142 88 116;
+    --primary-400: 192 133 161;
+    --primary-500: 213 153 176;
+    --primary-600: 229 168 184;
+    --primary-700: 237 187 202;
+    --primary-800: 243 206 216;
+    --primary-900: 249 226 233;
+    --primary-text-400: 213 153 176;
+    --primary-text-500: 222 162 184;
+    --primary-text-600: 229 168 184;
+    --primary-text-700: 237 187 202;
+    --primary-text-800: 243 206 216;
+    --primary-text-900: 249 226 233;
+}
+:root[data-rphub-accent="1"] {
+    --yy-rose: rgb(var(--primary-700));
+    --shell-accent: rgb(var(--primary-700));
+    --shell-tint: rgb(var(--primary-50));
+}
+:root:is([data-rphub-scheme="eye"],[data-rphub-scheme="eyeNight"]) {
+    --shell-bg: var(--c-canvas);
+    --shell-surface: var(--c-surface);
+    --yy-paper: var(--c-surface);
+    --yy-field: var(--c-field);
+    --shell-text: var(--c-text);
+    --yy-ink: var(--c-text-2);
+}
+.chenyue-theme :is(.shell-page, .shell-settings-detail, .workspace-memory-dialog) {
+    color: var(--shell-text);
+}
+.yy-page-header {
+    position: relative;
+    min-height: 142px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0 20px;
+    margin: 0 0 14px;
+}
+.yy-page-heading { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.yy-page-heading > h1 {
+    font-size: 24px; font-weight: 750; line-height: 1.45;
+    color: var(--shell-text); margin: 0 0 8px; letter-spacing: 0;
+    display: flex; align-items: center; width: 216px; max-width: 100%; min-height: 78px;
+    padding: 8px 12px 8px 60px;
+    background: var(--yy-label) left center/216px auto no-repeat;
+}
+.yy-heading-count { display: inline-block; margin-left: 10px; color: var(--shell-muted); font-size: 12px; font-weight: 500; line-height: 1.7; vertical-align: middle; }
+.yy-page-mascot { width: 112px; height: 116px; flex: none; object-fit: contain; align-self: center; }
+.yy-directory-heading { position: relative; min-height: 58px; padding-left: 64px; }
+.yy-directory-mascot { position: absolute; width: 60px; height: 64px; left: -2px; bottom: 0; object-fit: contain; }
+.yy-poke-mascot {
+    display: block; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; cursor: pointer; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+.yy-poke-mascot > img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.yy-poke-mascot:focus-visible { outline: 2px solid var(--yy-rose); outline-offset: 3px; }
+.yy-mascot-speech {
+    position: fixed; z-index: 20000; box-sizing: border-box; margin: 0; padding: 10px 14px;
+    border-radius: 8px; background: var(--yy-paper); color: var(--yy-ink);
+    box-shadow: 0 5px 20px #20112530; font-size: 14px; font-weight: 500; line-height: 1.65;
+    overflow-wrap: anywhere; pointer-events: none; text-align: center; letter-spacing: 0;
+}
+.yy-speech-enter-active { transition: opacity 100ms ease-out; }
+.yy-speech-leave-active { transition: opacity 200ms ease-out; }
+.yy-speech-enter-from, .yy-speech-leave-to { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+    .yy-speech-enter-active, .yy-speech-leave-active { transition-duration: 80ms; }
+}
+.yy-directory-heading h2 { font-size: 22px !important; color: var(--yy-ink) !important; }
+.chenyue-theme .shell-root .character-management-header { gap: 12px; }
+.chenyue-theme .shell-root .character-management-header input,
+.chenyue-theme .shell-search {
+    background: var(--yy-paper);
+    border: 1px solid var(--yy-line); border-radius: 6px; box-shadow: none;
+}
+.chenyue-theme .shell-search { padding-left: 15px; padding-right: 15px; min-height: 50px; }
+.chenyue-theme .app-main .shell-search input { background: transparent !important; border: 0; box-shadow: none; }
+.chenyue-theme .shell-root .character-management-header .settings-icon-button,
+.chenyue-theme .shell-root .character-management-header .settings-create-button {
+    background: var(--yy-paper);
+    color: var(--yy-ink); border: 1px solid var(--yy-line); border-radius: 6px; box-shadow: none;
+}
+.chenyue-theme .shell-root .character-management-header .settings-create-button { background: var(--shell-tint); color: var(--yy-rose); }
+.chenyue-theme .shell-menu-mask { background: #3026385c; }
+.chenyue-theme .shell-chat-menu {
+    position: relative; width: min(366px,100%); max-height: calc(100dvh - 36px);
+    padding: 12px 10px 16px; background: transparent; color: var(--yy-ink);
+    border: 14px solid transparent; border-image: var(--yy-button) 65 fill stretch;
+    box-shadow: 0 20px 60px #21162d35; overflow-y: auto; border-radius: 0;
+}
+.chenyue-theme .shell-chat-menu .yy-menu-header {
+    position: relative; display: flex; align-items: flex-end;
+    min-height: 130px; padding: 30px 0 15px; margin: -6px 0 12px;
+    border: 0; gap: 6px;
+}
+.yy-menu-header > div { flex: 1; min-width: 0; z-index: 1; padding: 0 0 5px; }
+.yy-menu-header small { display: block; font-size: 10px; color: var(--yy-rose); margin: 0 0 8px; }
+.yy-menu-header strong {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; font-size: 17px !important; font-weight: 700;
+    line-height: 1.5; overflow-wrap: anywhere;
+}
+.yy-menu-header > .yy-poke-mascot { width: 118px; height: 102px; flex: none; margin-right: 2px; }
+.chenyue-theme .yy-menu-header .yy-menu-close {
+    position: absolute; right: -11px; top: -9px; width: 40px; height: 40px;
+    background: var(--yy-close) center/100% 100% no-repeat; border-radius: 0; z-index: 2;
+}
+.yy-menu-close > .shell-icon { opacity: 0; }
+.yy-online-toolbar {
+    position: relative; flex: none; height: calc(60px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 16px 0 72px; display: flex; align-items: center;
+    background: var(--shell-surface); color: var(--yy-ink); border-bottom: 1px solid var(--yy-line);
+}
+.yy-online-toolbar > strong { flex: 1; font-size: 14px; line-height: 1.5; }
+.yy-online-return {
+    position: absolute; top: calc(6px + env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
+    z-index: 30; width: 48px; height: 48px; padding: 2px; border: 0;
+    background: var(--yy-close) center/44px 44px no-repeat; cursor: pointer;
+    touch-action: manipulation;
+}
+.yy-online-return:active { transform: scale(.94); }
+.yy-online-return:focus-visible { outline: 2px solid var(--yy-rose); outline-offset: 2px; }
+.chenyue-theme .shell-chat-menu > .yy-menu-return {
+    width: 100%; display: flex; padding: 0 16px; gap: 10px; min-height: 52px;
+    background: var(--shell-tint); border: 1px solid var(--yy-line); border-radius: 6px;
+    font-size: 13px; color: var(--yy-ink);
+}
+.yy-menu-return > span { flex: 1; text-align: left; }
+.yy-menu-return > .shell-icon { width: 17px; height: 17px; }
+.yy-menu-section { margin: 17px 3px 8px; font-size: 11px; color: var(--yy-muted); }
+.yy-menu-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.yy-menu-grid > button {
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    min-width: 0; min-height: 57px; padding: 8px 9px;
+    background: var(--yy-paper); border: 1px solid var(--yy-line); border-radius: 6px; color: var(--yy-ink);
+    font-size: 13px; line-height: 1.5;
+}
+.yy-menu-grid .shell-icon { width: 19px; height: 19px; color: var(--yy-rose); }
+.yy-menu-grid button:disabled { opacity: .46; filter: grayscale(.8); }
+.yy-menu-grid button:disabled .shell-icon { color: var(--yy-muted); }
+.yy-menu-bottom { display: flex; gap: 12px; margin: 15px 3px 0; padding-top: 12px; border-top: 1px dashed var(--yy-line); }
+.yy-menu-bottom > button {
+    display: flex; flex: 1; align-items: center; justify-content: center; gap: 7px;
+    min-height: 44px; font-size: 12px; color: var(--yy-ink);
+}
+.yy-menu-bottom .shell-icon { width: 18px; height: 18px; color: var(--yy-rose); }
+.yy-menu-signature { margin: 9px 0 0; font-size: 10px; text-align: center; color: var(--yy-muted); }
+.chenyue-theme .shell-dock {
+    background: var(--yy-paper); border: 1px solid var(--yy-line); box-shadow: 0 8px 26px #34213d14;
+}
+.chenyue-theme .shell-dock > button.is-active { color: var(--yy-rose); }
+.chenyue-theme .shell-dock-fold { background: var(--yy-paper); color: var(--yy-rose); border-color: var(--yy-line); }
+.chenyue-theme .shell-dock-wrap .shell-online-trigger { box-shadow: 0 4px 12px #4f68581a; border: 1px solid #687a6155; touch-action: none; }
+.chenyue-theme .shell-section-heading h2 { font-weight: 700; color: var(--yy-ink); }
+.chenyue-theme .shell-section-heading { margin-top: 21px; }
+.chenyue-theme .shell-action-grid > button {
+    min-height: 82px; padding: 16px 14px; border-radius: 6px;
+    background: var(--yy-paper); border: 1px solid var(--yy-line);
+}
+.chenyue-theme .shell-action-icon { width: 30px; height: 34px; background: transparent; color: var(--yy-rose); }
+.chenyue-theme .shell-action-grid > button:hover { background: var(--shell-tint); }
+.chenyue-theme .shell-row-list { background: transparent; border-block: 1px solid var(--yy-line); border-radius: 0; padding: 0; box-shadow: none; }
+.chenyue-theme .shell-row-list > button + button { border-top-style: dashed; border-color: var(--yy-line); }
+.chenyue-theme .shell-row-list .shell-row-icon { color: var(--yy-rose); }
+.chenyue-theme .shell-card-picker { background: var(--shell-tint); border: 1px solid var(--yy-line); border-radius: 6px; padding: 12px 16px; }
+.chenyue-theme .shell-profile {
+    background: var(--yy-paper); border: 1px solid var(--yy-line); border-radius: 6px;
+    padding: 20px; min-height: 116px;
+}
+.chenyue-theme .shell-profile-fallback { background: var(--shell-tint); color: var(--yy-rose); }
+.chenyue-theme .shell-album-cover {
+    background: transparent; border: 0; padding: 0; overflow: visible;
+    box-shadow: var(--yy-depth);
+}
+.shell-album-aperture {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    overflow: hidden; border-radius: inherit; background: #ffffff12;
+}
+.shell-album-aperture > img { position: absolute; width: 100%; height: 100%; object-fit: contain; }
+.shell-album-aperture > img.is-missing { visibility: hidden; }
+.shell-album-aperture:has(img:not(.is-missing)) > .shell-icon { visibility: hidden; }
+.shell-album-aperture > .shell-icon { color: var(--shell-muted); width: 30px; height: 30px; }
+.chenyue-theme .shell-album-cover::before, .chenyue-theme .shell-album-cover::after {
+    content: ""; position: absolute; z-index: 1; pointer-events: none;
+    width: 50px; height: 50px; background: var(--yy-moon) center/contain no-repeat;
+}
+.chenyue-theme .shell-album-cover::before { top: -8px; left: -8px; }
+.chenyue-theme .shell-album-cover::after { bottom: -4px; right: -6px; background-image: var(--yy-leaf); width: 42px; height: 46px; }
+.chenyue-theme .shell-album-grid { padding: 8px 7px 0; gap: 28px 22px; }
+.chenyue-theme .shell-album { gap: 6px; color: var(--shell-text); }
+.yy-empty-mascot { width: 160px; height: 142px; object-fit: contain; margin: 0 auto 18px; }
+.chenyue-theme .shell-empty { padding-top: 32px; }
+.chenyue-theme .shell-empty h2 { font-size: 16px; }
+.chenyue-theme .settings-page-header {
+    background: transparent; border-bottom: 1px solid var(--yy-line);
+    padding: 4px 0 16px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.chenyue-theme .management-view { background: var(--shell-bg); color: var(--shell-text); animation: none; }
+.chenyue-theme .management-page-heading { min-width: 0; gap: 4px; }
+.chenyue-theme .management-page-heading h2 { color: var(--yy-ink); font-size: 20px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; letter-spacing: 0; }
+.chenyue-theme .settings-page-header .management-page-heading h2 > svg { display: none; }
+.chenyue-theme .management-view .app-nav-trigger { width: 44px; height: 44px; flex: none; background: var(--shell-tint); color: var(--yy-rose); border-radius: 6px; }
+.chenyue-theme .shell-settings-detail { max-width: 1000px; background: var(--yy-paper); padding: 20px; }
+.chenyue-theme .shell-settings-detail .settings-card {
+    border: 0; border-radius: 0; background: transparent; box-shadow: none;
+}
+.chenyue-theme .shell-settings-detail .settings-card__header { padding: 0 0 18px; border-bottom: 1px dashed var(--yy-line); gap: 16px; }
+.chenyue-theme .shell-settings-detail .settings-card__title { font-size: 15px; color: var(--yy-ink); }
+.chenyue-theme .app-main:not([data-view="chat"]) .settings-card__title > svg { width: 32px; height: 32px; border-radius: 6px; color: var(--yy-rose); background: var(--shell-tint); box-shadow: none; }
+.chenyue-theme .shell-settings-detail .settings-card__body { padding: 22px 0; }
+.chenyue-theme .shell-settings-detail .settings-profile-avatar { border-radius: 8px; width: 88px; height: 88px; }
+.chenyue-theme .app-main .settings-view .settings-control {
+    border-color: var(--yy-line); background: var(--yy-field); color: var(--shell-text); border-radius: 6px;
+}
+.chenyue-theme .app-main:not([data-view="chat"]) .settings-label { font-size: 13px; color: var(--yy-ink); margin-bottom: 8px; }
+.chenyue-theme .settings-view textarea.settings-control { min-height: 120px; line-height: 1.8; }
+.chenyue-theme .settings-control::placeholder { color: var(--shell-muted); opacity: 1; }
+.image-quota { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; color: var(--yy-rose); font-size: 13px; }
+.image-quota > button { flex: none; }
+.image-quota > button:disabled { opacity: .4; cursor: default; }
+.chenyue-theme .app-main:not([data-view="chat"]) .segmented-switch { background: var(--yy-field); border: 1px solid var(--yy-line); border-radius: 6px; }
+.chenyue-theme .app-main:not([data-view="chat"]) .segmented-switch__indicator { background: var(--shell-tint); box-shadow: none; border-radius: 3px; transition: transform 180ms cubic-bezier(.22,1,.36,1); }
+.chenyue-theme .app-main:not([data-view="chat"]) .segmented-switch__option { font-size: 13px; font-weight: 600; }
+.chenyue-theme .app-main:not([data-view="chat"]) .segmented-switch__option.is-active { color: var(--yy-rose); }
+.chenyue-theme .app-main:not([data-view="chat"]) .settings-action { border-radius: 6px; box-shadow: none; min-height: 44px; }
+.chenyue-theme .app-main:not([data-view="chat"]) .settings-action--icon { min-width: 44px; }
+.chenyue-theme .workspace-memory-dialog > section { background: var(--yy-paper); border: 1px solid var(--yy-line); box-shadow: 0 12px 40px #39283a25; }
+.chenyue-theme .workspace-memory-dialog h2 { color: var(--yy-rose); }
+.chenyue-theme .app-modal-panel {
+    background-color: var(--yy-paper); border-color: var(--yy-line);
+    box-shadow: 0 18px 55px #1c152d24;
+}
+.chenyue-theme .app-modal-panel :is(.modal-close-button,.item-action-button) { color: var(--yy-rose); }
+.chenyue-theme .pagination-button { border-color: var(--yy-line); background: var(--yy-paper); color: var(--yy-ink); }
+.chenyue-theme .startup-home { background: var(--shell-bg) !important; }
+.chenyue-theme .startup-brand { color: var(--yy-rose); }
+.chenyue-theme .startup-progress span { background: var(--yy-rose); }
+.chenyue-theme .startup-mascot { width: 240px; height: 205px; }
+.chenyue-theme .shell-error {
+    background: var(--yy-paper) url("../images/chenyue/confused.webp") 10px center/42px auto no-repeat;
+    padding: 14px 12px 14px 62px; min-height: 64px; border: 1px dashed #ba7a87; border-radius: 6px;
+}
+.chenyue-theme :is(.shell-chat-menu,.yy-menu-grid) button:focus-visible { outline: 2px solid var(--yy-rose); outline-offset: 2px; }
+.chenyue-theme :is(.shell-page,.shell-dock-wrap,.shell-settings-detail) button { touch-action: manipulation; transition: background-color 120ms ease, color 120ms ease, translate 100ms ease; }
+.chenyue-theme :is(.shell-page,.shell-dock-wrap,.shell-settings-detail) button:active:not(:disabled) { translate: 0 1px; }
+.chenyue-theme :is(.shell-page,.management-view) { scrollbar-color: var(--yy-line) transparent; scrollbar-width: thin; }
+.chenyue-theme :is(.shell-page,.management-view) ::selection { background: var(--shell-tint); color: var(--yy-ink); }
+.chenyue-theme :is(.shell-page,.management-view) :is(input,textarea) { caret-color: var(--yy-rose); }
+.chenyue-theme .shell-settings-detail :focus-visible { outline: 2px solid var(--yy-rose); outline-offset: 2px; }
+@media (max-height: 660px) {
+    .chenyue-theme .shell-chat-menu { padding-top: 0; padding-bottom: 5px; }
+    .chenyue-theme .shell-chat-menu .yy-menu-header { min-height: 92px; padding-top: 10px; }
+    .yy-menu-header > .yy-poke-mascot { width: 96px; height: 78px; }
+    .yy-menu-grid > button { min-height: 48px; }
+    .yy-menu-section { margin-top: 10px; }
+    .yy-menu-bottom { margin-top: 10px; padding-top: 5px; }
+}
+@media (min-width: 768px) {
+    .yy-page-header { min-height: 152px; }
+    .yy-page-mascot { width: 145px; height: 130px; }
+    .yy-directory-heading { min-height: 72px; padding-left: 82px; }
+    .yy-directory-mascot { width: 78px; height: 78px; }
+    .chenyue-theme .shell-settings-detail { padding: 28px 36px; }
+    .chenyue-theme .shell-album-cover::before { width: 62px; height: 62px; }
+    .chenyue-theme .shell-album-cover::after { width: 52px; height: 58px; }
+}
+@media (max-width: 400px) {
+    .yy-page-header { gap: 4px; }
+    .yy-page-heading > h1 { font-size: 21px; background-size: 188px auto; width: 188px; padding-left: 54px; }
+    .yy-page-mascot { width: 104px; }
+    .chenyue-theme .shell-settings-detail { padding: 18px 16px; }
+}
+@media (max-height: 500px) and (min-width: 520px) {
+    .chenyue-theme .shell-page { padding-top: 16px; }
+    .yy-page-header { min-height: 92px; padding: 0 0 12px; margin-bottom: 12px; }
+    .yy-page-heading > h1 { min-height: 60px; margin-bottom: 0; }
+    .yy-page-mascot { width: 100px; height: 84px; }
+    .chenyue-theme .shell-search { margin-bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .chenyue-theme :is(.shell-page,.shell-dock-wrap,.shell-settings-detail) button:active { translate: none; }
+}
