@@ -1,3 +1,4 @@
+import argparse
 import base64
 import json
 from pathlib import Path
@@ -5,7 +6,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 
-out = Path(__file__).resolve().parent
+parser = argparse.ArgumentParser()
+parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent)
+parser.add_argument("--sources-json", type=Path)
+options = parser.parse_args()
+out = options.output_dir.resolve()
+out.mkdir(parents=True, exist_ok=True)
 exports = Path("D:/大模型用/rp/rp可导入数据-最终/分项导入")
 sources = [
     Path("C:/Users/pzh/Downloads/新建文件夹/地牢小馆：炒翻日常 V1.5.png"),
@@ -13,6 +19,9 @@ sources = [
     exports / "04-漆黑的子弹/角色卡含头像.png",
     next(exports.glob("02-*/角色卡含头像.png")),
 ]
+if options.sources_json:
+    sources = [Path(value) for value in json.loads(options.sources_json.read_text(encoding="utf-8"))]
+assert len(sources) == 4
 cards = []
 sheet = Image.new("RGB", (1200, 520), "#eeeef0")
 draw = ImageDraw.Draw(sheet)

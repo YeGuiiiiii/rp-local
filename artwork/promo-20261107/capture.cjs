@@ -5,7 +5,11 @@ const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-r
 const installFiles = require('../../scripts/mock-files.cjs');
 const root = path.resolve(__dirname, '../..');
 const web = path.join(root, 'web');
-const cards = JSON.parse(fs.readFileSync(path.join(__dirname, 'cards.json'), 'utf8'));
+const output = path.resolve(process.argv[2] || __dirname);
+const inputOption = process.argv.indexOf('--cards-dir');
+const input = inputOption >= 0 ? path.resolve(process.argv[inputOption + 1]) : __dirname;
+const cards = JSON.parse(fs.readFileSync(path.join(input, 'cards.json'), 'utf8'));
+fs.mkdirSync(output, { recursive: true });
 
 (async () => {
     const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -27,7 +31,7 @@ const cards = JSON.parse(fs.readFileSync(path.join(__dirname, 'cards.json'), 'ut
             const url = new URL(route.request().url());
             if (url.origin !== 'https://sta1n156.github.io') return route.abort();
             if (/^\/RP-Hub\/card-cover-[0-3]\.png$/.test(url.pathname)) {
-                return route.fulfill({ path: path.join(__dirname,
+                return route.fulfill({ path: path.join(input,
                     url.pathname.split('/').at(-1)), contentType: 'image/png' });
             }
             if (url.pathname.includes('/_files/')) {
@@ -78,15 +82,43 @@ const cards = JSON.parse(fs.readFileSync(path.join(__dirname, 'cards.json'), 'ut
             await page.waitForFunction(() => [...document.images].filter(image => image.getClientRects().length)
                 .every(image => image.complete && image.naturalWidth > 0));
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-            await page.screenshot({ path: path.join(__dirname, name + '.png') });
+            await page.screenshot({ path: path.join(output, name + '.png') });
         }
         await page.evaluate(() => RPThemePacks.set('journal'));
         await capture('screen-day-home');
         await page.evaluate(() => { RPThemePacks.set('vampire'); __promo.navigateWorkspace('advanced'); });
         await capture('screen-night-advanced');
         await page.evaluate(() => __promo.navigateWorkspace('album'));
+        if (process.argv.includes('--expanded')) await page.setViewportSize({ width: 390, height: 920 });
         await capture('screen-night-gallery');
+        if (process.argv.includes('--expanded')) {
+            await page.setViewportSize({ width: 390, height: 844 });
+            await page.evaluate(() => {
+                RPThemePacks.set('classic');
+                RPHubThemeKit.setScheme('day');
+                __promo.navigateWorkspace('characters');
+                __promo.characterGridView = false;
+            });
+            await capture('screen-classic-deck');
+            await page.evaluate(() => {
+                __promo.navigateWorkspace('memory');
+                __promo.showMemorySettings = true;
+                __promo.memorySettings.enabled = true;
+            });
+            await capture('screen-classic-memory');
+            await page.evaluate(() => {
+                RPThemePacks.set('journal');
+                __promo.openSettingsSection('appearance');
+            });
+            await capture('screen-day-appearance');
+            await page.evaluate(() => {
+                RPThemePacks.set('vampire');
+                __promo.navigateWorkspace('characters');
+                __promo.characterGridView = true;
+            });
+            await capture('screen-night-home');
+        }
         assert.deepEqual(errors, []);
-        console.log('Captured three actual application pages at 1170 x 2532, using four existing character cards in isolated storage.');
+        console.log('Captured actual application pages at 1170 x 2532, using four existing character cards in isolated storage: ' + output);
     } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

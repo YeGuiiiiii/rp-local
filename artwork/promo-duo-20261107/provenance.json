@@ -1,0 +1,142 @@
+[
+  {
+    "name": "RP本地版-双人篇-经典与陪伴",
+    "dimensions": [
+      2400,
+      3600
+    ],
+    "files": [
+      "RP本地版-双人篇-经典与陪伴.png",
+      "RP本地版-双人篇-经典与陪伴.jpg"
+    ],
+    "appVersion": "2.9.001",
+    "screens": [
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-day-home.png",
+        "sourceSha256": "de2c14cf45e0ab3aa16f1c63169eb55eb178acdc00259bbd6656434cab3f1a32",
+        "displayWidth": 760,
+        "rotationDegrees": 6,
+        "applicationPixelsPreservedBeforePlacement": true
+      },
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-night-home.png",
+        "sourceSha256": "b742bd0e8d756a9714a9178c0104a994337f447c3a89f6d1bad323a82568dd14",
+        "displayWidth": 760,
+        "rotationDegrees": -6,
+        "applicationPixelsPreservedBeforePlacement": true
+      },
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-classic-deck.png",
+        "sourceSha256": "90f5605a7b29d64abe8e2f407d2723480c0c603700613df939c1d00aba1ef0db",
+        "displayWidth": 930,
+        "rotationDegrees": 0,
+        "applicationPixelsPreservedBeforePlacement": true
+      }
+    ],
+    "figureBounds": [
+      [
+        41,
+        2235,
+        699,
+        3270
+      ],
+      [
+        1710,
+        2245,
+        2349,
+        3270
+      ]
+    ],
+    "figureEdit": {
+      "source": "artwork/promo-duo-20261107/day-eyes/Change_only_the_dark-haired_girl_s_eyes_Keep_their_dark_wine-red_color_but_add_a_clear_dark_pupil_a_gentle_lig_5023b731/edited.png",
+      "sha256": "f2578cb10435f66083779d88a90c3f1ae8430d25af567ec277851fe6957cd9e9",
+      "jobId": "job_45e63beec2f54687be758e591ac086df"
+    },
+    "generation": "Meowa general image and focused eye edit",
+    "authors": {
+      "original": "STA1N156 / RP-Hub",
+      "acknowledgements": [
+        "红花铃",
+        "启元"
+      ]
+    },
+    "characters": [
+      "红花铃",
+      "玥玥"
+    ],
+    "primaryGroup": "132292045",
+    "secondaryGroup": "472441481",
+    "primaryGroupFont": 80,
+    "secondaryGroupFont": 43
+  },
+  {
+    "name": "RP本地版-双人篇-界面与画廊",
+    "dimensions": [
+      2400,
+      3600
+    ],
+    "files": [
+      "RP本地版-双人篇-界面与画廊.png",
+      "RP本地版-双人篇-界面与画廊.jpg"
+    ],
+    "appVersion": "2.9.001",
+    "screens": [
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-classic-memory.png",
+        "sourceSha256": "668feb55070a7561ab7ab61f79c17195cf152e9797f008dcd213cc421804d39b",
+        "displayWidth": 760,
+        "rotationDegrees": 6,
+        "applicationPixelsPreservedBeforePlacement": true
+      },
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-day-appearance.png",
+        "sourceSha256": "64cb2cff91764c522bcc411646ff95860355ecbd7ff6e7b421d904ac52fb7f4c",
+        "displayWidth": 760,
+        "rotationDegrees": -6,
+        "applicationPixelsPreservedBeforePlacement": true
+      },
+      {
+        "source": "artwork/promo-duo-20261107/screens/screen-night-gallery.png",
+        "sourceSha256": "6af86d618912a8f2ff8768e1476c25c4371e82377f94b7243165d6832e1e4305",
+        "displayWidth": 930,
+        "rotationDegrees": 0,
+        "applicationPixelsPreservedBeforePlacement": true
+      }
+    ],
+    "figureBounds": [
+      [
+        16,
+        2235,
+        725,
+        3270
+      ],
+      [
+        1678,
+        2245,
+        2383,
+        3270
+      ]
+    ],
+    "figureEdit": {
+      "source": "artwork/promo-duo-20261107/night-eyes/Change_only_the_dark-haired_girl_s_eyes_Keep_their_dark_wine-red_color_but_add_a_clear_dark_pupil_a_gentle_lig_5023b731/edited.png",
+      "sha256": "e5e351d6210f3be0eacafd0baf6ca05ec0edbbd6a67e5eb03d2572cc7db5a811",
+      "jobId": "job_593f236de7e44ad191dd1839b8e34977"
+    },
+    "generation": "Meowa general image and focused eye edit",
+    "authors": {
+      "original": "STA1N156 / RP-Hub",
+      "acknowledgements": [
+        "红花铃",
+        "启元"
+      ]
+    },
+    "characters": [
+      "红花铃",
+      "玥玥"
+    ],
+    "primaryGroup": "132292045",
+    "secondaryGroup": "472441481",
+    "primaryGroupFont": 80,
+    "secondaryGroupFont": 43
+  }
+]
