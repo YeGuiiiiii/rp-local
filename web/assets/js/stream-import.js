@@ -213,6 +213,7 @@
       await new Promise((resolve, reject) => {
         const tx = db.transaction(["store", "restore_units", "restore_sessions"], "readwrite");
         const store = tx.objectStore("store");
+        store.delete("__rp_local_mirror_revision");
         let failure;
         const abort = () => {
           try {
@@ -237,7 +238,7 @@
           abort();
         };
         const deleted = new Set(session.deleted);
-        const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
+        const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && item.key !== "__rp_local_mirror_revision" && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
         for (const key of deleted) {
           for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
             {

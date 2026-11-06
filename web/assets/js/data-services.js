@@ -7,6 +7,9 @@
     const STORAGE_PREFIX = 'rp_hub_';
     const LEGACY_STORAGE_PREFIX = String.fromCharCode(115, 105, 108, 108, 121, 95, 116, 97, 118, 101, 114, 110, 95);
     const DB_VERSION = 2;
+    const LOCAL_MIRROR_KEY = '__rp_local_mirror_revision';
+    const initialReads = new Map();
+    let pendingMirrors = 0, mirrorFailed = false, latestMirrorRevision;
     let mainDb = null;
     let legacyDb = null;
     let initPromise = null;
@@ -55,14 +58,36 @@
                 console.warn('Legacy DB check failed:', error);
             }
             if (window.RPLocalStore?.available) {
-                await window.RPLocalStore.initialize(await readStorageEntries(mainDb),
-                    (key, value) => dbSetTo(mainDb, key, value, { clone: true, mirror: false }));
+                const revision = await dbGetFrom(mainDb, LOCAL_MIRROR_KEY);
+                let synchronized = !!revision && revision === window.RPLocalStore.readRevision();
+                let entries;
+                if (synchronized) {
+                    const value = await dbGetFrom(mainDb, 'rp_hub_characters');
+                    synchronized = Array.isArray(value);
+                    if (synchronized) entries = [{ key: 'rp_hub_characters', value }];
+                }
+                if (!synchronized) {
+                    await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false });
+                    entries = (await readStorageEntries(mainDb)).filter(entry => entry.key !== LOCAL_MIRROR_KEY);
+                }
+                await window.RPLocalStore.initialize(entries, async (key, value) => {
+                    await dbSetTo(mainDb, key, value, { mirror: false });
+                    if (key === 'rp_hub_characters') initialReads.set(key, value);
+                }, { synchronized });
+                const characters = entries.find(entry => entry.key === 'rp_hub_characters');
+                if (characters) initialReads.set(characters.key, characters.value);
+                if (!synchronized) {
+                    const next = crypto.randomUUID();
+                    await dbSetTo(mainDb, LOCAL_MIRROR_KEY, next, { mirror: false });
+                    await window.RPLocalStore.saveRevision(next);
+                }
             }
             return mainDb;
         })();
         try {
             return await initPromise;
         } catch (error) {
+            initialReads.clear();
             mainDb?.close();
             mainDb = null;
             throw error;
@@ -167,6 +192,7 @@
         let result;
         let onSignalAbort = null;
         const mirrors = new Map();
+        let mirrorRevision;
         const settle = (ok, value) => {
             if (settled) return;
             settled = true;
@@ -185,10 +211,21 @@
             transaction = targetDb.transaction(['store'], 'readwrite');
             transaction.oncomplete = () => {
                 storageActiveWrites.delete(transaction);
+                if (mirrorRevision) {
+                    pendingMirrors++;
+                    latestMirrorRevision = mirrorRevision;
+                }
                 Promise.all([...mirrors].map(([key, value]) => value === undefined
                     ? window.RPLocalStore.remove(key) : window.RPLocalStore.save(key, value)))
+                    .then(() => {
+                        if (mirrorRevision && --pendingMirrors === 0 && !mirrorFailed)
+                            return window.RPLocalStore.saveRevision(latestMirrorRevision);
+                    })
                     .then(() => settle(true, result),
-                        error => settle(false, Object.assign(error, { committed: true })));
+                        error => {
+                            mirrorFailed = true;
+                            settle(false, Object.assign(error, { committed: true }));
+                        });
             };
             transaction.onabort = () => settle(false, failure || transaction.error || storageWriteError('AbortError', '存储事务已中止'));
             transaction.onerror = (event) => abortWith(event.target?.error || transaction.error || storageWriteError('UnknownError', '存储事务失败'));
@@ -200,14 +237,23 @@
             }
             const store = transaction.objectStore('store');
             const mirror = targetDb === mainDb && options.mirror !== false && window.RPLocalStore?.available;
+            const changed = key => {
+                initialReads.delete(key);
+                if (mirror && !mirrorRevision) {
+                    mirrorRevision = crypto.randomUUID();
+                    store.put(mirrorRevision, LOCAL_MIRROR_KEY);
+                }
+            };
             result = schedule({
                 get: key => store.get(key),
                 put: (value, key) => {
+                    changed(key);
                     if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                     if (mirror) mirrors.set(key, cloneForStorage(value));
                     return store.put(value, key);
                 },
                 delete: key => {
+                    changed(key);
                     if (mirror) mirrors.set(key, undefined);
                     return store.delete(key);
                 }
@@ -249,6 +295,11 @@
 
     const dbGet = async (key) => {
         if (!mainDb || initPromise) await initDB();
+        if (initialReads.has(key)) {
+            const value = initialReads.get(key);
+            initialReads.delete(key);
+            return value;
+        }
         try {
             return await dbGetFrom(mainDb, key);
         } catch (error) {
@@ -733,6 +784,7 @@
         setWritesPaused: (paused) => {
             const next = !!paused;
             if (writesPaused !== next) {
+                initialReads.clear();
                 storageWriteEpoch++;
                 writesPaused = next;
                 const reason = storageWriteError(next ? 'StoragePausedError' : 'StorageConflictError', '存储维护状态变化，未提交事务已中止');

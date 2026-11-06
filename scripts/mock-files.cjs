@@ -1,4 +1,4 @@
-module.exports = function installFileBridge({ skin = 'journal' } = {}) {
+module.exports = function installFileBridge({ skin = 'journal', persistFiles = true } = {}) {
   if (window.top !== window) return;
   // Existing UI fixtures use the journal layout; installation-default tests opt out with skin:null.
   if (skin && !localStorage.getItem('rphub-layout118')) {
@@ -17,7 +17,7 @@ module.exports = function installFileBridge({ skin = 'journal' } = {}) {
     files['个人数据/文件索引.json'] = { text: JSON.stringify(index) };
   }
   const response = value => JSON.stringify({ ok: true, value });
-  const persist = () => originalSet.call(localStorage, storeKey, JSON.stringify(files));
+  const persist = () => { if (persistFiles) originalSet.call(localStorage, storeKey, JSON.stringify(files)); };
   const validate = name => {
     if (!/^(个人数据|角色卡数据|图片)(\/|$)/.test(name) || name.split('/').some(p => p === '..' || p === '.')) throw new Error('Invalid path');
   };

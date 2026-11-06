@@ -23,7 +23,10 @@ const _hoisted_8 = ["onClick"]
 const _hoisted_9 = ["aria-label"]
 const _hoisted_10 = ["aria-pressed", "onClick"]
 const _hoisted_11 = ["aria-pressed", "onClick"]
-const _hoisted_12 = { class: "chat-view-root flex flex-col h-full relative" }
+const _hoisted_12 = {
+  key: 5,
+  class: "chat-view-root flex flex-col h-full relative"
+}
 const _hoisted_13 = ["onClick"]
 const _hoisted_14 = {
   key: 0,
@@ -419,19 +422,19 @@ const _hoisted_221 = {
 }
 const _hoisted_222 = ["onClick"]
 const _hoisted_223 = {
-  key: 6,
-  class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
-}
-const _hoisted_224 = {
   key: 7,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
-const _hoisted_225 = {
+const _hoisted_224 = {
   key: 8,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
-const _hoisted_226 = {
+const _hoisted_225 = {
   key: 9,
+  class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
+}
+const _hoisted_226 = {
+  key: 10,
   class: "management-view"
 }
 const _hoisted_227 = { class: "max-w-3xl mx-auto" }
@@ -440,7 +443,7 @@ const _hoisted_229 = ["onClick"]
 const _hoisted_230 = { class: "relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5" }
 const _hoisted_231 = ["onClick"]
 const _hoisted_232 = {
-  key: 10,
+  key: 11,
   class: "management-view"
 }
 const _hoisted_233 = { class: "max-w-3xl mx-auto" }
@@ -562,7 +565,7 @@ const _hoisted_318 = ["onClick"]
 const _hoisted_319 = { class: "px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500" }
 const _hoisted_320 = ["onClick"]
 const _hoisted_321 = {
-  key: 11,
+  key: 12,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
 const _hoisted_322 = ["onClick"]
@@ -607,7 +610,7 @@ const _hoisted_351 = { class: "px-5 py-3 border-t border-gray-100 bg-gray-50 fle
 const _hoisted_352 = { class: "truncate" }
 const _hoisted_353 = ["onClick"]
 const _hoisted_354 = {
-  key: 13,
+  key: 14,
   class: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
 }
 const _hoisted_355 = { class: "bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100" }
@@ -923,7 +926,7 @@ const _hoisted_579 = {
   class: "text-xs text-gray-400"
 }
 const _hoisted_580 = {
-  key: 15,
+  key: 16,
   class: "management-view"
 }
 const _hoisted_581 = ["onClick"]
@@ -1025,7 +1028,7 @@ const _hoisted_647 = { class: "flex gap-2.5 pt-2 border-t border-gray-100 dark:b
 const _hoisted_648 = ["onClick"]
 const _hoisted_649 = ["onClick"]
 const _hoisted_650 = {
-  key: 16,
+  key: 17,
   class: "management-view"
 }
 const _hoisted_651 = ["onClick"]
@@ -1051,7 +1054,7 @@ const _hoisted_664 = { class: "sortable-item-buttons" }
 const _hoisted_665 = ["onClick"]
 const _hoisted_666 = ["onClick"]
 const _hoisted_667 = {
-  key: 17,
+  key: 18,
   class: "management-view"
 }
 const _hoisted_668 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
@@ -1086,7 +1089,7 @@ const _hoisted_686 = ["onUpdate:modelValue", "onChange"]
 const _hoisted_687 = { class: "sortable-item-buttons" }
 const _hoisted_688 = ["onClick"]
 const _hoisted_689 = {
-  key: 18,
+  key: 19,
   class: "management-view"
 }
 const _hoisted_690 = {
@@ -1805,55 +1808,98 @@ return function render(_ctx, _cache) {
             ]))
           : _createCommentVNode("v-if", true),
         _createCommentVNode(" Chat View "),
-        _withDirectives(_createElementVNode("div", _hoisted_12, [
-          _createCommentVNode(" Character Background Layer "),
-          (settings.useCharacterBackground && currentCharacter?.avatar)
-            ? (_openBlock(), _createElementBlock("div", {
-                key: 0,
-                class: "absolute -inset-4 bg-cover bg-center bg-no-repeat pointer-events-none transition-opacity duration-500 z-0 blur-[2px] char-bg-blur",
-                style: _normalizeStyle({ backgroundImage: `url(${JSON.stringify(currentCharacterAvatar)})`, opacity: 0.9 })
-              }, null, 4 /* STYLE */))
-            : _createCommentVNode("v-if", true),
-          _createCommentVNode(" Blur Overlay for Description Panel "),
-          _createVNode(_Transition, { name: "fade" }, {
-            default: _withCtx(() => [
-              showDescriptionPanel
+        hasOpenedChat
+          ? _withDirectives((_openBlock(), _createElementBlock("div", _hoisted_12, [
+              _createCommentVNode(" Character Background Layer "),
+              (settings.useCharacterBackground && currentCharacter?.avatar)
                 ? (_openBlock(), _createElementBlock("div", {
                     key: 0,
-                    onClick: $event => (showDescriptionPanel = false),
-                    class: "absolute inset-0 bg-black/5 z-[35] transition-opacity duration-300 desc-panel-overlay"
-                  }, null, 8 /* PROPS */, _hoisted_13))
-                : _createCommentVNode("v-if", true)
-            ]),
-            _: 1 /* STABLE */
-          }),
-          _createCommentVNode(" Character Description Panel "),
-          _createVNode(_Transition, { name: "dropdown" }, {
-            default: _withCtx(() => [
-              (showDescriptionPanel && currentCharacter)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_14, [
-                    _createElementVNode("div", _hoisted_15, [
-                      _createElementVNode("button", {
-                        type: "button",
-                        onClick: $event => (editCharacter(currentCharacterIndex)),
-                        class: "group flex-shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300",
-                        title: "编辑角色"
-                      }, [
-                        _createElementVNode("img", {
-                          src: currentCharacterAvatar,
-                          class: "w-14 h-14 rounded-xl object-cover border border-white shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
-                        }, null, 8 /* PROPS */, _hoisted_17)
-                      ], 8 /* PROPS */, _hoisted_16),
-                      _createElementVNode("div", _hoisted_18, [
-                        _createElementVNode("div", _hoisted_19, [
-                          _createElementVNode("h3", _hoisted_20, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                    class: "absolute -inset-4 bg-cover bg-center bg-no-repeat pointer-events-none transition-opacity duration-500 z-0 blur-[2px] char-bg-blur",
+                    style: _normalizeStyle({ backgroundImage: `url(${JSON.stringify(currentCharacterAvatar)})`, opacity: 0.9 })
+                  }, null, 4 /* STYLE */))
+                : _createCommentVNode("v-if", true),
+              _createCommentVNode(" Blur Overlay for Description Panel "),
+              _createVNode(_Transition, { name: "fade" }, {
+                default: _withCtx(() => [
+                  showDescriptionPanel
+                    ? (_openBlock(), _createElementBlock("div", {
+                        key: 0,
+                        onClick: $event => (showDescriptionPanel = false),
+                        class: "absolute inset-0 bg-black/5 z-[35] transition-opacity duration-300 desc-panel-overlay"
+                      }, null, 8 /* PROPS */, _hoisted_13))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                _: 1 /* STABLE */
+              }),
+              _createCommentVNode(" Character Description Panel "),
+              _createVNode(_Transition, { name: "dropdown" }, {
+                default: _withCtx(() => [
+                  (showDescriptionPanel && currentCharacter)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_14, [
+                        _createElementVNode("div", _hoisted_15, [
                           _createElementVNode("button", {
+                            type: "button",
                             onClick: $event => (editCharacter(currentCharacterIndex)),
-                            class: "p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors flex-shrink-0",
+                            class: "group flex-shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300",
                             title: "编辑角色"
-                          }, [...(_cache[1] || (_cache[1] = [
+                          }, [
+                            _createElementVNode("img", {
+                              src: currentCharacterAvatar,
+                              class: "w-14 h-14 rounded-xl object-cover border border-white shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
+                            }, null, 8 /* PROPS */, _hoisted_17)
+                          ], 8 /* PROPS */, _hoisted_16),
+                          _createElementVNode("div", _hoisted_18, [
+                            _createElementVNode("div", _hoisted_19, [
+                              _createElementVNode("h3", _hoisted_20, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                              _createElementVNode("button", {
+                                onClick: $event => (editCharacter(currentCharacterIndex)),
+                                class: "p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors flex-shrink-0",
+                                title: "编辑角色"
+                              }, [...(_cache[1] || (_cache[1] = [
+                                _createElementVNode("svg", {
+                                  class: "w-3.5 h-3.5",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2",
+                                    d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_21)
+                            ]),
+                            _createElementVNode("div", _hoisted_22, [
+                              _createElementVNode("span", _hoisted_23, [
+                                _createElementVNode("span", _hoisted_24, _toDisplayString(chatRoundStats.floors), 1 /* TEXT */),
+                                _cache[2] || (_cache[2] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "楼", -1 /* CACHED */))
+                              ]),
+                              _cache[6] || (_cache[6] = _createElementVNode("span", { class: "h-3 w-px rounded-full bg-gray-200" }, null, -1 /* CACHED */)),
+                              _createElementVNode("span", _hoisted_25, [
+                                _createElementVNode("span", _hoisted_26, _toDisplayString(Number(conversationBodyLength || 0).toLocaleString()), 1 /* TEXT */),
+                                _cache[5] || (_cache[5] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */)),
+                                (memorySettings.enabled)
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_27, [
+                                      _cache[3] || (_cache[3] = _createElementVNode("span", {
+                                        class: "text-gray-700",
+                                        "aria-hidden": "true"
+                                      }, "→", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_28, _toDisplayString(Number(summaryCompressedBodyLength || 0).toLocaleString()), 1 /* TEXT */),
+                                      _cache[4] || (_cache[4] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */))
+                                    ]))
+                                  : _createCommentVNode("v-if", true)
+                              ])
+                            ])
+                          ]),
+                          _createElementVNode("button", {
+                            onClick: $event => (showDescriptionPanel = false),
+                            class: "absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all z-20 desc-close-btn",
+                            title: "关闭"
+                          }, [...(_cache[7] || (_cache[7] = [
                             _createElementVNode("svg", {
-                              class: "w-3.5 h-3.5",
+                              class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
                               viewBox: "0 0 24 24"
@@ -1862,38 +1908,1226 @@ return function render(_ctx, _cache) {
                                 "stroke-linecap": "round",
                                 "stroke-linejoin": "round",
                                 "stroke-width": "2",
-                                d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                d: "M6 18L18 6M6 6l12 12"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_21)
+                          ]))], 8 /* PROPS */, _hoisted_29)
                         ]),
-                        _createElementVNode("div", _hoisted_22, [
-                          _createElementVNode("span", _hoisted_23, [
-                            _createElementVNode("span", _hoisted_24, _toDisplayString(chatRoundStats.floors), 1 /* TEXT */),
-                            _cache[2] || (_cache[2] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "楼", -1 /* CACHED */))
-                          ]),
-                          _cache[6] || (_cache[6] = _createElementVNode("span", { class: "h-3 w-px rounded-full bg-gray-200" }, null, -1 /* CACHED */)),
-                          _createElementVNode("span", _hoisted_25, [
-                            _createElementVNode("span", _hoisted_26, _toDisplayString(Number(conversationBodyLength || 0).toLocaleString()), 1 /* TEXT */),
-                            _cache[5] || (_cache[5] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */)),
-                            (memorySettings.enabled)
-                              ? (_openBlock(), _createElementBlock("span", _hoisted_27, [
-                                  _cache[3] || (_cache[3] = _createElementVNode("span", {
-                                    class: "text-gray-700",
-                                    "aria-hidden": "true"
-                                  }, "→", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_28, _toDisplayString(Number(summaryCompressedBodyLength || 0).toLocaleString()), 1 /* TEXT */),
-                                  _cache[4] || (_cache[4] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */))
+                        _createElementVNode("div", _hoisted_30, [
+                          _cache[9] || (_cache[9] = _createElementVNode("div", { class: "mb-2 flex items-center justify-between px-0.5" }, [
+                            _createElementVNode("div", { class: "flex items-center gap-2 text-[11px] font-bold text-gray-400" }, [
+                              _createElementVNode("svg", {
+                                class: "w-4 h-4 text-gray-400",
+                                fill: "none",
+                                stroke: "currentColor",
+                                viewBox: "0 0 24 24"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2",
+                                  d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                })
+                              ]),
+                              _createTextVNode(" 角色卡简介 ")
+                            ])
+                          ], -1 /* CACHED */)),
+                          _createElementVNode("div", _hoisted_31, [
+                            (currentCharacter.description)
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_32, [
+                                  _createElementVNode("div", {
+                                    class: "text-sm text-gray-700 leading-relaxed font-normal font-sans markdown-body",
+                                    innerHTML: renderMarkdown(currentCharacter.description, 'assistant', true)
+                                  }, null, 8 /* PROPS */, _hoisted_33)
                                 ]))
-                              : _createCommentVNode("v-if", true)
+                              : (_openBlock(), _createElementBlock("div", _hoisted_34, [...(_cache[8] || (_cache[8] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-8 h-8 mb-2 opacity-50",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-linejoin": "round",
+                                      "stroke-width": "1.5",
+                                      d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    })
+                                  ], -1 /* CACHED */),
+                                  _createTextVNode(" 暂无描述信息 ", -1 /* CACHED */)
+                                ]))]))
                           ])
                         ])
-                      ]),
+                      ]))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                _: 1 /* STABLE */
+              }),
+              _createCommentVNode(" Chat Header "),
+              _createElementVNode("div", _hoisted_35, [
+                _withDirectives(_createElementVNode("div", _hoisted_36, null, 512 /* NEED_PATCH */), [
+                  [_vShow, !isInputBarHidden]
+                ]),
+                _createCommentVNode(" 实际内容容器 "),
+                _createElementVNode("div", _hoisted_37, [
+                  _createElementVNode("div", {
+                    style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
+                    class: "flex items-center min-w-0"
+                  }, [
+                    (!isChatFullscreen)
+                      ? (_openBlock(), _createElementBlock("button", {
+                          key: 0,
+                          onClick: toggleNavigation,
+                          class: "app-nav-trigger app-nav-trigger--chat",
+                          "aria-label": "聊天菜单",
+                          "aria-haspopup": "dialog"
+                        }, [...(_cache[10] || (_cache[10] = [
+                          _createElementVNode("svg", {
+                            class: "w-6 h-6",
+                            fill: "none",
+                            stroke: "currentColor"
+                          }, [
+                            _createElementVNode("use", { href: "#icon-menu" })
+                          ], -1 /* CACHED */)
+                        ]))], 8 /* PROPS */, _hoisted_38))
+                      : _createCommentVNode("v-if", true),
+                    currentCharacter
+                      ? (_openBlock(), _createElementBlock("div", {
+                          key: 1,
+                          class: "flex items-center min-w-0 cursor-pointer",
+                          onClick: $event => (showDescriptionPanel = !showDescriptionPanel)
+                        }, [
+                          _createElementVNode("img", {
+                            src: currentCharacterAvatar,
+                            class: "w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm flex-shrink-0"
+                          }, null, 8 /* PROPS */, _hoisted_40),
+                          _createElementVNode("span", _hoisted_41, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                          _createElementVNode("button", {
+                            class: _normalizeClass(["ml-1 p-1.5 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-all flex-shrink-0", {'bg-white/20 text-white': showDescriptionPanel}])
+                          }, [
+                            (_openBlock(), _createElementBlock("svg", {
+                              class: _normalizeClass(["desc-panel-chevron w-4 h-4", {'rotate-180': showDescriptionPanel}]),
+                              fill: "none",
+                              stroke: "currentColor",
+                              viewBox: "0 0 24 24"
+                            }, [...(_cache[11] || (_cache[11] = [
+                              _createElementVNode("path", {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M19 9l-7 7-7-7"
+                              }, null, -1 /* CACHED */)
+                            ]))], 2 /* CLASS */))
+                          ], 2 /* CLASS */)
+                        ], 8 /* PROPS */, _hoisted_39))
+                      : (_openBlock(), _createElementBlock("div", _hoisted_42, "未选择角色卡"))
+                  ], 4 /* STYLE */),
+                  _createElementVNode("div", _hoisted_43, [
+                    _createElementVNode("button", {
+                      onClick: toggleInputBarVisibility,
+                      class: _normalizeClass(["chat-header-button", isInputBarHidden ? 'rphub-zen-toggle--on' : '']),
+                      title: isInputBarHidden ? '显示输入栏' : '隐藏输入栏'
+                    }, [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_45, [
+                        isInputBarHidden
+                          ? (_openBlock(), _createElementBlock("path", _hoisted_46))
+                          : _createCommentVNode("v-if", true),
+                        isInputBarHidden
+                          ? (_openBlock(), _createElementBlock("path", _hoisted_47))
+                          : (_openBlock(), _createElementBlock("path", _hoisted_48))
+                      ]))
+                    ], 10 /* CLASS, PROPS */, _hoisted_44),
+                    _createElementVNode("button", {
+                      onClick: clearChat,
+                      class: "chat-header-button chat-header-button--danger",
+                      style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
+                      title: "清空聊天"
+                    }, [...(_cache[12] || (_cache[12] = [
+                      _createElementVNode("svg", {
+                        class: "w-5 h-5",
+                        fill: "none",
+                        stroke: "currentColor"
+                      }, [
+                        _createElementVNode("use", { href: "#icon-delete" })
+                      ], -1 /* CACHED */)
+                    ]))], 12 /* STYLE, PROPS */, _hoisted_49)
+                  ])
+                ])
+              ]),
+              _createCommentVNode(" Chat Messages "),
+              _createElementVNode("div", {
+                ref: "chatContainer",
+                onClick: $event => (showChatModelSelector = false),
+                onScroll: handleChatScroll,
+                class: _normalizeClass(["flex-1 overflow-y-auto overflow-x-hidden px-2 pt-14 md:pt-16 pb-52 md:pb-60 relative z-0 space-y-12 md:space-y-14", !settings.useCharacterBackground || !currentCharacter?.avatar ? 'chat-ambient' : '']),
+                style: _normalizeStyle(isAnyMessageEditing ? { paddingBottom: 'max(13rem, calc(var(--keyboard-inset, 0px) + 24px))' } : (isInputBarHidden ? { paddingTop: '44px', paddingBottom: '16px' } : null))
+              }, [
+                (!currentCharacter)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_51, [
+                      _cache[13] || (_cache[13] = _createElementVNode("div", { class: "chat-empty__icon" }, [
+                        _createElementVNode("svg", {
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
+                        }, [
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          })
+                        ])
+                      ], -1 /* CACHED */)),
+                      _cache[14] || (_cache[14] = _createElementVNode("p", { class: "chat-empty__title" }, "请先选择或创建一个角色卡", -1 /* CACHED */)),
                       _createElementVNode("button", {
-                        onClick: $event => (showDescriptionPanel = false),
-                        class: "absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all z-20 desc-close-btn",
-                        title: "关闭"
-                      }, [...(_cache[7] || (_cache[7] = [
+                        onClick: $event => (currentView = 'characters'),
+                        class: "modal-primary-button"
+                      }, "前往角色管理", 8 /* PROPS */, _hoisted_52)
+                    ]))
+                  : (chatHistory.length === 0)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_53, [
+                        _createElementVNode("img", {
+                          src: currentCharacterAvatar,
+                          class: "chat-empty__avatar",
+                          alt: ""
+                        }, null, 8 /* PROPS */, _hoisted_54),
+                        _createElementVNode("p", _hoisted_55, "开始与 " + _toDisplayString(currentCharacter.name) + " 对话吧", 1 /* TEXT */)
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                (currentCharacter && chatHistory.length > 0)
+                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
+                      return _withDirectives((_openBlock(), _createElementBlock("div", {
+                        key: index,
+                        ref_for: true,
+                        ref: "messageElements",
+                        "data-role": msg.role,
+                        "data-chat-index": index,
+                        class: _normalizeClass(['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]),
+                        style: _normalizeStyle({ transitionDelay: (displayIndex % 5) * 50 + 'ms' })
+                      }, [
+                        _createElementVNode("div", {
+                          class: _normalizeClass(['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row'])
+                        }, [
+                          _createCommentVNode(" Avatar "),
+                          _withDirectives(_createElementVNode("div", {
+                            class: _normalizeClass(['flex-shrink-0 select-none', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
+                          }, [
+                            (msg.role === 'user')
+                              ? (_openBlock(), _createElementBlock("div", {
+                                  key: 0,
+                                  class: _normalizeClass(['msg-avatar w-9 h-9 rounded-full overflow-hidden', msg.isSelf ? 'ml-2' : 'mr-2'])
+                                }, [
+                                  (msg.avatar || (msg.isSelf && user.avatar))
+                                    ? (_openBlock(), _createElementBlock("img", {
+                                        key: 0,
+                                        src: msg.avatar || user.avatar,
+                                        class: "w-full h-full object-cover"
+                                      }, null, 8 /* PROPS */, _hoisted_57))
+                                    : (!msg.isSelf && user.avatar)
+                                      ? (_openBlock(), _createElementBlock("img", {
+                                          key: 1,
+                                          src: user.avatar,
+                                          class: "w-full h-full object-cover",
+                                          title: "Fallback to user avatar for legacy messages"
+                                        }, null, 8 /* PROPS */, _hoisted_58))
+                                      : (_openBlock(), _createElementBlock("div", _hoisted_59, _toDisplayString((msg.name || user.name || 'U').charAt(0)), 1 /* TEXT */))
+                                ], 2 /* CLASS */))
+                              : (_openBlock(), _createElementBlock("img", {
+                                  key: 1,
+                                  src: currentCharacterAvatar,
+                                  class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
+                                }, null, 8 /* PROPS */, _hoisted_60))
+                          ], 2 /* CLASS */), [
+                            [_vShow, !settings.immersiveMode]
+                          ]),
+                          _createElementVNode("div", {
+                            class: _normalizeClass(['flex flex-col min-w-0', settings.immersiveMode ? 'immersive-message-column' : '', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'flex-1 w-full' : '', msg.isSelf ? 'items-end' : 'items-start'])
+                          }, [
+                            _createCommentVNode(" Name (Outside Bubble) "),
+                            _withDirectives(_createElementVNode("div", {
+                              class: _normalizeClass(['msg-name-tag truncate max-w-[210px] md:max-w-[250px]', msg.isSelf ? 'ml-auto mr-1' : 'mr-auto ml-1', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
+                            }, _toDisplayString(msg.name || (msg.role === 'user' ? user.name : (currentCharacter.name || 'Unknown'))), 3 /* TEXT, CLASS */), [
+                              [_vShow, !settings.immersiveMode]
+                            ]),
+                            _createCommentVNode(" Message Bubble "),
+                            _createElementVNode("div", {
+                              class: _normalizeClass(["group relative min-w-0 max-w-full", {'w-full': messageUsesWideLayout(msg) || msg.isEditing_Message, 'message-edit-group': msg.isEditing_Message}])
+                            }, [
+                              _createElementVNode("div", {
+                                onClick: $event => (handleGeneratedImageReroll($event, index)),
+                                class: _normalizeClass(['msg-bubble-glass p-0 text-sm md:text-base leading-relaxed overflow-hidden',
+                                        msg.shouldAnimate && !(msg.role === 'assistant' && msg.reasoning) ? (msg.role === 'system' ? 'animate-bubble-swap' : 'animate-message-in') : '',
+                                        messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '',
+                                        msg.isSelf ? 'msg-bubble--self' : msg.role === 'system' ? 'msg-bubble--system' : ''])
+                              }, [
+                                (msg.isEditing_Message)
+                                  ? (_openBlock(), _createElementBlock("div", _hoisted_62, [
+                                      _withDirectives(_createElementVNode("textarea", {
+                                        "onUpdate:modelValue": $event => ((msg.editMessageContent) = $event),
+                                        onFocus: keepEditBlockVisible,
+                                        style: _normalizeStyle({ height: (msg.editMessageHeight || 160) + 'px' }),
+                                        class: "w-full min-h-[88px] max-h-[70vh] p-3 text-sm text-gray-700 bg-white/50 backdrop-blur-md rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:bg-white transition-all shadow-inner resize-y custom-scrollbar",
+                                        placeholder: "编辑消息..."
+                                      }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_63), [
+                                        [_vModelText, msg.editMessageContent]
+                                      ]),
+                                      _createElementVNode("div", _hoisted_64, [
+                                        _createElementVNode("button", {
+                                          onClick: $event => (cancelEditMessage(index)),
+                                          class: "px-4 py-1.5 text-xs font-bold text-gray-500 bg-white/80 hover:bg-white border border-gray-200 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
+                                        }, " 取消 ", 8 /* PROPS */, _hoisted_65),
+                                        _createElementVNode("button", {
+                                          onClick: $event => (saveEditMessage(index)),
+                                          class: "px-4 py-1.5 text-xs font-bold text-white bg-primary-500 hover:bg-primary-600 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        }, " 保存 ", 8 /* PROPS */, _hoisted_66)
+                                      ])
+                                    ]))
+                                  : (msg.isTriggered && !msg.showRaw)
+                                    ? (_openBlock(), _createElementBlock("div", {
+                                        key: 1,
+                                        onClick: $event => (msg.showRaw = true),
+                                        class: "px-4 py-3 flex items-center space-x-2 text-primary-800/80 select-none cursor-pointer hover:bg-primary-50 transition-colors",
+                                        title: msg.content
+                                      }, [...(_cache[15] || (_cache[15] = [
+                                        _createElementVNode("svg", {
+                                          class: "w-5 h-5 animate-pulse",
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24"
+                                        }, [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M13 10V3L4 14h7v7l9-11h-7z"
+                                          })
+                                        ], -1 /* CACHED */),
+                                        _createElementVNode("span", { class: "font-bold text-sm" }, [
+                                          _createTextVNode("触发了卡片交互 "),
+                                          _createElementVNode("span", { class: "text-[10px] opacity-60 ml-1" })
+                                        ], -1 /* CACHED */)
+                                      ]))], 8 /* PROPS */, _hoisted_67))
+                                    : (msg.isTriggered && msg.showRaw)
+                                      ? (_openBlock(), _createElementBlock("div", {
+                                          key: 2,
+                                          onClick: $event => (msg.showRaw = false),
+                                          class: "cursor-pointer hover:opacity-80 transition-opacity",
+                                          title: "点击收起"
+                                        }, [
+                                          _createElementVNode("div", {
+                                            class: "markdown-body",
+                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                            innerHTML: renderMarkdown(msg.content, msg.role)
+                                          }, null, 12 /* STYLE, PROPS */, _hoisted_69)
+                                        ], 8 /* PROPS */, _hoisted_68))
+                                      : (_openBlock(), _createElementBlock("div", {
+                                          key: 3,
+                                          class: _normalizeClass(["message-content-wrapper", {'w-full': messageUsesWideLayout(msg), 'has-user-images': msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length}]),
+                                          onClick: openMemoryCitation
+                                        }, [
+                                          (msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length)
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 0,
+                                                class: _normalizeClass(['grid gap-1.5 p-1', msg.imageAttachments.length === 1 ? 'grid-cols-1 w-fit' : 'grid-cols-2 w-[min(24rem,78vw)]'])
+                                              }, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.imageAttachments, (image, imageIndex) => {
+                                                  return (_openBlock(), _createElementBlock("img", {
+                                                    key: `${index}-image-${imageIndex}`,
+                                                    src: image.dataUrl,
+                                                    class: _normalizeClass(['block rounded-xl bg-white', msg.imageAttachments.length === 1 ? 'justify-self-start w-auto max-w-[min(24rem,78vw)] h-auto max-h-[26rem] object-contain' : ('w-full ' + (msg.imageAttachments.length === 3 && imageIndex === 0 ? 'col-span-2 h-48 object-cover' : 'h-36 object-cover'))]),
+                                                    alt: `用户发送的图片 ${imageIndex + 1}`
+                                                  }, null, 10 /* CLASS, PROPS */, _hoisted_71))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ], 2 /* CLASS */))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Unified Summary Timeline Part "),
+                                          (hasThinkingOrTools(msg))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_72, [
+                                                _createElementVNode("div", {
+                                                  class: _normalizeClass(["cot-ui native-thinking-card summary-timeline-card", { 'is-live': isMessageThinkingOrRunning(msg), 'is-open': isThinkingSummaryOpen(msg) }])
+                                                }, [
+                                                  _createElementVNode("button", {
+                                                    type: "button",
+                                                    class: "cot-header native-thinking-header justify-between",
+                                                    onClick: $event => (toggleThinkingSummary(msg))
+                                                  }, [
+                                                    _createElementVNode("div", _hoisted_74, [
+                                                      (isMessageThinkingOrRunning(msg))
+                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_75, [...(_cache[16] || (_cache[16] = [
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */),
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */),
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */)
+                                                          ]))]))
+                                                        : (_openBlock(), _createElementBlock("svg", _hoisted_76, [...(_cache[17] || (_cache[17] = [
+                                                            _createElementVNode("path", {
+                                                              "stroke-linecap": "round",
+                                                              "stroke-linejoin": "round",
+                                                              "stroke-width": "2",
+                                                              d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5M9 18h6M10 22h4"
+                                                            }, null, -1 /* CACHED */)
+                                                          ]))])),
+                                                      _cache[18] || (_cache[18] = _createElementVNode("span", { class: "text-sm font-bold truncate" }, "Thinking", -1 /* CACHED */))
+                                                    ]),
+                                                    _cache[19] || (_cache[19] = _createElementVNode("svg", {
+                                                      class: "w-3.5 h-3.5 ml-2 opacity-60 chevron",
+                                                      fill: "none",
+                                                      stroke: "currentColor",
+                                                      viewBox: "0 0 24 24"
+                                                    }, [
+                                                      _createElementVNode("path", {
+                                                        "stroke-linecap": "round",
+                                                        "stroke-linejoin": "round",
+                                                        "stroke-width": "2",
+                                                        d: "M19 9l-7 7-7-7"
+                                                      })
+                                                    ], -1 /* CACHED */))
+                                                  ], 8 /* PROPS */, _hoisted_73),
+                                                  _createElementVNode("div", {
+                                                    class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
+                                                  }, [
+                                                    _createElementVNode("div", _hoisted_77, [
+                                                      _createElementVNode("div", _hoisted_78, [
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: step.id,
+                                                            class: "relative group/step"
+                                                          }, [
+                                                            _createCommentVNode(" Marker Node "),
+                                                            _createElementVNode("div", _hoisted_79, [
+                                                              _createElementVNode("div", {
+                                                                class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
+                                                              }, null, 2 /* CLASS */)
+                                                            ]),
+                                                            _createCommentVNode(" Content Box "),
+                                                            _createElementVNode("div", _hoisted_80, [
+                                                              (step.isReason)
+                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_81, _toDisplayString(step.title), 1 /* TEXT */))
+                                                                : (_openBlock(), _createElementBlock("details", {
+                                                                    key: 1,
+                                                                    class: "group/detail",
+                                                                    onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
+                                                                  }, [
+                                                                    _createElementVNode("summary", _hoisted_83, [
+                                                                      _createElementVNode("div", _hoisted_84, [
+                                                                        _createElementVNode("span", _hoisted_85, [
+                                                                          _createElementVNode("span", _hoisted_86, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                          (step.type === 'thinking')
+                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_87, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                            : _createCommentVNode("v-if", true),
+                                                                          (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
+                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_88, [
+                                                                                _createElementVNode("span", _hoisted_89, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                                (step.type === 'thinking')
+                                                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_90, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                  : _createCommentVNode("v-if", true)
+                                                                              ]))
+                                                                            : _createCommentVNode("v-if", true)
+                                                                        ]),
+                                                                        (step.status === 'done')
+                                                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_91, [...(_cache[20] || (_cache[20] = [
+                                                                              _createElementVNode("path", {
+                                                                                "stroke-linecap": "round",
+                                                                                "stroke-linejoin": "round",
+                                                                                "stroke-width": "3",
+                                                                                d: "M5 13l4 4L19 7"
+                                                                              }, null, -1 /* CACHED */)
+                                                                            ]))]))
+                                                                          : _createCommentVNode("v-if", true),
+                                                                        (step.status === 'error')
+                                                                          ? (_openBlock(), _createElementBlock("span", _hoisted_92, "失败"))
+                                                                          : _createCommentVNode("v-if", true)
+                                                                      ]),
+                                                                      _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
+                                                                        _createTextVNode(" 详情 "),
+                                                                        _createElementVNode("svg", {
+                                                                          class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
+                                                                          fill: "none",
+                                                                          stroke: "currentColor",
+                                                                          viewBox: "0 0 24 24"
+                                                                        }, [
+                                                                          _createElementVNode("path", {
+                                                                            "stroke-linecap": "round",
+                                                                            "stroke-linejoin": "round",
+                                                                            "stroke-width": "2",
+                                                                            d: "M19 9l-7 7-7-7"
+                                                                          })
+                                                                        ])
+                                                                      ], -1 /* CACHED */))
+                                                                    ]),
+                                                                    _createElementVNode("div", {
+                                                                      class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
+                                                                    }, [
+                                                                      (step.type === 'thinking')
+                                                                        ? (_openBlock(), _createElementBlock("div", {
+                                                                            key: 0,
+                                                                            class: "markdown-body",
+                                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
+                                                                            innerHTML: renderMarkdown(step.text, 'assistant', true, false)
+                                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_93))
+                                                                        : (_openBlock(), _createElementBlock("div", _hoisted_94, [
+                                                                            _createElementVNode("div", _hoisted_95, [
+                                                                              _createElementVNode("span", null, [
+                                                                                _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
+                                                                                _createElementVNode("code", _hoisted_96, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
+                                                                              ]),
+                                                                              _createElementVNode("span", _hoisted_97, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
+                                                                            ]),
+                                                                            _createElementVNode("div", _hoisted_98, [
+                                                                              _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
+                                                                              _createElementVNode("pre", _hoisted_99, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
+                                                                            ]),
+                                                                            (step.toolCall.error)
+                                                                              ? (_openBlock(), _createElementBlock("div", _hoisted_100, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
+                                                                              : (step.toolCall.resultText)
+                                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_101, [
+                                                                                    _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
+                                                                                    _createElementVNode("pre", _hoisted_102, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
+                                                                                  ]))
+                                                                                : _createCommentVNode("v-if", true)
+                                                                          ]))
+                                                                    ], 2 /* CLASS */)
+                                                                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_82))
+                                                            ])
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ])
+                                                    ])
+                                                  ], 2 /* CLASS */)
+                                                ], 2 /* CLASS */)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Active Tool Calls "),
+                                          (msg.role === 'assistant' && activeToolContinuationMessageId === msg.id && isGenerating && !activeToolContinuationHasResponse && !isThinking)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_103, [
+                                                _cache[25] || (_cache[25] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
+                                                  _createElementVNode("span"),
+                                                  _createElementVNode("span"),
+                                                  _createElementVNode("span")
+                                                ], -1 /* CACHED */)),
+                                                isGenerating
+                                                  ? (_openBlock(), _createBlock(_component_generation_timer, {
+                                                      key: 0,
+                                                      "wait-time": currentWaitTime,
+                                                      "estimated-time": estimatedGenerationTime
+                                                    }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
+                                                  : _createCommentVNode("v-if", true)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.top && msg.uiTemplateBlocks.top.length)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_104, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
+                                                  return (_openBlock(), _createElementBlock("div", {
+                                                    key: 'msg-ui-top-' + index + '-' + tIndex,
+                                                    class: "w-full ui-template-render",
+                                                    onClick: handleUiTemplateClick,
+                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                  }, null, 8 /* PROPS */, _hoisted_105))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'top'))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_106, [
+                                                _createVNode(_component_ui_template_pending)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Main Part "),
+                                          (parseCot(msg.content).main)
+                                            ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
+                                                (index === chatHistory.length - 1 && isGenerating)
+                                                  ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                                                      (processMainContent(parseCot(msg.content).main, true).text)
+                                                        ? (_openBlock(), _createElementBlock("div", {
+                                                            key: 0,
+                                                            class: "markdown-body",
+                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                            innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
+                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_107))
+                                                        : _createCommentVNode("v-if", true),
+                                                      (processMainContent(parseCot(msg.content).main, true).showSpinner)
+                                                        ? (_openBlock(), _createElementBlock("div", _hoisted_108, [...(_cache[26] || (_cache[26] = [
+                                                            _createElementVNode("div", {
+                                                              class: "ui-build-dots",
+                                                              "aria-hidden": "true"
+                                                            }, [
+                                                              _createElementVNode("i"),
+                                                              _createElementVNode("i"),
+                                                              _createElementVNode("i")
+                                                            ], -1 /* CACHED */),
+                                                            _createElementVNode("span", { class: "text-[16px] font-bold tracking-wider text-blue-600/80" }, "正在构建 UI 界面", -1 /* CACHED */)
+                                                          ]))]))
+                                                        : _createCommentVNode("v-if", true)
+                                                    ], 64 /* STABLE_FRAGMENT */))
+                                                  : (_openBlock(), _createElementBlock("div", {
+                                                      key: 1,
+                                                      class: "markdown-body",
+                                                      style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                      innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
+                                                    }, null, 12 /* STYLE, PROPS */, _hoisted_109))
+                                              ], 64 /* STABLE_FRAGMENT */))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.bottom && msg.uiTemplateBlocks.bottom.length)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_110, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
+                                                  return (_openBlock(), _createElementBlock("div", {
+                                                    key: 'msg-ui-bottom-' + index + '-' + tIndex,
+                                                    class: "w-full ui-template-render",
+                                                    onClick: handleUiTemplateClick,
+                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                  }, null, 8 /* PROPS */, _hoisted_111))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'bottom'))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_112, [
+                                                _createVNode(_component_ui_template_pending)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.responseError)
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 8,
+                                                class: "response-error-text px-4 py-3",
+                                                style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                role: "alert"
+                                              }, _toDisplayString(msg.responseError), 5 /* TEXT, STYLE */))
+                                            : _createCommentVNode("v-if", true)
+                                        ], 10 /* CLASS, PROPS */, _hoisted_70))
+                              ], 10 /* CLASS, PROPS */, _hoisted_61),
+                              _createCommentVNode(" Message Actions "),
+                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
+                                ? (_openBlock(), _createElementBlock("div", {
+                                    key: 0,
+                                    class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
+                                  }, [
+                                    (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 0,
+                                          onClick: $event => (regenerateMessage(index)),
+                                          class: "message-action-button",
+                                          title: "重新生成"
+                                        }, [...(_cache[27] || (_cache[27] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24"
+                                          }, [
+                                            _createElementVNode("path", {
+                                              "stroke-linecap": "round",
+                                              "stroke-linejoin": "round",
+                                              "stroke-width": "2",
+                                              d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                            })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_113))
+                                      : _createCommentVNode("v-if", true),
+                                    _createElementVNode("button", {
+                                      onClick: $event => (editMessage(index)),
+                                      class: "message-action-button",
+                                      title: "编辑"
+                                    }, [...(_cache[28] || (_cache[28] = [
+                                      _createElementVNode("svg", {
+                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                        fill: "none",
+                                        stroke: "currentColor",
+                                        viewBox: "0 0 24 24"
+                                      }, [
+                                        _createElementVNode("path", {
+                                          "stroke-linecap": "round",
+                                          "stroke-linejoin": "round",
+                                          "stroke-width": "2",
+                                          d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        })
+                                      ], -1 /* CACHED */)
+                                    ]))], 8 /* PROPS */, _hoisted_114),
+                                    _createElementVNode("button", {
+                                      onClick: $event => {copyMessage(msg.content); playMessageActionFeedback($event)},
+                                      class: "message-action-button",
+                                      title: "复制"
+                                    }, [...(_cache[29] || (_cache[29] = [
+                                      _createElementVNode("svg", {
+                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                        fill: "none",
+                                        stroke: "currentColor",
+                                        viewBox: "0 0 24 24"
+                                      }, [
+                                        _createElementVNode("path", {
+                                          "stroke-linecap": "round",
+                                          "stroke-linejoin": "round",
+                                          "stroke-width": "2",
+                                          d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                        })
+                                      ], -1 /* CACHED */)
+                                    ]))], 8 /* PROPS */, _hoisted_115),
+                                    (msg.role === 'assistant')
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 1,
+                                          onClick: $event => {createStoryBranch(index); playMessageActionFeedback($event)},
+                                          disabled: storyBranchSwitching,
+                                          class: "message-action-button",
+                                          title: "从这里分支",
+                                          "aria-label": "从这里创建分支"
+                                        }, [...(_cache[30] || (_cache[30] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24",
+                                            "aria-hidden": "true"
+                                          }, [
+                                            _createElementVNode("use", { href: "#icon-story-branch" })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_116))
+                                      : _createCommentVNode("v-if", true),
+                                    (canDeleteMessage(index))
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 2,
+                                          onClick: $event => (deleteMessage(index)),
+                                          class: "message-action-button message-action-button--danger",
+                                          title: "删除"
+                                        }, [...(_cache[31] || (_cache[31] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24"
+                                          }, [
+                                            _createElementVNode("path", {
+                                              "stroke-linecap": "round",
+                                              "stroke-linejoin": "round",
+                                              "stroke-width": "2",
+                                              d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_117))
+                                      : _createCommentVNode("v-if", true),
+                                    (msg.role === 'assistant' && Array.isArray(msg.styleFilterHits) && msg.styleFilterHits.length)
+                                      ? (_openBlock(), _createElementBlock("div", _hoisted_118, [
+                                          (isStyleFilterDetailsOpen(msg, index))
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 0,
+                                                onClick: _withModifiers(() => {}, ["stop"]),
+                                                class: "message-style-filter-popover absolute bottom-full left-1/2 z-30 mb-2 w-[min(20rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur-xl"
+                                              }, [
+                                                _cache[32] || (_cache[32] = _createElementVNode("div", { class: "border-b border-gray-100 bg-gray-50/80 px-3 py-2" }, [
+                                                  _createElementVNode("span", { class: "text-xs font-bold text-gray-700" }, "文风过滤详情")
+                                                ], -1 /* CACHED */)),
+                                                _createElementVNode("div", _hoisted_120, [
+                                                  (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.styleFilterHits, (fragment, filterIndex) => {
+                                                    return (_openBlock(), _createElementBlock("div", {
+                                                      key: index + '-style-filter-' + filterIndex,
+                                                      class: "flex items-start gap-1.5 rounded-xl border border-gray-100 bg-gray-50/70 px-2.5 py-2"
+                                                    }, [
+                                                      _createElementVNode("span", _hoisted_121, _toDisplayString(filterIndex + 1), 1 /* TEXT */),
+                                                      _createElementVNode("span", _hoisted_122, [
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getStyleFilterHitSegments(fragment), (segment, segmentIndex) => {
+                                                          return (_openBlock(), _createElementBlock("span", {
+                                                            key: filterIndex + '-segment-' + segmentIndex,
+                                                            class: _normalizeClass(segment.matched ? 'font-semibold text-blue-500' : '')
+                                                          }, _toDisplayString(segment.text), 3 /* TEXT, CLASS */))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ])
+                                                    ]))
+                                                  }), 128 /* KEYED_FRAGMENT */))
+                                                ])
+                                              ], 8 /* PROPS */, _hoisted_119))
+                                            : _createCommentVNode("v-if", true),
+                                          _createElementVNode("button", {
+                                            onClick: _withModifiers($event => (toggleStyleFilterDetails(msg, index)), ["stop"]),
+                                            class: _normalizeClass(["message-style-filter-button", { 'is-active': isStyleFilterDetailsOpen(msg, index) }]),
+                                            title: '查看本条回复过滤的 ' + msg.styleFilterHits.length + ' 处内容'
+                                          }, [
+                                            _cache[34] || (_cache[34] = _createElementVNode("svg", {
+                                              class: "h-3.5 w-3.5",
+                                              fill: "none",
+                                              stroke: "currentColor",
+                                              viewBox: "0 0 24 24",
+                                              "aria-hidden": "true"
+                                            }, [
+                                              _createElementVNode("path", {
+                                                "stroke-linecap": "round",
+                                                "stroke-linejoin": "round",
+                                                "stroke-width": "2",
+                                                d: "M3 4h18M6 9h12M9 14h6M11 19h2"
+                                              })
+                                            ], -1 /* CACHED */)),
+                                            (_openBlock(), _createElementBlock("svg", {
+                                              class: _normalizeClass(["h-3 w-3 transition-transform", { 'rotate-180': isStyleFilterDetailsOpen(msg, index) }]),
+                                              fill: "none",
+                                              stroke: "currentColor",
+                                              viewBox: "0 0 24 24",
+                                              "aria-hidden": "true"
+                                            }, [...(_cache[33] || (_cache[33] = [
+                                              _createElementVNode("path", {
+                                                "stroke-linecap": "round",
+                                                "stroke-linejoin": "round",
+                                                "stroke-width": "2",
+                                                d: "M19 9l-7 7-7-7"
+                                              }, null, -1 /* CACHED */)
+                                            ]))], 2 /* CLASS */))
+                                          ], 10 /* CLASS, PROPS */, _hoisted_123)
+                                        ]))
+                                      : _createCommentVNode("v-if", true)
+                                  ], 2 /* CLASS */))
+                                : _createCommentVNode("v-if", true)
+                            ], 2 /* CLASS */)
+                          ], 2 /* CLASS */)
+                        ], 2 /* CLASS */)
+                      ], 14 /* CLASS, STYLE, PROPS */, _hoisted_56)), [
+                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
+                      ])
+                    }), 128 /* KEYED_FRAGMENT */))
+                  : _createCommentVNode("v-if", true),
+                _createCommentVNode(" Typing Indicator "),
+                (isGenerating && !isReceiving && !isThinking && !hasActiveToolInlineWork)
+                  ? (_openBlock(), _createElementBlock("div", {
+                      key: 3,
+                      class: _normalizeClass(['flex w-full', settings.immersiveMode ? 'immersive-message-row justify-start' : 'standard-message-row'])
+                    }, [
+                      _createElementVNode("div", {
+                        class: _normalizeClass(['flex flex-row centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell'])
+                      }, [
+                        _withDirectives(_createElementVNode("div", _hoisted_124, [
+                          _createElementVNode("img", {
+                            src: currentCharacterAvatar,
+                            class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
+                          }, null, 8 /* PROPS */, _hoisted_125)
+                        ], 512 /* NEED_PATCH */), [
+                          [_vShow, !settings.immersiveMode]
+                        ]),
+                        _createElementVNode("div", {
+                          class: _normalizeClass(['flex flex-col min-w-0 items-start', settings.immersiveMode ? 'immersive-message-column' : ''])
+                        }, [
+                          _withDirectives(_createElementVNode("div", {
+                            class: "msg-name-tag mr-auto ml-1 truncate max-w-[210px] md:max-w-[250px] animate-message-in",
+                            style: {"animation-delay":"100ms"}
+                          }, _toDisplayString(currentCharacter.name), 513 /* TEXT, NEED_PATCH */), [
+                            [_vShow, !settings.immersiveMode]
+                          ]),
+                          _createElementVNode("div", _hoisted_126, [
+                            _cache[35] || (_cache[35] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
+                              _createElementVNode("span"),
+                              _createElementVNode("span"),
+                              _createElementVNode("span")
+                            ], -1 /* CACHED */)),
+                            isGenerating
+                              ? (_openBlock(), _createBlock(_component_generation_timer, {
+                                  key: 0,
+                                  "wait-time": currentWaitTime,
+                                  "estimated-time": estimatedGenerationTime
+                                }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
+                              : _createCommentVNode("v-if", true)
+                          ])
+                        ], 2 /* CLASS */)
+                      ], 2 /* CLASS */)
+                    ], 2 /* CLASS */))
+                  : _createCommentVNode("v-if", true)
+              ], 46 /* CLASS, STYLE, PROPS, NEED_HYDRATION */, _hoisted_50),
+              _createCommentVNode(" Input Area (Floating Island) "),
+              _withDirectives(_createElementVNode("div", _hoisted_127, [
+                _createElementVNode("div", _hoisted_128, [
+                  _createVNode(_Transition, {
+                    "enter-active-class": "transition duration-300 ease-spring",
+                    "enter-from-class": "opacity-0 translate-y-2 scale-95",
+                    "enter-to-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-active-class": "transition-all duration-150 ease-in",
+                    "leave-from-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-to-class": "opacity-0 translate-y-2 scale-95"
+                  }, {
+                    default: _withCtx(() => [
+                      pendingCardInteraction
+                        ? (_openBlock(), _createElementBlock("div", {
+                            key: 0,
+                            class: _normalizeClass([pendingChatImages.length ? 'bottom-[calc(100%+7.25rem)] md:bottom-[calc(100%+8.75rem)]' : 'bottom-[calc(100%+0.65rem)]', "absolute left-1 right-1 z-[3] flex justify-center"])
+                          }, [
+                            _createElementVNode("div", _hoisted_129, [
+                              _cache[37] || (_cache[37] = _createElementVNode("svg", {
+                                class: "h-3.5 w-3.5 flex-none text-primary-500",
+                                fill: "none",
+                                stroke: "currentColor",
+                                viewBox: "0 0 24 24",
+                                "aria-hidden": "true"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2",
+                                  d: "M13 10V3L4 14h7v7l9-11h-7z"
+                                })
+                              ], -1 /* CACHED */)),
+                              _cache[38] || (_cache[38] = _createElementVNode("span", { class: "flex-none font-bold text-primary-600" }, "卡片交互", -1 /* CACHED */)),
+                              _createElementVNode("span", {
+                                class: "min-w-0 truncate text-gray-600",
+                                title: pendingCardInteraction
+                              }, _toDisplayString(pendingCardInteraction), 9 /* TEXT, PROPS */, _hoisted_130),
+                              _createElementVNode("button", {
+                                type: "button",
+                                onClick: clearPendingCardInteraction,
+                                class: "flex h-5 w-5 flex-none items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600",
+                                title: "取消卡片交互",
+                                "aria-label": "取消卡片交互"
+                              }, [...(_cache[36] || (_cache[36] = [
+                                _createElementVNode("svg", {
+                                  class: "h-3.5 w-3.5",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2.5",
+                                    d: "M6 18L18 6M6 6l12 12"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_131)
+                            ])
+                          ], 2 /* CLASS */))
+                        : _createCommentVNode("v-if", true)
+                    ]),
+                    _: 1 /* STABLE */
+                  }),
+                  (pendingChatImages.length)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_132, [
+                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(pendingChatImages, (image) => {
+                          return (_openBlock(), _createElementBlock("div", {
+                            key: image.id,
+                            class: "relative w-24 h-24 md:w-[7.5rem] md:h-[7.5rem] flex-none overflow-hidden rounded-xl bg-transparent shadow-lg",
+                            title: image.status === 'ready' ? image.description : (image.error || '正在识别图片')
+                          }, [
+                            _createElementVNode("img", {
+                              src: image.dataUrl,
+                              alt: image.name,
+                              class: "w-full h-full object-cover"
+                            }, null, 8 /* PROPS */, _hoisted_134),
+                            (image.status !== 'ready')
+                              ? (_openBlock(), _createElementBlock("div", {
+                                  key: 0,
+                                  class: _normalizeClass(['absolute inset-0 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-white', image.status === 'error' ? 'bg-red-700/75' : 'bg-slate-900/55'])
+                                }, [
+                                  (image.status === 'analyzing')
+                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_135, [...(_cache[39] || (_cache[39] = [
+                                        _createElementVNode("circle", {
+                                          class: "generated-image-spinner-path",
+                                          cx: "25",
+                                          cy: "25",
+                                          r: "20",
+                                          fill: "none",
+                                          "stroke-width": "2"
+                                        }, null, -1 /* CACHED */)
+                                      ]))]))
+                                    : (_openBlock(), _createElementBlock("span", _hoisted_136, "识别失败"))
+                                ], 2 /* CLASS */))
+                              : _createCommentVNode("v-if", true),
+                            _createElementVNode("button", {
+                              type: "button",
+                              onClick: _withModifiers($event => (removePendingChatImage(image.id)), ["stop"]),
+                              title: "移除图片",
+                              class: "absolute top-1 right-1 z-[2] flex items-center justify-center w-5 h-5 rounded-full bg-slate-900/70 text-white shadow-sm",
+                              "aria-label": "移除图片"
+                            }, [...(_cache[40] || (_cache[40] = [
+                              _createElementVNode("svg", {
+                                class: "w-3 h-3",
+                                viewBox: "0 0 24 24",
+                                fill: "none",
+                                stroke: "currentColor"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2.5",
+                                  d: "M6 18L18 6M6 6l12 12"
+                                })
+                              ], -1 /* CACHED */)
+                            ]))], 8 /* PROPS */, _hoisted_137)
+                          ], 8 /* PROPS */, _hoisted_133))
+                        }), 128 /* KEYED_FRAGMENT */))
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                  (settings.showLatestUsageBar && latestMainTokenUsage)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_138, [
+                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList([
+                                    { tone: 'input', label: '输入', value: getUncachedInputTokens(latestMainTokenUsage) },
+                                    { tone: 'cache', label: '缓存', value: latestMainTokenUsage.cacheReadTokens },
+                                    { tone: 'output', label: '输出', value: latestMainTokenUsage.outputTokens }], (part) => {
+                          return (_openBlock(), _createElementBlock("span", {
+                            key: part.tone,
+                            class: "flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1",
+                            title: part.label + ' Token'
+                          }, [
+                            _createElementVNode("i", {
+                              class: _normalizeClass('usage-swatch usage-tone--' + part.tone)
+                            }, null, 2 /* CLASS */),
+                            _createVNode(_component_rolling_text, {
+                              class: "font-mono font-semibold tabular-nums text-gray-700",
+                              value: formatLatestTokenCount(part.value)
+                            }, null, 8 /* PROPS */, ["value"])
+                          ], 8 /* PROPS */, _hoisted_139))
+                        }), 128 /* KEYED_FRAGMENT */))
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                  _createCommentVNode(" Quick panel anchors to the whole composer so it never covers the text "),
+                  _createVNode(_Transition, {
+                    "enter-active-class": "transition duration-300 ease-spring",
+                    "enter-from-class": "opacity-0 translate-y-2 scale-95",
+                    "enter-to-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-active-class": "transition duration-150 ease-in",
+                    "leave-from-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-to-class": "opacity-0 translate-y-2 scale-95"
+                  }, {
+                    default: _withCtx(() => [
+                      showChatModelSelector
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_140, [
+                            _createElementVNode("div", {
+                              id: "chat-quick-panel",
+                              onClick: _withModifiers(() => {}, ["stop"]),
+                              onKeydown: _withKeys(_withModifiers($event => (showChatModelSelector = false), ["stop"]), ["esc"]),
+                              role: "dialog",
+                              "aria-label": "快捷面板",
+                              class: "chat-quick-panel rounded-2xl p-3 flex flex-col gap-3 max-w-full max-h-[inherit] overflow-x-hidden overflow-y-auto overscroll-contain"
+                            }, [
+                              _createElementVNode("div", _hoisted_142, [
+                                _cache[42] || (_cache[42] = _createElementVNode("h3", { class: "text-sm font-bold text-gray-700" }, "快捷面板", -1 /* CACHED */)),
+                                _createElementVNode("button", {
+                                  type: "button",
+                                  onClick: $event => (showChatModelSelector = false),
+                                  "aria-label": "关闭快捷面板",
+                                  class: "w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                }, [...(_cache[41] || (_cache[41] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-4 h-4",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24",
+                                    "aria-hidden": "true"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-width": "2",
+                                      d: "m6 6 12 12M18 6 6 18"
+                                    })
+                                  ], -1 /* CACHED */)
+                                ]))], 8 /* PROPS */, _hoisted_143)
+                              ]),
+                              _createCommentVNode(" API 站切换（下拉浮层：展开时覆盖下方内容，不推挤面板布局）"),
+                              _createElementVNode("div", _hoisted_144, [
+                                _createElementVNode("div", _hoisted_145, [
+                                  _cache[43] || (_cache[43] = _createElementVNode("span", { class: "text-xs font-bold text-gray-500" }, "API 站", -1 /* CACHED */)),
+                                  _createElementVNode("button", {
+                                    type: "button",
+                                    onClick: _withModifiers($event => (showApiQuickSelector = !showApiQuickSelector), ["stop"]),
+                                    class: "text-xs font-bold px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-primary-200 active:scale-95 transition-all"
+                                  }, _toDisplayString(quickApiProviders.length ? (quickApiProviders.find(p => p.id === settings.apiProviderId)?.name || '跟随主API') : '跟随主API') + " ▾ ", 9 /* TEXT, PROPS */, _hoisted_146)
+                                ]),
+                                _createVNode(_Transition, {
+                                  "enter-active-class": "transition-all duration-150 ease-out",
+                                  "enter-from-class": "opacity-0 scale-95",
+                                  "enter-to-class": "opacity-100 scale-100",
+                                  "leave-active-class": "transition-all duration-100 ease-in",
+                                  "leave-from-class": "opacity-100 scale-100",
+                                  "leave-to-class": "opacity-0 scale-95"
+                                }, {
+                                  default: _withCtx(() => [
+                                    showApiQuickSelector
+                                      ? (_openBlock(), _createElementBlock("div", {
+                                          key: 0,
+                                          onClick: _withModifiers(() => {}, ["stop"]),
+                                          class: "absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-lg"
+                                        }, [
+                                          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(quickApiProviders, (provider) => {
+                                            return (_openBlock(), _createElementBlock("button", {
+                                              key: provider.id,
+                                              type: "button",
+                                              onClick: $event => (selectQuickApiProvider(provider)),
+                                              class: _normalizeClass(['w-full text-left px-3 py-2 text-sm font-medium transition-colors', provider.id === settings.apiProviderId ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-600'])
+                                            }, _toDisplayString(provider.name || provider.id), 11 /* TEXT, CLASS, PROPS */, _hoisted_148))
+                                          }), 128 /* KEYED_FRAGMENT */)),
+                                          (!quickApiProviders.length)
+                                            ? (_openBlock(), _createElementBlock("p", _hoisted_149, "请先在设置中配置 API 站。"))
+                                            : _createCommentVNode("v-if", true)
+                                        ], 8 /* PROPS */, _hoisted_147))
+                                      : _createCommentVNode("v-if", true)
+                                  ]),
+                                  _: 1 /* STABLE */
+                                })
+                              ]),
+                              _createElementVNode("div", _hoisted_150, [
+                                _withDirectives(_createElementVNode("div", {
+                                  class: "segmented-switch__indicator flex items-center justify-end px-2.5 text-primary-600",
+                                  "aria-hidden": "true",
+                                  style: _normalizeStyle({ '--slot-index': chatModelSlots.findIndex(slot => slot.mode === modelMode) })
+                                }, [...(_cache[44] || (_cache[44] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-4 h-4 flex-none",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-linejoin": "round",
+                                      "stroke-width": "2",
+                                      d: "m5 12 4 4L19 6"
+                                    })
+                                  ], -1 /* CACHED */)
+                                ]))], 4 /* STYLE */), [
+                                  [_vShow, chatModelSlots.some(slot => slot.mode === modelMode && slot.model)]
+                                ]),
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(chatModelSlots, (slot, slotIndex) => {
+                                  return (_openBlock(), _createElementBlock("button", {
+                                    key: slot.mode,
+                                    type: "button",
+                                    onClick: $event => (selectChatModelSlot(slot)),
+                                    disabled: !slot.model,
+                                    "aria-pressed": modelMode === slot.mode && !!slot.model,
+                                    class: _normalizeClass(['relative z-10 flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors', modelMode === slot.mode && slot.model ? 'text-primary-600' : 'text-gray-500', !slot.model ? 'cursor-not-allowed opacity-45' : 'hover:text-primary-600'])
+                                  }, [
+                                    _createElementVNode("span", _hoisted_152, "槽位 " + _toDisplayString(slotIndex + 1), 1 /* TEXT */),
+                                    _createElementVNode("span", {
+                                      class: "min-w-0 flex-1 truncate text-[13px] font-medium",
+                                      title: slot.model
+                                    }, _toDisplayString(slot.model || '未配置'), 9 /* TEXT, PROPS */, _hoisted_153),
+                                    _cache[45] || (_cache[45] = _createElementVNode("span", {
+                                      class: "w-4 flex-none",
+                                      "aria-hidden": "true"
+                                    }, null, -1 /* CACHED */))
+                                  ], 10 /* CLASS, PROPS */, _hoisted_151))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ]),
+                              _createElementVNode("div", _hoisted_154, [
+                                _createElementVNode("div", _hoisted_155, [
+                                  _createElementVNode("div", _hoisted_156, [
+                                    _cache[46] || (_cache[46] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "推理强度", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_157, _toDisplayString(reasoningEffortLabel), 1 /* TEXT */)
+                                  ]),
+                                  _withDirectives(_createElementVNode("input", {
+                                    "onUpdate:modelValue": $event => ((reasoningEffortSlider) = $event),
+                                    type: "range",
+                                    min: "0",
+                                    max: "5",
+                                    step: "1",
+                                    class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
+                                    "aria-label": "推理强度"
+                                  }, null, 8 /* PROPS */, _hoisted_158), [
+                                    [
+                                      _vModelText,
+                                      reasoningEffortSlider,
+                                      void 0,
+                                      { number: true }
+                                    ]
+                                  ])
+                                ]),
+                                _createElementVNode("div", _hoisted_159, [
+                                  _createElementVNode("div", _hoisted_160, [
+                                    _cache[47] || (_cache[47] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "温度", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_161, _toDisplayString(Number(settings.temperature).toFixed(2)), 1 /* TEXT */)
+                                  ]),
+                                  _withDirectives(_createElementVNode("input", {
+                                    "onUpdate:modelValue": $event => ((slotTemperature) = $event),
+                                    type: "range",
+                                    min: "0",
+                                    max: "1",
+                                    step: "0.01",
+                                    class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
+                                    "aria-label": "温度"
+                                  }, null, 8 /* PROPS */, _hoisted_162), [
+                                    [
+                                      _vModelText,
+                                      slotTemperature,
+                                      void 0,
+                                      { number: true }
+                                    ]
+                                  ])
+                                ])
+                              ]),
+                              _createElementVNode("div", _hoisted_163, [
+                                _createElementVNode("label", _hoisted_164, [
+                                  _cache[49] || (_cache[49] = _createElementVNode("span", null, "流式输出", -1 /* CACHED */)),
+                                  _createElementVNode("span", _hoisted_165, [
+                                    _withDirectives(_createElementVNode("input", {
+                                      "onUpdate:modelValue": $event => ((settings.stream) = $event),
+                                      type: "checkbox",
+                                      class: "settings-toggle-input sr-only"
+                                    }, null, 8 /* PROPS */, _hoisted_166), [
+                                      [_vModelCheckbox, settings.stream]
+                                    ]),
+                                    _cache[48] || (_cache[48] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                  ])
+                                ]),
+                                _createElementVNode("label", _hoisted_167, [
+                                  _cache[51] || (_cache[51] = _createElementVNode("span", null, "沉浸模式", -1 /* CACHED */)),
+                                  _createElementVNode("span", _hoisted_168, [
+                                    _withDirectives(_createElementVNode("input", {
+                                      "onUpdate:modelValue": $event => ((settings.immersiveMode) = $event),
+                                      type: "checkbox",
+                                      class: "settings-toggle-input sr-only"
+                                    }, null, 8 /* PROPS */, _hoisted_169), [
+                                      [_vModelCheckbox, settings.immersiveMode]
+                                    ]),
+                                    _cache[50] || (_cache[50] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                  ])
+                                ])
+                              ]),
+                              isGeminiModel
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_170, [
+                                    _createElementVNode("label", _hoisted_171, [
+                                      _cache[53] || (_cache[53] = _createElementVNode("span", null, "Gemini抗截断", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_172, [
+                                        _withDirectives(_createElementVNode("input", {
+                                          "onUpdate:modelValue": $event => ((settings.preventTruncation) = $event),
+                                          onChange: $event => ($event.target.checked && (settings.stream = true)),
+                                          type: "checkbox",
+                                          class: "settings-toggle-input sr-only"
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_173), [
+                                          [_vModelCheckbox, settings.preventTruncation]
+                                        ]),
+                                        _cache[52] || (_cache[52] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                      ])
+                                    ]),
+                                    _createElementVNode("label", _hoisted_174, [
+                                      _cache[55] || (_cache[55] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_175, [
+                                        _withDirectives(_createElementVNode("input", {
+                                          "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
+                                          type: "checkbox",
+                                          class: "settings-toggle-input sr-only"
+                                        }, null, 8 /* PROPS */, _hoisted_176), [
+                                          [_vModelCheckbox, settings.inputObfuscation]
+                                        ]),
+                                        _cache[54] || (_cache[54] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                      ])
+                                    ])
+                                  ]))
+                                : _createCommentVNode("v-if", true)
+                            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_141)
+                          ]))
+                        : _createCommentVNode("v-if", true)
+                    ]),
+                    _: 1 /* STABLE */
+                  }),
+                  _withDirectives(_createElementVNode("textarea", {
+                    "onUpdate:modelValue": $event => ((userInput) = $event),
+                    onInput: autoResizeInput,
+                    onFocus: handleChatInputFocus,
+                    onBlur: handleChatInputBlur,
+                    enterkeyhint: "enter",
+                    onKeydown: handleChatInputEnter,
+                    placeholder: '输入消息...',
+                    class: "island-input chat-input-scrollbar",
+                    rows: "1",
+                    ref: "inputBox"
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_177), [
+                    [_vModelText, userInput]
+                  ]),
+                  _createElementVNode("div", _hoisted_178, [
+                    _createElementVNode("div", _hoisted_179, [
+                      _createCommentVNode(" Send Image Button "),
+                      _createElementVNode("button", {
+                        type: "button",
+                        onClick: $event => (requestChatImageSelection($refs.chatImageInput)),
+                        disabled: isConversationBusy,
+                        class: "island-button",
+                        title: `发送图片（${pendingChatImages.length + pendingChatImageReadCount}/3）`
+                      }, [...(_cache[56] || (_cache[56] = [
                         _createElementVNode("svg", {
                           class: "w-4 h-4",
                           fill: "none",
@@ -1904,1389 +3138,160 @@ return function render(_ctx, _cache) {
                             "stroke-linecap": "round",
                             "stroke-linejoin": "round",
                             "stroke-width": "2",
-                            d: "M6 18L18 6M6 6l12 12"
+                            d: "M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94a3 3 0 114.243 4.243L8.552 18.32a1.5 1.5 0 01-2.121-2.121l7.693-7.693"
                           })
                         ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_29)
-                    ]),
-                    _createElementVNode("div", _hoisted_30, [
-                      _cache[9] || (_cache[9] = _createElementVNode("div", { class: "mb-2 flex items-center justify-between px-0.5" }, [
-                        _createElementVNode("div", { class: "flex items-center gap-2 text-[11px] font-bold text-gray-400" }, [
-                          _createElementVNode("svg", {
-                            class: "w-4 h-4 text-gray-400",
-                            fill: "none",
-                            stroke: "currentColor",
-                            viewBox: "0 0 24 24"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            })
-                          ]),
-                          _createTextVNode(" 角色卡简介 ")
-                        ])
-                      ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_31, [
-                        (currentCharacter.description)
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_32, [
-                              _createElementVNode("div", {
-                                class: "text-sm text-gray-700 leading-relaxed font-normal font-sans markdown-body",
-                                innerHTML: renderMarkdown(currentCharacter.description, 'assistant', true)
-                              }, null, 8 /* PROPS */, _hoisted_33)
-                            ]))
-                          : (_openBlock(), _createElementBlock("div", _hoisted_34, [...(_cache[8] || (_cache[8] = [
-                              _createElementVNode("svg", {
-                                class: "w-8 h-8 mb-2 opacity-50",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-linejoin": "round",
-                                  "stroke-width": "1.5",
-                                  d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                })
-                              ], -1 /* CACHED */),
-                              _createTextVNode(" 暂无描述信息 ", -1 /* CACHED */)
-                            ]))]))
-                      ])
-                    ])
-                  ]))
-                : _createCommentVNode("v-if", true)
-            ]),
-            _: 1 /* STABLE */
-          }),
-          _createCommentVNode(" Chat Header "),
-          _createElementVNode("div", _hoisted_35, [
-            _withDirectives(_createElementVNode("div", _hoisted_36, null, 512 /* NEED_PATCH */), [
-              [_vShow, !isInputBarHidden]
-            ]),
-            _createCommentVNode(" 实际内容容器 "),
-            _createElementVNode("div", _hoisted_37, [
-              _createElementVNode("div", {
-                style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
-                class: "flex items-center min-w-0"
-              }, [
-                (!isChatFullscreen)
-                  ? (_openBlock(), _createElementBlock("button", {
-                      key: 0,
-                      onClick: toggleNavigation,
-                      class: "app-nav-trigger app-nav-trigger--chat",
-                      "aria-label": "聊天菜单",
-                      "aria-haspopup": "dialog"
-                    }, [...(_cache[10] || (_cache[10] = [
-                      _createElementVNode("svg", {
-                        class: "w-6 h-6",
-                        fill: "none",
-                        stroke: "currentColor"
-                      }, [
-                        _createElementVNode("use", { href: "#icon-menu" })
-                      ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_38))
-                  : _createCommentVNode("v-if", true),
-                currentCharacter
-                  ? (_openBlock(), _createElementBlock("div", {
-                      key: 1,
-                      class: "flex items-center min-w-0 cursor-pointer",
-                      onClick: $event => (showDescriptionPanel = !showDescriptionPanel)
-                    }, [
-                      _createElementVNode("img", {
-                        src: currentCharacterAvatar,
-                        class: "w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm flex-shrink-0"
-                      }, null, 8 /* PROPS */, _hoisted_40),
-                      _createElementVNode("span", _hoisted_41, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                      ]))], 8 /* PROPS */, _hoisted_180),
+                      _createElementVNode("input", {
+                        ref: "chatImageInput",
+                        type: "file",
+                        accept: "image/*",
+                        multiple: "",
+                        class: "hidden",
+                        onChange: handleChatImageSelection
+                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_181),
+                      _createCommentVNode(" Auto Image Button "),
                       _createElementVNode("button", {
-                        class: _normalizeClass(["ml-1 p-1.5 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-all flex-shrink-0", {'bg-white/20 text-white': showDescriptionPanel}])
-                      }, [
-                        (_openBlock(), _createElementBlock("svg", {
-                          class: _normalizeClass(["desc-panel-chevron w-4 h-4", {'rotate-180': showDescriptionPanel}]),
+                        onClick: toggleAutoImageGen,
+                        class: _normalizeClass(["island-button", { 'is-active': isAutoImageGenEnabled }]),
+                        "aria-pressed": isAutoImageGenEnabled,
+                        title: "自动生图开关"
+                      }, [...(_cache[57] || (_cache[57] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
                           fill: "none",
                           stroke: "currentColor",
                           viewBox: "0 0 24 24"
-                        }, [...(_cache[11] || (_cache[11] = [
+                        }, [
                           _createElementVNode("path", {
                             "stroke-linecap": "round",
                             "stroke-linejoin": "round",
                             "stroke-width": "2",
-                            d: "M19 9l-7 7-7-7"
-                          }, null, -1 /* CACHED */)
-                        ]))], 2 /* CLASS */))
-                      ], 2 /* CLASS */)
-                    ], 8 /* PROPS */, _hoisted_39))
-                  : (_openBlock(), _createElementBlock("div", _hoisted_42, "未选择角色卡"))
-              ], 4 /* STYLE */),
-              _createElementVNode("div", _hoisted_43, [
-                _createElementVNode("button", {
-                  onClick: toggleInputBarVisibility,
-                  class: _normalizeClass(["chat-header-button", isInputBarHidden ? 'rphub-zen-toggle--on' : '']),
-                  title: isInputBarHidden ? '显示输入栏' : '隐藏输入栏'
-                }, [
-                  (_openBlock(), _createElementBlock("svg", _hoisted_45, [
-                    isInputBarHidden
-                      ? (_openBlock(), _createElementBlock("path", _hoisted_46))
-                      : _createCommentVNode("v-if", true),
-                    isInputBarHidden
-                      ? (_openBlock(), _createElementBlock("path", _hoisted_47))
-                      : (_openBlock(), _createElementBlock("path", _hoisted_48))
-                  ]))
-                ], 10 /* CLASS, PROPS */, _hoisted_44),
-                _createElementVNode("button", {
-                  onClick: clearChat,
-                  class: "chat-header-button chat-header-button--danger",
-                  style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
-                  title: "清空聊天"
-                }, [...(_cache[12] || (_cache[12] = [
-                  _createElementVNode("svg", {
-                    class: "w-5 h-5",
-                    fill: "none",
-                    stroke: "currentColor"
-                  }, [
-                    _createElementVNode("use", { href: "#icon-delete" })
-                  ], -1 /* CACHED */)
-                ]))], 12 /* STYLE, PROPS */, _hoisted_49)
-              ])
-            ])
-          ]),
-          _createCommentVNode(" Chat Messages "),
-          _createElementVNode("div", {
-            ref: "chatContainer",
-            onClick: $event => (showChatModelSelector = false),
-            onScroll: handleChatScroll,
-            class: _normalizeClass(["flex-1 overflow-y-auto overflow-x-hidden px-2 pt-14 md:pt-16 pb-52 md:pb-60 relative z-0 space-y-12 md:space-y-14", !settings.useCharacterBackground || !currentCharacter?.avatar ? 'chat-ambient' : '']),
-            style: _normalizeStyle(isAnyMessageEditing ? { paddingBottom: 'max(13rem, calc(var(--keyboard-inset, 0px) + 24px))' } : (isInputBarHidden ? { paddingTop: '44px', paddingBottom: '16px' } : null))
-          }, [
-            (!currentCharacter)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_51, [
-                  _cache[13] || (_cache[13] = _createElementVNode("div", { class: "chat-empty__icon" }, [
-                    _createElementVNode("svg", {
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      })
-                    ])
-                  ], -1 /* CACHED */)),
-                  _cache[14] || (_cache[14] = _createElementVNode("p", { class: "chat-empty__title" }, "请先选择或创建一个角色卡", -1 /* CACHED */)),
-                  _createElementVNode("button", {
-                    onClick: $event => (currentView = 'characters'),
-                    class: "modal-primary-button"
-                  }, "前往角色管理", 8 /* PROPS */, _hoisted_52)
-                ]))
-              : (chatHistory.length === 0)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_53, [
-                    _createElementVNode("img", {
-                      src: currentCharacterAvatar,
-                      class: "chat-empty__avatar",
-                      alt: ""
-                    }, null, 8 /* PROPS */, _hoisted_54),
-                    _createElementVNode("p", _hoisted_55, "开始与 " + _toDisplayString(currentCharacter.name) + " 对话吧", 1 /* TEXT */)
-                  ]))
-                : _createCommentVNode("v-if", true),
-            (currentCharacter && chatHistory.length > 0)
-              ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
-                  return _withDirectives((_openBlock(), _createElementBlock("div", {
-                    key: index,
-                    ref_for: true,
-                    ref: "messageElements",
-                    "data-role": msg.role,
-                    "data-chat-index": index,
-                    class: _normalizeClass(['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]),
-                    style: _normalizeStyle({ transitionDelay: (displayIndex % 5) * 50 + 'ms' })
-                  }, [
-                    _createElementVNode("div", {
-                      class: _normalizeClass(['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row'])
-                    }, [
-                      _createCommentVNode(" Avatar "),
-                      _withDirectives(_createElementVNode("div", {
-                        class: _normalizeClass(['flex-shrink-0 select-none', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
-                      }, [
-                        (msg.role === 'user')
-                          ? (_openBlock(), _createElementBlock("div", {
-                              key: 0,
-                              class: _normalizeClass(['msg-avatar w-9 h-9 rounded-full overflow-hidden', msg.isSelf ? 'ml-2' : 'mr-2'])
-                            }, [
-                              (msg.avatar || (msg.isSelf && user.avatar))
-                                ? (_openBlock(), _createElementBlock("img", {
-                                    key: 0,
-                                    src: msg.avatar || user.avatar,
-                                    class: "w-full h-full object-cover"
-                                  }, null, 8 /* PROPS */, _hoisted_57))
-                                : (!msg.isSelf && user.avatar)
-                                  ? (_openBlock(), _createElementBlock("img", {
-                                      key: 1,
-                                      src: user.avatar,
-                                      class: "w-full h-full object-cover",
-                                      title: "Fallback to user avatar for legacy messages"
-                                    }, null, 8 /* PROPS */, _hoisted_58))
-                                  : (_openBlock(), _createElementBlock("div", _hoisted_59, _toDisplayString((msg.name || user.name || 'U').charAt(0)), 1 /* TEXT */))
-                            ], 2 /* CLASS */))
-                          : (_openBlock(), _createElementBlock("img", {
-                              key: 1,
-                              src: currentCharacterAvatar,
-                              class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
-                            }, null, 8 /* PROPS */, _hoisted_60))
-                      ], 2 /* CLASS */), [
-                        [_vShow, !settings.immersiveMode]
-                      ]),
-                      _createElementVNode("div", {
-                        class: _normalizeClass(['flex flex-col min-w-0', settings.immersiveMode ? 'immersive-message-column' : '', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'flex-1 w-full' : '', msg.isSelf ? 'items-end' : 'items-start'])
-                      }, [
-                        _createCommentVNode(" Name (Outside Bubble) "),
-                        _withDirectives(_createElementVNode("div", {
-                          class: _normalizeClass(['msg-name-tag truncate max-w-[210px] md:max-w-[250px]', msg.isSelf ? 'ml-auto mr-1' : 'mr-auto ml-1', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
-                        }, _toDisplayString(msg.name || (msg.role === 'user' ? user.name : (currentCharacter.name || 'Unknown'))), 3 /* TEXT, CLASS */), [
-                          [_vShow, !settings.immersiveMode]
-                        ]),
-                        _createCommentVNode(" Message Bubble "),
-                        _createElementVNode("div", {
-                          class: _normalizeClass(["group relative min-w-0 max-w-full", {'w-full': messageUsesWideLayout(msg) || msg.isEditing_Message, 'message-edit-group': msg.isEditing_Message}])
+                            d: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 10 /* CLASS, PROPS */, _hoisted_182),
+                      _createCommentVNode(" Context Viewer Button "),
+                      _createElementVNode("button", {
+                        onClick: $event => (showContextViewerModal = true),
+                        class: "island-button",
+                        title: "上下文查看器"
+                      }, [...(_cache[58] || (_cache[58] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
                         }, [
-                          _createElementVNode("div", {
-                            onClick: $event => (handleGeneratedImageReroll($event, index)),
-                            class: _normalizeClass(['msg-bubble-glass p-0 text-sm md:text-base leading-relaxed overflow-hidden',
-                                        msg.shouldAnimate && !(msg.role === 'assistant' && msg.reasoning) ? (msg.role === 'system' ? 'animate-bubble-swap' : 'animate-message-in') : '',
-                                        messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '',
-                                        msg.isSelf ? 'msg-bubble--self' : msg.role === 'system' ? 'msg-bubble--system' : ''])
-                          }, [
-                            (msg.isEditing_Message)
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_62, [
-                                  _withDirectives(_createElementVNode("textarea", {
-                                    "onUpdate:modelValue": $event => ((msg.editMessageContent) = $event),
-                                    onFocus: keepEditBlockVisible,
-                                    style: _normalizeStyle({ height: (msg.editMessageHeight || 160) + 'px' }),
-                                    class: "w-full min-h-[88px] max-h-[70vh] p-3 text-sm text-gray-700 bg-white/50 backdrop-blur-md rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:bg-white transition-all shadow-inner resize-y custom-scrollbar",
-                                    placeholder: "编辑消息..."
-                                  }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_63), [
-                                    [_vModelText, msg.editMessageContent]
-                                  ]),
-                                  _createElementVNode("div", _hoisted_64, [
-                                    _createElementVNode("button", {
-                                      onClick: $event => (cancelEditMessage(index)),
-                                      class: "px-4 py-1.5 text-xs font-bold text-gray-500 bg-white/80 hover:bg-white border border-gray-200 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
-                                    }, " 取消 ", 8 /* PROPS */, _hoisted_65),
-                                    _createElementVNode("button", {
-                                      onClick: $event => (saveEditMessage(index)),
-                                      class: "px-4 py-1.5 text-xs font-bold text-white bg-primary-500 hover:bg-primary-600 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    }, " 保存 ", 8 /* PROPS */, _hoisted_66)
-                                  ])
-                                ]))
-                              : (msg.isTriggered && !msg.showRaw)
-                                ? (_openBlock(), _createElementBlock("div", {
-                                    key: 1,
-                                    onClick: $event => (msg.showRaw = true),
-                                    class: "px-4 py-3 flex items-center space-x-2 text-primary-800/80 select-none cursor-pointer hover:bg-primary-50 transition-colors",
-                                    title: msg.content
-                                  }, [...(_cache[15] || (_cache[15] = [
-                                    _createElementVNode("svg", {
-                                      class: "w-5 h-5 animate-pulse",
-                                      fill: "none",
-                                      stroke: "currentColor",
-                                      viewBox: "0 0 24 24"
-                                    }, [
-                                      _createElementVNode("path", {
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                        d: "M13 10V3L4 14h7v7l9-11h-7z"
-                                      })
-                                    ], -1 /* CACHED */),
-                                    _createElementVNode("span", { class: "font-bold text-sm" }, [
-                                      _createTextVNode("触发了卡片交互 "),
-                                      _createElementVNode("span", { class: "text-[10px] opacity-60 ml-1" })
-                                    ], -1 /* CACHED */)
-                                  ]))], 8 /* PROPS */, _hoisted_67))
-                                : (msg.isTriggered && msg.showRaw)
-                                  ? (_openBlock(), _createElementBlock("div", {
-                                      key: 2,
-                                      onClick: $event => (msg.showRaw = false),
-                                      class: "cursor-pointer hover:opacity-80 transition-opacity",
-                                      title: "点击收起"
-                                    }, [
-                                      _createElementVNode("div", {
-                                        class: "markdown-body",
-                                        style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                        innerHTML: renderMarkdown(msg.content, msg.role)
-                                      }, null, 12 /* STYLE, PROPS */, _hoisted_69)
-                                    ], 8 /* PROPS */, _hoisted_68))
-                                  : (_openBlock(), _createElementBlock("div", {
-                                      key: 3,
-                                      class: _normalizeClass(["message-content-wrapper", {'w-full': messageUsesWideLayout(msg), 'has-user-images': msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length}]),
-                                      onClick: openMemoryCitation
-                                    }, [
-                                      (msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length)
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 0,
-                                            class: _normalizeClass(['grid gap-1.5 p-1', msg.imageAttachments.length === 1 ? 'grid-cols-1 w-fit' : 'grid-cols-2 w-[min(24rem,78vw)]'])
-                                          }, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.imageAttachments, (image, imageIndex) => {
-                                              return (_openBlock(), _createElementBlock("img", {
-                                                key: `${index}-image-${imageIndex}`,
-                                                src: image.dataUrl,
-                                                class: _normalizeClass(['block rounded-xl bg-white', msg.imageAttachments.length === 1 ? 'justify-self-start w-auto max-w-[min(24rem,78vw)] h-auto max-h-[26rem] object-contain' : ('w-full ' + (msg.imageAttachments.length === 3 && imageIndex === 0 ? 'col-span-2 h-48 object-cover' : 'h-36 object-cover'))]),
-                                                alt: `用户发送的图片 ${imageIndex + 1}`
-                                              }, null, 10 /* CLASS, PROPS */, _hoisted_71))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ], 2 /* CLASS */))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Unified Summary Timeline Part "),
-                                      (hasThinkingOrTools(msg))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_72, [
-                                            _createElementVNode("div", {
-                                              class: _normalizeClass(["cot-ui native-thinking-card summary-timeline-card", { 'is-live': isMessageThinkingOrRunning(msg), 'is-open': isThinkingSummaryOpen(msg) }])
-                                            }, [
-                                              _createElementVNode("button", {
-                                                type: "button",
-                                                class: "cot-header native-thinking-header justify-between",
-                                                onClick: $event => (toggleThinkingSummary(msg))
-                                              }, [
-                                                _createElementVNode("div", _hoisted_74, [
-                                                  (isMessageThinkingOrRunning(msg))
-                                                    ? (_openBlock(), _createElementBlock("span", _hoisted_75, [...(_cache[16] || (_cache[16] = [
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */),
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */),
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */)
-                                                      ]))]))
-                                                    : (_openBlock(), _createElementBlock("svg", _hoisted_76, [...(_cache[17] || (_cache[17] = [
-                                                        _createElementVNode("path", {
-                                                          "stroke-linecap": "round",
-                                                          "stroke-linejoin": "round",
-                                                          "stroke-width": "2",
-                                                          d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5M9 18h6M10 22h4"
-                                                        }, null, -1 /* CACHED */)
-                                                      ]))])),
-                                                  _cache[18] || (_cache[18] = _createElementVNode("span", { class: "text-sm font-bold truncate" }, "Thinking", -1 /* CACHED */))
-                                                ]),
-                                                _cache[19] || (_cache[19] = _createElementVNode("svg", {
-                                                  class: "w-3.5 h-3.5 ml-2 opacity-60 chevron",
-                                                  fill: "none",
-                                                  stroke: "currentColor",
-                                                  viewBox: "0 0 24 24"
-                                                }, [
-                                                  _createElementVNode("path", {
-                                                    "stroke-linecap": "round",
-                                                    "stroke-linejoin": "round",
-                                                    "stroke-width": "2",
-                                                    d: "M19 9l-7 7-7-7"
-                                                  })
-                                                ], -1 /* CACHED */))
-                                              ], 8 /* PROPS */, _hoisted_73),
-                                              _createElementVNode("div", {
-                                                class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
-                                              }, [
-                                                _createElementVNode("div", _hoisted_77, [
-                                                  _createElementVNode("div", _hoisted_78, [
-                                                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
-                                                      return (_openBlock(), _createElementBlock("div", {
-                                                        key: step.id,
-                                                        class: "relative group/step"
-                                                      }, [
-                                                        _createCommentVNode(" Marker Node "),
-                                                        _createElementVNode("div", _hoisted_79, [
-                                                          _createElementVNode("div", {
-                                                            class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
-                                                          }, null, 2 /* CLASS */)
-                                                        ]),
-                                                        _createCommentVNode(" Content Box "),
-                                                        _createElementVNode("div", _hoisted_80, [
-                                                          (step.isReason)
-                                                            ? (_openBlock(), _createElementBlock("div", _hoisted_81, _toDisplayString(step.title), 1 /* TEXT */))
-                                                            : (_openBlock(), _createElementBlock("details", {
-                                                                key: 1,
-                                                                class: "group/detail",
-                                                                onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
-                                                              }, [
-                                                                _createElementVNode("summary", _hoisted_83, [
-                                                                  _createElementVNode("div", _hoisted_84, [
-                                                                    _createElementVNode("span", _hoisted_85, [
-                                                                      _createElementVNode("span", _hoisted_86, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                      (step.type === 'thinking')
-                                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_87, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                        : _createCommentVNode("v-if", true),
-                                                                      (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
-                                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_88, [
-                                                                            _createElementVNode("span", _hoisted_89, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                            (step.type === 'thinking')
-                                                                              ? (_openBlock(), _createElementBlock("span", _hoisted_90, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                              : _createCommentVNode("v-if", true)
-                                                                          ]))
-                                                                        : _createCommentVNode("v-if", true)
-                                                                    ]),
-                                                                    (step.status === 'done')
-                                                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_91, [...(_cache[20] || (_cache[20] = [
-                                                                          _createElementVNode("path", {
-                                                                            "stroke-linecap": "round",
-                                                                            "stroke-linejoin": "round",
-                                                                            "stroke-width": "3",
-                                                                            d: "M5 13l4 4L19 7"
-                                                                          }, null, -1 /* CACHED */)
-                                                                        ]))]))
-                                                                      : _createCommentVNode("v-if", true),
-                                                                    (step.status === 'error')
-                                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_92, "失败"))
-                                                                      : _createCommentVNode("v-if", true)
-                                                                  ]),
-                                                                  _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
-                                                                    _createTextVNode(" 详情 "),
-                                                                    _createElementVNode("svg", {
-                                                                      class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
-                                                                      fill: "none",
-                                                                      stroke: "currentColor",
-                                                                      viewBox: "0 0 24 24"
-                                                                    }, [
-                                                                      _createElementVNode("path", {
-                                                                        "stroke-linecap": "round",
-                                                                        "stroke-linejoin": "round",
-                                                                        "stroke-width": "2",
-                                                                        d: "M19 9l-7 7-7-7"
-                                                                      })
-                                                                    ])
-                                                                  ], -1 /* CACHED */))
-                                                                ]),
-                                                                _createElementVNode("div", {
-                                                                  class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
-                                                                }, [
-                                                                  (step.type === 'thinking')
-                                                                    ? (_openBlock(), _createElementBlock("div", {
-                                                                        key: 0,
-                                                                        class: "markdown-body",
-                                                                        style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
-                                                                        innerHTML: renderMarkdown(step.text, 'assistant', true, false)
-                                                                      }, null, 12 /* STYLE, PROPS */, _hoisted_93))
-                                                                    : (_openBlock(), _createElementBlock("div", _hoisted_94, [
-                                                                        _createElementVNode("div", _hoisted_95, [
-                                                                          _createElementVNode("span", null, [
-                                                                            _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
-                                                                            _createElementVNode("code", _hoisted_96, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
-                                                                          ]),
-                                                                          _createElementVNode("span", _hoisted_97, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
-                                                                        ]),
-                                                                        _createElementVNode("div", _hoisted_98, [
-                                                                          _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
-                                                                          _createElementVNode("pre", _hoisted_99, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
-                                                                        ]),
-                                                                        (step.toolCall.error)
-                                                                          ? (_openBlock(), _createElementBlock("div", _hoisted_100, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
-                                                                          : (step.toolCall.resultText)
-                                                                            ? (_openBlock(), _createElementBlock("div", _hoisted_101, [
-                                                                                _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
-                                                                                _createElementVNode("pre", _hoisted_102, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
-                                                                              ]))
-                                                                            : _createCommentVNode("v-if", true)
-                                                                      ]))
-                                                                ], 2 /* CLASS */)
-                                                              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_82))
-                                                        ])
-                                                      ]))
-                                                    }), 128 /* KEYED_FRAGMENT */))
-                                                  ])
-                                                ])
-                                              ], 2 /* CLASS */)
-                                            ], 2 /* CLASS */)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Active Tool Calls "),
-                                      (msg.role === 'assistant' && activeToolContinuationMessageId === msg.id && isGenerating && !activeToolContinuationHasResponse && !isThinking)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_103, [
-                                            _cache[25] || (_cache[25] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
-                                              _createElementVNode("span"),
-                                              _createElementVNode("span"),
-                                              _createElementVNode("span")
-                                            ], -1 /* CACHED */)),
-                                            isGenerating
-                                              ? (_openBlock(), _createBlock(_component_generation_timer, {
-                                                  key: 0,
-                                                  "wait-time": currentWaitTime,
-                                                  "estimated-time": estimatedGenerationTime
-                                                }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
-                                              : _createCommentVNode("v-if", true)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.top && msg.uiTemplateBlocks.top.length)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_104, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
-                                              return (_openBlock(), _createElementBlock("div", {
-                                                key: 'msg-ui-top-' + index + '-' + tIndex,
-                                                class: "w-full ui-template-render",
-                                                onClick: handleUiTemplateClick,
-                                                innerHTML: replaceUserNamePlaceholder(html)
-                                              }, null, 8 /* PROPS */, _hoisted_105))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'top'))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_106, [
-                                            _createVNode(_component_ui_template_pending)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Main Part "),
-                                      (parseCot(msg.content).main)
-                                        ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                                            (index === chatHistory.length - 1 && isGenerating)
-                                              ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                                  (processMainContent(parseCot(msg.content).main, true).text)
-                                                    ? (_openBlock(), _createElementBlock("div", {
-                                                        key: 0,
-                                                        class: "markdown-body",
-                                                        style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                        innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
-                                                      }, null, 12 /* STYLE, PROPS */, _hoisted_107))
-                                                    : _createCommentVNode("v-if", true),
-                                                  (processMainContent(parseCot(msg.content).main, true).showSpinner)
-                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_108, [...(_cache[26] || (_cache[26] = [
-                                                        _createElementVNode("div", {
-                                                          class: "ui-build-dots",
-                                                          "aria-hidden": "true"
-                                                        }, [
-                                                          _createElementVNode("i"),
-                                                          _createElementVNode("i"),
-                                                          _createElementVNode("i")
-                                                        ], -1 /* CACHED */),
-                                                        _createElementVNode("span", { class: "text-[16px] font-bold tracking-wider text-blue-600/80" }, "正在构建 UI 界面", -1 /* CACHED */)
-                                                      ]))]))
-                                                    : _createCommentVNode("v-if", true)
-                                                ], 64 /* STABLE_FRAGMENT */))
-                                              : (_openBlock(), _createElementBlock("div", {
-                                                  key: 1,
-                                                  class: "markdown-body",
-                                                  style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                  innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
-                                                }, null, 12 /* STYLE, PROPS */, _hoisted_109))
-                                          ], 64 /* STABLE_FRAGMENT */))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.bottom && msg.uiTemplateBlocks.bottom.length)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_110, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
-                                              return (_openBlock(), _createElementBlock("div", {
-                                                key: 'msg-ui-bottom-' + index + '-' + tIndex,
-                                                class: "w-full ui-template-render",
-                                                onClick: handleUiTemplateClick,
-                                                innerHTML: replaceUserNamePlaceholder(html)
-                                              }, null, 8 /* PROPS */, _hoisted_111))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'bottom'))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_112, [
-                                            _createVNode(_component_ui_template_pending)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.responseError)
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 8,
-                                            class: "response-error-text px-4 py-3",
-                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                            role: "alert"
-                                          }, _toDisplayString(msg.responseError), 5 /* TEXT, STYLE */))
-                                        : _createCommentVNode("v-if", true)
-                                    ], 10 /* CLASS, PROPS */, _hoisted_70))
-                          ], 10 /* CLASS, PROPS */, _hoisted_61),
-                          _createCommentVNode(" Message Actions "),
-                          (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
-                            ? (_openBlock(), _createElementBlock("div", {
-                                key: 0,
-                                class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
-                              }, [
-                                (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 0,
-                                      onClick: $event => (regenerateMessage(index)),
-                                      class: "message-action-button",
-                                      title: "重新生成"
-                                    }, [...(_cache[27] || (_cache[27] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
-                                      }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_113))
-                                  : _createCommentVNode("v-if", true),
-                                _createElementVNode("button", {
-                                  onClick: $event => (editMessage(index)),
-                                  class: "message-action-button",
-                                  title: "编辑"
-                                }, [...(_cache[28] || (_cache[28] = [
-                                  _createElementVNode("svg", {
-                                    class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                    fill: "none",
-                                    stroke: "currentColor",
-                                    viewBox: "0 0 24 24"
-                                  }, [
-                                    _createElementVNode("path", {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      "stroke-width": "2",
-                                      d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                    })
-                                  ], -1 /* CACHED */)
-                                ]))], 8 /* PROPS */, _hoisted_114),
-                                _createElementVNode("button", {
-                                  onClick: $event => {copyMessage(msg.content); playMessageActionFeedback($event)},
-                                  class: "message-action-button",
-                                  title: "复制"
-                                }, [...(_cache[29] || (_cache[29] = [
-                                  _createElementVNode("svg", {
-                                    class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                    fill: "none",
-                                    stroke: "currentColor",
-                                    viewBox: "0 0 24 24"
-                                  }, [
-                                    _createElementVNode("path", {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      "stroke-width": "2",
-                                      d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                    })
-                                  ], -1 /* CACHED */)
-                                ]))], 8 /* PROPS */, _hoisted_115),
-                                (msg.role === 'assistant')
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 1,
-                                      onClick: $event => {createStoryBranch(index); playMessageActionFeedback($event)},
-                                      disabled: storyBranchSwitching,
-                                      class: "message-action-button",
-                                      title: "从这里分支",
-                                      "aria-label": "从这里创建分支"
-                                    }, [...(_cache[30] || (_cache[30] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24",
-                                        "aria-hidden": "true"
-                                      }, [
-                                        _createElementVNode("use", { href: "#icon-story-branch" })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_116))
-                                  : _createCommentVNode("v-if", true),
-                                (canDeleteMessage(index))
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 2,
-                                      onClick: $event => (deleteMessage(index)),
-                                      class: "message-action-button message-action-button--danger",
-                                      title: "删除"
-                                    }, [...(_cache[31] || (_cache[31] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
-                                      }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_117))
-                                  : _createCommentVNode("v-if", true),
-                                (msg.role === 'assistant' && Array.isArray(msg.styleFilterHits) && msg.styleFilterHits.length)
-                                  ? (_openBlock(), _createElementBlock("div", _hoisted_118, [
-                                      (isStyleFilterDetailsOpen(msg, index))
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 0,
-                                            onClick: _withModifiers(() => {}, ["stop"]),
-                                            class: "message-style-filter-popover absolute bottom-full left-1/2 z-30 mb-2 w-[min(20rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur-xl"
-                                          }, [
-                                            _cache[32] || (_cache[32] = _createElementVNode("div", { class: "border-b border-gray-100 bg-gray-50/80 px-3 py-2" }, [
-                                              _createElementVNode("span", { class: "text-xs font-bold text-gray-700" }, "文风过滤详情")
-                                            ], -1 /* CACHED */)),
-                                            _createElementVNode("div", _hoisted_120, [
-                                              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.styleFilterHits, (fragment, filterIndex) => {
-                                                return (_openBlock(), _createElementBlock("div", {
-                                                  key: index + '-style-filter-' + filterIndex,
-                                                  class: "flex items-start gap-1.5 rounded-xl border border-gray-100 bg-gray-50/70 px-2.5 py-2"
-                                                }, [
-                                                  _createElementVNode("span", _hoisted_121, _toDisplayString(filterIndex + 1), 1 /* TEXT */),
-                                                  _createElementVNode("span", _hoisted_122, [
-                                                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getStyleFilterHitSegments(fragment), (segment, segmentIndex) => {
-                                                      return (_openBlock(), _createElementBlock("span", {
-                                                        key: filterIndex + '-segment-' + segmentIndex,
-                                                        class: _normalizeClass(segment.matched ? 'font-semibold text-blue-500' : '')
-                                                      }, _toDisplayString(segment.text), 3 /* TEXT, CLASS */))
-                                                    }), 128 /* KEYED_FRAGMENT */))
-                                                  ])
-                                                ]))
-                                              }), 128 /* KEYED_FRAGMENT */))
-                                            ])
-                                          ], 8 /* PROPS */, _hoisted_119))
-                                        : _createCommentVNode("v-if", true),
-                                      _createElementVNode("button", {
-                                        onClick: _withModifiers($event => (toggleStyleFilterDetails(msg, index)), ["stop"]),
-                                        class: _normalizeClass(["message-style-filter-button", { 'is-active': isStyleFilterDetailsOpen(msg, index) }]),
-                                        title: '查看本条回复过滤的 ' + msg.styleFilterHits.length + ' 处内容'
-                                      }, [
-                                        _cache[34] || (_cache[34] = _createElementVNode("svg", {
-                                          class: "h-3.5 w-3.5",
-                                          fill: "none",
-                                          stroke: "currentColor",
-                                          viewBox: "0 0 24 24",
-                                          "aria-hidden": "true"
-                                        }, [
-                                          _createElementVNode("path", {
-                                            "stroke-linecap": "round",
-                                            "stroke-linejoin": "round",
-                                            "stroke-width": "2",
-                                            d: "M3 4h18M6 9h12M9 14h6M11 19h2"
-                                          })
-                                        ], -1 /* CACHED */)),
-                                        (_openBlock(), _createElementBlock("svg", {
-                                          class: _normalizeClass(["h-3 w-3 transition-transform", { 'rotate-180': isStyleFilterDetailsOpen(msg, index) }]),
-                                          fill: "none",
-                                          stroke: "currentColor",
-                                          viewBox: "0 0 24 24",
-                                          "aria-hidden": "true"
-                                        }, [...(_cache[33] || (_cache[33] = [
-                                          _createElementVNode("path", {
-                                            "stroke-linecap": "round",
-                                            "stroke-linejoin": "round",
-                                            "stroke-width": "2",
-                                            d: "M19 9l-7 7-7-7"
-                                          }, null, -1 /* CACHED */)
-                                        ]))], 2 /* CLASS */))
-                                      ], 10 /* CLASS, PROPS */, _hoisted_123)
-                                    ]))
-                                  : _createCommentVNode("v-if", true)
-                              ], 2 /* CLASS */))
-                            : _createCommentVNode("v-if", true)
-                        ], 2 /* CLASS */)
-                      ], 2 /* CLASS */)
-                    ], 2 /* CLASS */)
-                  ], 14 /* CLASS, STYLE, PROPS */, _hoisted_56)), [
-                    [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
-                  ])
-                }), 128 /* KEYED_FRAGMENT */))
-              : _createCommentVNode("v-if", true),
-            _createCommentVNode(" Typing Indicator "),
-            (isGenerating && !isReceiving && !isThinking && !hasActiveToolInlineWork)
-              ? (_openBlock(), _createElementBlock("div", {
-                  key: 3,
-                  class: _normalizeClass(['flex w-full', settings.immersiveMode ? 'immersive-message-row justify-start' : 'standard-message-row'])
-                }, [
-                  _createElementVNode("div", {
-                    class: _normalizeClass(['flex flex-row centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell'])
-                  }, [
-                    _withDirectives(_createElementVNode("div", _hoisted_124, [
-                      _createElementVNode("img", {
-                        src: currentCharacterAvatar,
-                        class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
-                      }, null, 8 /* PROPS */, _hoisted_125)
-                    ], 512 /* NEED_PATCH */), [
-                      [_vShow, !settings.immersiveMode]
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 8 /* PROPS */, _hoisted_183),
+                      _createElementVNode("button", {
+                        onClick: openStoryBranchModal,
+                        class: "island-button",
+                        title: '剧情分支：' + (currentStoryBranch?.name || '主线')
+                      }, [...(_cache[59] || (_cache[59] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
+                        }, [
+                          _createElementVNode("use", { href: "#icon-story-branch" })
+                        ], -1 /* CACHED */)
+                      ]))], 8 /* PROPS */, _hoisted_184)
                     ]),
-                    _createElementVNode("div", {
-                      class: _normalizeClass(['flex flex-col min-w-0 items-start', settings.immersiveMode ? 'immersive-message-column' : ''])
-                    }, [
-                      _withDirectives(_createElementVNode("div", {
-                        class: "msg-name-tag mr-auto ml-1 truncate max-w-[210px] md:max-w-[250px] animate-message-in",
-                        style: {"animation-delay":"100ms"}
-                      }, _toDisplayString(currentCharacter.name), 513 /* TEXT, NEED_PATCH */), [
-                        [_vShow, !settings.immersiveMode]
-                      ]),
-                      _createElementVNode("div", _hoisted_126, [
-                        _cache[35] || (_cache[35] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
-                          _createElementVNode("span"),
-                          _createElementVNode("span"),
-                          _createElementVNode("span")
-                        ], -1 /* CACHED */)),
-                        isGenerating
-                          ? (_openBlock(), _createBlock(_component_generation_timer, {
-                              key: 0,
-                              "wait-time": currentWaitTime,
-                              "estimated-time": estimatedGenerationTime
-                            }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
-                          : _createCommentVNode("v-if", true)
-                      ])
-                    ], 2 /* CLASS */)
-                  ], 2 /* CLASS */)
-                ], 2 /* CLASS */))
-              : _createCommentVNode("v-if", true)
-          ], 46 /* CLASS, STYLE, PROPS, NEED_HYDRATION */, _hoisted_50),
-          _createCommentVNode(" Input Area (Floating Island) "),
-          _withDirectives(_createElementVNode("div", _hoisted_127, [
-            _createElementVNode("div", _hoisted_128, [
-              _createVNode(_Transition, {
-                "enter-active-class": "transition duration-300 ease-spring",
-                "enter-from-class": "opacity-0 translate-y-2 scale-95",
-                "enter-to-class": "opacity-100 translate-y-0 scale-100",
-                "leave-active-class": "transition-all duration-150 ease-in",
-                "leave-from-class": "opacity-100 translate-y-0 scale-100",
-                "leave-to-class": "opacity-0 translate-y-2 scale-95"
-              }, {
-                default: _withCtx(() => [
-                  pendingCardInteraction
-                    ? (_openBlock(), _createElementBlock("div", {
-                        key: 0,
-                        class: _normalizeClass([pendingChatImages.length ? 'bottom-[calc(100%+7.25rem)] md:bottom-[calc(100%+8.75rem)]' : 'bottom-[calc(100%+0.65rem)]', "absolute left-1 right-1 z-[3] flex justify-center"])
-                      }, [
-                        _createElementVNode("div", _hoisted_129, [
-                          _cache[37] || (_cache[37] = _createElementVNode("svg", {
-                            class: "h-3.5 w-3.5 flex-none text-primary-500",
-                            fill: "none",
-                            stroke: "currentColor",
-                            viewBox: "0 0 24 24",
-                            "aria-hidden": "true"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M13 10V3L4 14h7v7l9-11h-7z"
-                            })
-                          ], -1 /* CACHED */)),
-                          _cache[38] || (_cache[38] = _createElementVNode("span", { class: "flex-none font-bold text-primary-600" }, "卡片交互", -1 /* CACHED */)),
-                          _createElementVNode("span", {
-                            class: "min-w-0 truncate text-gray-600",
-                            title: pendingCardInteraction
-                          }, _toDisplayString(pendingCardInteraction), 9 /* TEXT, PROPS */, _hoisted_130),
-                          _createElementVNode("button", {
-                            type: "button",
-                            onClick: clearPendingCardInteraction,
-                            class: "flex h-5 w-5 flex-none items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600",
-                            title: "取消卡片交互",
-                            "aria-label": "取消卡片交互"
-                          }, [...(_cache[36] || (_cache[36] = [
+                    _createElementVNode("div", _hoisted_185, [
+                      _createElementVNode("button", {
+                        onClick: _withModifiers($event => (showChatModelSelector = !showChatModelSelector), ["stop"]),
+                        class: _normalizeClass(["island-button", { 'is-active': showChatModelSelector }]),
+                        title: "快捷面板",
+                        "aria-label": "快捷面板",
+                        "aria-controls": "chat-quick-panel",
+                        "aria-expanded": showChatModelSelector
+                      }, [...(_cache[60] || (_cache[60] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24",
+                          "aria-hidden": "true"
+                        }, [
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M4 6h5m4 0h7M9 4v4M4 12h10m4 0h2m-6-2v4M4 18h3m4 0h9m-13-2v4"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 10 /* CLASS, PROPS */, _hoisted_186),
+                      (!isConversationBusy)
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 0,
+                            onClick: sendMessage,
+                            disabled: (!userInput.trim() && pendingChatImages.length === 0 && !pendingCardInteraction) || isRecognizingImages || pendingChatImages.some(image => image.status !== 'ready'),
+                            class: "island-send",
+                            title: "发送"
+                          }, [...(_cache[61] || (_cache[61] = [
                             _createElementVNode("svg", {
-                              class: "h-3.5 w-3.5",
                               fill: "none",
                               stroke: "currentColor",
-                              viewBox: "0 0 24 24"
+                              viewBox: "0 0 24 24",
+                              "aria-hidden": "true"
                             }, [
                               _createElementVNode("path", {
                                 "stroke-linecap": "round",
                                 "stroke-linejoin": "round",
-                                "stroke-width": "2.5",
-                                d: "M6 18L18 6M6 6l12 12"
+                                "stroke-width": "2",
+                                d: "M10.268 21a2 2 0 0 0 3.464 0"
+                              }),
+                              _createElementVNode("path", {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_131)
-                        ])
-                      ], 2 /* CLASS */))
-                    : _createCommentVNode("v-if", true)
-                ]),
-                _: 1 /* STABLE */
-              }),
-              (pendingChatImages.length)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_132, [
-                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(pendingChatImages, (image) => {
-                      return (_openBlock(), _createElementBlock("div", {
-                        key: image.id,
-                        class: "relative w-24 h-24 md:w-[7.5rem] md:h-[7.5rem] flex-none overflow-hidden rounded-xl bg-transparent shadow-lg",
-                        title: image.status === 'ready' ? image.description : (image.error || '正在识别图片')
-                      }, [
-                        _createElementVNode("img", {
-                          src: image.dataUrl,
-                          alt: image.name,
-                          class: "w-full h-full object-cover"
-                        }, null, 8 /* PROPS */, _hoisted_134),
-                        (image.status !== 'ready')
-                          ? (_openBlock(), _createElementBlock("div", {
-                              key: 0,
-                              class: _normalizeClass(['absolute inset-0 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-white', image.status === 'error' ? 'bg-red-700/75' : 'bg-slate-900/55'])
+                          ]))], 8 /* PROPS */, _hoisted_187))
+                        : (_openBlock(), _createElementBlock("button", {
+                            key: 1,
+                            onClick: stopGeneration,
+                            class: "island-send island-send--stop",
+                            title: "中止生成"
+                          }, [...(_cache[62] || (_cache[62] = [
+                            _createElementVNode("svg", {
+                              viewBox: "0 0 24 24",
+                              fill: "currentColor",
+                              "aria-hidden": "true"
                             }, [
-                              (image.status === 'analyzing')
-                                ? (_openBlock(), _createElementBlock("svg", _hoisted_135, [...(_cache[39] || (_cache[39] = [
-                                    _createElementVNode("circle", {
-                                      class: "generated-image-spinner-path",
-                                      cx: "25",
-                                      cy: "25",
-                                      r: "20",
-                                      fill: "none",
-                                      "stroke-width": "2"
-                                    }, null, -1 /* CACHED */)
-                                  ]))]))
-                                : (_openBlock(), _createElementBlock("span", _hoisted_136, "识别失败"))
-                            ], 2 /* CLASS */))
-                          : _createCommentVNode("v-if", true),
-                        _createElementVNode("button", {
-                          type: "button",
-                          onClick: _withModifiers($event => (removePendingChatImage(image.id)), ["stop"]),
-                          title: "移除图片",
-                          class: "absolute top-1 right-1 z-[2] flex items-center justify-center w-5 h-5 rounded-full bg-slate-900/70 text-white shadow-sm",
-                          "aria-label": "移除图片"
-                        }, [...(_cache[40] || (_cache[40] = [
-                          _createElementVNode("svg", {
-                            class: "w-3 h-3",
-                            viewBox: "0 0 24 24",
-                            fill: "none",
-                            stroke: "currentColor"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2.5",
-                              d: "M6 18L18 6M6 6l12 12"
-                            })
-                          ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_137)
-                      ], 8 /* PROPS */, _hoisted_133))
-                    }), 128 /* KEYED_FRAGMENT */))
-                  ]))
-                : _createCommentVNode("v-if", true),
-              (settings.showLatestUsageBar && latestMainTokenUsage)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_138, [
-                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList([
-                                    { tone: 'input', label: '输入', value: getUncachedInputTokens(latestMainTokenUsage) },
-                                    { tone: 'cache', label: '缓存', value: latestMainTokenUsage.cacheReadTokens },
-                                    { tone: 'output', label: '输出', value: latestMainTokenUsage.outputTokens }], (part) => {
-                      return (_openBlock(), _createElementBlock("span", {
-                        key: part.tone,
-                        class: "flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1",
-                        title: part.label + ' Token'
-                      }, [
-                        _createElementVNode("i", {
-                          class: _normalizeClass('usage-swatch usage-tone--' + part.tone)
-                        }, null, 2 /* CLASS */),
-                        _createVNode(_component_rolling_text, {
-                          class: "font-mono font-semibold tabular-nums text-gray-700",
-                          value: formatLatestTokenCount(part.value)
-                        }, null, 8 /* PROPS */, ["value"])
-                      ], 8 /* PROPS */, _hoisted_139))
-                    }), 128 /* KEYED_FRAGMENT */))
-                  ]))
-                : _createCommentVNode("v-if", true),
-              _createCommentVNode(" Quick panel anchors to the whole composer so it never covers the text "),
-              _createVNode(_Transition, {
-                "enter-active-class": "transition duration-300 ease-spring",
-                "enter-from-class": "opacity-0 translate-y-2 scale-95",
-                "enter-to-class": "opacity-100 translate-y-0 scale-100",
-                "leave-active-class": "transition duration-150 ease-in",
-                "leave-from-class": "opacity-100 translate-y-0 scale-100",
-                "leave-to-class": "opacity-0 translate-y-2 scale-95"
-              }, {
-                default: _withCtx(() => [
-                  showChatModelSelector
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_140, [
-                        _createElementVNode("div", {
-                          id: "chat-quick-panel",
-                          onClick: _withModifiers(() => {}, ["stop"]),
-                          onKeydown: _withKeys(_withModifiers($event => (showChatModelSelector = false), ["stop"]), ["esc"]),
-                          role: "dialog",
-                          "aria-label": "快捷面板",
-                          class: "chat-quick-panel rounded-2xl p-3 flex flex-col gap-3 max-w-full max-h-[inherit] overflow-x-hidden overflow-y-auto overscroll-contain"
-                        }, [
-                          _createElementVNode("div", _hoisted_142, [
-                            _cache[42] || (_cache[42] = _createElementVNode("h3", { class: "text-sm font-bold text-gray-700" }, "快捷面板", -1 /* CACHED */)),
-                            _createElementVNode("button", {
-                              type: "button",
-                              onClick: $event => (showChatModelSelector = false),
-                              "aria-label": "关闭快捷面板",
-                              class: "w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                            }, [...(_cache[41] || (_cache[41] = [
-                              _createElementVNode("svg", {
-                                class: "w-4 h-4",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24",
-                                "aria-hidden": "true"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-width": "2",
-                                  d: "m6 6 12 12M18 6 6 18"
-                                })
-                              ], -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_143)
-                          ]),
-                          _createCommentVNode(" API 站切换（下拉浮层：展开时覆盖下方内容，不推挤面板布局）"),
-                          _createElementVNode("div", _hoisted_144, [
-                            _createElementVNode("div", _hoisted_145, [
-                              _cache[43] || (_cache[43] = _createElementVNode("span", { class: "text-xs font-bold text-gray-500" }, "API 站", -1 /* CACHED */)),
-                              _createElementVNode("button", {
-                                type: "button",
-                                onClick: _withModifiers($event => (showApiQuickSelector = !showApiQuickSelector), ["stop"]),
-                                class: "text-xs font-bold px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-primary-200 active:scale-95 transition-all"
-                              }, _toDisplayString(quickApiProviders.length ? (quickApiProviders.find(p => p.id === settings.apiProviderId)?.name || '跟随主API') : '跟随主API') + " ▾ ", 9 /* TEXT, PROPS */, _hoisted_146)
-                            ]),
-                            _createVNode(_Transition, {
-                              "enter-active-class": "transition-all duration-150 ease-out",
-                              "enter-from-class": "opacity-0 scale-95",
-                              "enter-to-class": "opacity-100 scale-100",
-                              "leave-active-class": "transition-all duration-100 ease-in",
-                              "leave-from-class": "opacity-100 scale-100",
-                              "leave-to-class": "opacity-0 scale-95"
-                            }, {
-                              default: _withCtx(() => [
-                                showApiQuickSelector
-                                  ? (_openBlock(), _createElementBlock("div", {
-                                      key: 0,
-                                      onClick: _withModifiers(() => {}, ["stop"]),
-                                      class: "absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-lg"
-                                    }, [
-                                      (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(quickApiProviders, (provider) => {
-                                        return (_openBlock(), _createElementBlock("button", {
-                                          key: provider.id,
-                                          type: "button",
-                                          onClick: $event => (selectQuickApiProvider(provider)),
-                                          class: _normalizeClass(['w-full text-left px-3 py-2 text-sm font-medium transition-colors', provider.id === settings.apiProviderId ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-600'])
-                                        }, _toDisplayString(provider.name || provider.id), 11 /* TEXT, CLASS, PROPS */, _hoisted_148))
-                                      }), 128 /* KEYED_FRAGMENT */)),
-                                      (!quickApiProviders.length)
-                                        ? (_openBlock(), _createElementBlock("p", _hoisted_149, "请先在设置中配置 API 站。"))
-                                        : _createCommentVNode("v-if", true)
-                                    ], 8 /* PROPS */, _hoisted_147))
-                                  : _createCommentVNode("v-if", true)
-                              ]),
-                              _: 1 /* STABLE */
-                            })
-                          ]),
-                          _createElementVNode("div", _hoisted_150, [
-                            _withDirectives(_createElementVNode("div", {
-                              class: "segmented-switch__indicator flex items-center justify-end px-2.5 text-primary-600",
-                              "aria-hidden": "true",
-                              style: _normalizeStyle({ '--slot-index': chatModelSlots.findIndex(slot => slot.mode === modelMode) })
-                            }, [...(_cache[44] || (_cache[44] = [
-                              _createElementVNode("svg", {
-                                class: "w-4 h-4 flex-none",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-linejoin": "round",
-                                  "stroke-width": "2",
-                                  d: "m5 12 4 4L19 6"
-                                })
-                              ], -1 /* CACHED */)
-                            ]))], 4 /* STYLE */), [
-                              [_vShow, chatModelSlots.some(slot => slot.mode === modelMode && slot.model)]
-                            ]),
-                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(chatModelSlots, (slot, slotIndex) => {
-                              return (_openBlock(), _createElementBlock("button", {
-                                key: slot.mode,
-                                type: "button",
-                                onClick: $event => (selectChatModelSlot(slot)),
-                                disabled: !slot.model,
-                                "aria-pressed": modelMode === slot.mode && !!slot.model,
-                                class: _normalizeClass(['relative z-10 flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors', modelMode === slot.mode && slot.model ? 'text-primary-600' : 'text-gray-500', !slot.model ? 'cursor-not-allowed opacity-45' : 'hover:text-primary-600'])
-                              }, [
-                                _createElementVNode("span", _hoisted_152, "槽位 " + _toDisplayString(slotIndex + 1), 1 /* TEXT */),
-                                _createElementVNode("span", {
-                                  class: "min-w-0 flex-1 truncate text-[13px] font-medium",
-                                  title: slot.model
-                                }, _toDisplayString(slot.model || '未配置'), 9 /* TEXT, PROPS */, _hoisted_153),
-                                _cache[45] || (_cache[45] = _createElementVNode("span", {
-                                  class: "w-4 flex-none",
-                                  "aria-hidden": "true"
-                                }, null, -1 /* CACHED */))
-                              ], 10 /* CLASS, PROPS */, _hoisted_151))
-                            }), 128 /* KEYED_FRAGMENT */))
-                          ]),
-                          _createElementVNode("div", _hoisted_154, [
-                            _createElementVNode("div", _hoisted_155, [
-                              _createElementVNode("div", _hoisted_156, [
-                                _cache[46] || (_cache[46] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "推理强度", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_157, _toDisplayString(reasoningEffortLabel), 1 /* TEXT */)
-                              ]),
-                              _withDirectives(_createElementVNode("input", {
-                                "onUpdate:modelValue": $event => ((reasoningEffortSlider) = $event),
-                                type: "range",
-                                min: "0",
-                                max: "5",
-                                step: "1",
-                                class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
-                                "aria-label": "推理强度"
-                              }, null, 8 /* PROPS */, _hoisted_158), [
-                                [
-                                  _vModelText,
-                                  reasoningEffortSlider,
-                                  void 0,
-                                  { number: true }
-                                ]
-                              ])
-                            ]),
-                            _createElementVNode("div", _hoisted_159, [
-                              _createElementVNode("div", _hoisted_160, [
-                                _cache[47] || (_cache[47] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "温度", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_161, _toDisplayString(Number(settings.temperature).toFixed(2)), 1 /* TEXT */)
-                              ]),
-                              _withDirectives(_createElementVNode("input", {
-                                "onUpdate:modelValue": $event => ((slotTemperature) = $event),
-                                type: "range",
-                                min: "0",
-                                max: "1",
-                                step: "0.01",
-                                class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
-                                "aria-label": "温度"
-                              }, null, 8 /* PROPS */, _hoisted_162), [
-                                [
-                                  _vModelText,
-                                  slotTemperature,
-                                  void 0,
-                                  { number: true }
-                                ]
-                              ])
-                            ])
-                          ]),
-                          _createElementVNode("div", _hoisted_163, [
-                            _createElementVNode("label", _hoisted_164, [
-                              _cache[49] || (_cache[49] = _createElementVNode("span", null, "流式输出", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_165, [
-                                _withDirectives(_createElementVNode("input", {
-                                  "onUpdate:modelValue": $event => ((settings.stream) = $event),
-                                  type: "checkbox",
-                                  class: "settings-toggle-input sr-only"
-                                }, null, 8 /* PROPS */, _hoisted_166), [
-                                  [_vModelCheckbox, settings.stream]
-                                ]),
-                                _cache[48] || (_cache[48] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                              ])
-                            ]),
-                            _createElementVNode("label", _hoisted_167, [
-                              _cache[51] || (_cache[51] = _createElementVNode("span", null, "沉浸模式", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_168, [
-                                _withDirectives(_createElementVNode("input", {
-                                  "onUpdate:modelValue": $event => ((settings.immersiveMode) = $event),
-                                  type: "checkbox",
-                                  class: "settings-toggle-input sr-only"
-                                }, null, 8 /* PROPS */, _hoisted_169), [
-                                  [_vModelCheckbox, settings.immersiveMode]
-                                ]),
-                                _cache[50] || (_cache[50] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                              ])
-                            ])
-                          ]),
-                          isGeminiModel
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_170, [
-                                _createElementVNode("label", _hoisted_171, [
-                                  _cache[53] || (_cache[53] = _createElementVNode("span", null, "Gemini抗截断", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_172, [
-                                    _withDirectives(_createElementVNode("input", {
-                                      "onUpdate:modelValue": $event => ((settings.preventTruncation) = $event),
-                                      onChange: $event => ($event.target.checked && (settings.stream = true)),
-                                      type: "checkbox",
-                                      class: "settings-toggle-input sr-only"
-                                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_173), [
-                                      [_vModelCheckbox, settings.preventTruncation]
-                                    ]),
-                                    _cache[52] || (_cache[52] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                                  ])
-                                ]),
-                                _createElementVNode("label", _hoisted_174, [
-                                  _cache[55] || (_cache[55] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_175, [
-                                    _withDirectives(_createElementVNode("input", {
-                                      "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
-                                      type: "checkbox",
-                                      class: "settings-toggle-input sr-only"
-                                    }, null, 8 /* PROPS */, _hoisted_176), [
-                                      [_vModelCheckbox, settings.inputObfuscation]
-                                    ]),
-                                    _cache[54] || (_cache[54] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                                  ])
-                                ])
-                              ]))
-                            : _createCommentVNode("v-if", true)
-                        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_141)
-                      ]))
-                    : _createCommentVNode("v-if", true)
-                ]),
-                _: 1 /* STABLE */
-              }),
-              _withDirectives(_createElementVNode("textarea", {
-                "onUpdate:modelValue": $event => ((userInput) = $event),
-                onInput: autoResizeInput,
-                onFocus: handleChatInputFocus,
-                onBlur: handleChatInputBlur,
-                enterkeyhint: "enter",
-                onKeydown: handleChatInputEnter,
-                placeholder: '输入消息...',
-                class: "island-input chat-input-scrollbar",
-                rows: "1",
-                ref: "inputBox"
-              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_177), [
-                [_vModelText, userInput]
-              ]),
-              _createElementVNode("div", _hoisted_178, [
-                _createElementVNode("div", _hoisted_179, [
-                  _createCommentVNode(" Send Image Button "),
-                  _createElementVNode("button", {
-                    type: "button",
-                    onClick: $event => (requestChatImageSelection($refs.chatImageInput)),
-                    disabled: isConversationBusy,
-                    class: "island-button",
-                    title: `发送图片（${pendingChatImages.length + pendingChatImageReadCount}/3）`
-                  }, [...(_cache[56] || (_cache[56] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94a3 3 0 114.243 4.243L8.552 18.32a1.5 1.5 0 01-2.121-2.121l7.693-7.693"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_180),
-                  _createElementVNode("input", {
-                    ref: "chatImageInput",
-                    type: "file",
-                    accept: "image/*",
-                    multiple: "",
-                    class: "hidden",
-                    onChange: handleChatImageSelection
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_181),
-                  _createCommentVNode(" Auto Image Button "),
-                  _createElementVNode("button", {
-                    onClick: toggleAutoImageGen,
-                    class: _normalizeClass(["island-button", { 'is-active': isAutoImageGenEnabled }]),
-                    "aria-pressed": isAutoImageGenEnabled,
-                    title: "自动生图开关"
-                  }, [...(_cache[57] || (_cache[57] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 10 /* CLASS, PROPS */, _hoisted_182),
-                  _createCommentVNode(" Context Viewer Button "),
-                  _createElementVNode("button", {
-                    onClick: $event => (showContextViewerModal = true),
-                    class: "island-button",
-                    title: "上下文查看器"
-                  }, [...(_cache[58] || (_cache[58] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_183),
-                  _createElementVNode("button", {
-                    onClick: openStoryBranchModal,
-                    class: "island-button",
-                    title: '剧情分支：' + (currentStoryBranch?.name || '主线')
-                  }, [...(_cache[59] || (_cache[59] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("use", { href: "#icon-story-branch" })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_184)
-                ]),
-                _createElementVNode("div", _hoisted_185, [
-                  _createElementVNode("button", {
-                    onClick: _withModifiers($event => (showChatModelSelector = !showChatModelSelector), ["stop"]),
-                    class: _normalizeClass(["island-button", { 'is-active': showChatModelSelector }]),
-                    title: "快捷面板",
-                    "aria-label": "快捷面板",
-                    "aria-controls": "chat-quick-panel",
-                    "aria-expanded": showChatModelSelector
-                  }, [...(_cache[60] || (_cache[60] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24",
-                      "aria-hidden": "true"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M4 6h5m4 0h7M9 4v4M4 12h10m4 0h2m-6-2v4M4 18h3m4 0h9m-13-2v4"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 10 /* CLASS, PROPS */, _hoisted_186),
-                  (!isConversationBusy)
-                    ? (_openBlock(), _createElementBlock("button", {
-                        key: 0,
-                        onClick: sendMessage,
-                        disabled: (!userInput.trim() && pendingChatImages.length === 0 && !pendingCardInteraction) || isRecognizingImages || pendingChatImages.some(image => image.status !== 'ready'),
-                        class: "island-send",
-                        title: "发送"
-                      }, [...(_cache[61] || (_cache[61] = [
-                        _createElementVNode("svg", {
-                          fill: "none",
-                          stroke: "currentColor",
-                          viewBox: "0 0 24 24",
-                          "aria-hidden": "true"
-                        }, [
-                          _createElementVNode("path", {
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            "stroke-width": "2",
-                            d: "M10.268 21a2 2 0 0 0 3.464 0"
-                          }),
-                          _createElementVNode("path", {
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            "stroke-width": "2",
-                            d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
-                          })
-                        ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_187))
-                    : (_openBlock(), _createElementBlock("button", {
-                        key: 1,
-                        onClick: stopGeneration,
-                        class: "island-send island-send--stop",
-                        title: "中止生成"
-                      }, [...(_cache[62] || (_cache[62] = [
-                        _createElementVNode("svg", {
-                          viewBox: "0 0 24 24",
-                          fill: "currentColor",
-                          "aria-hidden": "true"
-                        }, [
-                          _createElementVNode("rect", {
-                            x: "7",
-                            y: "7",
-                            width: "10",
-                            height: "10",
-                            rx: "2.5"
-                          })
-                        ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_188))
+                              _createElementVNode("rect", {
+                                x: "7",
+                                y: "7",
+                                width: "10",
+                                height: "10",
+                                rx: "2.5"
+                              })
+                            ], -1 /* CACHED */)
+                          ]))], 8 /* PROPS */, _hoisted_188))
+                    ])
+                  ])
                 ])
+              ], 512 /* NEED_PATCH */), [
+                [_vShow, !isInputBarHidden && !isAnyMessageEditing]
               ])
+            ], 512 /* NEED_PATCH */)), [
+              [_vShow, currentView === 'chat']
             ])
-          ], 512 /* NEED_PATCH */), [
-            [_vShow, !isInputBarHidden && !isAnyMessageEditing]
-          ])
-        ], 512 /* NEED_PATCH */), [
-          [_vShow, currentView === 'chat']
-        ]),
+          : _createCommentVNode("v-if", true),
         _createCommentVNode(" Characters Management "),
         hasOpenedCharacterManager
           ? _withDirectives((_openBlock(), _createElementBlock("div", {
-              key: 5,
+              key: 6,
               class: _normalizeClass(["management-view", { 'character-management--deck': useCharacterDeck && filteredCharacters.length }]),
               "data-rphub-save-skip": ""
             }, [
@@ -3715,7 +3720,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_229)
                 ]),
                 _createElementVNode("div", _hoisted_230, [
-                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.001 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.002 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -4140,7 +4145,7 @@ return function render(_ctx, _cache) {
         _createCommentVNode(" [rphub 2.8.95] 备份体积分析结果弹窗：toast 是单行胶囊，表格只能放这里 "),
         (showBackupSizeModal && backupSizeReport)
           ? (_openBlock(), _createElementBlock("div", {
-              key: 12,
+              key: 13,
               role: "dialog",
               "aria-modal": "true",
               "aria-label": "备份体积分析",
@@ -4411,7 +4416,7 @@ return function render(_ctx, _cache) {
         _createCommentVNode(" Settings View "),
         (currentView === 'settings-detail')
           ? (_openBlock(), _createElementBlock("div", {
-              key: 14,
+              key: 15,
               class: "management-view settings-view shell-settings-detail",
               "data-section": settingsSection
             }, [
@@ -7302,7 +7307,7 @@ return function render(_ctx, _cache) {
         _createCommentVNode(" World Info View "),
         (currentView === 'worldinfo')
           ? (_openBlock(), _createElementBlock("div", {
-              key: 19,
+              key: 20,
               ref: "worldInfoViewport",
               class: "management-view worldinfo-view",
               onScrollPassive: $event => (worldInfoScrolled = $event.target.scrollTop > 300)
@@ -8750,7 +8755,10 @@ const _hoisted_7 = ["onClick"]
 const _hoisted_8 = ["aria-label"]
 const _hoisted_9 = ["aria-pressed", "onClick"]
 const _hoisted_10 = ["aria-pressed", "onClick"]
-const _hoisted_11 = { class: "chat-view-root flex flex-col h-full relative" }
+const _hoisted_11 = {
+  key: 1,
+  class: "chat-view-root flex flex-col h-full relative"
+}
 const _hoisted_12 = ["onClick"]
 const _hoisted_13 = {
   key: 0,
@@ -9135,19 +9143,19 @@ const _hoisted_217 = {
 }
 const _hoisted_218 = ["onClick"]
 const _hoisted_219 = {
-  key: 2,
-  class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
-}
-const _hoisted_220 = {
   key: 3,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
-const _hoisted_221 = {
+const _hoisted_220 = {
   key: 4,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
-const _hoisted_222 = {
+const _hoisted_221 = {
   key: 5,
+  class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
+}
+const _hoisted_222 = {
+  key: 6,
   class: "management-view"
 }
 const _hoisted_223 = { class: "max-w-3xl mx-auto" }
@@ -9157,7 +9165,7 @@ const _hoisted_226 = { class: "classic-local-links" }
 const _hoisted_227 = ["onClick"]
 const _hoisted_228 = ["onClick"]
 const _hoisted_229 = {
-  key: 6,
+  key: 7,
   class: "management-view"
 }
 const _hoisted_230 = { class: "max-w-3xl mx-auto" }
@@ -9279,12 +9287,12 @@ const _hoisted_315 = ["onClick"]
 const _hoisted_316 = { class: "px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500" }
 const _hoisted_317 = ["onClick"]
 const _hoisted_318 = {
-  key: 7,
+  key: 8,
   class: "h-full overflow-hidden flex flex-col bg-gray-50 relative"
 }
 const _hoisted_319 = ["onClick"]
 const _hoisted_320 = {
-  key: 8,
+  key: 9,
   class: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
 }
 const _hoisted_321 = { class: "bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100" }
@@ -9356,7 +9364,7 @@ const _hoisted_362 = { class: "px-5 py-3 border-t border-gray-100 bg-gray-50 fle
 const _hoisted_363 = { class: "truncate" }
 const _hoisted_364 = ["onClick"]
 const _hoisted_365 = {
-  key: 9,
+  key: 10,
   class: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
 }
 const _hoisted_366 = { class: "bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100" }
@@ -9398,7 +9406,7 @@ const _hoisted_389 = { class: "flex items-center gap-2" }
 const _hoisted_390 = ["onClick"]
 const _hoisted_391 = ["onClick"]
 const _hoisted_392 = {
-  key: 10,
+  key: 11,
   class: "management-view settings-view"
 }
 const _hoisted_393 = { class: "settings-stack" }
@@ -9678,7 +9686,7 @@ const _hoisted_594 = {
 const _hoisted_595 = { class: "settings-card" }
 const _hoisted_596 = ["onClick"]
 const _hoisted_597 = {
-  key: 11,
+  key: 12,
   class: "management-view"
 }
 const _hoisted_598 = ["onClick"]
@@ -9780,7 +9788,7 @@ const _hoisted_664 = { class: "flex gap-2.5 pt-2 border-t border-gray-100 dark:b
 const _hoisted_665 = ["onClick"]
 const _hoisted_666 = ["onClick"]
 const _hoisted_667 = {
-  key: 12,
+  key: 13,
   class: "management-view"
 }
 const _hoisted_668 = ["onClick"]
@@ -9806,7 +9814,7 @@ const _hoisted_681 = { class: "sortable-item-buttons" }
 const _hoisted_682 = ["onClick"]
 const _hoisted_683 = ["onClick"]
 const _hoisted_684 = {
-  key: 13,
+  key: 14,
   class: "management-view"
 }
 const _hoisted_685 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
@@ -9841,7 +9849,7 @@ const _hoisted_703 = ["onUpdate:modelValue", "onChange"]
 const _hoisted_704 = { class: "sortable-item-buttons" }
 const _hoisted_705 = ["onClick"]
 const _hoisted_706 = {
-  key: 14,
+  key: 15,
   class: "management-view"
 }
 const _hoisted_707 = {
@@ -10311,7 +10319,7 @@ const _hoisted_1015 = {
   class: "text-xs text-gray-400"
 }
 const _hoisted_1016 = {
-  key: 17,
+  key: 18,
   class: "management-view shell-settings-detail"
 }
 const _hoisted_1017 = ["onClick"]
@@ -10780,55 +10788,98 @@ return function render(_ctx, _cache) {
             ]))
           : _createCommentVNode("v-if", true),
         _createCommentVNode(" Chat View "),
-        _withDirectives(_createElementVNode("div", _hoisted_11, [
-          _createCommentVNode(" Character Background Layer "),
-          (settings.useCharacterBackground && currentCharacter?.avatar)
-            ? (_openBlock(), _createElementBlock("div", {
-                key: 0,
-                class: "absolute -inset-4 bg-cover bg-center bg-no-repeat pointer-events-none transition-opacity duration-500 z-0 blur-[2px] char-bg-blur",
-                style: _normalizeStyle({ backgroundImage: `url(${JSON.stringify(currentCharacterAvatar)})`, opacity: 0.9 })
-              }, null, 4 /* STYLE */))
-            : _createCommentVNode("v-if", true),
-          _createCommentVNode(" Blur Overlay for Description Panel "),
-          _createVNode(_Transition, { name: "fade" }, {
-            default: _withCtx(() => [
-              showDescriptionPanel
+        hasOpenedChat
+          ? _withDirectives((_openBlock(), _createElementBlock("div", _hoisted_11, [
+              _createCommentVNode(" Character Background Layer "),
+              (settings.useCharacterBackground && currentCharacter?.avatar)
                 ? (_openBlock(), _createElementBlock("div", {
                     key: 0,
-                    onClick: $event => (showDescriptionPanel = false),
-                    class: "absolute inset-0 bg-black/5 z-[35] transition-opacity duration-300 desc-panel-overlay"
-                  }, null, 8 /* PROPS */, _hoisted_12))
-                : _createCommentVNode("v-if", true)
-            ]),
-            _: 1 /* STABLE */
-          }),
-          _createCommentVNode(" Character Description Panel "),
-          _createVNode(_Transition, { name: "dropdown" }, {
-            default: _withCtx(() => [
-              (showDescriptionPanel && currentCharacter)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_13, [
-                    _createElementVNode("div", _hoisted_14, [
-                      _createElementVNode("button", {
-                        type: "button",
-                        onClick: $event => (editCharacter(currentCharacterIndex)),
-                        class: "group flex-shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300",
-                        title: "编辑角色"
-                      }, [
-                        _createElementVNode("img", {
-                          src: currentCharacterAvatar,
-                          class: "w-14 h-14 rounded-xl object-cover border border-white shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
-                        }, null, 8 /* PROPS */, _hoisted_16)
-                      ], 8 /* PROPS */, _hoisted_15),
-                      _createElementVNode("div", _hoisted_17, [
-                        _createElementVNode("div", _hoisted_18, [
-                          _createElementVNode("h3", _hoisted_19, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                    class: "absolute -inset-4 bg-cover bg-center bg-no-repeat pointer-events-none transition-opacity duration-500 z-0 blur-[2px] char-bg-blur",
+                    style: _normalizeStyle({ backgroundImage: `url(${JSON.stringify(currentCharacterAvatar)})`, opacity: 0.9 })
+                  }, null, 4 /* STYLE */))
+                : _createCommentVNode("v-if", true),
+              _createCommentVNode(" Blur Overlay for Description Panel "),
+              _createVNode(_Transition, { name: "fade" }, {
+                default: _withCtx(() => [
+                  showDescriptionPanel
+                    ? (_openBlock(), _createElementBlock("div", {
+                        key: 0,
+                        onClick: $event => (showDescriptionPanel = false),
+                        class: "absolute inset-0 bg-black/5 z-[35] transition-opacity duration-300 desc-panel-overlay"
+                      }, null, 8 /* PROPS */, _hoisted_12))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                _: 1 /* STABLE */
+              }),
+              _createCommentVNode(" Character Description Panel "),
+              _createVNode(_Transition, { name: "dropdown" }, {
+                default: _withCtx(() => [
+                  (showDescriptionPanel && currentCharacter)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_13, [
+                        _createElementVNode("div", _hoisted_14, [
                           _createElementVNode("button", {
+                            type: "button",
                             onClick: $event => (editCharacter(currentCharacterIndex)),
-                            class: "p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors flex-shrink-0",
+                            class: "group flex-shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300",
                             title: "编辑角色"
-                          }, [...(_cache[1] || (_cache[1] = [
+                          }, [
+                            _createElementVNode("img", {
+                              src: currentCharacterAvatar,
+                              class: "w-14 h-14 rounded-xl object-cover border border-white shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
+                            }, null, 8 /* PROPS */, _hoisted_16)
+                          ], 8 /* PROPS */, _hoisted_15),
+                          _createElementVNode("div", _hoisted_17, [
+                            _createElementVNode("div", _hoisted_18, [
+                              _createElementVNode("h3", _hoisted_19, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                              _createElementVNode("button", {
+                                onClick: $event => (editCharacter(currentCharacterIndex)),
+                                class: "p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors flex-shrink-0",
+                                title: "编辑角色"
+                              }, [...(_cache[1] || (_cache[1] = [
+                                _createElementVNode("svg", {
+                                  class: "w-3.5 h-3.5",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2",
+                                    d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_20)
+                            ]),
+                            _createElementVNode("div", _hoisted_21, [
+                              _createElementVNode("span", _hoisted_22, [
+                                _createElementVNode("span", _hoisted_23, _toDisplayString(chatRoundStats.floors), 1 /* TEXT */),
+                                _cache[2] || (_cache[2] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "楼", -1 /* CACHED */))
+                              ]),
+                              _cache[6] || (_cache[6] = _createElementVNode("span", { class: "h-3 w-px rounded-full bg-gray-200" }, null, -1 /* CACHED */)),
+                              _createElementVNode("span", _hoisted_24, [
+                                _createElementVNode("span", _hoisted_25, _toDisplayString(Number(conversationBodyLength || 0).toLocaleString()), 1 /* TEXT */),
+                                _cache[5] || (_cache[5] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */)),
+                                (memorySettings.enabled)
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_26, [
+                                      _cache[3] || (_cache[3] = _createElementVNode("span", {
+                                        class: "text-gray-700",
+                                        "aria-hidden": "true"
+                                      }, "→", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_27, _toDisplayString(Number(summaryCompressedBodyLength || 0).toLocaleString()), 1 /* TEXT */),
+                                      _cache[4] || (_cache[4] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */))
+                                    ]))
+                                  : _createCommentVNode("v-if", true)
+                              ])
+                            ])
+                          ]),
+                          _createElementVNode("button", {
+                            onClick: $event => (showDescriptionPanel = false),
+                            class: "absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all z-20 desc-close-btn",
+                            title: "关闭"
+                          }, [...(_cache[7] || (_cache[7] = [
                             _createElementVNode("svg", {
-                              class: "w-3.5 h-3.5",
+                              class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
                               viewBox: "0 0 24 24"
@@ -10837,38 +10888,1227 @@ return function render(_ctx, _cache) {
                                 "stroke-linecap": "round",
                                 "stroke-linejoin": "round",
                                 "stroke-width": "2",
-                                d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                d: "M6 18L18 6M6 6l12 12"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_20)
+                          ]))], 8 /* PROPS */, _hoisted_28)
                         ]),
-                        _createElementVNode("div", _hoisted_21, [
-                          _createElementVNode("span", _hoisted_22, [
-                            _createElementVNode("span", _hoisted_23, _toDisplayString(chatRoundStats.floors), 1 /* TEXT */),
-                            _cache[2] || (_cache[2] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "楼", -1 /* CACHED */))
-                          ]),
-                          _cache[6] || (_cache[6] = _createElementVNode("span", { class: "h-3 w-px rounded-full bg-gray-200" }, null, -1 /* CACHED */)),
-                          _createElementVNode("span", _hoisted_24, [
-                            _createElementVNode("span", _hoisted_25, _toDisplayString(Number(conversationBodyLength || 0).toLocaleString()), 1 /* TEXT */),
-                            _cache[5] || (_cache[5] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */)),
-                            (memorySettings.enabled)
-                              ? (_openBlock(), _createElementBlock("span", _hoisted_26, [
-                                  _cache[3] || (_cache[3] = _createElementVNode("span", {
-                                    class: "text-gray-700",
-                                    "aria-hidden": "true"
-                                  }, "→", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_27, _toDisplayString(Number(summaryCompressedBodyLength || 0).toLocaleString()), 1 /* TEXT */),
-                                  _cache[4] || (_cache[4] = _createElementVNode("span", { class: "desc-panel-stat-unit" }, "字", -1 /* CACHED */))
+                        _createElementVNode("div", _hoisted_29, [
+                          _cache[9] || (_cache[9] = _createElementVNode("div", { class: "mb-2 flex items-center justify-between px-0.5" }, [
+                            _createElementVNode("div", { class: "flex items-center gap-2 text-[11px] font-bold text-gray-400" }, [
+                              _createElementVNode("svg", {
+                                class: "w-4 h-4 text-gray-400",
+                                fill: "none",
+                                stroke: "currentColor",
+                                viewBox: "0 0 24 24"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2",
+                                  d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                })
+                              ]),
+                              _createTextVNode(" 角色卡简介 ")
+                            ])
+                          ], -1 /* CACHED */)),
+                          _createElementVNode("div", _hoisted_30, [
+                            (currentCharacter.description)
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_31, [
+                                  _createElementVNode("div", {
+                                    class: "text-sm text-gray-700 leading-relaxed font-normal font-sans markdown-body",
+                                    innerHTML: renderMarkdown(currentCharacter.description, 'assistant', true)
+                                  }, null, 8 /* PROPS */, _hoisted_32)
                                 ]))
-                              : _createCommentVNode("v-if", true)
+                              : (_openBlock(), _createElementBlock("div", _hoisted_33, [...(_cache[8] || (_cache[8] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-8 h-8 mb-2 opacity-50",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-linejoin": "round",
+                                      "stroke-width": "1.5",
+                                      d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    })
+                                  ], -1 /* CACHED */),
+                                  _createTextVNode(" 暂无描述信息 ", -1 /* CACHED */)
+                                ]))]))
                           ])
                         ])
-                      ]),
+                      ]))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                _: 1 /* STABLE */
+              }),
+              _createCommentVNode(" Chat Header "),
+              _createElementVNode("div", _hoisted_34, [
+                _withDirectives(_createElementVNode("div", _hoisted_35, null, 512 /* NEED_PATCH */), [
+                  [_vShow, !isInputBarHidden]
+                ]),
+                _createCommentVNode(" 实际内容容器 "),
+                _createElementVNode("div", _hoisted_36, [
+                  _createElementVNode("div", {
+                    style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
+                    class: "flex items-center min-w-0"
+                  }, [
+                    (!isChatFullscreen)
+                      ? (_openBlock(), _createElementBlock("button", {
+                          key: 0,
+                          onClick: toggleNavigation,
+                          class: "app-nav-trigger app-nav-trigger--chat",
+                          "aria-label": "打开导航",
+                          "aria-haspopup": "dialog",
+                          "aria-controls": "app-navigation-panel"
+                        }, [...(_cache[10] || (_cache[10] = [
+                          _createElementVNode("svg", {
+                            class: "w-6 h-6",
+                            fill: "none",
+                            stroke: "currentColor"
+                          }, [
+                            _createElementVNode("use", { href: "#icon-menu" })
+                          ], -1 /* CACHED */)
+                        ]))], 8 /* PROPS */, _hoisted_37))
+                      : _createCommentVNode("v-if", true),
+                    currentCharacter
+                      ? (_openBlock(), _createElementBlock("div", {
+                          key: 1,
+                          class: "flex items-center min-w-0 cursor-pointer",
+                          onClick: $event => (showDescriptionPanel = !showDescriptionPanel)
+                        }, [
+                          _createElementVNode("img", {
+                            src: currentCharacterAvatar,
+                            class: "w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm flex-shrink-0"
+                          }, null, 8 /* PROPS */, _hoisted_39),
+                          _createElementVNode("span", _hoisted_40, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                          _createElementVNode("button", {
+                            class: _normalizeClass(["ml-1 p-1.5 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-all flex-shrink-0", {'bg-white/20 text-white': showDescriptionPanel}])
+                          }, [
+                            (_openBlock(), _createElementBlock("svg", {
+                              class: _normalizeClass(["desc-panel-chevron w-4 h-4", {'rotate-180': showDescriptionPanel}]),
+                              fill: "none",
+                              stroke: "currentColor",
+                              viewBox: "0 0 24 24"
+                            }, [...(_cache[11] || (_cache[11] = [
+                              _createElementVNode("path", {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M19 9l-7 7-7-7"
+                              }, null, -1 /* CACHED */)
+                            ]))], 2 /* CLASS */))
+                          ], 2 /* CLASS */)
+                        ], 8 /* PROPS */, _hoisted_38))
+                      : (_openBlock(), _createElementBlock("div", _hoisted_41, "未选择角色卡"))
+                  ], 4 /* STYLE */),
+                  _createElementVNode("div", _hoisted_42, [
+                    _createElementVNode("button", {
+                      onClick: toggleInputBarVisibility,
+                      class: _normalizeClass(["chat-header-button", isInputBarHidden ? 'rphub-zen-toggle--on' : '']),
+                      title: isInputBarHidden ? '显示输入栏' : '隐藏输入栏'
+                    }, [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_44, [
+                        isInputBarHidden
+                          ? (_openBlock(), _createElementBlock("path", _hoisted_45))
+                          : _createCommentVNode("v-if", true),
+                        isInputBarHidden
+                          ? (_openBlock(), _createElementBlock("path", _hoisted_46))
+                          : (_openBlock(), _createElementBlock("path", _hoisted_47))
+                      ]))
+                    ], 10 /* CLASS, PROPS */, _hoisted_43),
+                    _createElementVNode("button", {
+                      onClick: clearChat,
+                      class: "chat-header-button chat-header-button--danger",
+                      style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
+                      title: "清空聊天"
+                    }, [...(_cache[12] || (_cache[12] = [
+                      _createElementVNode("svg", {
+                        class: "w-5 h-5",
+                        fill: "none",
+                        stroke: "currentColor"
+                      }, [
+                        _createElementVNode("use", { href: "#icon-delete" })
+                      ], -1 /* CACHED */)
+                    ]))], 12 /* STYLE, PROPS */, _hoisted_48)
+                  ])
+                ])
+              ]),
+              _createCommentVNode(" Chat Messages "),
+              _createElementVNode("div", {
+                ref: "chatContainer",
+                onClick: $event => (showChatModelSelector = false),
+                onScroll: handleChatScroll,
+                class: _normalizeClass(["flex-1 overflow-y-auto overflow-x-hidden px-2 pt-14 md:pt-16 pb-52 md:pb-60 relative z-0 space-y-12 md:space-y-14", !settings.useCharacterBackground || !currentCharacter?.avatar ? 'chat-ambient' : '']),
+                style: _normalizeStyle(isAnyMessageEditing ? { paddingBottom: 'max(13rem, calc(var(--keyboard-inset, 0px) + 24px))' } : (isInputBarHidden ? { paddingTop: '44px', paddingBottom: '16px' } : null))
+              }, [
+                (!currentCharacter)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_50, [
+                      _cache[13] || (_cache[13] = _createElementVNode("div", { class: "chat-empty__icon" }, [
+                        _createElementVNode("svg", {
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
+                        }, [
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          })
+                        ])
+                      ], -1 /* CACHED */)),
+                      _cache[14] || (_cache[14] = _createElementVNode("p", { class: "chat-empty__title" }, "请先选择或创建一个角色卡", -1 /* CACHED */)),
                       _createElementVNode("button", {
-                        onClick: $event => (showDescriptionPanel = false),
-                        class: "absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all z-20 desc-close-btn",
-                        title: "关闭"
-                      }, [...(_cache[7] || (_cache[7] = [
+                        onClick: $event => (currentView = 'characters'),
+                        class: "modal-primary-button"
+                      }, "前往角色管理", 8 /* PROPS */, _hoisted_51)
+                    ]))
+                  : (chatHistory.length === 0)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_52, [
+                        _createElementVNode("img", {
+                          src: currentCharacterAvatar,
+                          class: "chat-empty__avatar",
+                          alt: ""
+                        }, null, 8 /* PROPS */, _hoisted_53),
+                        _createElementVNode("p", _hoisted_54, "开始与 " + _toDisplayString(currentCharacter.name) + " 对话吧", 1 /* TEXT */)
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                (currentCharacter && chatHistory.length > 0)
+                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
+                      return _withDirectives((_openBlock(), _createElementBlock("div", {
+                        key: index,
+                        ref_for: true,
+                        ref: "messageElements",
+                        "data-role": msg.role,
+                        "data-chat-index": index,
+                        class: _normalizeClass(['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]),
+                        style: _normalizeStyle({ transitionDelay: (displayIndex % 5) * 50 + 'ms' })
+                      }, [
+                        _createElementVNode("div", {
+                          class: _normalizeClass(['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row'])
+                        }, [
+                          _createCommentVNode(" Avatar "),
+                          _withDirectives(_createElementVNode("div", {
+                            class: _normalizeClass(['flex-shrink-0 select-none', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
+                          }, [
+                            (msg.role === 'user')
+                              ? (_openBlock(), _createElementBlock("div", {
+                                  key: 0,
+                                  class: _normalizeClass(['msg-avatar w-9 h-9 rounded-full overflow-hidden', msg.isSelf ? 'ml-2' : 'mr-2'])
+                                }, [
+                                  (msg.avatar || (msg.isSelf && user.avatar))
+                                    ? (_openBlock(), _createElementBlock("img", {
+                                        key: 0,
+                                        src: msg.avatar || user.avatar,
+                                        class: "w-full h-full object-cover"
+                                      }, null, 8 /* PROPS */, _hoisted_56))
+                                    : (!msg.isSelf && user.avatar)
+                                      ? (_openBlock(), _createElementBlock("img", {
+                                          key: 1,
+                                          src: user.avatar,
+                                          class: "w-full h-full object-cover",
+                                          title: "Fallback to user avatar for legacy messages"
+                                        }, null, 8 /* PROPS */, _hoisted_57))
+                                      : (_openBlock(), _createElementBlock("div", _hoisted_58, _toDisplayString((msg.name || user.name || 'U').charAt(0)), 1 /* TEXT */))
+                                ], 2 /* CLASS */))
+                              : (_openBlock(), _createElementBlock("img", {
+                                  key: 1,
+                                  src: currentCharacterAvatar,
+                                  class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
+                                }, null, 8 /* PROPS */, _hoisted_59))
+                          ], 2 /* CLASS */), [
+                            [_vShow, !settings.immersiveMode]
+                          ]),
+                          _createElementVNode("div", {
+                            class: _normalizeClass(['flex flex-col min-w-0', settings.immersiveMode ? 'immersive-message-column' : '', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'flex-1 w-full' : '', msg.isSelf ? 'items-end' : 'items-start'])
+                          }, [
+                            _createCommentVNode(" Name (Outside Bubble) "),
+                            _withDirectives(_createElementVNode("div", {
+                              class: _normalizeClass(['msg-name-tag truncate max-w-[210px] md:max-w-[250px]', msg.isSelf ? 'ml-auto mr-1' : 'mr-auto ml-1', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
+                            }, _toDisplayString(msg.name || (msg.role === 'user' ? user.name : (currentCharacter.name || 'Unknown'))), 3 /* TEXT, CLASS */), [
+                              [_vShow, !settings.immersiveMode]
+                            ]),
+                            _createCommentVNode(" Message Bubble "),
+                            _createElementVNode("div", {
+                              class: _normalizeClass(["group relative min-w-0 max-w-full", {'w-full': messageUsesWideLayout(msg) || msg.isEditing_Message, 'message-edit-group': msg.isEditing_Message}])
+                            }, [
+                              _createElementVNode("div", {
+                                onClick: $event => (handleGeneratedImageReroll($event, index)),
+                                class: _normalizeClass(['msg-bubble-glass p-0 text-sm md:text-base leading-relaxed overflow-hidden',
+                                        msg.shouldAnimate && !(msg.role === 'assistant' && msg.reasoning) ? (msg.role === 'system' ? 'animate-bubble-swap' : 'animate-message-in') : '',
+                                        messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '',
+                                        msg.isSelf ? 'msg-bubble--self' : msg.role === 'system' ? 'msg-bubble--system' : ''])
+                              }, [
+                                (msg.isEditing_Message)
+                                  ? (_openBlock(), _createElementBlock("div", _hoisted_61, [
+                                      _withDirectives(_createElementVNode("textarea", {
+                                        "onUpdate:modelValue": $event => ((msg.editMessageContent) = $event),
+                                        onFocus: keepEditBlockVisible,
+                                        style: _normalizeStyle({ height: (msg.editMessageHeight || 160) + 'px' }),
+                                        class: "w-full min-h-[88px] max-h-[70vh] p-3 text-sm text-gray-700 bg-white/50 backdrop-blur-md rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:bg-white transition-all shadow-inner resize-y custom-scrollbar",
+                                        placeholder: "编辑消息..."
+                                      }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_62), [
+                                        [_vModelText, msg.editMessageContent]
+                                      ]),
+                                      _createElementVNode("div", _hoisted_63, [
+                                        _createElementVNode("button", {
+                                          onClick: $event => (cancelEditMessage(index)),
+                                          class: "px-4 py-1.5 text-xs font-bold text-gray-500 bg-white/80 hover:bg-white border border-gray-200 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
+                                        }, " 取消 ", 8 /* PROPS */, _hoisted_64),
+                                        _createElementVNode("button", {
+                                          onClick: $event => (saveEditMessage(index)),
+                                          class: "px-4 py-1.5 text-xs font-bold text-white bg-primary-500 hover:bg-primary-600 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        }, " 保存 ", 8 /* PROPS */, _hoisted_65)
+                                      ])
+                                    ]))
+                                  : (msg.isTriggered && !msg.showRaw)
+                                    ? (_openBlock(), _createElementBlock("div", {
+                                        key: 1,
+                                        onClick: $event => (msg.showRaw = true),
+                                        class: "px-4 py-3 flex items-center space-x-2 text-primary-800/80 select-none cursor-pointer hover:bg-primary-50 transition-colors",
+                                        title: msg.content
+                                      }, [...(_cache[15] || (_cache[15] = [
+                                        _createElementVNode("svg", {
+                                          class: "w-5 h-5 animate-pulse",
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24"
+                                        }, [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M13 10V3L4 14h7v7l9-11h-7z"
+                                          })
+                                        ], -1 /* CACHED */),
+                                        _createElementVNode("span", { class: "font-bold text-sm" }, [
+                                          _createTextVNode("触发了卡片交互 "),
+                                          _createElementVNode("span", { class: "text-[10px] opacity-60 ml-1" })
+                                        ], -1 /* CACHED */)
+                                      ]))], 8 /* PROPS */, _hoisted_66))
+                                    : (msg.isTriggered && msg.showRaw)
+                                      ? (_openBlock(), _createElementBlock("div", {
+                                          key: 2,
+                                          onClick: $event => (msg.showRaw = false),
+                                          class: "cursor-pointer hover:opacity-80 transition-opacity",
+                                          title: "点击收起"
+                                        }, [
+                                          _createElementVNode("div", {
+                                            class: "markdown-body",
+                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                            innerHTML: renderMarkdown(msg.content, msg.role)
+                                          }, null, 12 /* STYLE, PROPS */, _hoisted_68)
+                                        ], 8 /* PROPS */, _hoisted_67))
+                                      : (_openBlock(), _createElementBlock("div", {
+                                          key: 3,
+                                          class: _normalizeClass(["message-content-wrapper", {'w-full': messageUsesWideLayout(msg), 'has-user-images': msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length}]),
+                                          onClick: openMemoryCitation
+                                        }, [
+                                          (msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length)
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 0,
+                                                class: _normalizeClass(['grid gap-1.5 p-1', msg.imageAttachments.length === 1 ? 'grid-cols-1 w-fit' : 'grid-cols-2 w-[min(24rem,78vw)]'])
+                                              }, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.imageAttachments, (image, imageIndex) => {
+                                                  return (_openBlock(), _createElementBlock("img", {
+                                                    key: `${index}-image-${imageIndex}`,
+                                                    src: image.dataUrl,
+                                                    class: _normalizeClass(['block rounded-xl bg-white', msg.imageAttachments.length === 1 ? 'justify-self-start w-auto max-w-[min(24rem,78vw)] h-auto max-h-[26rem] object-contain' : ('w-full ' + (msg.imageAttachments.length === 3 && imageIndex === 0 ? 'col-span-2 h-48 object-cover' : 'h-36 object-cover'))]),
+                                                    alt: `用户发送的图片 ${imageIndex + 1}`
+                                                  }, null, 10 /* CLASS, PROPS */, _hoisted_70))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ], 2 /* CLASS */))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Unified Summary Timeline Part "),
+                                          (hasThinkingOrTools(msg))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_71, [
+                                                _createElementVNode("div", {
+                                                  class: _normalizeClass(["cot-ui native-thinking-card summary-timeline-card", { 'is-live': isMessageThinkingOrRunning(msg), 'is-open': isThinkingSummaryOpen(msg) }])
+                                                }, [
+                                                  _createElementVNode("button", {
+                                                    type: "button",
+                                                    class: "cot-header native-thinking-header justify-between",
+                                                    onClick: $event => (toggleThinkingSummary(msg))
+                                                  }, [
+                                                    _createElementVNode("div", _hoisted_73, [
+                                                      (isMessageThinkingOrRunning(msg))
+                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_74, [...(_cache[16] || (_cache[16] = [
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */),
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */),
+                                                            _createElementVNode("i", null, null, -1 /* CACHED */)
+                                                          ]))]))
+                                                        : (_openBlock(), _createElementBlock("svg", _hoisted_75, [...(_cache[17] || (_cache[17] = [
+                                                            _createElementVNode("path", {
+                                                              "stroke-linecap": "round",
+                                                              "stroke-linejoin": "round",
+                                                              "stroke-width": "2",
+                                                              d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5M9 18h6M10 22h4"
+                                                            }, null, -1 /* CACHED */)
+                                                          ]))])),
+                                                      _cache[18] || (_cache[18] = _createElementVNode("span", { class: "text-sm font-bold truncate" }, "Thinking", -1 /* CACHED */))
+                                                    ]),
+                                                    _cache[19] || (_cache[19] = _createElementVNode("svg", {
+                                                      class: "w-3.5 h-3.5 ml-2 opacity-60 chevron",
+                                                      fill: "none",
+                                                      stroke: "currentColor",
+                                                      viewBox: "0 0 24 24"
+                                                    }, [
+                                                      _createElementVNode("path", {
+                                                        "stroke-linecap": "round",
+                                                        "stroke-linejoin": "round",
+                                                        "stroke-width": "2",
+                                                        d: "M19 9l-7 7-7-7"
+                                                      })
+                                                    ], -1 /* CACHED */))
+                                                  ], 8 /* PROPS */, _hoisted_72),
+                                                  _createElementVNode("div", {
+                                                    class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
+                                                  }, [
+                                                    _createElementVNode("div", _hoisted_76, [
+                                                      _createElementVNode("div", _hoisted_77, [
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: step.id,
+                                                            class: "relative group/step"
+                                                          }, [
+                                                            _createCommentVNode(" Marker Node "),
+                                                            _createElementVNode("div", _hoisted_78, [
+                                                              _createElementVNode("div", {
+                                                                class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
+                                                              }, null, 2 /* CLASS */)
+                                                            ]),
+                                                            _createCommentVNode(" Content Box "),
+                                                            _createElementVNode("div", _hoisted_79, [
+                                                              (step.isReason)
+                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_80, _toDisplayString(step.title), 1 /* TEXT */))
+                                                                : (_openBlock(), _createElementBlock("details", {
+                                                                    key: 1,
+                                                                    class: "group/detail",
+                                                                    onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
+                                                                  }, [
+                                                                    _createElementVNode("summary", _hoisted_82, [
+                                                                      _createElementVNode("div", _hoisted_83, [
+                                                                        _createElementVNode("span", _hoisted_84, [
+                                                                          _createElementVNode("span", _hoisted_85, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                          (step.type === 'thinking')
+                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_86, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                            : _createCommentVNode("v-if", true),
+                                                                          (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
+                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_87, [
+                                                                                _createElementVNode("span", _hoisted_88, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                                (step.type === 'thinking')
+                                                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_89, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                  : _createCommentVNode("v-if", true)
+                                                                              ]))
+                                                                            : _createCommentVNode("v-if", true)
+                                                                        ]),
+                                                                        (step.status === 'done')
+                                                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_90, [...(_cache[20] || (_cache[20] = [
+                                                                              _createElementVNode("path", {
+                                                                                "stroke-linecap": "round",
+                                                                                "stroke-linejoin": "round",
+                                                                                "stroke-width": "3",
+                                                                                d: "M5 13l4 4L19 7"
+                                                                              }, null, -1 /* CACHED */)
+                                                                            ]))]))
+                                                                          : _createCommentVNode("v-if", true),
+                                                                        (step.status === 'error')
+                                                                          ? (_openBlock(), _createElementBlock("span", _hoisted_91, "失败"))
+                                                                          : _createCommentVNode("v-if", true)
+                                                                      ]),
+                                                                      _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
+                                                                        _createTextVNode(" 详情 "),
+                                                                        _createElementVNode("svg", {
+                                                                          class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
+                                                                          fill: "none",
+                                                                          stroke: "currentColor",
+                                                                          viewBox: "0 0 24 24"
+                                                                        }, [
+                                                                          _createElementVNode("path", {
+                                                                            "stroke-linecap": "round",
+                                                                            "stroke-linejoin": "round",
+                                                                            "stroke-width": "2",
+                                                                            d: "M19 9l-7 7-7-7"
+                                                                          })
+                                                                        ])
+                                                                      ], -1 /* CACHED */))
+                                                                    ]),
+                                                                    _createElementVNode("div", {
+                                                                      class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
+                                                                    }, [
+                                                                      (step.type === 'thinking')
+                                                                        ? (_openBlock(), _createElementBlock("div", {
+                                                                            key: 0,
+                                                                            class: "markdown-body",
+                                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
+                                                                            innerHTML: renderMarkdown(step.text, 'assistant', true, false)
+                                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_92))
+                                                                        : (_openBlock(), _createElementBlock("div", _hoisted_93, [
+                                                                            _createElementVNode("div", _hoisted_94, [
+                                                                              _createElementVNode("span", null, [
+                                                                                _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
+                                                                                _createElementVNode("code", _hoisted_95, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
+                                                                              ]),
+                                                                              _createElementVNode("span", _hoisted_96, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
+                                                                            ]),
+                                                                            _createElementVNode("div", _hoisted_97, [
+                                                                              _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
+                                                                              _createElementVNode("pre", _hoisted_98, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
+                                                                            ]),
+                                                                            (step.toolCall.error)
+                                                                              ? (_openBlock(), _createElementBlock("div", _hoisted_99, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
+                                                                              : (step.toolCall.resultText)
+                                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_100, [
+                                                                                    _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
+                                                                                    _createElementVNode("pre", _hoisted_101, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
+                                                                                  ]))
+                                                                                : _createCommentVNode("v-if", true)
+                                                                          ]))
+                                                                    ], 2 /* CLASS */)
+                                                                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_81))
+                                                            ])
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ])
+                                                    ])
+                                                  ], 2 /* CLASS */)
+                                                ], 2 /* CLASS */)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Active Tool Calls "),
+                                          (msg.role === 'assistant' && activeToolContinuationMessageId === msg.id && isGenerating && !activeToolContinuationHasResponse && !isThinking)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_102, [
+                                                _cache[25] || (_cache[25] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
+                                                  _createElementVNode("span"),
+                                                  _createElementVNode("span"),
+                                                  _createElementVNode("span")
+                                                ], -1 /* CACHED */)),
+                                                isGenerating
+                                                  ? (_openBlock(), _createBlock(_component_generation_timer, {
+                                                      key: 0,
+                                                      "wait-time": currentWaitTime,
+                                                      "estimated-time": estimatedGenerationTime
+                                                    }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
+                                                  : _createCommentVNode("v-if", true)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.top && msg.uiTemplateBlocks.top.length)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_103, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
+                                                  return (_openBlock(), _createElementBlock("div", {
+                                                    key: 'msg-ui-top-' + index + '-' + tIndex,
+                                                    class: "w-full ui-template-render",
+                                                    onClick: handleUiTemplateClick,
+                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                  }, null, 8 /* PROPS */, _hoisted_104))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'top'))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_105, [
+                                                _createVNode(_component_ui_template_pending)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          _createCommentVNode(" Main Part "),
+                                          (parseCot(msg.content).main)
+                                            ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
+                                                (index === chatHistory.length - 1 && isGenerating)
+                                                  ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                                                      (processMainContent(parseCot(msg.content).main, true).text)
+                                                        ? (_openBlock(), _createElementBlock("div", {
+                                                            key: 0,
+                                                            class: "markdown-body",
+                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                            innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
+                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_106))
+                                                        : _createCommentVNode("v-if", true),
+                                                      (processMainContent(parseCot(msg.content).main, true).showSpinner)
+                                                        ? (_openBlock(), _createElementBlock("div", _hoisted_107, [...(_cache[26] || (_cache[26] = [
+                                                            _createElementVNode("div", {
+                                                              class: "ui-build-dots",
+                                                              "aria-hidden": "true"
+                                                            }, [
+                                                              _createElementVNode("i"),
+                                                              _createElementVNode("i"),
+                                                              _createElementVNode("i")
+                                                            ], -1 /* CACHED */),
+                                                            _createElementVNode("span", { class: "text-[16px] font-bold tracking-wider text-blue-600/80" }, "正在构建 UI 界面", -1 /* CACHED */)
+                                                          ]))]))
+                                                        : _createCommentVNode("v-if", true)
+                                                    ], 64 /* STABLE_FRAGMENT */))
+                                                  : (_openBlock(), _createElementBlock("div", {
+                                                      key: 1,
+                                                      class: "markdown-body",
+                                                      style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                      innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
+                                                    }, null, 12 /* STYLE, PROPS */, _hoisted_108))
+                                              ], 64 /* STABLE_FRAGMENT */))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.bottom && msg.uiTemplateBlocks.bottom.length)
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_109, [
+                                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
+                                                  return (_openBlock(), _createElementBlock("div", {
+                                                    key: 'msg-ui-bottom-' + index + '-' + tIndex,
+                                                    class: "w-full ui-template-render",
+                                                    onClick: handleUiTemplateClick,
+                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                  }, null, 8 /* PROPS */, _hoisted_110))
+                                                }), 128 /* KEYED_FRAGMENT */))
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'bottom'))
+                                            ? (_openBlock(), _createElementBlock("div", _hoisted_111, [
+                                                _createVNode(_component_ui_template_pending)
+                                              ]))
+                                            : _createCommentVNode("v-if", true),
+                                          (msg.responseError)
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 8,
+                                                class: "response-error-text px-4 py-3",
+                                                style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
+                                                role: "alert"
+                                              }, _toDisplayString(msg.responseError), 5 /* TEXT, STYLE */))
+                                            : _createCommentVNode("v-if", true)
+                                        ], 10 /* CLASS, PROPS */, _hoisted_69))
+                              ], 10 /* CLASS, PROPS */, _hoisted_60),
+                              _createCommentVNode(" Message Actions "),
+                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
+                                ? (_openBlock(), _createElementBlock("div", {
+                                    key: 0,
+                                    class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
+                                  }, [
+                                    (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 0,
+                                          onClick: $event => (regenerateMessage(index)),
+                                          class: "message-action-button",
+                                          title: "重新生成"
+                                        }, [...(_cache[27] || (_cache[27] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24"
+                                          }, [
+                                            _createElementVNode("path", {
+                                              "stroke-linecap": "round",
+                                              "stroke-linejoin": "round",
+                                              "stroke-width": "2",
+                                              d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                            })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_112))
+                                      : _createCommentVNode("v-if", true),
+                                    _createElementVNode("button", {
+                                      onClick: $event => (editMessage(index)),
+                                      class: "message-action-button",
+                                      title: "编辑"
+                                    }, [...(_cache[28] || (_cache[28] = [
+                                      _createElementVNode("svg", {
+                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                        fill: "none",
+                                        stroke: "currentColor",
+                                        viewBox: "0 0 24 24"
+                                      }, [
+                                        _createElementVNode("path", {
+                                          "stroke-linecap": "round",
+                                          "stroke-linejoin": "round",
+                                          "stroke-width": "2",
+                                          d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        })
+                                      ], -1 /* CACHED */)
+                                    ]))], 8 /* PROPS */, _hoisted_113),
+                                    _createElementVNode("button", {
+                                      onClick: $event => {copyMessage(msg.content); playMessageActionFeedback($event)},
+                                      class: "message-action-button",
+                                      title: "复制"
+                                    }, [...(_cache[29] || (_cache[29] = [
+                                      _createElementVNode("svg", {
+                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                        fill: "none",
+                                        stroke: "currentColor",
+                                        viewBox: "0 0 24 24"
+                                      }, [
+                                        _createElementVNode("path", {
+                                          "stroke-linecap": "round",
+                                          "stroke-linejoin": "round",
+                                          "stroke-width": "2",
+                                          d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                        })
+                                      ], -1 /* CACHED */)
+                                    ]))], 8 /* PROPS */, _hoisted_114),
+                                    (msg.role === 'assistant')
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 1,
+                                          onClick: $event => {createStoryBranch(index); playMessageActionFeedback($event)},
+                                          disabled: storyBranchSwitching,
+                                          class: "message-action-button",
+                                          title: "从这里分支",
+                                          "aria-label": "从这里创建分支"
+                                        }, [...(_cache[30] || (_cache[30] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24",
+                                            "aria-hidden": "true"
+                                          }, [
+                                            _createElementVNode("use", { href: "#icon-story-branch" })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_115))
+                                      : _createCommentVNode("v-if", true),
+                                    (canDeleteMessage(index))
+                                      ? (_openBlock(), _createElementBlock("button", {
+                                          key: 2,
+                                          onClick: $event => (deleteMessage(index)),
+                                          class: "message-action-button message-action-button--danger",
+                                          title: "删除"
+                                        }, [...(_cache[31] || (_cache[31] = [
+                                          _createElementVNode("svg", {
+                                            class: "w-3.5 h-3.5 md:w-4 md:h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24"
+                                          }, [
+                                            _createElementVNode("path", {
+                                              "stroke-linecap": "round",
+                                              "stroke-linejoin": "round",
+                                              "stroke-width": "2",
+                                              d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            })
+                                          ], -1 /* CACHED */)
+                                        ]))], 8 /* PROPS */, _hoisted_116))
+                                      : _createCommentVNode("v-if", true),
+                                    (msg.role === 'assistant' && Array.isArray(msg.styleFilterHits) && msg.styleFilterHits.length)
+                                      ? (_openBlock(), _createElementBlock("div", _hoisted_117, [
+                                          (isStyleFilterDetailsOpen(msg, index))
+                                            ? (_openBlock(), _createElementBlock("div", {
+                                                key: 0,
+                                                onClick: _withModifiers(() => {}, ["stop"]),
+                                                class: "message-style-filter-popover absolute bottom-full left-1/2 z-30 mb-2 w-[min(20rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur-xl"
+                                              }, [
+                                                _cache[32] || (_cache[32] = _createElementVNode("div", { class: "border-b border-gray-100 bg-gray-50/80 px-3 py-2" }, [
+                                                  _createElementVNode("span", { class: "text-xs font-bold text-gray-700" }, "文风过滤详情")
+                                                ], -1 /* CACHED */)),
+                                                _createElementVNode("div", _hoisted_119, [
+                                                  (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.styleFilterHits, (fragment, filterIndex) => {
+                                                    return (_openBlock(), _createElementBlock("div", {
+                                                      key: index + '-style-filter-' + filterIndex,
+                                                      class: "flex items-start gap-1.5 rounded-xl border border-gray-100 bg-gray-50/70 px-2.5 py-2"
+                                                    }, [
+                                                      _createElementVNode("span", _hoisted_120, _toDisplayString(filterIndex + 1), 1 /* TEXT */),
+                                                      _createElementVNode("span", _hoisted_121, [
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getStyleFilterHitSegments(fragment), (segment, segmentIndex) => {
+                                                          return (_openBlock(), _createElementBlock("span", {
+                                                            key: filterIndex + '-segment-' + segmentIndex,
+                                                            class: _normalizeClass(segment.matched ? 'font-semibold text-blue-500' : '')
+                                                          }, _toDisplayString(segment.text), 3 /* TEXT, CLASS */))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ])
+                                                    ]))
+                                                  }), 128 /* KEYED_FRAGMENT */))
+                                                ])
+                                              ], 8 /* PROPS */, _hoisted_118))
+                                            : _createCommentVNode("v-if", true),
+                                          _createElementVNode("button", {
+                                            onClick: _withModifiers($event => (toggleStyleFilterDetails(msg, index)), ["stop"]),
+                                            class: _normalizeClass(["message-style-filter-button", { 'is-active': isStyleFilterDetailsOpen(msg, index) }]),
+                                            title: '查看本条回复过滤的 ' + msg.styleFilterHits.length + ' 处内容'
+                                          }, [
+                                            _cache[34] || (_cache[34] = _createElementVNode("svg", {
+                                              class: "h-3.5 w-3.5",
+                                              fill: "none",
+                                              stroke: "currentColor",
+                                              viewBox: "0 0 24 24",
+                                              "aria-hidden": "true"
+                                            }, [
+                                              _createElementVNode("path", {
+                                                "stroke-linecap": "round",
+                                                "stroke-linejoin": "round",
+                                                "stroke-width": "2",
+                                                d: "M3 4h18M6 9h12M9 14h6M11 19h2"
+                                              })
+                                            ], -1 /* CACHED */)),
+                                            (_openBlock(), _createElementBlock("svg", {
+                                              class: _normalizeClass(["h-3 w-3 transition-transform", { 'rotate-180': isStyleFilterDetailsOpen(msg, index) }]),
+                                              fill: "none",
+                                              stroke: "currentColor",
+                                              viewBox: "0 0 24 24",
+                                              "aria-hidden": "true"
+                                            }, [...(_cache[33] || (_cache[33] = [
+                                              _createElementVNode("path", {
+                                                "stroke-linecap": "round",
+                                                "stroke-linejoin": "round",
+                                                "stroke-width": "2",
+                                                d: "M19 9l-7 7-7-7"
+                                              }, null, -1 /* CACHED */)
+                                            ]))], 2 /* CLASS */))
+                                          ], 10 /* CLASS, PROPS */, _hoisted_122)
+                                        ]))
+                                      : _createCommentVNode("v-if", true)
+                                  ], 2 /* CLASS */))
+                                : _createCommentVNode("v-if", true)
+                            ], 2 /* CLASS */)
+                          ], 2 /* CLASS */)
+                        ], 2 /* CLASS */)
+                      ], 14 /* CLASS, STYLE, PROPS */, _hoisted_55)), [
+                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
+                      ])
+                    }), 128 /* KEYED_FRAGMENT */))
+                  : _createCommentVNode("v-if", true),
+                _createCommentVNode(" Typing Indicator "),
+                (isGenerating && !isReceiving && !isThinking && !hasActiveToolInlineWork)
+                  ? (_openBlock(), _createElementBlock("div", {
+                      key: 3,
+                      class: _normalizeClass(['flex w-full', settings.immersiveMode ? 'immersive-message-row justify-start' : 'standard-message-row'])
+                    }, [
+                      _createElementVNode("div", {
+                        class: _normalizeClass(['flex flex-row centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell'])
+                      }, [
+                        _withDirectives(_createElementVNode("div", _hoisted_123, [
+                          _createElementVNode("img", {
+                            src: currentCharacterAvatar,
+                            class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
+                          }, null, 8 /* PROPS */, _hoisted_124)
+                        ], 512 /* NEED_PATCH */), [
+                          [_vShow, !settings.immersiveMode]
+                        ]),
+                        _createElementVNode("div", {
+                          class: _normalizeClass(['flex flex-col min-w-0 items-start', settings.immersiveMode ? 'immersive-message-column' : ''])
+                        }, [
+                          _withDirectives(_createElementVNode("div", {
+                            class: "msg-name-tag mr-auto ml-1 truncate max-w-[210px] md:max-w-[250px] animate-message-in",
+                            style: {"animation-delay":"100ms"}
+                          }, _toDisplayString(currentCharacter.name), 513 /* TEXT, NEED_PATCH */), [
+                            [_vShow, !settings.immersiveMode]
+                          ]),
+                          _createElementVNode("div", _hoisted_125, [
+                            _cache[35] || (_cache[35] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
+                              _createElementVNode("span"),
+                              _createElementVNode("span"),
+                              _createElementVNode("span")
+                            ], -1 /* CACHED */)),
+                            isGenerating
+                              ? (_openBlock(), _createBlock(_component_generation_timer, {
+                                  key: 0,
+                                  "wait-time": currentWaitTime,
+                                  "estimated-time": estimatedGenerationTime
+                                }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
+                              : _createCommentVNode("v-if", true)
+                          ])
+                        ], 2 /* CLASS */)
+                      ], 2 /* CLASS */)
+                    ], 2 /* CLASS */))
+                  : _createCommentVNode("v-if", true)
+              ], 46 /* CLASS, STYLE, PROPS, NEED_HYDRATION */, _hoisted_49),
+              _createCommentVNode(" Input Area (Floating Island) "),
+              _withDirectives(_createElementVNode("div", _hoisted_126, [
+                _createElementVNode("div", _hoisted_127, [
+                  _createVNode(_Transition, {
+                    "enter-active-class": "transition duration-300 ease-spring",
+                    "enter-from-class": "opacity-0 translate-y-2 scale-95",
+                    "enter-to-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-active-class": "transition-all duration-150 ease-in",
+                    "leave-from-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-to-class": "opacity-0 translate-y-2 scale-95"
+                  }, {
+                    default: _withCtx(() => [
+                      pendingCardInteraction
+                        ? (_openBlock(), _createElementBlock("div", {
+                            key: 0,
+                            class: _normalizeClass([pendingChatImages.length ? 'bottom-[calc(100%+7.25rem)] md:bottom-[calc(100%+8.75rem)]' : 'bottom-[calc(100%+0.65rem)]', "absolute left-1 right-1 z-[3] flex justify-center"])
+                          }, [
+                            _createElementVNode("div", _hoisted_128, [
+                              _cache[37] || (_cache[37] = _createElementVNode("svg", {
+                                class: "h-3.5 w-3.5 flex-none text-primary-500",
+                                fill: "none",
+                                stroke: "currentColor",
+                                viewBox: "0 0 24 24",
+                                "aria-hidden": "true"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2",
+                                  d: "M13 10V3L4 14h7v7l9-11h-7z"
+                                })
+                              ], -1 /* CACHED */)),
+                              _cache[38] || (_cache[38] = _createElementVNode("span", { class: "flex-none font-bold text-primary-600" }, "卡片交互", -1 /* CACHED */)),
+                              _createElementVNode("span", {
+                                class: "min-w-0 truncate text-gray-600",
+                                title: pendingCardInteraction
+                              }, _toDisplayString(pendingCardInteraction), 9 /* TEXT, PROPS */, _hoisted_129),
+                              _createElementVNode("button", {
+                                type: "button",
+                                onClick: clearPendingCardInteraction,
+                                class: "flex h-5 w-5 flex-none items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600",
+                                title: "取消卡片交互",
+                                "aria-label": "取消卡片交互"
+                              }, [...(_cache[36] || (_cache[36] = [
+                                _createElementVNode("svg", {
+                                  class: "h-3.5 w-3.5",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2.5",
+                                    d: "M6 18L18 6M6 6l12 12"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_130)
+                            ])
+                          ], 2 /* CLASS */))
+                        : _createCommentVNode("v-if", true)
+                    ]),
+                    _: 1 /* STABLE */
+                  }),
+                  (pendingChatImages.length)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_131, [
+                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(pendingChatImages, (image) => {
+                          return (_openBlock(), _createElementBlock("div", {
+                            key: image.id,
+                            class: "relative w-24 h-24 md:w-[7.5rem] md:h-[7.5rem] flex-none overflow-hidden rounded-xl bg-transparent shadow-lg",
+                            title: image.status === 'ready' ? image.description : (image.error || '正在识别图片')
+                          }, [
+                            _createElementVNode("img", {
+                              src: image.dataUrl,
+                              alt: image.name,
+                              class: "w-full h-full object-cover"
+                            }, null, 8 /* PROPS */, _hoisted_133),
+                            (image.status !== 'ready')
+                              ? (_openBlock(), _createElementBlock("div", {
+                                  key: 0,
+                                  class: _normalizeClass(['absolute inset-0 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-white', image.status === 'error' ? 'bg-red-700/75' : 'bg-slate-900/55'])
+                                }, [
+                                  (image.status === 'analyzing')
+                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_134, [...(_cache[39] || (_cache[39] = [
+                                        _createElementVNode("circle", {
+                                          class: "generated-image-spinner-path",
+                                          cx: "25",
+                                          cy: "25",
+                                          r: "20",
+                                          fill: "none",
+                                          "stroke-width": "2"
+                                        }, null, -1 /* CACHED */)
+                                      ]))]))
+                                    : (_openBlock(), _createElementBlock("span", _hoisted_135, "识别失败"))
+                                ], 2 /* CLASS */))
+                              : _createCommentVNode("v-if", true),
+                            _createElementVNode("button", {
+                              type: "button",
+                              onClick: _withModifiers($event => (removePendingChatImage(image.id)), ["stop"]),
+                              title: "移除图片",
+                              class: "absolute top-1 right-1 z-[2] flex items-center justify-center w-5 h-5 rounded-full bg-slate-900/70 text-white shadow-sm",
+                              "aria-label": "移除图片"
+                            }, [...(_cache[40] || (_cache[40] = [
+                              _createElementVNode("svg", {
+                                class: "w-3 h-3",
+                                viewBox: "0 0 24 24",
+                                fill: "none",
+                                stroke: "currentColor"
+                              }, [
+                                _createElementVNode("path", {
+                                  "stroke-linecap": "round",
+                                  "stroke-linejoin": "round",
+                                  "stroke-width": "2.5",
+                                  d: "M6 18L18 6M6 6l12 12"
+                                })
+                              ], -1 /* CACHED */)
+                            ]))], 8 /* PROPS */, _hoisted_136)
+                          ], 8 /* PROPS */, _hoisted_132))
+                        }), 128 /* KEYED_FRAGMENT */))
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                  (settings.showLatestUsageBar && latestMainTokenUsage)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_137, [
+                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList([
+                                    { tone: 'input', label: '输入', value: getUncachedInputTokens(latestMainTokenUsage) },
+                                    { tone: 'cache', label: '缓存', value: latestMainTokenUsage.cacheReadTokens },
+                                    { tone: 'output', label: '输出', value: latestMainTokenUsage.outputTokens }], (part) => {
+                          return (_openBlock(), _createElementBlock("span", {
+                            key: part.tone,
+                            class: "flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1",
+                            title: part.label + ' Token'
+                          }, [
+                            _createElementVNode("i", {
+                              class: _normalizeClass('usage-swatch usage-tone--' + part.tone)
+                            }, null, 2 /* CLASS */),
+                            _createVNode(_component_rolling_text, {
+                              class: "font-mono font-semibold tabular-nums text-gray-700",
+                              value: formatLatestTokenCount(part.value)
+                            }, null, 8 /* PROPS */, ["value"])
+                          ], 8 /* PROPS */, _hoisted_138))
+                        }), 128 /* KEYED_FRAGMENT */))
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                  _createCommentVNode(" Quick panel anchors to the whole composer so it never covers the text "),
+                  _createVNode(_Transition, {
+                    "enter-active-class": "transition duration-300 ease-spring",
+                    "enter-from-class": "opacity-0 translate-y-2 scale-95",
+                    "enter-to-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-active-class": "transition duration-150 ease-in",
+                    "leave-from-class": "opacity-100 translate-y-0 scale-100",
+                    "leave-to-class": "opacity-0 translate-y-2 scale-95"
+                  }, {
+                    default: _withCtx(() => [
+                      showChatModelSelector
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_139, [
+                            _createElementVNode("div", {
+                              id: "chat-quick-panel",
+                              onClick: _withModifiers(() => {}, ["stop"]),
+                              onKeydown: _withKeys(_withModifiers($event => (showChatModelSelector = false), ["stop"]), ["esc"]),
+                              role: "dialog",
+                              "aria-label": "快捷面板",
+                              class: "chat-quick-panel rounded-2xl p-3 flex flex-col gap-3 max-w-full max-h-[inherit] overflow-x-hidden overflow-y-auto overscroll-contain"
+                            }, [
+                              _createElementVNode("div", _hoisted_141, [
+                                _cache[42] || (_cache[42] = _createElementVNode("h3", { class: "text-sm font-bold text-gray-700" }, "快捷面板", -1 /* CACHED */)),
+                                _createElementVNode("button", {
+                                  type: "button",
+                                  onClick: $event => (showChatModelSelector = false),
+                                  "aria-label": "关闭快捷面板",
+                                  class: "w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                }, [...(_cache[41] || (_cache[41] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-4 h-4",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24",
+                                    "aria-hidden": "true"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-width": "2",
+                                      d: "m6 6 12 12M18 6 6 18"
+                                    })
+                                  ], -1 /* CACHED */)
+                                ]))], 8 /* PROPS */, _hoisted_142)
+                              ]),
+                              _createCommentVNode(" API 站切换（下拉浮层：展开时覆盖下方内容，不推挤面板布局）"),
+                              _createElementVNode("div", _hoisted_143, [
+                                _createElementVNode("div", _hoisted_144, [
+                                  _cache[43] || (_cache[43] = _createElementVNode("span", { class: "text-xs font-bold text-gray-500" }, "API 站", -1 /* CACHED */)),
+                                  _createElementVNode("button", {
+                                    type: "button",
+                                    onClick: _withModifiers($event => (showApiQuickSelector = !showApiQuickSelector), ["stop"]),
+                                    class: "text-xs font-bold px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-primary-200 active:scale-95 transition-all"
+                                  }, _toDisplayString(quickApiProviders.length ? (quickApiProviders.find(p => p.id === settings.apiProviderId)?.name || '跟随主API') : '跟随主API') + " ▾ ", 9 /* TEXT, PROPS */, _hoisted_145)
+                                ]),
+                                _createVNode(_Transition, {
+                                  "enter-active-class": "transition-all duration-150 ease-out",
+                                  "enter-from-class": "opacity-0 scale-95",
+                                  "enter-to-class": "opacity-100 scale-100",
+                                  "leave-active-class": "transition-all duration-100 ease-in",
+                                  "leave-from-class": "opacity-100 scale-100",
+                                  "leave-to-class": "opacity-0 scale-95"
+                                }, {
+                                  default: _withCtx(() => [
+                                    showApiQuickSelector
+                                      ? (_openBlock(), _createElementBlock("div", {
+                                          key: 0,
+                                          onClick: _withModifiers(() => {}, ["stop"]),
+                                          class: "absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-lg"
+                                        }, [
+                                          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(quickApiProviders, (provider) => {
+                                            return (_openBlock(), _createElementBlock("button", {
+                                              key: provider.id,
+                                              type: "button",
+                                              onClick: $event => (selectQuickApiProvider(provider)),
+                                              class: _normalizeClass(['w-full text-left px-3 py-2 text-sm font-medium transition-colors', provider.id === settings.apiProviderId ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-600'])
+                                            }, _toDisplayString(provider.name || provider.id), 11 /* TEXT, CLASS, PROPS */, _hoisted_147))
+                                          }), 128 /* KEYED_FRAGMENT */)),
+                                          (!quickApiProviders.length)
+                                            ? (_openBlock(), _createElementBlock("p", _hoisted_148, "请先在设置中配置 API 站。"))
+                                            : _createCommentVNode("v-if", true)
+                                        ], 8 /* PROPS */, _hoisted_146))
+                                      : _createCommentVNode("v-if", true)
+                                  ]),
+                                  _: 1 /* STABLE */
+                                })
+                              ]),
+                              _createElementVNode("div", _hoisted_149, [
+                                _withDirectives(_createElementVNode("div", {
+                                  class: "segmented-switch__indicator flex items-center justify-end px-2.5 text-primary-600",
+                                  "aria-hidden": "true",
+                                  style: _normalizeStyle({ '--slot-index': chatModelSlots.findIndex(slot => slot.mode === modelMode) })
+                                }, [...(_cache[44] || (_cache[44] = [
+                                  _createElementVNode("svg", {
+                                    class: "w-4 h-4 flex-none",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24"
+                                  }, [
+                                    _createElementVNode("path", {
+                                      "stroke-linecap": "round",
+                                      "stroke-linejoin": "round",
+                                      "stroke-width": "2",
+                                      d: "m5 12 4 4L19 6"
+                                    })
+                                  ], -1 /* CACHED */)
+                                ]))], 4 /* STYLE */), [
+                                  [_vShow, chatModelSlots.some(slot => slot.mode === modelMode && slot.model)]
+                                ]),
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(chatModelSlots, (slot, slotIndex) => {
+                                  return (_openBlock(), _createElementBlock("button", {
+                                    key: slot.mode,
+                                    type: "button",
+                                    onClick: $event => (selectChatModelSlot(slot)),
+                                    disabled: !slot.model,
+                                    "aria-pressed": modelMode === slot.mode && !!slot.model,
+                                    class: _normalizeClass(['relative z-10 flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors', modelMode === slot.mode && slot.model ? 'text-primary-600' : 'text-gray-500', !slot.model ? 'cursor-not-allowed opacity-45' : 'hover:text-primary-600'])
+                                  }, [
+                                    _createElementVNode("span", _hoisted_151, "槽位 " + _toDisplayString(slotIndex + 1), 1 /* TEXT */),
+                                    _createElementVNode("span", {
+                                      class: "min-w-0 flex-1 truncate text-[13px] font-medium",
+                                      title: slot.model
+                                    }, _toDisplayString(slot.model || '未配置'), 9 /* TEXT, PROPS */, _hoisted_152),
+                                    _cache[45] || (_cache[45] = _createElementVNode("span", {
+                                      class: "w-4 flex-none",
+                                      "aria-hidden": "true"
+                                    }, null, -1 /* CACHED */))
+                                  ], 10 /* CLASS, PROPS */, _hoisted_150))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ]),
+                              _createElementVNode("div", _hoisted_153, [
+                                _createElementVNode("div", _hoisted_154, [
+                                  _createElementVNode("div", _hoisted_155, [
+                                    _cache[46] || (_cache[46] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "推理强度", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_156, _toDisplayString(reasoningEffortLabel), 1 /* TEXT */)
+                                  ]),
+                                  _withDirectives(_createElementVNode("input", {
+                                    "onUpdate:modelValue": $event => ((reasoningEffortSlider) = $event),
+                                    type: "range",
+                                    min: "0",
+                                    max: "5",
+                                    step: "1",
+                                    class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
+                                    "aria-label": "推理强度"
+                                  }, null, 8 /* PROPS */, _hoisted_157), [
+                                    [
+                                      _vModelText,
+                                      reasoningEffortSlider,
+                                      void 0,
+                                      { number: true }
+                                    ]
+                                  ])
+                                ]),
+                                _createElementVNode("div", _hoisted_158, [
+                                  _createElementVNode("div", _hoisted_159, [
+                                    _cache[47] || (_cache[47] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "温度", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_160, _toDisplayString(Number(settings.temperature).toFixed(2)), 1 /* TEXT */)
+                                  ]),
+                                  _withDirectives(_createElementVNode("input", {
+                                    "onUpdate:modelValue": $event => ((slotTemperature) = $event),
+                                    type: "range",
+                                    min: "0",
+                                    max: "1",
+                                    step: "0.01",
+                                    class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
+                                    "aria-label": "温度"
+                                  }, null, 8 /* PROPS */, _hoisted_161), [
+                                    [
+                                      _vModelText,
+                                      slotTemperature,
+                                      void 0,
+                                      { number: true }
+                                    ]
+                                  ])
+                                ])
+                              ]),
+                              _createElementVNode("div", _hoisted_162, [
+                                _createElementVNode("label", _hoisted_163, [
+                                  _cache[49] || (_cache[49] = _createElementVNode("span", null, "流式输出", -1 /* CACHED */)),
+                                  _createElementVNode("span", _hoisted_164, [
+                                    _withDirectives(_createElementVNode("input", {
+                                      "onUpdate:modelValue": $event => ((settings.stream) = $event),
+                                      type: "checkbox",
+                                      class: "settings-toggle-input sr-only"
+                                    }, null, 8 /* PROPS */, _hoisted_165), [
+                                      [_vModelCheckbox, settings.stream]
+                                    ]),
+                                    _cache[48] || (_cache[48] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                  ])
+                                ]),
+                                _createElementVNode("label", _hoisted_166, [
+                                  _cache[51] || (_cache[51] = _createElementVNode("span", null, "沉浸模式", -1 /* CACHED */)),
+                                  _createElementVNode("span", _hoisted_167, [
+                                    _withDirectives(_createElementVNode("input", {
+                                      "onUpdate:modelValue": $event => ((settings.immersiveMode) = $event),
+                                      type: "checkbox",
+                                      class: "settings-toggle-input sr-only"
+                                    }, null, 8 /* PROPS */, _hoisted_168), [
+                                      [_vModelCheckbox, settings.immersiveMode]
+                                    ]),
+                                    _cache[50] || (_cache[50] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                  ])
+                                ])
+                              ]),
+                              isGeminiModel
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_169, [
+                                    _createElementVNode("label", _hoisted_170, [
+                                      _cache[53] || (_cache[53] = _createElementVNode("span", null, "Gemini抗截断", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_171, [
+                                        _withDirectives(_createElementVNode("input", {
+                                          "onUpdate:modelValue": $event => ((settings.preventTruncation) = $event),
+                                          onChange: $event => ($event.target.checked && (settings.stream = true)),
+                                          type: "checkbox",
+                                          class: "settings-toggle-input sr-only"
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_172), [
+                                          [_vModelCheckbox, settings.preventTruncation]
+                                        ]),
+                                        _cache[52] || (_cache[52] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                      ])
+                                    ]),
+                                    _createElementVNode("label", _hoisted_173, [
+                                      _cache[55] || (_cache[55] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
+                                      _createElementVNode("span", _hoisted_174, [
+                                        _withDirectives(_createElementVNode("input", {
+                                          "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
+                                          type: "checkbox",
+                                          class: "settings-toggle-input sr-only"
+                                        }, null, 8 /* PROPS */, _hoisted_175), [
+                                          [_vModelCheckbox, settings.inputObfuscation]
+                                        ]),
+                                        _cache[54] || (_cache[54] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                      ])
+                                    ])
+                                  ]))
+                                : _createCommentVNode("v-if", true)
+                            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_140)
+                          ]))
+                        : _createCommentVNode("v-if", true)
+                    ]),
+                    _: 1 /* STABLE */
+                  }),
+                  _withDirectives(_createElementVNode("textarea", {
+                    "onUpdate:modelValue": $event => ((userInput) = $event),
+                    onInput: autoResizeInput,
+                    onFocus: handleChatInputFocus,
+                    onBlur: handleChatInputBlur,
+                    enterkeyhint: "enter",
+                    onKeydown: handleChatInputEnter,
+                    placeholder: '输入消息...',
+                    class: "island-input chat-input-scrollbar",
+                    rows: "1",
+                    ref: "inputBox"
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_176), [
+                    [_vModelText, userInput]
+                  ]),
+                  _createElementVNode("div", _hoisted_177, [
+                    _createElementVNode("div", _hoisted_178, [
+                      _createCommentVNode(" Send Image Button "),
+                      _createElementVNode("button", {
+                        type: "button",
+                        onClick: $event => (requestChatImageSelection($refs.chatImageInput)),
+                        disabled: isConversationBusy,
+                        class: "island-button",
+                        title: `发送图片（${pendingChatImages.length + pendingChatImageReadCount}/3）`
+                      }, [...(_cache[56] || (_cache[56] = [
                         _createElementVNode("svg", {
                           class: "w-4 h-4",
                           fill: "none",
@@ -10879,1390 +12119,160 @@ return function render(_ctx, _cache) {
                             "stroke-linecap": "round",
                             "stroke-linejoin": "round",
                             "stroke-width": "2",
-                            d: "M6 18L18 6M6 6l12 12"
+                            d: "M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94a3 3 0 114.243 4.243L8.552 18.32a1.5 1.5 0 01-2.121-2.121l7.693-7.693"
                           })
                         ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_28)
-                    ]),
-                    _createElementVNode("div", _hoisted_29, [
-                      _cache[9] || (_cache[9] = _createElementVNode("div", { class: "mb-2 flex items-center justify-between px-0.5" }, [
-                        _createElementVNode("div", { class: "flex items-center gap-2 text-[11px] font-bold text-gray-400" }, [
-                          _createElementVNode("svg", {
-                            class: "w-4 h-4 text-gray-400",
-                            fill: "none",
-                            stroke: "currentColor",
-                            viewBox: "0 0 24 24"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            })
-                          ]),
-                          _createTextVNode(" 角色卡简介 ")
-                        ])
-                      ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_30, [
-                        (currentCharacter.description)
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_31, [
-                              _createElementVNode("div", {
-                                class: "text-sm text-gray-700 leading-relaxed font-normal font-sans markdown-body",
-                                innerHTML: renderMarkdown(currentCharacter.description, 'assistant', true)
-                              }, null, 8 /* PROPS */, _hoisted_32)
-                            ]))
-                          : (_openBlock(), _createElementBlock("div", _hoisted_33, [...(_cache[8] || (_cache[8] = [
-                              _createElementVNode("svg", {
-                                class: "w-8 h-8 mb-2 opacity-50",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-linejoin": "round",
-                                  "stroke-width": "1.5",
-                                  d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                })
-                              ], -1 /* CACHED */),
-                              _createTextVNode(" 暂无描述信息 ", -1 /* CACHED */)
-                            ]))]))
-                      ])
-                    ])
-                  ]))
-                : _createCommentVNode("v-if", true)
-            ]),
-            _: 1 /* STABLE */
-          }),
-          _createCommentVNode(" Chat Header "),
-          _createElementVNode("div", _hoisted_34, [
-            _withDirectives(_createElementVNode("div", _hoisted_35, null, 512 /* NEED_PATCH */), [
-              [_vShow, !isInputBarHidden]
-            ]),
-            _createCommentVNode(" 实际内容容器 "),
-            _createElementVNode("div", _hoisted_36, [
-              _createElementVNode("div", {
-                style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
-                class: "flex items-center min-w-0"
-              }, [
-                (!isChatFullscreen)
-                  ? (_openBlock(), _createElementBlock("button", {
-                      key: 0,
-                      onClick: toggleNavigation,
-                      class: "app-nav-trigger app-nav-trigger--chat",
-                      "aria-label": "打开导航",
-                      "aria-haspopup": "dialog",
-                      "aria-controls": "app-navigation-panel"
-                    }, [...(_cache[10] || (_cache[10] = [
-                      _createElementVNode("svg", {
-                        class: "w-6 h-6",
-                        fill: "none",
-                        stroke: "currentColor"
-                      }, [
-                        _createElementVNode("use", { href: "#icon-menu" })
-                      ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_37))
-                  : _createCommentVNode("v-if", true),
-                currentCharacter
-                  ? (_openBlock(), _createElementBlock("div", {
-                      key: 1,
-                      class: "flex items-center min-w-0 cursor-pointer",
-                      onClick: $event => (showDescriptionPanel = !showDescriptionPanel)
-                    }, [
-                      _createElementVNode("img", {
-                        src: currentCharacterAvatar,
-                        class: "w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm flex-shrink-0"
-                      }, null, 8 /* PROPS */, _hoisted_39),
-                      _createElementVNode("span", _hoisted_40, _toDisplayString(currentCharacter.name), 1 /* TEXT */),
+                      ]))], 8 /* PROPS */, _hoisted_179),
+                      _createElementVNode("input", {
+                        ref: "chatImageInput",
+                        type: "file",
+                        accept: "image/*",
+                        multiple: "",
+                        class: "hidden",
+                        onChange: handleChatImageSelection
+                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_180),
+                      _createCommentVNode(" Auto Image Button "),
                       _createElementVNode("button", {
-                        class: _normalizeClass(["ml-1 p-1.5 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-all flex-shrink-0", {'bg-white/20 text-white': showDescriptionPanel}])
-                      }, [
-                        (_openBlock(), _createElementBlock("svg", {
-                          class: _normalizeClass(["desc-panel-chevron w-4 h-4", {'rotate-180': showDescriptionPanel}]),
+                        onClick: toggleAutoImageGen,
+                        class: _normalizeClass(["island-button", { 'is-active': isAutoImageGenEnabled }]),
+                        "aria-pressed": isAutoImageGenEnabled,
+                        title: "自动生图开关"
+                      }, [...(_cache[57] || (_cache[57] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
                           fill: "none",
                           stroke: "currentColor",
                           viewBox: "0 0 24 24"
-                        }, [...(_cache[11] || (_cache[11] = [
+                        }, [
                           _createElementVNode("path", {
                             "stroke-linecap": "round",
                             "stroke-linejoin": "round",
                             "stroke-width": "2",
-                            d: "M19 9l-7 7-7-7"
-                          }, null, -1 /* CACHED */)
-                        ]))], 2 /* CLASS */))
-                      ], 2 /* CLASS */)
-                    ], 8 /* PROPS */, _hoisted_38))
-                  : (_openBlock(), _createElementBlock("div", _hoisted_41, "未选择角色卡"))
-              ], 4 /* STYLE */),
-              _createElementVNode("div", _hoisted_42, [
-                _createElementVNode("button", {
-                  onClick: toggleInputBarVisibility,
-                  class: _normalizeClass(["chat-header-button", isInputBarHidden ? 'rphub-zen-toggle--on' : '']),
-                  title: isInputBarHidden ? '显示输入栏' : '隐藏输入栏'
-                }, [
-                  (_openBlock(), _createElementBlock("svg", _hoisted_44, [
-                    isInputBarHidden
-                      ? (_openBlock(), _createElementBlock("path", _hoisted_45))
-                      : _createCommentVNode("v-if", true),
-                    isInputBarHidden
-                      ? (_openBlock(), _createElementBlock("path", _hoisted_46))
-                      : (_openBlock(), _createElementBlock("path", _hoisted_47))
-                  ]))
-                ], 10 /* CLASS, PROPS */, _hoisted_43),
-                _createElementVNode("button", {
-                  onClick: clearChat,
-                  class: "chat-header-button chat-header-button--danger",
-                  style: _normalizeStyle(isInputBarHidden ? { visibility: 'hidden' } : null),
-                  title: "清空聊天"
-                }, [...(_cache[12] || (_cache[12] = [
-                  _createElementVNode("svg", {
-                    class: "w-5 h-5",
-                    fill: "none",
-                    stroke: "currentColor"
-                  }, [
-                    _createElementVNode("use", { href: "#icon-delete" })
-                  ], -1 /* CACHED */)
-                ]))], 12 /* STYLE, PROPS */, _hoisted_48)
-              ])
-            ])
-          ]),
-          _createCommentVNode(" Chat Messages "),
-          _createElementVNode("div", {
-            ref: "chatContainer",
-            onClick: $event => (showChatModelSelector = false),
-            onScroll: handleChatScroll,
-            class: _normalizeClass(["flex-1 overflow-y-auto overflow-x-hidden px-2 pt-14 md:pt-16 pb-52 md:pb-60 relative z-0 space-y-12 md:space-y-14", !settings.useCharacterBackground || !currentCharacter?.avatar ? 'chat-ambient' : '']),
-            style: _normalizeStyle(isAnyMessageEditing ? { paddingBottom: 'max(13rem, calc(var(--keyboard-inset, 0px) + 24px))' } : (isInputBarHidden ? { paddingTop: '44px', paddingBottom: '16px' } : null))
-          }, [
-            (!currentCharacter)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_50, [
-                  _cache[13] || (_cache[13] = _createElementVNode("div", { class: "chat-empty__icon" }, [
-                    _createElementVNode("svg", {
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      })
-                    ])
-                  ], -1 /* CACHED */)),
-                  _cache[14] || (_cache[14] = _createElementVNode("p", { class: "chat-empty__title" }, "请先选择或创建一个角色卡", -1 /* CACHED */)),
-                  _createElementVNode("button", {
-                    onClick: $event => (currentView = 'characters'),
-                    class: "modal-primary-button"
-                  }, "前往角色管理", 8 /* PROPS */, _hoisted_51)
-                ]))
-              : (chatHistory.length === 0)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_52, [
-                    _createElementVNode("img", {
-                      src: currentCharacterAvatar,
-                      class: "chat-empty__avatar",
-                      alt: ""
-                    }, null, 8 /* PROPS */, _hoisted_53),
-                    _createElementVNode("p", _hoisted_54, "开始与 " + _toDisplayString(currentCharacter.name) + " 对话吧", 1 /* TEXT */)
-                  ]))
-                : _createCommentVNode("v-if", true),
-            (currentCharacter && chatHistory.length > 0)
-              ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
-                  return _withDirectives((_openBlock(), _createElementBlock("div", {
-                    key: index,
-                    ref_for: true,
-                    ref: "messageElements",
-                    "data-role": msg.role,
-                    "data-chat-index": index,
-                    class: _normalizeClass(['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]),
-                    style: _normalizeStyle({ transitionDelay: (displayIndex % 5) * 50 + 'ms' })
-                  }, [
-                    _createElementVNode("div", {
-                      class: _normalizeClass(['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row'])
-                    }, [
-                      _createCommentVNode(" Avatar "),
-                      _withDirectives(_createElementVNode("div", {
-                        class: _normalizeClass(['flex-shrink-0 select-none', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
-                      }, [
-                        (msg.role === 'user')
-                          ? (_openBlock(), _createElementBlock("div", {
-                              key: 0,
-                              class: _normalizeClass(['msg-avatar w-9 h-9 rounded-full overflow-hidden', msg.isSelf ? 'ml-2' : 'mr-2'])
-                            }, [
-                              (msg.avatar || (msg.isSelf && user.avatar))
-                                ? (_openBlock(), _createElementBlock("img", {
-                                    key: 0,
-                                    src: msg.avatar || user.avatar,
-                                    class: "w-full h-full object-cover"
-                                  }, null, 8 /* PROPS */, _hoisted_56))
-                                : (!msg.isSelf && user.avatar)
-                                  ? (_openBlock(), _createElementBlock("img", {
-                                      key: 1,
-                                      src: user.avatar,
-                                      class: "w-full h-full object-cover",
-                                      title: "Fallback to user avatar for legacy messages"
-                                    }, null, 8 /* PROPS */, _hoisted_57))
-                                  : (_openBlock(), _createElementBlock("div", _hoisted_58, _toDisplayString((msg.name || user.name || 'U').charAt(0)), 1 /* TEXT */))
-                            ], 2 /* CLASS */))
-                          : (_openBlock(), _createElementBlock("img", {
-                              key: 1,
-                              src: currentCharacterAvatar,
-                              class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
-                            }, null, 8 /* PROPS */, _hoisted_59))
-                      ], 2 /* CLASS */), [
-                        [_vShow, !settings.immersiveMode]
-                      ]),
-                      _createElementVNode("div", {
-                        class: _normalizeClass(['flex flex-col min-w-0', settings.immersiveMode ? 'immersive-message-column' : '', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'flex-1 w-full' : '', msg.isSelf ? 'items-end' : 'items-start'])
-                      }, [
-                        _createCommentVNode(" Name (Outside Bubble) "),
-                        _withDirectives(_createElementVNode("div", {
-                          class: _normalizeClass(['msg-name-tag truncate max-w-[210px] md:max-w-[250px]', msg.isSelf ? 'ml-auto mr-1' : 'mr-auto ml-1', msg.shouldAnimate && msg.role !== 'system' ? 'animate-message-fade-in' : ''])
-                        }, _toDisplayString(msg.name || (msg.role === 'user' ? user.name : (currentCharacter.name || 'Unknown'))), 3 /* TEXT, CLASS */), [
-                          [_vShow, !settings.immersiveMode]
-                        ]),
-                        _createCommentVNode(" Message Bubble "),
-                        _createElementVNode("div", {
-                          class: _normalizeClass(["group relative min-w-0 max-w-full", {'w-full': messageUsesWideLayout(msg) || msg.isEditing_Message, 'message-edit-group': msg.isEditing_Message}])
+                            d: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 10 /* CLASS, PROPS */, _hoisted_181),
+                      _createCommentVNode(" Context Viewer Button "),
+                      _createElementVNode("button", {
+                        onClick: $event => (showContextViewerModal = true),
+                        class: "island-button",
+                        title: "上下文查看器"
+                      }, [...(_cache[58] || (_cache[58] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
                         }, [
-                          _createElementVNode("div", {
-                            onClick: $event => (handleGeneratedImageReroll($event, index)),
-                            class: _normalizeClass(['msg-bubble-glass p-0 text-sm md:text-base leading-relaxed overflow-hidden',
-                                        msg.shouldAnimate && !(msg.role === 'assistant' && msg.reasoning) ? (msg.role === 'system' ? 'animate-bubble-swap' : 'animate-message-in') : '',
-                                        messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '',
-                                        msg.isSelf ? 'msg-bubble--self' : msg.role === 'system' ? 'msg-bubble--system' : ''])
-                          }, [
-                            (msg.isEditing_Message)
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_61, [
-                                  _withDirectives(_createElementVNode("textarea", {
-                                    "onUpdate:modelValue": $event => ((msg.editMessageContent) = $event),
-                                    onFocus: keepEditBlockVisible,
-                                    style: _normalizeStyle({ height: (msg.editMessageHeight || 160) + 'px' }),
-                                    class: "w-full min-h-[88px] max-h-[70vh] p-3 text-sm text-gray-700 bg-white/50 backdrop-blur-md rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:bg-white transition-all shadow-inner resize-y custom-scrollbar",
-                                    placeholder: "编辑消息..."
-                                  }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_62), [
-                                    [_vModelText, msg.editMessageContent]
-                                  ]),
-                                  _createElementVNode("div", _hoisted_63, [
-                                    _createElementVNode("button", {
-                                      onClick: $event => (cancelEditMessage(index)),
-                                      class: "px-4 py-1.5 text-xs font-bold text-gray-500 bg-white/80 hover:bg-white border border-gray-200 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
-                                    }, " 取消 ", 8 /* PROPS */, _hoisted_64),
-                                    _createElementVNode("button", {
-                                      onClick: $event => (saveEditMessage(index)),
-                                      class: "px-4 py-1.5 text-xs font-bold text-white bg-primary-500 hover:bg-primary-600 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    }, " 保存 ", 8 /* PROPS */, _hoisted_65)
-                                  ])
-                                ]))
-                              : (msg.isTriggered && !msg.showRaw)
-                                ? (_openBlock(), _createElementBlock("div", {
-                                    key: 1,
-                                    onClick: $event => (msg.showRaw = true),
-                                    class: "px-4 py-3 flex items-center space-x-2 text-primary-800/80 select-none cursor-pointer hover:bg-primary-50 transition-colors",
-                                    title: msg.content
-                                  }, [...(_cache[15] || (_cache[15] = [
-                                    _createElementVNode("svg", {
-                                      class: "w-5 h-5 animate-pulse",
-                                      fill: "none",
-                                      stroke: "currentColor",
-                                      viewBox: "0 0 24 24"
-                                    }, [
-                                      _createElementVNode("path", {
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                        d: "M13 10V3L4 14h7v7l9-11h-7z"
-                                      })
-                                    ], -1 /* CACHED */),
-                                    _createElementVNode("span", { class: "font-bold text-sm" }, [
-                                      _createTextVNode("触发了卡片交互 "),
-                                      _createElementVNode("span", { class: "text-[10px] opacity-60 ml-1" })
-                                    ], -1 /* CACHED */)
-                                  ]))], 8 /* PROPS */, _hoisted_66))
-                                : (msg.isTriggered && msg.showRaw)
-                                  ? (_openBlock(), _createElementBlock("div", {
-                                      key: 2,
-                                      onClick: $event => (msg.showRaw = false),
-                                      class: "cursor-pointer hover:opacity-80 transition-opacity",
-                                      title: "点击收起"
-                                    }, [
-                                      _createElementVNode("div", {
-                                        class: "markdown-body",
-                                        style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                        innerHTML: renderMarkdown(msg.content, msg.role)
-                                      }, null, 12 /* STYLE, PROPS */, _hoisted_68)
-                                    ], 8 /* PROPS */, _hoisted_67))
-                                  : (_openBlock(), _createElementBlock("div", {
-                                      key: 3,
-                                      class: _normalizeClass(["message-content-wrapper", {'w-full': messageUsesWideLayout(msg), 'has-user-images': msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length}]),
-                                      onClick: openMemoryCitation
-                                    }, [
-                                      (msg.role === 'user' && Array.isArray(msg.imageAttachments) && msg.imageAttachments.length)
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 0,
-                                            class: _normalizeClass(['grid gap-1.5 p-1', msg.imageAttachments.length === 1 ? 'grid-cols-1 w-fit' : 'grid-cols-2 w-[min(24rem,78vw)]'])
-                                          }, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.imageAttachments, (image, imageIndex) => {
-                                              return (_openBlock(), _createElementBlock("img", {
-                                                key: `${index}-image-${imageIndex}`,
-                                                src: image.dataUrl,
-                                                class: _normalizeClass(['block rounded-xl bg-white', msg.imageAttachments.length === 1 ? 'justify-self-start w-auto max-w-[min(24rem,78vw)] h-auto max-h-[26rem] object-contain' : ('w-full ' + (msg.imageAttachments.length === 3 && imageIndex === 0 ? 'col-span-2 h-48 object-cover' : 'h-36 object-cover'))]),
-                                                alt: `用户发送的图片 ${imageIndex + 1}`
-                                              }, null, 10 /* CLASS, PROPS */, _hoisted_70))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ], 2 /* CLASS */))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Unified Summary Timeline Part "),
-                                      (hasThinkingOrTools(msg))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_71, [
-                                            _createElementVNode("div", {
-                                              class: _normalizeClass(["cot-ui native-thinking-card summary-timeline-card", { 'is-live': isMessageThinkingOrRunning(msg), 'is-open': isThinkingSummaryOpen(msg) }])
-                                            }, [
-                                              _createElementVNode("button", {
-                                                type: "button",
-                                                class: "cot-header native-thinking-header justify-between",
-                                                onClick: $event => (toggleThinkingSummary(msg))
-                                              }, [
-                                                _createElementVNode("div", _hoisted_73, [
-                                                  (isMessageThinkingOrRunning(msg))
-                                                    ? (_openBlock(), _createElementBlock("span", _hoisted_74, [...(_cache[16] || (_cache[16] = [
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */),
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */),
-                                                        _createElementVNode("i", null, null, -1 /* CACHED */)
-                                                      ]))]))
-                                                    : (_openBlock(), _createElementBlock("svg", _hoisted_75, [...(_cache[17] || (_cache[17] = [
-                                                        _createElementVNode("path", {
-                                                          "stroke-linecap": "round",
-                                                          "stroke-linejoin": "round",
-                                                          "stroke-width": "2",
-                                                          d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5M9 18h6M10 22h4"
-                                                        }, null, -1 /* CACHED */)
-                                                      ]))])),
-                                                  _cache[18] || (_cache[18] = _createElementVNode("span", { class: "text-sm font-bold truncate" }, "Thinking", -1 /* CACHED */))
-                                                ]),
-                                                _cache[19] || (_cache[19] = _createElementVNode("svg", {
-                                                  class: "w-3.5 h-3.5 ml-2 opacity-60 chevron",
-                                                  fill: "none",
-                                                  stroke: "currentColor",
-                                                  viewBox: "0 0 24 24"
-                                                }, [
-                                                  _createElementVNode("path", {
-                                                    "stroke-linecap": "round",
-                                                    "stroke-linejoin": "round",
-                                                    "stroke-width": "2",
-                                                    d: "M19 9l-7 7-7-7"
-                                                  })
-                                                ], -1 /* CACHED */))
-                                              ], 8 /* PROPS */, _hoisted_72),
-                                              _createElementVNode("div", {
-                                                class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
-                                              }, [
-                                                _createElementVNode("div", _hoisted_76, [
-                                                  _createElementVNode("div", _hoisted_77, [
-                                                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
-                                                      return (_openBlock(), _createElementBlock("div", {
-                                                        key: step.id,
-                                                        class: "relative group/step"
-                                                      }, [
-                                                        _createCommentVNode(" Marker Node "),
-                                                        _createElementVNode("div", _hoisted_78, [
-                                                          _createElementVNode("div", {
-                                                            class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
-                                                          }, null, 2 /* CLASS */)
-                                                        ]),
-                                                        _createCommentVNode(" Content Box "),
-                                                        _createElementVNode("div", _hoisted_79, [
-                                                          (step.isReason)
-                                                            ? (_openBlock(), _createElementBlock("div", _hoisted_80, _toDisplayString(step.title), 1 /* TEXT */))
-                                                            : (_openBlock(), _createElementBlock("details", {
-                                                                key: 1,
-                                                                class: "group/detail",
-                                                                onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
-                                                              }, [
-                                                                _createElementVNode("summary", _hoisted_82, [
-                                                                  _createElementVNode("div", _hoisted_83, [
-                                                                    _createElementVNode("span", _hoisted_84, [
-                                                                      _createElementVNode("span", _hoisted_85, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                      (step.type === 'thinking')
-                                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_86, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                        : _createCommentVNode("v-if", true),
-                                                                      (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
-                                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_87, [
-                                                                            _createElementVNode("span", _hoisted_88, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                            (step.type === 'thinking')
-                                                                              ? (_openBlock(), _createElementBlock("span", _hoisted_89, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                              : _createCommentVNode("v-if", true)
-                                                                          ]))
-                                                                        : _createCommentVNode("v-if", true)
-                                                                    ]),
-                                                                    (step.status === 'done')
-                                                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_90, [...(_cache[20] || (_cache[20] = [
-                                                                          _createElementVNode("path", {
-                                                                            "stroke-linecap": "round",
-                                                                            "stroke-linejoin": "round",
-                                                                            "stroke-width": "3",
-                                                                            d: "M5 13l4 4L19 7"
-                                                                          }, null, -1 /* CACHED */)
-                                                                        ]))]))
-                                                                      : _createCommentVNode("v-if", true),
-                                                                    (step.status === 'error')
-                                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_91, "失败"))
-                                                                      : _createCommentVNode("v-if", true)
-                                                                  ]),
-                                                                  _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
-                                                                    _createTextVNode(" 详情 "),
-                                                                    _createElementVNode("svg", {
-                                                                      class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
-                                                                      fill: "none",
-                                                                      stroke: "currentColor",
-                                                                      viewBox: "0 0 24 24"
-                                                                    }, [
-                                                                      _createElementVNode("path", {
-                                                                        "stroke-linecap": "round",
-                                                                        "stroke-linejoin": "round",
-                                                                        "stroke-width": "2",
-                                                                        d: "M19 9l-7 7-7-7"
-                                                                      })
-                                                                    ])
-                                                                  ], -1 /* CACHED */))
-                                                                ]),
-                                                                _createElementVNode("div", {
-                                                                  class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
-                                                                }, [
-                                                                  (step.type === 'thinking')
-                                                                    ? (_openBlock(), _createElementBlock("div", {
-                                                                        key: 0,
-                                                                        class: "markdown-body",
-                                                                        style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
-                                                                        innerHTML: renderMarkdown(step.text, 'assistant', true, false)
-                                                                      }, null, 12 /* STYLE, PROPS */, _hoisted_92))
-                                                                    : (_openBlock(), _createElementBlock("div", _hoisted_93, [
-                                                                        _createElementVNode("div", _hoisted_94, [
-                                                                          _createElementVNode("span", null, [
-                                                                            _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
-                                                                            _createElementVNode("code", _hoisted_95, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
-                                                                          ]),
-                                                                          _createElementVNode("span", _hoisted_96, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
-                                                                        ]),
-                                                                        _createElementVNode("div", _hoisted_97, [
-                                                                          _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
-                                                                          _createElementVNode("pre", _hoisted_98, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
-                                                                        ]),
-                                                                        (step.toolCall.error)
-                                                                          ? (_openBlock(), _createElementBlock("div", _hoisted_99, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
-                                                                          : (step.toolCall.resultText)
-                                                                            ? (_openBlock(), _createElementBlock("div", _hoisted_100, [
-                                                                                _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
-                                                                                _createElementVNode("pre", _hoisted_101, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
-                                                                              ]))
-                                                                            : _createCommentVNode("v-if", true)
-                                                                      ]))
-                                                                ], 2 /* CLASS */)
-                                                              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_81))
-                                                        ])
-                                                      ]))
-                                                    }), 128 /* KEYED_FRAGMENT */))
-                                                  ])
-                                                ])
-                                              ], 2 /* CLASS */)
-                                            ], 2 /* CLASS */)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Active Tool Calls "),
-                                      (msg.role === 'assistant' && activeToolContinuationMessageId === msg.id && isGenerating && !activeToolContinuationHasResponse && !isThinking)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_102, [
-                                            _cache[25] || (_cache[25] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
-                                              _createElementVNode("span"),
-                                              _createElementVNode("span"),
-                                              _createElementVNode("span")
-                                            ], -1 /* CACHED */)),
-                                            isGenerating
-                                              ? (_openBlock(), _createBlock(_component_generation_timer, {
-                                                  key: 0,
-                                                  "wait-time": currentWaitTime,
-                                                  "estimated-time": estimatedGenerationTime
-                                                }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
-                                              : _createCommentVNode("v-if", true)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.top && msg.uiTemplateBlocks.top.length)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_103, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
-                                              return (_openBlock(), _createElementBlock("div", {
-                                                key: 'msg-ui-top-' + index + '-' + tIndex,
-                                                class: "w-full ui-template-render",
-                                                onClick: handleUiTemplateClick,
-                                                innerHTML: replaceUserNamePlaceholder(html)
-                                              }, null, 8 /* PROPS */, _hoisted_104))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'top'))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_105, [
-                                            _createVNode(_component_ui_template_pending)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      _createCommentVNode(" Main Part "),
-                                      (parseCot(msg.content).main)
-                                        ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                                            (index === chatHistory.length - 1 && isGenerating)
-                                              ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                                  (processMainContent(parseCot(msg.content).main, true).text)
-                                                    ? (_openBlock(), _createElementBlock("div", {
-                                                        key: 0,
-                                                        class: "markdown-body",
-                                                        style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                        innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
-                                                      }, null, 12 /* STYLE, PROPS */, _hoisted_106))
-                                                    : _createCommentVNode("v-if", true),
-                                                  (processMainContent(parseCot(msg.content).main, true).showSpinner)
-                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_107, [...(_cache[26] || (_cache[26] = [
-                                                        _createElementVNode("div", {
-                                                          class: "ui-build-dots",
-                                                          "aria-hidden": "true"
-                                                        }, [
-                                                          _createElementVNode("i"),
-                                                          _createElementVNode("i"),
-                                                          _createElementVNode("i")
-                                                        ], -1 /* CACHED */),
-                                                        _createElementVNode("span", { class: "text-[16px] font-bold tracking-wider text-blue-600/80" }, "正在构建 UI 界面", -1 /* CACHED */)
-                                                      ]))]))
-                                                    : _createCommentVNode("v-if", true)
-                                                ], 64 /* STABLE_FRAGMENT */))
-                                              : (_openBlock(), _createElementBlock("div", {
-                                                  key: 1,
-                                                  class: "markdown-body",
-                                                  style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                  innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
-                                                }, null, 12 /* STYLE, PROPS */, _hoisted_108))
-                                          ], 64 /* STABLE_FRAGMENT */))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.bottom && msg.uiTemplateBlocks.bottom.length)
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_109, [
-                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
-                                              return (_openBlock(), _createElementBlock("div", {
-                                                key: 'msg-ui-bottom-' + index + '-' + tIndex,
-                                                class: "w-full ui-template-render",
-                                                onClick: handleUiTemplateClick,
-                                                innerHTML: replaceUserNamePlaceholder(html)
-                                              }, null, 8 /* PROPS */, _hoisted_110))
-                                            }), 128 /* KEYED_FRAGMENT */))
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.role === 'assistant' && uiTemplateUpdateStatus.state === 'running' && uiTemplateUpdateStatus.targetMessageId === msg.id && activeUiTemplates.some(t => t.placement === 'bottom'))
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_111, [
-                                            _createVNode(_component_ui_template_pending)
-                                          ]))
-                                        : _createCommentVNode("v-if", true),
-                                      (msg.responseError)
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 8,
-                                            class: "response-error-text px-4 py-3",
-                                            style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                            role: "alert"
-                                          }, _toDisplayString(msg.responseError), 5 /* TEXT, STYLE */))
-                                        : _createCommentVNode("v-if", true)
-                                    ], 10 /* CLASS, PROPS */, _hoisted_69))
-                          ], 10 /* CLASS, PROPS */, _hoisted_60),
-                          _createCommentVNode(" Message Actions "),
-                          (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
-                            ? (_openBlock(), _createElementBlock("div", {
-                                key: 0,
-                                class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
-                              }, [
-                                (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 0,
-                                      onClick: $event => (regenerateMessage(index)),
-                                      class: "message-action-button",
-                                      title: "重新生成"
-                                    }, [...(_cache[27] || (_cache[27] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
-                                      }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_112))
-                                  : _createCommentVNode("v-if", true),
-                                _createElementVNode("button", {
-                                  onClick: $event => (editMessage(index)),
-                                  class: "message-action-button",
-                                  title: "编辑"
-                                }, [...(_cache[28] || (_cache[28] = [
-                                  _createElementVNode("svg", {
-                                    class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                    fill: "none",
-                                    stroke: "currentColor",
-                                    viewBox: "0 0 24 24"
-                                  }, [
-                                    _createElementVNode("path", {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      "stroke-width": "2",
-                                      d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                    })
-                                  ], -1 /* CACHED */)
-                                ]))], 8 /* PROPS */, _hoisted_113),
-                                _createElementVNode("button", {
-                                  onClick: $event => {copyMessage(msg.content); playMessageActionFeedback($event)},
-                                  class: "message-action-button",
-                                  title: "复制"
-                                }, [...(_cache[29] || (_cache[29] = [
-                                  _createElementVNode("svg", {
-                                    class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                    fill: "none",
-                                    stroke: "currentColor",
-                                    viewBox: "0 0 24 24"
-                                  }, [
-                                    _createElementVNode("path", {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      "stroke-width": "2",
-                                      d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                    })
-                                  ], -1 /* CACHED */)
-                                ]))], 8 /* PROPS */, _hoisted_114),
-                                (msg.role === 'assistant')
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 1,
-                                      onClick: $event => {createStoryBranch(index); playMessageActionFeedback($event)},
-                                      disabled: storyBranchSwitching,
-                                      class: "message-action-button",
-                                      title: "从这里分支",
-                                      "aria-label": "从这里创建分支"
-                                    }, [...(_cache[30] || (_cache[30] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24",
-                                        "aria-hidden": "true"
-                                      }, [
-                                        _createElementVNode("use", { href: "#icon-story-branch" })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_115))
-                                  : _createCommentVNode("v-if", true),
-                                (canDeleteMessage(index))
-                                  ? (_openBlock(), _createElementBlock("button", {
-                                      key: 2,
-                                      onClick: $event => (deleteMessage(index)),
-                                      class: "message-action-button message-action-button--danger",
-                                      title: "删除"
-                                    }, [...(_cache[31] || (_cache[31] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-3.5 h-3.5 md:w-4 md:h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
-                                      }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_116))
-                                  : _createCommentVNode("v-if", true),
-                                (msg.role === 'assistant' && Array.isArray(msg.styleFilterHits) && msg.styleFilterHits.length)
-                                  ? (_openBlock(), _createElementBlock("div", _hoisted_117, [
-                                      (isStyleFilterDetailsOpen(msg, index))
-                                        ? (_openBlock(), _createElementBlock("div", {
-                                            key: 0,
-                                            onClick: _withModifiers(() => {}, ["stop"]),
-                                            class: "message-style-filter-popover absolute bottom-full left-1/2 z-30 mb-2 w-[min(20rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur-xl"
-                                          }, [
-                                            _cache[32] || (_cache[32] = _createElementVNode("div", { class: "border-b border-gray-100 bg-gray-50/80 px-3 py-2" }, [
-                                              _createElementVNode("span", { class: "text-xs font-bold text-gray-700" }, "文风过滤详情")
-                                            ], -1 /* CACHED */)),
-                                            _createElementVNode("div", _hoisted_119, [
-                                              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.styleFilterHits, (fragment, filterIndex) => {
-                                                return (_openBlock(), _createElementBlock("div", {
-                                                  key: index + '-style-filter-' + filterIndex,
-                                                  class: "flex items-start gap-1.5 rounded-xl border border-gray-100 bg-gray-50/70 px-2.5 py-2"
-                                                }, [
-                                                  _createElementVNode("span", _hoisted_120, _toDisplayString(filterIndex + 1), 1 /* TEXT */),
-                                                  _createElementVNode("span", _hoisted_121, [
-                                                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getStyleFilterHitSegments(fragment), (segment, segmentIndex) => {
-                                                      return (_openBlock(), _createElementBlock("span", {
-                                                        key: filterIndex + '-segment-' + segmentIndex,
-                                                        class: _normalizeClass(segment.matched ? 'font-semibold text-blue-500' : '')
-                                                      }, _toDisplayString(segment.text), 3 /* TEXT, CLASS */))
-                                                    }), 128 /* KEYED_FRAGMENT */))
-                                                  ])
-                                                ]))
-                                              }), 128 /* KEYED_FRAGMENT */))
-                                            ])
-                                          ], 8 /* PROPS */, _hoisted_118))
-                                        : _createCommentVNode("v-if", true),
-                                      _createElementVNode("button", {
-                                        onClick: _withModifiers($event => (toggleStyleFilterDetails(msg, index)), ["stop"]),
-                                        class: _normalizeClass(["message-style-filter-button", { 'is-active': isStyleFilterDetailsOpen(msg, index) }]),
-                                        title: '查看本条回复过滤的 ' + msg.styleFilterHits.length + ' 处内容'
-                                      }, [
-                                        _cache[34] || (_cache[34] = _createElementVNode("svg", {
-                                          class: "h-3.5 w-3.5",
-                                          fill: "none",
-                                          stroke: "currentColor",
-                                          viewBox: "0 0 24 24",
-                                          "aria-hidden": "true"
-                                        }, [
-                                          _createElementVNode("path", {
-                                            "stroke-linecap": "round",
-                                            "stroke-linejoin": "round",
-                                            "stroke-width": "2",
-                                            d: "M3 4h18M6 9h12M9 14h6M11 19h2"
-                                          })
-                                        ], -1 /* CACHED */)),
-                                        (_openBlock(), _createElementBlock("svg", {
-                                          class: _normalizeClass(["h-3 w-3 transition-transform", { 'rotate-180': isStyleFilterDetailsOpen(msg, index) }]),
-                                          fill: "none",
-                                          stroke: "currentColor",
-                                          viewBox: "0 0 24 24",
-                                          "aria-hidden": "true"
-                                        }, [...(_cache[33] || (_cache[33] = [
-                                          _createElementVNode("path", {
-                                            "stroke-linecap": "round",
-                                            "stroke-linejoin": "round",
-                                            "stroke-width": "2",
-                                            d: "M19 9l-7 7-7-7"
-                                          }, null, -1 /* CACHED */)
-                                        ]))], 2 /* CLASS */))
-                                      ], 10 /* CLASS, PROPS */, _hoisted_122)
-                                    ]))
-                                  : _createCommentVNode("v-if", true)
-                              ], 2 /* CLASS */))
-                            : _createCommentVNode("v-if", true)
-                        ], 2 /* CLASS */)
-                      ], 2 /* CLASS */)
-                    ], 2 /* CLASS */)
-                  ], 14 /* CLASS, STYLE, PROPS */, _hoisted_55)), [
-                    [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
-                  ])
-                }), 128 /* KEYED_FRAGMENT */))
-              : _createCommentVNode("v-if", true),
-            _createCommentVNode(" Typing Indicator "),
-            (isGenerating && !isReceiving && !isThinking && !hasActiveToolInlineWork)
-              ? (_openBlock(), _createElementBlock("div", {
-                  key: 3,
-                  class: _normalizeClass(['flex w-full', settings.immersiveMode ? 'immersive-message-row justify-start' : 'standard-message-row'])
-                }, [
-                  _createElementVNode("div", {
-                    class: _normalizeClass(['flex flex-row centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell'])
-                  }, [
-                    _withDirectives(_createElementVNode("div", _hoisted_123, [
-                      _createElementVNode("img", {
-                        src: currentCharacterAvatar,
-                        class: "msg-avatar w-9 h-9 rounded-full object-cover mr-2"
-                      }, null, 8 /* PROPS */, _hoisted_124)
-                    ], 512 /* NEED_PATCH */), [
-                      [_vShow, !settings.immersiveMode]
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 8 /* PROPS */, _hoisted_182),
+                      _createElementVNode("button", {
+                        onClick: openStoryBranchModal,
+                        class: "island-button",
+                        title: '剧情分支：' + (currentStoryBranch?.name || '主线')
+                      }, [...(_cache[59] || (_cache[59] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24"
+                        }, [
+                          _createElementVNode("use", { href: "#icon-story-branch" })
+                        ], -1 /* CACHED */)
+                      ]))], 8 /* PROPS */, _hoisted_183)
                     ]),
-                    _createElementVNode("div", {
-                      class: _normalizeClass(['flex flex-col min-w-0 items-start', settings.immersiveMode ? 'immersive-message-column' : ''])
-                    }, [
-                      _withDirectives(_createElementVNode("div", {
-                        class: "msg-name-tag mr-auto ml-1 truncate max-w-[210px] md:max-w-[250px] animate-message-in",
-                        style: {"animation-delay":"100ms"}
-                      }, _toDisplayString(currentCharacter.name), 513 /* TEXT, NEED_PATCH */), [
-                        [_vShow, !settings.immersiveMode]
-                      ]),
-                      _createElementVNode("div", _hoisted_125, [
-                        _cache[35] || (_cache[35] = _createElementVNode("div", { class: "typing-indicator scale-125" }, [
-                          _createElementVNode("span"),
-                          _createElementVNode("span"),
-                          _createElementVNode("span")
-                        ], -1 /* CACHED */)),
-                        isGenerating
-                          ? (_openBlock(), _createBlock(_component_generation_timer, {
-                              key: 0,
-                              "wait-time": currentWaitTime,
-                              "estimated-time": estimatedGenerationTime
-                            }, null, 8 /* PROPS */, ["wait-time", "estimated-time"]))
-                          : _createCommentVNode("v-if", true)
-                      ])
-                    ], 2 /* CLASS */)
-                  ], 2 /* CLASS */)
-                ], 2 /* CLASS */))
-              : _createCommentVNode("v-if", true)
-          ], 46 /* CLASS, STYLE, PROPS, NEED_HYDRATION */, _hoisted_49),
-          _createCommentVNode(" Input Area (Floating Island) "),
-          _withDirectives(_createElementVNode("div", _hoisted_126, [
-            _createElementVNode("div", _hoisted_127, [
-              _createVNode(_Transition, {
-                "enter-active-class": "transition duration-300 ease-spring",
-                "enter-from-class": "opacity-0 translate-y-2 scale-95",
-                "enter-to-class": "opacity-100 translate-y-0 scale-100",
-                "leave-active-class": "transition-all duration-150 ease-in",
-                "leave-from-class": "opacity-100 translate-y-0 scale-100",
-                "leave-to-class": "opacity-0 translate-y-2 scale-95"
-              }, {
-                default: _withCtx(() => [
-                  pendingCardInteraction
-                    ? (_openBlock(), _createElementBlock("div", {
-                        key: 0,
-                        class: _normalizeClass([pendingChatImages.length ? 'bottom-[calc(100%+7.25rem)] md:bottom-[calc(100%+8.75rem)]' : 'bottom-[calc(100%+0.65rem)]', "absolute left-1 right-1 z-[3] flex justify-center"])
-                      }, [
-                        _createElementVNode("div", _hoisted_128, [
-                          _cache[37] || (_cache[37] = _createElementVNode("svg", {
-                            class: "h-3.5 w-3.5 flex-none text-primary-500",
-                            fill: "none",
-                            stroke: "currentColor",
-                            viewBox: "0 0 24 24",
-                            "aria-hidden": "true"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M13 10V3L4 14h7v7l9-11h-7z"
-                            })
-                          ], -1 /* CACHED */)),
-                          _cache[38] || (_cache[38] = _createElementVNode("span", { class: "flex-none font-bold text-primary-600" }, "卡片交互", -1 /* CACHED */)),
-                          _createElementVNode("span", {
-                            class: "min-w-0 truncate text-gray-600",
-                            title: pendingCardInteraction
-                          }, _toDisplayString(pendingCardInteraction), 9 /* TEXT, PROPS */, _hoisted_129),
-                          _createElementVNode("button", {
-                            type: "button",
-                            onClick: clearPendingCardInteraction,
-                            class: "flex h-5 w-5 flex-none items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600",
-                            title: "取消卡片交互",
-                            "aria-label": "取消卡片交互"
-                          }, [...(_cache[36] || (_cache[36] = [
+                    _createElementVNode("div", _hoisted_184, [
+                      _createElementVNode("button", {
+                        onClick: _withModifiers($event => (showChatModelSelector = !showChatModelSelector), ["stop"]),
+                        class: _normalizeClass(["island-button", { 'is-active': showChatModelSelector }]),
+                        title: "快捷面板",
+                        "aria-label": "快捷面板",
+                        "aria-controls": "chat-quick-panel",
+                        "aria-expanded": showChatModelSelector
+                      }, [...(_cache[60] || (_cache[60] = [
+                        _createElementVNode("svg", {
+                          class: "w-4 h-4",
+                          fill: "none",
+                          stroke: "currentColor",
+                          viewBox: "0 0 24 24",
+                          "aria-hidden": "true"
+                        }, [
+                          _createElementVNode("path", {
+                            "stroke-linecap": "round",
+                            "stroke-linejoin": "round",
+                            "stroke-width": "2",
+                            d: "M4 6h5m4 0h7M9 4v4M4 12h10m4 0h2m-6-2v4M4 18h3m4 0h9m-13-2v4"
+                          })
+                        ], -1 /* CACHED */)
+                      ]))], 10 /* CLASS, PROPS */, _hoisted_185),
+                      (!isConversationBusy)
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 0,
+                            onClick: sendMessage,
+                            disabled: (!userInput.trim() && pendingChatImages.length === 0 && !pendingCardInteraction) || isRecognizingImages || pendingChatImages.some(image => image.status !== 'ready'),
+                            class: "island-send",
+                            title: "发送"
+                          }, [...(_cache[61] || (_cache[61] = [
                             _createElementVNode("svg", {
-                              class: "h-3.5 w-3.5",
                               fill: "none",
                               stroke: "currentColor",
-                              viewBox: "0 0 24 24"
+                              viewBox: "0 0 24 24",
+                              "aria-hidden": "true"
                             }, [
                               _createElementVNode("path", {
                                 "stroke-linecap": "round",
                                 "stroke-linejoin": "round",
-                                "stroke-width": "2.5",
-                                d: "M6 18L18 6M6 6l12 12"
+                                "stroke-width": "2",
+                                d: "M10.268 21a2 2 0 0 0 3.464 0"
+                              }),
+                              _createElementVNode("path", {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_130)
-                        ])
-                      ], 2 /* CLASS */))
-                    : _createCommentVNode("v-if", true)
-                ]),
-                _: 1 /* STABLE */
-              }),
-              (pendingChatImages.length)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_131, [
-                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(pendingChatImages, (image) => {
-                      return (_openBlock(), _createElementBlock("div", {
-                        key: image.id,
-                        class: "relative w-24 h-24 md:w-[7.5rem] md:h-[7.5rem] flex-none overflow-hidden rounded-xl bg-transparent shadow-lg",
-                        title: image.status === 'ready' ? image.description : (image.error || '正在识别图片')
-                      }, [
-                        _createElementVNode("img", {
-                          src: image.dataUrl,
-                          alt: image.name,
-                          class: "w-full h-full object-cover"
-                        }, null, 8 /* PROPS */, _hoisted_133),
-                        (image.status !== 'ready')
-                          ? (_openBlock(), _createElementBlock("div", {
-                              key: 0,
-                              class: _normalizeClass(['absolute inset-0 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-white', image.status === 'error' ? 'bg-red-700/75' : 'bg-slate-900/55'])
+                          ]))], 8 /* PROPS */, _hoisted_186))
+                        : (_openBlock(), _createElementBlock("button", {
+                            key: 1,
+                            onClick: stopGeneration,
+                            class: "island-send island-send--stop",
+                            title: "中止生成"
+                          }, [...(_cache[62] || (_cache[62] = [
+                            _createElementVNode("svg", {
+                              viewBox: "0 0 24 24",
+                              fill: "currentColor",
+                              "aria-hidden": "true"
                             }, [
-                              (image.status === 'analyzing')
-                                ? (_openBlock(), _createElementBlock("svg", _hoisted_134, [...(_cache[39] || (_cache[39] = [
-                                    _createElementVNode("circle", {
-                                      class: "generated-image-spinner-path",
-                                      cx: "25",
-                                      cy: "25",
-                                      r: "20",
-                                      fill: "none",
-                                      "stroke-width": "2"
-                                    }, null, -1 /* CACHED */)
-                                  ]))]))
-                                : (_openBlock(), _createElementBlock("span", _hoisted_135, "识别失败"))
-                            ], 2 /* CLASS */))
-                          : _createCommentVNode("v-if", true),
-                        _createElementVNode("button", {
-                          type: "button",
-                          onClick: _withModifiers($event => (removePendingChatImage(image.id)), ["stop"]),
-                          title: "移除图片",
-                          class: "absolute top-1 right-1 z-[2] flex items-center justify-center w-5 h-5 rounded-full bg-slate-900/70 text-white shadow-sm",
-                          "aria-label": "移除图片"
-                        }, [...(_cache[40] || (_cache[40] = [
-                          _createElementVNode("svg", {
-                            class: "w-3 h-3",
-                            viewBox: "0 0 24 24",
-                            fill: "none",
-                            stroke: "currentColor"
-                          }, [
-                            _createElementVNode("path", {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2.5",
-                              d: "M6 18L18 6M6 6l12 12"
-                            })
-                          ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_136)
-                      ], 8 /* PROPS */, _hoisted_132))
-                    }), 128 /* KEYED_FRAGMENT */))
-                  ]))
-                : _createCommentVNode("v-if", true),
-              (settings.showLatestUsageBar && latestMainTokenUsage)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_137, [
-                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList([
-                                    { tone: 'input', label: '输入', value: getUncachedInputTokens(latestMainTokenUsage) },
-                                    { tone: 'cache', label: '缓存', value: latestMainTokenUsage.cacheReadTokens },
-                                    { tone: 'output', label: '输出', value: latestMainTokenUsage.outputTokens }], (part) => {
-                      return (_openBlock(), _createElementBlock("span", {
-                        key: part.tone,
-                        class: "flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1",
-                        title: part.label + ' Token'
-                      }, [
-                        _createElementVNode("i", {
-                          class: _normalizeClass('usage-swatch usage-tone--' + part.tone)
-                        }, null, 2 /* CLASS */),
-                        _createVNode(_component_rolling_text, {
-                          class: "font-mono font-semibold tabular-nums text-gray-700",
-                          value: formatLatestTokenCount(part.value)
-                        }, null, 8 /* PROPS */, ["value"])
-                      ], 8 /* PROPS */, _hoisted_138))
-                    }), 128 /* KEYED_FRAGMENT */))
-                  ]))
-                : _createCommentVNode("v-if", true),
-              _createCommentVNode(" Quick panel anchors to the whole composer so it never covers the text "),
-              _createVNode(_Transition, {
-                "enter-active-class": "transition duration-300 ease-spring",
-                "enter-from-class": "opacity-0 translate-y-2 scale-95",
-                "enter-to-class": "opacity-100 translate-y-0 scale-100",
-                "leave-active-class": "transition duration-150 ease-in",
-                "leave-from-class": "opacity-100 translate-y-0 scale-100",
-                "leave-to-class": "opacity-0 translate-y-2 scale-95"
-              }, {
-                default: _withCtx(() => [
-                  showChatModelSelector
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_139, [
-                        _createElementVNode("div", {
-                          id: "chat-quick-panel",
-                          onClick: _withModifiers(() => {}, ["stop"]),
-                          onKeydown: _withKeys(_withModifiers($event => (showChatModelSelector = false), ["stop"]), ["esc"]),
-                          role: "dialog",
-                          "aria-label": "快捷面板",
-                          class: "chat-quick-panel rounded-2xl p-3 flex flex-col gap-3 max-w-full max-h-[inherit] overflow-x-hidden overflow-y-auto overscroll-contain"
-                        }, [
-                          _createElementVNode("div", _hoisted_141, [
-                            _cache[42] || (_cache[42] = _createElementVNode("h3", { class: "text-sm font-bold text-gray-700" }, "快捷面板", -1 /* CACHED */)),
-                            _createElementVNode("button", {
-                              type: "button",
-                              onClick: $event => (showChatModelSelector = false),
-                              "aria-label": "关闭快捷面板",
-                              class: "w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                            }, [...(_cache[41] || (_cache[41] = [
-                              _createElementVNode("svg", {
-                                class: "w-4 h-4",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24",
-                                "aria-hidden": "true"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-width": "2",
-                                  d: "m6 6 12 12M18 6 6 18"
-                                })
-                              ], -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_142)
-                          ]),
-                          _createCommentVNode(" API 站切换（下拉浮层：展开时覆盖下方内容，不推挤面板布局）"),
-                          _createElementVNode("div", _hoisted_143, [
-                            _createElementVNode("div", _hoisted_144, [
-                              _cache[43] || (_cache[43] = _createElementVNode("span", { class: "text-xs font-bold text-gray-500" }, "API 站", -1 /* CACHED */)),
-                              _createElementVNode("button", {
-                                type: "button",
-                                onClick: _withModifiers($event => (showApiQuickSelector = !showApiQuickSelector), ["stop"]),
-                                class: "text-xs font-bold px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-gray-600 hover:border-primary-200 active:scale-95 transition-all"
-                              }, _toDisplayString(quickApiProviders.length ? (quickApiProviders.find(p => p.id === settings.apiProviderId)?.name || '跟随主API') : '跟随主API') + " ▾ ", 9 /* TEXT, PROPS */, _hoisted_145)
-                            ]),
-                            _createVNode(_Transition, {
-                              "enter-active-class": "transition-all duration-150 ease-out",
-                              "enter-from-class": "opacity-0 scale-95",
-                              "enter-to-class": "opacity-100 scale-100",
-                              "leave-active-class": "transition-all duration-100 ease-in",
-                              "leave-from-class": "opacity-100 scale-100",
-                              "leave-to-class": "opacity-0 scale-95"
-                            }, {
-                              default: _withCtx(() => [
-                                showApiQuickSelector
-                                  ? (_openBlock(), _createElementBlock("div", {
-                                      key: 0,
-                                      onClick: _withModifiers(() => {}, ["stop"]),
-                                      class: "absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-lg"
-                                    }, [
-                                      (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(quickApiProviders, (provider) => {
-                                        return (_openBlock(), _createElementBlock("button", {
-                                          key: provider.id,
-                                          type: "button",
-                                          onClick: $event => (selectQuickApiProvider(provider)),
-                                          class: _normalizeClass(['w-full text-left px-3 py-2 text-sm font-medium transition-colors', provider.id === settings.apiProviderId ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-600'])
-                                        }, _toDisplayString(provider.name || provider.id), 11 /* TEXT, CLASS, PROPS */, _hoisted_147))
-                                      }), 128 /* KEYED_FRAGMENT */)),
-                                      (!quickApiProviders.length)
-                                        ? (_openBlock(), _createElementBlock("p", _hoisted_148, "请先在设置中配置 API 站。"))
-                                        : _createCommentVNode("v-if", true)
-                                    ], 8 /* PROPS */, _hoisted_146))
-                                  : _createCommentVNode("v-if", true)
-                              ]),
-                              _: 1 /* STABLE */
-                            })
-                          ]),
-                          _createElementVNode("div", _hoisted_149, [
-                            _withDirectives(_createElementVNode("div", {
-                              class: "segmented-switch__indicator flex items-center justify-end px-2.5 text-primary-600",
-                              "aria-hidden": "true",
-                              style: _normalizeStyle({ '--slot-index': chatModelSlots.findIndex(slot => slot.mode === modelMode) })
-                            }, [...(_cache[44] || (_cache[44] = [
-                              _createElementVNode("svg", {
-                                class: "w-4 h-4 flex-none",
-                                fill: "none",
-                                stroke: "currentColor",
-                                viewBox: "0 0 24 24"
-                              }, [
-                                _createElementVNode("path", {
-                                  "stroke-linecap": "round",
-                                  "stroke-linejoin": "round",
-                                  "stroke-width": "2",
-                                  d: "m5 12 4 4L19 6"
-                                })
-                              ], -1 /* CACHED */)
-                            ]))], 4 /* STYLE */), [
-                              [_vShow, chatModelSlots.some(slot => slot.mode === modelMode && slot.model)]
-                            ]),
-                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(chatModelSlots, (slot, slotIndex) => {
-                              return (_openBlock(), _createElementBlock("button", {
-                                key: slot.mode,
-                                type: "button",
-                                onClick: $event => (selectChatModelSlot(slot)),
-                                disabled: !slot.model,
-                                "aria-pressed": modelMode === slot.mode && !!slot.model,
-                                class: _normalizeClass(['relative z-10 flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors', modelMode === slot.mode && slot.model ? 'text-primary-600' : 'text-gray-500', !slot.model ? 'cursor-not-allowed opacity-45' : 'hover:text-primary-600'])
-                              }, [
-                                _createElementVNode("span", _hoisted_151, "槽位 " + _toDisplayString(slotIndex + 1), 1 /* TEXT */),
-                                _createElementVNode("span", {
-                                  class: "min-w-0 flex-1 truncate text-[13px] font-medium",
-                                  title: slot.model
-                                }, _toDisplayString(slot.model || '未配置'), 9 /* TEXT, PROPS */, _hoisted_152),
-                                _cache[45] || (_cache[45] = _createElementVNode("span", {
-                                  class: "w-4 flex-none",
-                                  "aria-hidden": "true"
-                                }, null, -1 /* CACHED */))
-                              ], 10 /* CLASS, PROPS */, _hoisted_150))
-                            }), 128 /* KEYED_FRAGMENT */))
-                          ]),
-                          _createElementVNode("div", _hoisted_153, [
-                            _createElementVNode("div", _hoisted_154, [
-                              _createElementVNode("div", _hoisted_155, [
-                                _cache[46] || (_cache[46] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "推理强度", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_156, _toDisplayString(reasoningEffortLabel), 1 /* TEXT */)
-                              ]),
-                              _withDirectives(_createElementVNode("input", {
-                                "onUpdate:modelValue": $event => ((reasoningEffortSlider) = $event),
-                                type: "range",
-                                min: "0",
-                                max: "5",
-                                step: "1",
-                                class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
-                                "aria-label": "推理强度"
-                              }, null, 8 /* PROPS */, _hoisted_157), [
-                                [
-                                  _vModelText,
-                                  reasoningEffortSlider,
-                                  void 0,
-                                  { number: true }
-                                ]
-                              ])
-                            ]),
-                            _createElementVNode("div", _hoisted_158, [
-                              _createElementVNode("div", _hoisted_159, [
-                                _cache[47] || (_cache[47] = _createElementVNode("span", { class: "font-bold text-gray-500" }, "温度", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_160, _toDisplayString(Number(settings.temperature).toFixed(2)), 1 /* TEXT */)
-                              ]),
-                              _withDirectives(_createElementVNode("input", {
-                                "onUpdate:modelValue": $event => ((slotTemperature) = $event),
-                                type: "range",
-                                min: "0",
-                                max: "1",
-                                step: "0.01",
-                                class: "compact-range block w-full appearance-none cursor-pointer accent-primary-500",
-                                "aria-label": "温度"
-                              }, null, 8 /* PROPS */, _hoisted_161), [
-                                [
-                                  _vModelText,
-                                  slotTemperature,
-                                  void 0,
-                                  { number: true }
-                                ]
-                              ])
-                            ])
-                          ]),
-                          _createElementVNode("div", _hoisted_162, [
-                            _createElementVNode("label", _hoisted_163, [
-                              _cache[49] || (_cache[49] = _createElementVNode("span", null, "流式输出", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_164, [
-                                _withDirectives(_createElementVNode("input", {
-                                  "onUpdate:modelValue": $event => ((settings.stream) = $event),
-                                  type: "checkbox",
-                                  class: "settings-toggle-input sr-only"
-                                }, null, 8 /* PROPS */, _hoisted_165), [
-                                  [_vModelCheckbox, settings.stream]
-                                ]),
-                                _cache[48] || (_cache[48] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                              ])
-                            ]),
-                            _createElementVNode("label", _hoisted_166, [
-                              _cache[51] || (_cache[51] = _createElementVNode("span", null, "沉浸模式", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_167, [
-                                _withDirectives(_createElementVNode("input", {
-                                  "onUpdate:modelValue": $event => ((settings.immersiveMode) = $event),
-                                  type: "checkbox",
-                                  class: "settings-toggle-input sr-only"
-                                }, null, 8 /* PROPS */, _hoisted_168), [
-                                  [_vModelCheckbox, settings.immersiveMode]
-                                ]),
-                                _cache[50] || (_cache[50] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                              ])
-                            ])
-                          ]),
-                          isGeminiModel
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_169, [
-                                _createElementVNode("label", _hoisted_170, [
-                                  _cache[53] || (_cache[53] = _createElementVNode("span", null, "Gemini抗截断", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_171, [
-                                    _withDirectives(_createElementVNode("input", {
-                                      "onUpdate:modelValue": $event => ((settings.preventTruncation) = $event),
-                                      onChange: $event => ($event.target.checked && (settings.stream = true)),
-                                      type: "checkbox",
-                                      class: "settings-toggle-input sr-only"
-                                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_172), [
-                                      [_vModelCheckbox, settings.preventTruncation]
-                                    ]),
-                                    _cache[52] || (_cache[52] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                                  ])
-                                ]),
-                                _createElementVNode("label", _hoisted_173, [
-                                  _cache[55] || (_cache[55] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_174, [
-                                    _withDirectives(_createElementVNode("input", {
-                                      "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
-                                      type: "checkbox",
-                                      class: "settings-toggle-input sr-only"
-                                    }, null, 8 /* PROPS */, _hoisted_175), [
-                                      [_vModelCheckbox, settings.inputObfuscation]
-                                    ]),
-                                    _cache[54] || (_cache[54] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                                  ])
-                                ])
-                              ]))
-                            : _createCommentVNode("v-if", true)
-                        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_140)
-                      ]))
-                    : _createCommentVNode("v-if", true)
-                ]),
-                _: 1 /* STABLE */
-              }),
-              _withDirectives(_createElementVNode("textarea", {
-                "onUpdate:modelValue": $event => ((userInput) = $event),
-                onInput: autoResizeInput,
-                onFocus: handleChatInputFocus,
-                onBlur: handleChatInputBlur,
-                enterkeyhint: "enter",
-                onKeydown: handleChatInputEnter,
-                placeholder: '输入消息...',
-                class: "island-input chat-input-scrollbar",
-                rows: "1",
-                ref: "inputBox"
-              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_176), [
-                [_vModelText, userInput]
-              ]),
-              _createElementVNode("div", _hoisted_177, [
-                _createElementVNode("div", _hoisted_178, [
-                  _createCommentVNode(" Send Image Button "),
-                  _createElementVNode("button", {
-                    type: "button",
-                    onClick: $event => (requestChatImageSelection($refs.chatImageInput)),
-                    disabled: isConversationBusy,
-                    class: "island-button",
-                    title: `发送图片（${pendingChatImages.length + pendingChatImageReadCount}/3）`
-                  }, [...(_cache[56] || (_cache[56] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94a3 3 0 114.243 4.243L8.552 18.32a1.5 1.5 0 01-2.121-2.121l7.693-7.693"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_179),
-                  _createElementVNode("input", {
-                    ref: "chatImageInput",
-                    type: "file",
-                    accept: "image/*",
-                    multiple: "",
-                    class: "hidden",
-                    onChange: handleChatImageSelection
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_180),
-                  _createCommentVNode(" Auto Image Button "),
-                  _createElementVNode("button", {
-                    onClick: toggleAutoImageGen,
-                    class: _normalizeClass(["island-button", { 'is-active': isAutoImageGenEnabled }]),
-                    "aria-pressed": isAutoImageGenEnabled,
-                    title: "自动生图开关"
-                  }, [...(_cache[57] || (_cache[57] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 10 /* CLASS, PROPS */, _hoisted_181),
-                  _createCommentVNode(" Context Viewer Button "),
-                  _createElementVNode("button", {
-                    onClick: $event => (showContextViewerModal = true),
-                    class: "island-button",
-                    title: "上下文查看器"
-                  }, [...(_cache[58] || (_cache[58] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_182),
-                  _createElementVNode("button", {
-                    onClick: openStoryBranchModal,
-                    class: "island-button",
-                    title: '剧情分支：' + (currentStoryBranch?.name || '主线')
-                  }, [...(_cache[59] || (_cache[59] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24"
-                    }, [
-                      _createElementVNode("use", { href: "#icon-story-branch" })
-                    ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_183)
-                ]),
-                _createElementVNode("div", _hoisted_184, [
-                  _createElementVNode("button", {
-                    onClick: _withModifiers($event => (showChatModelSelector = !showChatModelSelector), ["stop"]),
-                    class: _normalizeClass(["island-button", { 'is-active': showChatModelSelector }]),
-                    title: "快捷面板",
-                    "aria-label": "快捷面板",
-                    "aria-controls": "chat-quick-panel",
-                    "aria-expanded": showChatModelSelector
-                  }, [...(_cache[60] || (_cache[60] = [
-                    _createElementVNode("svg", {
-                      class: "w-4 h-4",
-                      fill: "none",
-                      stroke: "currentColor",
-                      viewBox: "0 0 24 24",
-                      "aria-hidden": "true"
-                    }, [
-                      _createElementVNode("path", {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        "stroke-width": "2",
-                        d: "M4 6h5m4 0h7M9 4v4M4 12h10m4 0h2m-6-2v4M4 18h3m4 0h9m-13-2v4"
-                      })
-                    ], -1 /* CACHED */)
-                  ]))], 10 /* CLASS, PROPS */, _hoisted_185),
-                  (!isConversationBusy)
-                    ? (_openBlock(), _createElementBlock("button", {
-                        key: 0,
-                        onClick: sendMessage,
-                        disabled: (!userInput.trim() && pendingChatImages.length === 0 && !pendingCardInteraction) || isRecognizingImages || pendingChatImages.some(image => image.status !== 'ready'),
-                        class: "island-send",
-                        title: "发送"
-                      }, [...(_cache[61] || (_cache[61] = [
-                        _createElementVNode("svg", {
-                          fill: "none",
-                          stroke: "currentColor",
-                          viewBox: "0 0 24 24",
-                          "aria-hidden": "true"
-                        }, [
-                          _createElementVNode("path", {
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            "stroke-width": "2",
-                            d: "M10.268 21a2 2 0 0 0 3.464 0"
-                          }),
-                          _createElementVNode("path", {
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            "stroke-width": "2",
-                            d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
-                          })
-                        ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_186))
-                    : (_openBlock(), _createElementBlock("button", {
-                        key: 1,
-                        onClick: stopGeneration,
-                        class: "island-send island-send--stop",
-                        title: "中止生成"
-                      }, [...(_cache[62] || (_cache[62] = [
-                        _createElementVNode("svg", {
-                          viewBox: "0 0 24 24",
-                          fill: "currentColor",
-                          "aria-hidden": "true"
-                        }, [
-                          _createElementVNode("rect", {
-                            x: "7",
-                            y: "7",
-                            width: "10",
-                            height: "10",
-                            rx: "2.5"
-                          })
-                        ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_187))
+                              _createElementVNode("rect", {
+                                x: "7",
+                                y: "7",
+                                width: "10",
+                                height: "10",
+                                rx: "2.5"
+                              })
+                            ], -1 /* CACHED */)
+                          ]))], 8 /* PROPS */, _hoisted_187))
+                    ])
+                  ])
                 ])
+              ], 512 /* NEED_PATCH */), [
+                [_vShow, !isInputBarHidden && !isAnyMessageEditing]
               ])
+            ], 512 /* NEED_PATCH */)), [
+              [_vShow, currentView === 'chat']
             ])
-          ], 512 /* NEED_PATCH */), [
-            [_vShow, !isInputBarHidden && !isAnyMessageEditing]
-          ])
-        ], 512 /* NEED_PATCH */), [
-          [_vShow, currentView === 'chat']
-        ]),
+          : _createCommentVNode("v-if", true),
         _createCommentVNode(" Characters Management "),
         hasOpenedCharacterManager
           ? _withDirectives((_openBlock(), _createElementBlock("div", {
-              key: 1,
+              key: 2,
               class: _normalizeClass(["management-view", { 'character-management--deck': useCharacterDeck && filteredCharacters.length }]),
               "data-rphub-save-skip": ""
             }, [
@@ -16306,7 +16316,7 @@ return function render(_ctx, _cache) {
         _createCommentVNode(" World Info View "),
         (currentView === 'worldinfo')
           ? (_openBlock(), _createElementBlock("div", {
-              key: 15,
+              key: 16,
               ref: "worldInfoViewport",
               class: "management-view worldinfo-view",
               onScrollPassive: $event => (worldInfoScrolled = $event.target.scrollTop > 300)
@@ -16640,7 +16650,7 @@ return function render(_ctx, _cache) {
           : _createCommentVNode("v-if", true),
         (currentView === 'settings-detail')
           ? (_openBlock(), _createElementBlock("div", {
-              key: 16,
+              key: 17,
               class: "management-view settings-view shell-settings-detail",
               "data-section": settingsSection
             }, [
@@ -18034,7 +18044,7 @@ return function render(_ctx, _cache) {
         ]),
         (currentView === 'advanced')
           ? (_openBlock(), _createBlock(_component_shell_advanced, {
-              key: 18,
+              key: 19,
               characters: characters,
               selected: currentCharacterIndex,
               busy: isConversationBusy,
@@ -18045,7 +18055,7 @@ return function render(_ctx, _cache) {
           : _createCommentVNode("v-if", true),
         (currentView === 'competition' && selectedCompetition)
           ? (_openBlock(), _createBlock(_component_competition_detail, {
-              key: 19,
+              key: 20,
               event: selectedCompetition,
               onBack: shellGoBack,
               onVisit: $event => (navigateWorkspace({view:'lighthouse',url:$event}))

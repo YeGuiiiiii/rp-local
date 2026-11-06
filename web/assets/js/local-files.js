@@ -69,7 +69,7 @@
             inventory[key] = file;
         }
     }
-    async function initialize(entries, put) {
+    async function initialize(entries, put, { synchronized = false } = {}) {
         if (!bridge) return;
         const existing = entries.find(entry => entry.key === 'rp_hub_characters');
         if (existing) {
@@ -88,6 +88,7 @@
                 await put(existing.key, existing.value);
             }
         }
+        if (synchronized) return;
         // A full backup import can replace the database directly; remove stale file references.
         if (existing) {
             const active = new Set(entries.map(entry => entry.key));
@@ -150,6 +151,8 @@
     window.RPLocalStore = Object.freeze({
         available: !!bridge, call, read, write, safeName, hash, imageUrl, assignFolders,
         initialize, ownerOf, findImage, saveImage,
+        readRevision: () => read('个人数据/同步版本.json'),
+        saveRevision: revision => ordered(() => write('个人数据/同步版本.json', revision)),
         save: (key, value) => ordered(async () => {
             await saveEntry(key, value);
             if (bridge) write('个人数据/文件索引.json', inventory);

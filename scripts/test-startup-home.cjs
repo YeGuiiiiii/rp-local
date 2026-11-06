@@ -10,6 +10,14 @@ const web=path.join(root,'web');
   const browser=await chromium.launch({channel:'msedge',headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844}});
   await context.addInitScript(installFileBridge);
+  await context.addInitScript(() => {
+    window.__qaBootCharacterWrites = 0;
+    const put = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (value, key) {
+      if (key === 'rp_hub_characters') __qaBootCharacterWrites++;
+      return put.call(this, value, key);
+    };
+  });
   const page=await context.newPage();
   let release;
   let gate=new Promise(resolve=>{release=resolve;});
@@ -44,6 +52,8 @@ const web=path.join(root,'web');
       __qa.showUserSetupModal=false;
     });
     assert.equal(await page.evaluate(()=>__qa.currentView),'characters');
+    assert.equal(await page.locator('.chat-view-root').count(), 0,
+      'The unopened chat page must not mount behind the directory');
     await page.getByRole('button',{name:'在线入口',exact:true}).click();
     const wheel=await page.getByRole('dialog',{name:'在线入口',exact:true}).boundingBox();
     const close=await page.getByRole('button',{name:'关闭在线入口',exact:true}).boundingBox();
@@ -57,7 +67,7 @@ const web=path.join(root,'web');
     await page.getByRole('dialog',{name:'在线入口',exact:true}).waitFor({state:'detached'});
     assert.equal(await page.getByRole('dialog',{name:'在线入口',exact:true}).count(),0);
     await page.evaluate(async()=>{
-      __qa.characters=[{uuid:'startup-card',name:'正在玩的卡',first_mes:'开场',description:'',worldInfo:[],regexScripts:[],uiTemplates:[]}];
+      __qa.characters=[{uuid:'startup-card',createdAt:1,name:'正在玩的卡',first_mes:'开场',description:'',worldInfo:[],regexScripts:[],uiTemplates:[]}];
       await __qa.selectCharacter(0);
       __qa.chatHistory=[{id:'startup-user',role:'user',content:'继续上次的冒险。'},{id:'startup-assistant',role:'assistant',content:'这里是保存的剧情。',shouldAnimate:false}];
     });
@@ -68,6 +78,15 @@ const web=path.join(root,'web');
     assert.equal(await page.evaluate(()=>__qa.currentView),'chat');
     assert.equal(await page.evaluate(()=>__qa.currentCharacter.uuid),'startup-card');
     assert.equal(await page.evaluate(()=>__qa.chatHistory[1].content),'这里是保存的剧情。');
+    assert.equal(await page.locator('.management-view[data-rphub-save-skip]').count(), 0,
+      'Resuming chat must not decode and mount the hidden character directory');
+    await page.waitForTimeout(1500);
+    assert.equal(await page.evaluate(()=>__qaBootCharacterWrites), 0,
+      'Restoring character resources must not trigger a second full-library autosave');
+    await page.evaluate(()=>__qa.navigateWorkspace('characters'));
+    await page.locator('.management-view[data-rphub-save-skip]').waitFor();
+    assert.ok((await page.locator('.management-view[data-rphub-save-skip]').innerText()).includes('正在玩的卡'));
+    await page.evaluate(()=>__qa.navigateWorkspace('chat'));
     await page.evaluate(()=>{
       Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});
       document.dispatchEvent(new Event('visibilitychange'));

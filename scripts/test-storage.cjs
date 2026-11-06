@@ -68,23 +68,32 @@ const filesModule = source('assets/js/local-files.js');
     const repeatedStartup = await page.evaluate(async () => {
       const digest = crypto.subtle.digest.bind(crypto.subtle);
       const put = IDBObjectStore.prototype.put;
-      let hashes = 0, cardWrites = 0;
+      const cursor = IDBObjectStore.prototype.openCursor;
+      const check = RPLocalFiles.writeTextIfChanged;
+      let hashes = 0, cardWrites = 0, fullScans = 0, mirrorChecks = 0;
       crypto.subtle.digest = (...args) => { hashes++; return digest(...args); };
       IDBObjectStore.prototype.put = function (value, key) {
         if (key === 'rp_hub_characters') cardWrites++;
         return put.call(this, value, key);
       };
+      IDBObjectStore.prototype.openCursor = function (...args) {
+        if (this.name === 'store') fullScans++;
+        return cursor.apply(this, args);
+      };
+      if (check) RPLocalFiles.writeTextIfChanged = (...args) => { mirrorChecks++; return check(...args); };
       try {
         await RPHubStorage.initDB();
         await RPLocalStore.flush();
-        return { hashes, cardWrites };
+        return { hashes, cardWrites, fullScans, mirrorChecks };
       } finally {
         crypto.subtle.digest = digest;
         IDBObjectStore.prototype.put = put;
+        IDBObjectStore.prototype.openCursor = cursor;
+        if (check) RPLocalFiles.writeTextIfChanged = check;
       }
     });
-    assert.deepEqual(repeatedStartup, { hashes: 0, cardWrites: 0 },
-      'Reopening unchanged data must reuse file paths and avoid rewriting the full character library');
+    assert.deepEqual(repeatedStartup, { hashes: 0, cardWrites: 0, fullScans: 0, mirrorChecks: 0 },
+      'Reopening synchronized data must not scan or serialize all cards and inactive conversations');
     await page.evaluate(async () => {
       RPHubStorage.getMainDb().close();
       await new Promise((resolve, reject) => {
@@ -122,6 +131,15 @@ const filesModule = source('assets/js/local-files.js');
       return rejected;
     });
     assert.equal(failures, true);
+    await page.evaluate(() => RPHubStorage.setStoredValue('after_failure', 'saved later'));
+    await load();
+    const repaired = await page.evaluate(async () => {
+      await RPHubStorage.initDB();
+      const index = RPLocalStore.read('个人数据/文件索引.json');
+      return RPLocalStore.read(index.rp_hub_test_failure).value;
+    });
+    assert.deepEqual(repaired, { value: 1 },
+      'A later successful save must not hide an earlier failed mirror; reopening must repair it');
     const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, folders: initial.folders };
     fs.writeFileSync(path.join(root, 'verification', process.argv.includes('--legacy-bridge') ? 'storage-legacy-bridge.json' : 'storage.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));

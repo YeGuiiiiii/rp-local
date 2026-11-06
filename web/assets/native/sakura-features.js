@@ -167,6 +167,7 @@
     //   沉浸时长统计已移到设置页（见模块二 renderPresence）。
     // ================================================================ */
     function sfFindToolbar() {
+        if (!document.querySelector('.chat-view-root')) return null;
         // 找 ⚙ 快捷面板按钮，确保其父容器是 flex 行。
         // 选择器按「稳定性」排序兜底 —— 只认 title 的话，官方改个文案这里就全挂：
         //   aria-controls 是语义属性（指向弹层 id），比 title 稳；

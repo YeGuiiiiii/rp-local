@@ -494,7 +494,10 @@ const app = createApp({
             if (currentCharacter.value && chatHistory.value.length) {
                 currentView.value = 'chat';
                 if (!await readerSession.restore()) await scrollChatToBottom();
-            } else currentView.value = 'characters';
+            } else {
+                hasOpenedCharacterManager.value = true;
+                currentView.value = 'characters';
+            }
         };
         const isNavigationOpen = ref(false);
         const showDescriptionPanel = ref(false);
@@ -518,7 +521,8 @@ const app = createApp({
         const activeToolMessages = [];
         const tempUserSetup = reactive({ name: '', description: '', person: 'second' });
         const characterDisplayLimit = ref(8);
-        const hasOpenedCharacterManager = ref(true);
+        const hasOpenedCharacterManager = ref(false);
+        const hasOpenedChat = ref(false);
         const isDesktopCharacterLayout = ref(window.innerWidth >= 768);
 
         // Quota State
@@ -5400,6 +5404,8 @@ const app = createApp({
         //   只有小文件（≤64MB）且流式通道不可用时才回退老路径。
         const LOCAL_BACKUP_READ_SAFE_BYTES = 64 * 1024 * 1024;
         const putBackupEntry = (store, entry) => {
+            store.delete('__rp_local_mirror_revision');
+            if (entry.key === '__rp_local_mirror_revision') return;
             if (entry.key.startsWith('rp_hub_b1_memory_state_') && entry.value?.deleted === true) {
                 store.delete(entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
             }
@@ -7361,6 +7367,7 @@ const app = createApp({
 
         // Watch view change to refresh embedded pages and sortable lists
         watch(currentView, (newView) => {
+            if (newView === 'chat') hasOpenedChat.value = true;
             activeSortable?.destroy();
             activeSortable = null;
             if (newView !== 'presets' && activePresetGroupName.value) openPresetGroup(null);
@@ -15765,9 +15772,6 @@ const app = createApp({
             // Save enforced defaults immediately (2.8.84: 只提交 settings / active_tools，大件世界书留给后续全量保存)
             saveData({ saveMemories: false, saveCharacters: false, startupConfigOnly: true });
 
-            // 初始化守卫解除：此后 saveData 才允许写入 user / memorySettings
-            _initComplete = true;
-
             // Restore Last Active Session
             if (lastActiveCharacterId.value !== null && characters.value[lastActiveCharacterId.value]) {
                 // Restore character selection without clearing chat history (we load it from DB)
@@ -15817,7 +15821,11 @@ const app = createApp({
                 }
 
             }
-            currentView.value = 'characters';
+            currentView.value = currentCharacter.value && chatHistory.value.length ? 'chat' : 'characters';
+            if (currentView.value === 'characters') hasOpenedCharacterManager.value = true;
+            // Drain hydration watchers before enabling user-change autosaves.
+            await nextTick();
+            _initComplete = true;
             window.rphubHandleBack = shellGoBack;
             window.addEventListener('rp:notice', shellNotice);
             window.addEventListener('rp:startup-finished', finishStartup, { once: true });
@@ -16143,7 +16151,7 @@ const app = createApp({
             isNovelLoading, novelUrl, onNovelLoad, // Novel exports
             isLighthouseLoading, lighthouseUrl, onLighthouseLoad, // Lighthouse exports
             openLighthouseWindow,
-            editorTab, characterDisplayLimit, hasOpenedCharacterManager, isDesktopCharacterLayout, characterGridView, characterDeck, useCharacterDeck, displayedCharacters, loadMoreCharacters, getCharacterWICount, getCharacterRegexCount,
+            editorTab, characterDisplayLimit, hasOpenedCharacterManager, hasOpenedChat, isDesktopCharacterLayout, characterGridView, characterDeck, useCharacterDeck, displayedCharacters, loadMoreCharacters, getCharacterWICount, getCharacterRegexCount,
             isAutoImageGenEnabled,
             apiStatus, apiLatency, imageGenStatus, imageGenLatency, checkAllStatuses, // Status Exports
             toggleAutoImageGen, setWorldInfoEnabled, handleGeneratedImageReroll,
