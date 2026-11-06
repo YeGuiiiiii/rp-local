@@ -173,10 +173,8 @@
 .shell-row-list > button > .shell-icon:last-child { width: 16px; height: 16px; color: var(--shell-muted); }
 .shell-row-list .shell-row-icon { width: 34px; height: 34px; display: grid; place-items: center; color: var(--shell-muted); }
 .shell-profile { display: flex; width: 100%; padding: 22px 18px; align-items: center; gap: 16px; min-height: 120px; background: var(--shell-surface); border-radius: 8px; text-align: left; }
-.shell-profile img, .shell-profile-fallback { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; }
-.shell-profile-fallback { display: grid; place-items: center; background: var(--shell-tint); color: var(--shell-accent); }
-.shell-profile-fallback .shell-icon { width: 30px; height: 30px; }
-.shell-profile > span:not(.shell-profile-fallback) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.shell-profile > .persona-avatar { width: 64px; height: 64px; }
+.shell-profile > span:not(.persona-avatar) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .shell-profile strong { font-size: 19px; font-weight: 700; overflow-wrap: anywhere; }
 .shell-profile small { font-size: 12px; color: var(--shell-muted); }
 .shell-profile > .shell-icon { width: 18px; height: 18px; color: var(--shell-muted); }
@@ -228,6 +226,30 @@
 .shell-runtime-info dd { overflow-wrap: anywhere; }
 .shell-settings-detail { max-width: 1000px; width: 100%; margin: 0 auto; }
 .shell-settings-detail .settings-card { border-radius: 8px; border: 0; box-shadow: none; }
+.persona-avatar { display: inline-flex; flex: none; overflow: hidden; border-radius: 50%; }
+.persona-avatar > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.persona-avatar--default {
+    align-items: flex-end; justify-content: center; background: var(--yy-field);
+    border: 1px solid var(--yy-line); box-shadow: inset 0 1px 0 var(--ui-polish),inset 0 -5px 12px var(--ui-recess);
+}
+.persona-avatar--default > img { width: 94%; height: 94%; object-fit: contain; object-position: center; }
+.settings-profile-avatar .persona-avatar { width: 100%; height: 100%; }
+.worldinfo-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--yy-muted); font-size: 13px; }
+.worldinfo-pagination label { display: flex; align-items: center; gap: 6px; }
+.worldinfo-pagination input {
+    width: 56px; min-height: 44px; padding: 6px; text-align: center; font-size: 16px;
+    border: 1px solid var(--yy-line); border-radius: 6px; background: var(--yy-field); color: var(--yy-ink);
+}
+:root .chenyue-theme .worldinfo-top-button {
+    position: fixed; z-index: 20; right: 24px; bottom: max(20px, env(safe-area-inset-bottom));
+    width: 46px; height: 46px; border-radius: 50%; box-shadow: 0 4px 14px var(--ui-shadow);
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--yy-paper); color: var(--yy-ink); border: 1px solid var(--yy-line);
+}
+.worldinfo-view { scrollbar-width: thin !important; scrollbar-color: var(--yy-line) transparent; scrollbar-gutter: stable; }
+.worldinfo-view::-webkit-scrollbar { display: block !important; width: 8px !important; }
+.worldinfo-view::-webkit-scrollbar-thumb { background: var(--yy-line); border: 2px solid transparent; background-clip: content-box; border-radius: 8px; min-height: 32px; }
+.worldinfo-view::-webkit-scrollbar-track { background: transparent; }
 .shell-settings-detail[data-section="image"] .shell-api-card .settings-card__body > :not(.shell-image-section):not(:has(.shell-image-section)) { display: none; }
 .shell-settings-detail[data-section="image"] .shell-api-card .settings-card__body > :has(.shell-image-section) > :not(.shell-image-section) { display: none; }
 .shell-settings-detail[data-section="image"] .shell-image-section { margin: 0 !important; padding-top: 0 !important; border: 0 !important; }

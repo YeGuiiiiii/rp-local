@@ -347,8 +347,17 @@
             </div>
           </main>`
     };
+    const PersonaAvatar = {
+        components: { ThemeMascot },
+        props: { src: String },
+        template: `
+          <span class="persona-avatar" :class="{'persona-avatar--default':!src}" data-rphub-no-save>
+            <img v-if="src" :src="src" alt="">
+            <theme-mascot v-else pose="poke-happy" alt=""></theme-mascot>
+          </span>`
+    };
     const Settings = {
-        components: { Icon, MascotHeader },
+        components: { Icon, MascotHeader, PersonaAvatar },
         props: { user: Object },
         emits: ['section', 'navigate'],
         setup() {
@@ -374,7 +383,7 @@
           <main class="shell-page shell-settings-home">
             <mascot-header title="设置" pose="peek"></mascot-header>
             <button type="button" class="shell-profile" @click="$emit('section','persona')">
-              <img v-if="user.avatar" :src="user.avatar" alt=""><span v-else class="shell-profile-fallback"><icon name="UserRound"/></span>
+              <persona-avatar :src="user.avatar"></persona-avatar>
               <span><small>个人设定</small><strong>{{user.name==='请前往设置自定义你的名称'?'设置你的人设':user.name}}</strong></span><icon name="ChevronRight"/>
             </button>
             <section v-for="group in groups" :key="group.title" class="shell-settings-group">
@@ -519,5 +528,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PokeMascot, MascotHeader, Dock, ChatMenu, Advanced, Settings, Utilities, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, Advanced, Settings, Utilities, ReleaseAnnouncement });
 })();

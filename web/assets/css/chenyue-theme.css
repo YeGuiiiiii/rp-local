@@ -256,7 +256,6 @@
     background: var(--yy-paper); border: 1px solid var(--yy-line); border-radius: 6px;
     padding: 20px; min-height: 116px;
 }
-.chenyue-theme .shell-profile-fallback { background: var(--shell-tint); color: var(--yy-rose); }
 .chenyue-theme .shell-album-cover {
     background: transparent; border: 0; padding: 0; overflow: visible;
     box-shadow: var(--yy-depth);
@@ -294,6 +293,7 @@
     border: 0; border-radius: 0; background: transparent; box-shadow: none;
 }
 .chenyue-theme .shell-settings-detail .settings-card__header { padding: 0 0 18px; border-bottom: 1px dashed var(--yy-line); gap: 16px; }
+.chenyue-theme .shell-settings-detail .settings-profile-toolbar { justify-content: flex-end; border-bottom: 0; padding-bottom: 0; }
 .chenyue-theme .shell-settings-detail .settings-card__title { font-size: 15px; color: var(--yy-ink); }
 .chenyue-theme .app-main:not([data-view="chat"]) .settings-card__title > svg { width: 32px; height: 32px; border-radius: 6px; color: var(--yy-rose); background: var(--shell-tint); box-shadow: none; }
 .chenyue-theme .shell-settings-detail .settings-card__body { padding: 22px 0; }

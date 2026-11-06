@@ -89,6 +89,7 @@ fs.mkdirSync(output, { recursive: true });
       || document.querySelector('.generated-image-reroll:not(:disabled)'));
     await page.waitForTimeout(300);
     assert.equal(jobs.length, 1);
+    assert.equal(jobs[0].steps, '28');
     assert.equal(jobs[0].sampler, 'k_euler'); assert.equal(jobs[0].noise_schedule, 'exponential');
     await imageSettings();
     await select('采样器', 'DPM++ 2M SDE'); await select('噪声调度', 'Karras（官网默认）');

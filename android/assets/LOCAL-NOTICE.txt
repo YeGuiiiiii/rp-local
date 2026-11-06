@@ -1,4 +1,4 @@
-RP Local 1.09 - personal preview build
+RP Local 1.19 - personal preview build
 
 RP-Hub: STA1N156, https://github.com/STA1N156/RP-Hub
 Original project license: Creative Commons Attribution-NonCommercial 4.0.

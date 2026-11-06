@@ -1813,12 +1813,35 @@ const app = createApp({
         const globalWorldInfo = ref([]);
         const worldInfo = ref([]);
         const worldInfoSearch = ref('');
+        const worldInfoPage = ref(1);
+        const worldInfoViewport = ref(null);
+        const worldInfoScrolled = ref(false);
+        const WORLDINFO_PAGE_SIZE = 100;
         const filteredWorldInfo = computed(() => {
             const query = worldInfoSearch.value.trim().toLocaleLowerCase();
             return worldInfo.value.map((entry, index) => ({ entry, index })).filter(({ entry }) =>
                 (entry.scope === 'global' ? 'global' : 'character') === resourceScope.value &&
                 (!query || [entry.comment, ...(entry.keys || []), entry.content]
                     .join('\n').toLocaleLowerCase().includes(query)));
+        });
+        const worldInfoPageCount = computed(() => Math.max(1, Math.ceil(filteredWorldInfo.value.length / WORLDINFO_PAGE_SIZE)));
+        const visibleWorldInfo = computed(() => filteredWorldInfo.value.slice(
+            (worldInfoPage.value - 1) * WORLDINFO_PAGE_SIZE, worldInfoPage.value * WORLDINFO_PAGE_SIZE));
+        const scrollWorldInfoTop = () => {
+            worldInfoViewport.value?.scrollTo({
+                top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+            });
+        };
+        const setWorldInfoPage = value => {
+            worldInfoPage.value = Math.max(1, Math.min(worldInfoPageCount.value, Math.trunc(Number(value)) || 1));
+            nextTick(() => {
+                if (worldInfoViewport.value) worldInfoViewport.value.scrollTop = 0;
+                worldInfoScrolled.value = false;
+            });
+        };
+        watch([worldInfoSearch, resourceScope, currentCharacterIndex], () => setWorldInfoPage(1));
+        watch(worldInfoPageCount, count => {
+            if (worldInfoPage.value > count) setWorldInfoPage(count);
         });
         const managedRegexScripts = computed(() => regexScripts.value.map((script, index) => ({ script, index }))
             .filter(({ script }) => (script.scope === 'global' ? 'global' : 'character') === resourceScope.value));
@@ -7307,7 +7330,7 @@ const app = createApp({
         // 存储走 localStorage 独立键：不塞 settings，避免被「恢复默认」清掉、不污染存档。
         const IMAGE_GEN_PARAM_STORAGE_KEY = 'rphub_image_gen_params';
         const IMAGE_GEN_PARAM_SPEC = Object.freeze({
-            steps: { min: 1, max: 50, def: 23, label: '迭代步数' },
+            steps: { min: 1, max: 50, def: 28, label: '迭代步数' },
             scale: { min: 1, max: 20, def: 6, label: '提示词引导强度' },
             cfg: { min: 0, max: 1, def: 0, label: '引导重缩放' },
             sampler: { def: 'k_dpmpp_2m_sde', label: '采样器' },
@@ -7352,10 +7375,24 @@ const app = createApp({
                 localStorage.setItem(IMAGE_GEN_PARAM_STORAGE_KEY, JSON.stringify(imageGenParams.value));
             } catch (e) { /* 存不下就只在本会话生效 */ }
         };
-        const setImageGenParam = (name, value) => {
+        let imageStepsConfirmationPending = false;
+        const setImageGenParam = async (name, value, input) => {
             if (!IMAGE_GEN_PARAM_SPEC[name]) return;
+            const normalized = clampImageGenParam(name, value);
+            if (name === 'steps' && normalized > 28 && normalized !== imageGenParams.value.steps) {
+                if (input) input.value = imageGenParams.value.steps;
+                if (imageStepsConfirmationPending) return;
+                imageStepsConfirmationPending = true;
+                let confirmed;
+                try {
+                    confirmed = await showVueConfirmModal('提高迭代步数？',
+                        '默认迭代步数为 28。更高步数通常需要更长时间，也可能消耗更多额度，画质不一定提升。继续使用这个步数吗？',
+                        { confirmText: '继续使用', cancelText: '保持原步数' });
+                } finally { imageStepsConfirmationPending = false; }
+                if (!confirmed) return;
+            }
             const next = Object.assign({}, imageGenParams.value);
-            next[name] = clampImageGenParam(name, value);
+            next[name] = normalized;
             imageGenParams.value = next;
             saveImageGenParams();
         };
@@ -14670,6 +14707,7 @@ const app = createApp({
                     regexScripts.value.push(data);
                 }
                 showRegexEditor.value = false;
+                resourceScope.value = data.scope;
             },
             deleteRegex: (index) => {
                 confirmAction('确定要删除这个正则脚本吗？此操作无法撤销。', () => {
@@ -14795,7 +14833,8 @@ const app = createApp({
             },
 
             showRegexEditor, showWorldInfoEditor, editingRegex, editingWorldInfo, worldInfoKeysText, updateEditingWorldInfoKeys,
-            worldInfoSearch, filteredWorldInfo, resourceScope, managedRegexScripts,
+            worldInfoSearch, filteredWorldInfo, visibleWorldInfo, worldInfoPage, worldInfoPageCount,
+            worldInfoViewport, worldInfoScrolled, setWorldInfoPage, scrollWorldInfoTop, resourceScope, managedRegexScripts,
             worldInfoSettings, showWorldInfoSettings, showMemorySettings, settingsHelpTopic, showActiveToolSettings, showUiTemplateSettings, estimatedGenerationTime, currentWaitTime,
             globalConfirmModal,
 
@@ -14862,6 +14901,7 @@ app.component('RoleMemoryManager', window.RPLocalWorkspace.RoleMemoryManager);
 app.component('ShellIcon', window.RPAppShell.Icon);
 app.component('MascotHeader', window.RPAppShell.MascotHeader);
 app.component('ThemeMascot', window.RPAppShell.ThemeMascot);
+app.component('PersonaAvatar', window.RPAppShell.PersonaAvatar);
 app.component('PokeMascot', window.RPAppShell.PokeMascot);
 app.component('ShellDock', window.RPAppShell.Dock);
 app.component('ShellChatMenu', window.RPAppShell.ChatMenu);

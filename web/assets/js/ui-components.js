@@ -1908,8 +1908,8 @@
                         <h3 class="text-lg font-bold text-gray-900 mb-2 tracking-tight">{{ state.title }}</h3>
                         <p class="text-[13px] text-gray-500 mb-6 whitespace-pre-wrap leading-relaxed px-2">{{ state.message }}</p>
                         <div class="flex space-x-3 w-full">
-                            <button @click="state.onCancel" class="flex-1 py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold rounded-xl transition-all border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 hover:-translate-y-0.5">{{ state.cancelText || '取消' }}</button>
-                            <button @click="state.onConfirm" class="flex-1 py-2.5 px-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary-400 hover:-translate-y-0.5">{{ state.confirmText || '确认' }}</button>
+                            <button type="button" @click="state.onCancel" class="modal-secondary-button flex-1">{{ state.cancelText || '取消' }}</button>
+                            <button type="button" @click="state.onConfirm" class="modal-primary-button flex-1 justify-center">{{ state.confirmText || '确认' }}</button>
                         </div>
             </modal-shell>`
     };
