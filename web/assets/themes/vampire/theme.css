@@ -65,46 +65,27 @@
     background: var(--shell-bg);
 }
 :root[data-ui-skin="vampire"] .chenyue-theme .yy-page-header {
-    min-height: 146px;
-    border-bottom: 1px solid var(--yy-line);
-    padding-bottom: 16px;
-    margin-bottom: 24px;
+    box-shadow: 0 1px var(--yy-line);
 }
 :root[data-ui-skin="vampire"] .yy-page-heading > h1 {
     background: none;
-    padding: 0;
-    width: auto;
-    min-height: 48px;
-    font-size: 24px;
-    gap: 10px;
 }
 :root[data-ui-skin="vampire"] .yy-page-heading > h1::before {
     content: "";
     width: 34px;
     height: 40px;
-    flex: none;
+    position: absolute;
+    left: 12px;
     background: url("brooch.webp") center/contain no-repeat;
 }
-:root[data-ui-skin="vampire"] .yy-page-mascot { width: 136px; height: 118px; }
 :root[data-ui-skin="vampire"] .chenyue-theme .shell-album-cover::before { background-image: url("corner-upper.webp"); width: 42px; height: 42px; top: -4px; left: -4px; }
-:root[data-ui-skin="vampire"] .chenyue-theme .shell-album-cover::after { background-image: url("corner-lower.webp"); width: 38px; height: 38px; bottom: -3px; right: -3px; }
-:root[data-ui-skin="vampire"] .shell-section-heading { gap: 12px; }
-:root[data-ui-skin="vampire"] .shell-section-heading h2 { font-size: 15px; color: #e3d6dc; }
-:root[data-ui-skin="vampire"] .shell-card-picker {
-    border: 1px solid var(--yy-line);
-    background: #2d2029;
-    border-radius: 6px;
-    min-height: 58px;
-}
-:root[data-ui-skin="vampire"] .shell-card-picker select { color: #f2e9eb; }
-:root[data-ui-skin="vampire"] .shell-action-grid { gap: 10px; }
+:root[data-ui-skin="vampire"] .chenyue-theme .shell-album-cover::after { background-image: url("corner-lower.webp"); width: 34px; height: 36px; bottom: 2px; right: 2px; }
+:root[data-ui-skin="vampire"] .shell-section-heading h2 { color: #e3d6dc; }
 :root[data-ui-skin="vampire"] .shell-action-grid > button {
     position: relative;
     background: linear-gradient(160deg,var(--ui-polish-soft),transparent 52%),#251e27;
     border: 1px solid #705363;
     border-radius: 6px;
-    min-height: 82px;
-    padding: 16px 12px;
     color: #f2e9eb;
 }
 :root[data-ui-skin="vampire"] .shell-action-grid > button::after {
@@ -119,22 +100,15 @@
     pointer-events: none;
 }
 :root[data-ui-skin="vampire"] .shell-action-grid > button:hover:not(:disabled) { background: #3b2632; }
-:root[data-ui-skin="vampire"] .shell-action-icon { color: #e7acbb; width: 28px; }
+:root[data-ui-skin="vampire"] .shell-action-icon { color: #e7acbb; }
 :root[data-ui-skin="vampire"] .shell-character-actions > button { background: #30202b; }
-:root[data-ui-skin="vampire"] .shell-row-list { border: 0; }
 :root[data-ui-skin="vampire"] .shell-row-list > button {
-    min-height: 58px;
-    padding: 12px 8px;
-    border-bottom: 1px solid #3b3038;
-    border-radius: 0;
     color: #eee2e7;
 }
-:root[data-ui-skin="vampire"] .shell-row-list > button + button { border-top: 0; }
 :root[data-ui-skin="vampire"] .shell-row-list > button:hover { background: #30202b; }
 :root[data-ui-skin="vampire"] .shell-row-list .shell-row-icon { color: #e7acbb; }
 :root[data-ui-skin="vampire"] .shell-row-list > button > .shell-icon:last-child { color: #bd9fac; }
 :root[data-ui-skin="vampire"] .shell-profile {
-    min-height: 102px;
     background: #2d2029;
     border: 1px solid #705363;
 }
@@ -143,18 +117,12 @@
 :root[data-ui-skin="vampire"] .shell-dock-symbol { display: block; width: 24px; height: 24px; }
 :root[data-ui-skin="vampire"] .shell-chat-menu {
     background: #211d23;
-    border: 1px solid #896677;
-    border-image: none;
-    border-radius: 8px;
-    padding: 16px;
+    border-color: transparent;
     box-shadow: 0 20px 50px #0006;
 }
 :root[data-ui-skin="vampire"] .shell-chat-menu .yy-menu-header {
-    margin: 0 0 16px;
-    padding: 12px 0;
-    border-bottom: 1px solid #57434e;
+    box-shadow: 0 1px #57434e;
 }
-:root[data-ui-skin="vampire"] .yy-menu-header > .yy-poke-mascot { width: 140px; height: 112px; }
 :root[data-ui-skin="vampire"] .yy-menu-header small { color: #e7acbb; }
 :root[data-ui-skin="vampire"] .yy-menu-close,
 :root[data-ui-skin="vampire"] .shell-wheel-close {
@@ -162,12 +130,11 @@
     border: 1px solid #896677;
 }
 :root[data-ui-skin="vampire"] :is(.yy-menu-close,.shell-wheel-close) > .shell-icon { opacity: 1; color: #f2e9eb; }
-:root[data-ui-skin="vampire"] .yy-menu-header .yy-menu-close { right: 0; top: 0; display: grid; place-items: center; border-radius: 6px; }
+:root[data-ui-skin="vampire"] .yy-menu-header .yy-menu-close { display: grid; place-items: center; border-radius: 50%; }
 :root[data-ui-skin="vampire"] .yy-online-return {
     background: #442732 url("seal.webp") center/36px no-repeat;
     border-radius: 6px;
 }
-:root[data-ui-skin="vampire"] .chenyue-theme .app-main .input-island { padding-bottom: 26px; }
 :root[data-ui-skin="vampire"] .input-island::before {
     content: "";
     position: absolute;
@@ -181,15 +148,9 @@
 :root[data-ui-skin="vampire"] .input-island:focus-within { border-color: #e7acbb; }
 :root[data-ui-skin="vampire"] .input-island .island-input { color: #f2e9eb; background: transparent; font-size: 16px; }
 :root[data-ui-skin="vampire"] .input-island .island-input::placeholder { color: #bda9b5; }
-:root[data-ui-skin="vampire"] .island-toolbar { border-top: 1px solid #57434e; margin-top: 6px; padding-top: 6px; }
-:root[data-ui-skin="vampire"] .island-button { color: #e0c6d2; width: 36px; height: 36px; border-radius: 6px; }
+:root[data-ui-skin="vampire"] .island-button { color: #e0c6d2; border-radius: 6px; }
 :root[data-ui-skin="vampire"] .island-button:hover:not(:disabled),
 :root[data-ui-skin="vampire"] .island-button.is-active { background: #442732; color: #f4dce5; }
 :root[data-ui-skin="vampire"] .chenyue-theme .shell-error { background-image: url("confused.webp"); }
 :root[data-ui-skin="vampire"] .chenyue-theme .startup-brand { color: #e7acbb; }
 :root[data-ui-skin="vampire"] .chenyue-theme :is(.shell-page,.management-view,.input-island) :focus-visible { outline: 2px solid #e7acbb; outline-offset: 3px; }
-@media (max-width: 400px) {
-    :root[data-ui-skin="vampire"] .yy-page-mascot { width: 116px; height: 104px; }
-    :root[data-ui-skin="vampire"] .yy-page-heading > h1 { font-size: 22px; }
-    :root[data-ui-skin="vampire"] .yy-page-header { gap: 8px; min-height: 132px; }
-}

@@ -338,7 +338,7 @@ const app = createApp({
 
         const currentView = ref('characters');
         const uiPack = ref(window.RPThemePacks.current);
-        const classicUi = computed(() => uiPack.value === 'classic');
+        const classicUi = computed(() => window.RPThemePacks.catalog.find(pack => pack.id === uiPack.value)?.layout === 'classic');
         const syncUiPack = () => { uiPack.value = window.RPThemePacks.current; };
         window.addEventListener('rp-ui-theme-change', syncUiPack);
         onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', syncUiPack));
@@ -438,11 +438,6 @@ const app = createApp({
         const openSettingsSection = section => {
             navigateWorkspace('settings-detail');
             settingsSection.value = section;
-        };
-        const selectConfigurationCharacter = async index => {
-            const previous = currentView.value;
-            await selectCharacter(index, false, { silent: true });
-            currentView.value = previous;
         };
         const shellGoBack = () => {
             if (streamImportPanel.value?.handleBack()) return true;
@@ -14882,7 +14877,7 @@ const app = createApp({
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
-                        editingCharacter.data.avatar = await compressImage(e.target.result, 400, 0.8);
+                        editingCharacter.data.avatar = await compressImage(e.target.result, 1600, 0.92);
                     } catch (err) {
                         editingCharacter.data.avatar = e.target.result;
                     }
@@ -16133,7 +16128,7 @@ const app = createApp({
             onlineOpen, dockFolded, foldDock, galleryPage, shellGoBack, streamImportPanel, backupTask, backupProfiles, backupProfile,
             showAnnouncement, openAnnouncement, closeAnnouncement,
             prepareStreamImport, restoreRphubBinaryDeep, showVueConfirmModal,
-            settingsSection, settingTitles, openSettingsSection, selectConfigurationCharacter,
+            settingsSection, settingTitles, openSettingsSection,
             downloadJsonFile,
             fetchModels, fetchMemoryModels, isFetchingMemoryModels, exportAllData, importAllData, selectModel, selectQuickModels, sendMessage,
             fetchUiTemplateModels, isFetchingUiTemplateModels,

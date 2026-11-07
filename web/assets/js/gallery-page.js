@@ -2,7 +2,7 @@
     'use strict';
     const { ref, computed, onMounted, onBeforeUnmount, watch } = Vue;
     const GalleryPage = {
-        components: { Icon: window.RPAppShell.Icon, MascotHeader: window.RPAppShell.MascotHeader, ThemeMascot: window.RPAppShell.ThemeMascot },
+        components: { Icon: window.RPAppShell.Icon, MascotHeader: window.RPAppShell.MascotHeader, ThemeMascot: window.RPAppShell.ThemeMascot, CharacterCover: window.RPHubComponents.CharacterCover },
         props: { characters: { type: Array, default: () => [] }, active: Boolean },
         setup(props, { expose }) {
             const search = ref('');
@@ -132,7 +132,7 @@
             <template v-if="!selected">
               <div class="shell-album-grid">
                 <button v-for="card in albums" :key="card.uuid" type="button" class="shell-album" @click="open(card)" :aria-label="'打开相簿：'+card.name">
-                  <div class="shell-album-cover"><div class="shell-album-aperture image-glass"><icon name="Images"/><img v-if="card.avatar" :src="card.avatar" :alt="card.name" loading="lazy" @error="$event.target.classList.add('is-missing');$event.target.closest('.shell-album-cover').style.removeProperty('--album-ratio')" @load="coverLoaded"></div></div>
+                  <div class="shell-album-cover"><div class="shell-album-aperture image-glass"><icon name="Images"/><character-cover v-if="card.avatar" :src="card.avatar" :uuid="card.uuid" :alt="card.name" loading="lazy" decoding="async" @error="$event.target.classList.add('is-missing');$event.target.closest('.shell-album-cover').style.removeProperty('--album-ratio')" @load="coverLoaded"></character-cover></div></div>
                   <strong>{{card.name}}</strong><small>{{counts[card.uuid] === null?'读取失败':counts[card.uuid] === undefined?'本地相簿':counts[card.uuid]+' 张图片'}}</small>
                 </button>
               </div>

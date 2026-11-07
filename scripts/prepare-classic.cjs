@@ -42,7 +42,7 @@ append(stack, `<section class="settings-card"><h3 class="settings-card__title">�
 const about = view(originalMain, 'patchlist');
 const aboutItems = find(about, node => node.tagName === 'ol').childNodes.filter(node => node.tagName === 'li');
 aboutItems[0].childNodes[0].value = '页面与补丁随安装包内置，按 RP-Hub 2.8.118 对照维护。';
-aboutItems.at(-1).childNodes[0].value = '更新公告：使用本地版公告，首次安装或更新后展示一次。设置 → 外观 → 界面主题可切换经典、白昼手账和夜蔷薇。';
+aboutItems.at(-1).childNodes[0].value = '更新公告：使用本地版公告，首次安装或更新后展示一次。设置 → 外观 → 皮肤可选择经典皮肤或玥玥经典皮肤，日夜可在倾斜反光下方或聊天菜单切换。';
 append(about, `<div class="classic-local-links"><button type="button" class="settings-action" @click="openAnnouncement">查看更新公告</button>
     <button type="button" class="settings-action" @click="openSettingsSection('appearance')">外观</button></div>`);
 const cardView = view(originalMain, 'characters');

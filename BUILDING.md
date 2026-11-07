@@ -53,10 +53,10 @@ node scripts/compile-ui.cjs
 ```powershell
 New-Item -ItemType Directory -Force reference/RP-Hub | Out-Null
 Copy-Item -LiteralPath LICENSE -Destination reference/RP-Hub/LICENSE
-& ./scripts/build.ps1 -Version 2.9.006
+& ./scripts/build.ps1 -Version 2.9.007
 ```
 
-输出为 `dist/RP-local-2.9.006.apk` 和对应的 `SHA256SUMS-2.9.006.txt`。首次构建自动在 `.signing/` 创建自己的签名；请自行妥善保留，后续用同一签名升级自己打出的包。
+输出为 `dist/RP-local-2.9.007.apk` 和对应的 `SHA256SUMS-2.9.007.txt`。首次构建自动在 `.signing/` 创建自己的签名；请自行妥善保留，后续用同一签名升级自己打出的包。
 
 自行构建的签名与官方 Release 不同，不能覆盖官方安装包。需要切换时先导出备份；不要为试编译直接卸载正在使用的软件。官方 Release 沿用原有维护者签名，可以覆盖旧本地版。
 

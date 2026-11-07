@@ -5,70 +5,75 @@
     const catalog = window.RPThemeCatalog;
     const fallback = 'assets/images/chenyue/';
     let selected;
-    let selecting = false;
+    const legacyMode = id => id === 'journal' ? 'day' : id === 'vampire' ? 'night' : '';
+    const skinId = id => legacyMode(id) ? 'chenyue' : id;
     try {
         selected = localStorage.getItem('rphub-layout118') === '1' ? localStorage.getItem(key) : 'classic';
+        const previousMode = legacyMode(selected);
+        if (previousMode) {
+            localStorage.setItem('rphub-theme-scheme', previousMode);
+            window.RPHubTheme.set(previousMode === 'night' ? 'dark' : 'light');
+        }
+        selected = skinId(selected);
         localStorage.setItem('rphub-layout118', '1');
         localStorage.setItem(key, selected || 'classic');
     } catch (_) { selected = 'classic'; }
     const mode = () => root.dataset.appTheme === 'dark' ? 'night' : 'day';
-    const getPack = () => catalog.find(pack => pack.id === selected)
-        || catalog.find(pack => pack.mode === mode()) || catalog[0];
-    const asset = name => (name === 'transfer' && mode() === 'night'
-        ? 'assets/themes/vampire/' : getPack().assets || fallback) + name + '.webp';
+    const getPack = () => catalog.find(pack => pack.id === selected) || catalog[0];
+    const variant = (pack = getPack()) => pack.variants[mode()] || pack.variants.day;
+    const asset = name => variant()[name] || variant().overrides?.[name] || (variant().assets || fallback) + name + '.webp';
+    const navigation = view => (variant().navigation || 'assets/images/navigation/') + view + '.webp';
     const syncStandalone = () => document.querySelectorAll('[data-ui-mascot]').forEach(image => {
         image.src = asset(image.dataset.uiMascot);
     });
     function apply() {
         const current = getPack();
+        const appearance = variant(current);
         selected = current.id;
-        if (current.css && !document.getElementById('ui-skin-' + current.skin)) {
+        if (appearance.css && !document.getElementById('ui-skin-' + appearance.skin)) {
             const link = document.createElement('link');
-            link.id = 'ui-skin-' + current.skin;
+            link.id = 'ui-skin-' + appearance.skin;
             link.rel = 'stylesheet';
-            link.href = current.css + '?v=' + window.RP_LOCAL_VERSION;
+            link.href = appearance.css + '?v=' + window.RP_LOCAL_VERSION;
             document.head.appendChild(link);
         }
         root.dataset.uiPack = current.id;
-        root.dataset.uiSkin = current.skin;
-        document.body?.classList.toggle('chenyue-theme', current.id !== 'classic');
+        root.dataset.uiSkin = appearance.skin;
+        root.dataset.uiLayout = current.layout;
+        document.body?.classList.toggle('chenyue-theme', current.layout !== 'classic');
         syncStandalone();
         window.dispatchEvent(new Event('rp-ui-theme-change'));
     }
+    function setMode(value) {
+        if (!['day', 'night'].includes(value)) return;
+        if (window.RPHubThemeKit) window.RPHubThemeKit.setScheme(value);
+        else {
+            try { localStorage.setItem('rphub-theme-scheme', value); } catch (_) {}
+            window.RPHubTheme.set(value === 'night' ? 'dark' : 'light');
+        }
+    }
     window.RPThemePacks = Object.freeze({
-        catalog, asset, get current() { return getPack().id; },
+        catalog, asset, navigation, variant, setMode, get mode() { return mode(); }, get current() { return getPack().id; },
+        toggleMode: () => setMode(mode() === 'night' ? 'day' : 'night'),
         set(id) {
-            const pack = catalog.find(pack => pack.id === id);
+            const pack = catalog.find(pack => pack.id === skinId(id));
             if (!pack) return;
-            selected = id;
-            try { localStorage.setItem(key, id); } catch (_) {}
-            selecting = true;
+            selected = pack.id;
+            try { localStorage.setItem(key, selected); } catch (_) {}
             window.RPHubThemeKit?.setAccent('');
-            if (pack.id !== 'classic') {
-                if (window.RPHubThemeKit) window.RPHubThemeKit.setScheme(pack.mode);
-                else window.RPHubTheme.set(pack.mode === 'night' ? 'dark' : 'light');
-            }
-            selecting = false;
+            if (legacyMode(id)) setMode(legacyMode(id));
             apply();
         }
     });
-    window.addEventListener('rphub-theme-change', () => {
-        if (selecting) return;
-        if (getPack().id !== 'classic' && getPack().mode !== mode()) {
-            selected = catalog.find(pack => pack.id !== 'classic' && pack.mode === mode())?.id || catalog[0].id;
-            try { localStorage.setItem(key, selected); } catch (_) {}
-        }
-        apply();
-    });
+    window.addEventListener('rphub-theme-change', apply);
     window.addEventListener('storage', event => {
-        if (event.key === key) { selected = event.newValue; apply(); }
+        if (event.key === key) { selected = skinId(event.newValue); apply(); }
     });
     document.addEventListener('DOMContentLoaded', apply, { once: true });
     if (!catalog.some(pack => pack.id === selected)) {
         try {
             const pack = getPack();
             localStorage.setItem(key, pack.id);
-            localStorage.setItem('rphub-theme-scheme', pack.mode);
             localStorage.removeItem('rphub-theme-accent');
         } catch (_) {}
     }

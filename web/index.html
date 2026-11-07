@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>window.RP_LOCAL_VERSION = '2.9.006'; window.RP_LOCAL_RELEASE = 270;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.007'; window.RP_LOCAL_RELEASE = 271;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/themes/catalog.js"></script>
     <script src="assets/js/local-files.js"></script>
@@ -455,7 +455,7 @@
             :class="{'shell-root':shellRoot,'shell-dock-folded':dockFolded}" :data-view="currentView" :inert="isNavigationOpen || onlineOpen">
             <gallery-page ref="galleryPage" v-show="currentView === 'album'" :characters="characters" :active="currentView === 'album'"></gallery-page>
             <shell-advanced v-if="currentView === 'advanced'" :characters="characters" :selected="currentCharacterIndex"
-                :busy="isConversationBusy" @select="selectConfigurationCharacter" @navigate="navigateWorkspace" @event="openCompetition"></shell-advanced>
+                :busy="isConversationBusy" @navigate="navigateWorkspace" @event="openCompetition"></shell-advanced>
             <competition-detail v-if="currentView === 'competition' && selectedCompetition" :event="selectedCompetition"
                 @back="shellGoBack" @visit="navigateWorkspace({view:'lighthouse',url:$event})"></competition-detail>
             <shell-settings v-if="currentView === 'settings'" :user="user" @section="openSettingsSection" @navigate="navigateWorkspace"></shell-settings>
@@ -1476,7 +1476,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.006 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.007 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -1509,7 +1509,7 @@
                         <li>灯塔：导航抽屉「高级」分组内置万象灯塔（角色卡发现站），使用官方嵌入视图加载，可直接浏览站内页面。</li>
                         <li>名场面手记：把高光对话收藏成手记，支持命名与回看。</li>
                         <li>图片管理：导航抽屉「高级」分组「数据备份」之前，汇总聊天里的生图与上传图；只存本地 240px 缩略图，原图按需从远端读取；支持「全部 / 生图 / 上传」筛选、长按多选、存相册、复制生图配方、批量打包导出。</li>
-                        <li>条目关键词搜索：经典布局的世界书 / 预设管理 / 正则脚本页提供放大镜搜索，实时计数与高亮，可直接进入编辑；白昼手账与夜蔷薇的世界书使用常驻搜索栏。</li>
+                        <li>条目关键词搜索：世界书、预设管理和正则脚本页提供放大镜搜索，实时计数与高亮，可直接进入编辑。</li>
                         <li>全量数据分块备份：支持自定义文件名与保存目录，支持导入恢复与历史数据库遗留数据兼容。</li>
                         <li>自动备份：可选「每天提醒我」（启动或回到前台时弹窗问一次，点确定才备份，取消则当天不再提醒）或「全自动」（启动后静默备份）；备份文件存本地，保留天数与历史保留份数均可选，也可随时手动立即备份或从历史记录恢复。</li>
                         <li>备份管理：数据备份页一键管理备份文件夹内的全部备份文件，支持行内重命名、删除、另存与刷新列表。</li>
@@ -1519,7 +1519,7 @@
                         <li>用量记录保留上限可设置，新记录写入时自动裁剪。</li>
                         <li>长聊天渲染上限与 UI 模板滚动懒加载。</li>
                         <li>角色卡导入无损去重，自动清理完全重复的 UI 模板。</li>
-                        <li>更新公告：使用本地版公告，每次安装更新后展示一次。设置 → 外观 → 界面主题可切换经典、白昼手账和夜蔷薇。</li>
+                        <li>更新公告：使用本地版公告，每次安装更新后展示一次。设置 → 外观 → 皮肤可选择经典皮肤或玥玥经典皮肤，日夜可在倾斜反光下方或聊天菜单切换。</li>
                         <li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li>
                         <li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li>
                         <li>向量缓存：同一段文本 + 同一向量模型 + 同一接口地址的向量只向服务端请求一次，命中后直接复用本机结果，零请求、零计费；换 API 站、重试、切分支都不再重复扣费。设置页有独立卡片显示已缓存条数与本次命中率，可一键清空，数据只存本机。</li>

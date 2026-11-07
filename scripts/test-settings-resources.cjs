@@ -64,7 +64,7 @@ fs.mkdirSync(output, { recursive: true });
                 __qa.editingRegex.data.enabled = true;
                 __qa.saveRegex();
             });
-            await page.evaluate(async () => { await __qa.selectConfigurationCharacter(1); __qa.navigateWorkspace('regex'); });
+            await page.evaluate(async () => { await __qa.selectCharacter(1); __qa.navigateWorkspace('regex'); });
             assert.equal(await page.locator('#regex-list .sortable-list-item').filter({ hasText: 'NAI画图正则' }).getByRole('checkbox').isChecked(), true);
         });
         await check('settings detail headings are not repeated', async () => {

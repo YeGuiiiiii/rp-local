@@ -3,10 +3,14 @@
     const { ref, computed, onMounted, onBeforeUnmount, watch, h, nextTick } = Vue;
     const useThemePack = () => {
         const selected = ref(window.RPThemePacks.current);
-        const sync = () => { selected.value = window.RPThemePacks.current; };
+        const night = ref(window.RPThemePacks.mode === 'night');
+        const sync = () => { selected.value = window.RPThemePacks.current; night.value = window.RPThemePacks.mode === 'night'; };
         window.addEventListener('rp-ui-theme-change', sync);
         onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', sync));
-        return { selected, packs: window.RPThemePacks.catalog };
+        return { selected, night, packs: window.RPThemePacks.catalog,
+            variant: computed(() => { selected.value; night.value; return window.RPThemePacks.variant(); }),
+            toggleDayNight: () => window.RPThemePacks.toggleMode(),
+            preview: pack => pack.variants[night.value ? 'night' : 'day'].preview };
     };
     const ThemeMascot = {
         props: { pose: { type: String, default: 'welcome' }, alt: { type: String, default: '陈玥' } },
@@ -131,6 +135,7 @@
         props: { active: String, folded: Boolean, online: Boolean },
         emits: ['navigate', 'fold', 'online', 'close-online'],
         setup(props, { emit }) {
+            const theme = useThemePack();
             const trigger = ref(null), highlighted = ref(''), origin = ref({ x: 0, y: 0 });
             const destinations = [
                 { view: 'lighthouse', name: '灯塔', icon: 'Lighthouse', dx: -22, dy: -116 },
@@ -200,7 +205,9 @@
                 document.removeEventListener('visibilitychange', hidden);
             });
             return { trigger, highlighted, origin, choices, press, move, release, cancel, click, close,
-                selected: useThemePack().selected, trapFocus: useDialogFocus(() => props.online, '#shell-online-wheel'), tabs: [
+                nightNavigation: computed(() => theme.variant.value.navigationNightArt),
+                navigation: view => theme.variant.value.navigation + view + '.webp',
+                trapFocus: useDialogFocus(() => props.online, '#shell-online-wheel'), tabs: [
                 { view: 'characters', name: '角色卡', icon: 'Users' },
                 { view: 'album', name: '画廊', icon: 'Images' },
                 { view: 'advanced', name: '高级', icon: 'SlidersHorizontal' },
@@ -220,8 +227,8 @@
                 <button v-for="tab in tabs" :key="tab.view" type="button"
                   :class="{'is-active':active===tab.view}" :aria-current="active===tab.view?'page':null"
                   :aria-label="tab.name" :title="tab.name" @click="$emit('navigate',tab.view)">
-                  <img v-if="selected==='vampire'" :src="'assets/themes/vampire/nav-'+tab.view+'.webp'" alt="" class="shell-dock-night-art" data-rphub-no-save>
-                  <img v-else :src="'assets/images/navigation/'+tab.view+'.webp'" alt="" class="shell-dock-art">
+                  <img v-if="nightNavigation" :src="navigation(tab.view)" alt="" class="shell-dock-night-art" data-rphub-no-save>
+                  <img v-else :src="navigation(tab.view)" alt="" class="shell-dock-art" data-rphub-no-save>
                   <icon :name="tab.icon" class="shell-dock-symbol"/><span>{{tab.name}}</span>
                 </button>
               </nav>
@@ -257,10 +264,8 @@
         emits: ['close', 'navigate'],
         setup(props) {
             const theme = useThemePack();
-            const night = computed(() => theme.packs.find(pack => pack.id === theme.selected.value)?.mode === 'night');
             return {
-                night,
-                toggleDayNight: () => window.RPThemePacks.set(theme.packs.find(pack => pack.id !== 'classic' && pack.mode === (night.value ? 'day' : 'night'))?.id),
+                night: theme.night, toggleDayNight: theme.toggleDayNight,
                 version: window.RP_LOCAL_VERSION,
                 trapFocus: useDialogFocus(() => props.show, '.shell-chat-menu'),
                 items: [
@@ -398,7 +403,7 @@
     const Advanced = {
         components: { Icon, MascotHeader, CompetitionList },
         props: { characters: Array, selected: Number, busy: Boolean },
-        emits: ['select', 'navigate', 'event'],
+        emits: ['navigate', 'event'],
         setup(props) {
             const card = computed(() => props.characters?.[props.selected]);
             const plugins = computed(() => [
@@ -416,20 +421,12 @@
         template: `
           <main class="shell-page shell-advanced">
             <mascot-header title="高级功能" pose="workshop"></mascot-header>
-            <div class="shell-section-heading"><h2>当前角色</h2><span v-if="card">绑定配置</span></div>
-            <label class="shell-card-picker"><img v-if="card?.avatar" :src="card.avatar" alt=""><icon v-else name="Users"/>
-              <select :value="selected" @change="$emit('select',Number($event.target.value))" aria-label="选择配置所属角色" :disabled="busy || !characters.length">
-                <option v-if="!characters.length" :value="-1">尚无角色卡</option>
-                <option v-for="(item,index) in characters" :key="item.uuid" :value="index">{{item.name}}</option>
-              </select><icon name="ChevronDown"/>
-            </label>
             <div class="shell-action-grid shell-character-actions">
               <button v-for="item in cardItems" :key="item.view" type="button" :disabled="!card || busy"
                 @click="$emit('navigate',item.view)">
                 <span class="shell-action-icon"><icon :name="item.icon"/></span><strong>{{item.label}}</strong>
               </button>
             </div>
-            <button v-if="!card" type="button" class="shell-text-link" @click="$emit('navigate','characters')">选择或导入角色卡<icon name="ChevronRight"/></button>
             <div class="shell-section-heading"><h2>预设与工具</h2><span>软件通用</span></div>
             <div class="shell-action-grid">
               <button type="button" @click="$emit('navigate','presets')"><span class="shell-action-icon"><icon name="NotebookPen"/></span><strong>预设管理</strong></button>
@@ -563,24 +560,30 @@
             </template>
             <template v-if="section==='appearance'">
               <section class="theme-library" aria-labelledby="theme-library-title">
-                <h3 id="theme-library-title">界面主题</h3>
+                <h3 id="theme-library-title">皮肤</h3>
                 <div class="theme-pack-grid">
                   <label v-for="pack in packs" :key="pack.id" class="theme-pack" :class="{'is-selected':selected===pack.id}">
-                    <div class="theme-pack-preview" :style="{'--preview-bg':pack.preview.background,'--preview-accent':pack.preview.accent}">
-                      <img v-if="pack.preview.image" :src="pack.preview.image" alt="" data-rphub-no-save>
+                    <div class="theme-pack-preview" :style="{'--preview-bg':preview(pack).background,'--preview-accent':preview(pack).accent}">
+                      <img v-if="preview(pack).image" :src="preview(pack).image" alt="" data-rphub-no-save>
                       <span v-else class="theme-classic-preview" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                       <span class="theme-preview-lines" aria-hidden="true"><i></i><i></i><i></i></span>
-                      <span class="theme-mode-badge">{{pack.modeLabel}}</span>
+                      <span class="theme-mode-badge">{{night?'夜间':'日间'}}</span>
                     </div>
-                    <span class="theme-pack-name"><input type="radio" name="ui-pack" :value="pack.id" :checked="selected===pack.id" @change="selectPack(pack.id)">{{pack.name}}</span>
+                    <span class="theme-pack-name"><input type="radio" name="ui-pack" :value="pack.id" :aria-label="pack.name" :checked="selected===pack.id" @change="selectPack(pack.id)">{{pack.name}}</span>
                     <span class="theme-pack-subtitle">{{pack.subtitle}}</span>
-                    <span class="theme-pack-palette" aria-hidden="true"><i :style="{background:pack.preview.background}"></i><i :style="{background:pack.accent}"></i><i></i></span>
+                    <span class="theme-pack-palette" aria-hidden="true"><i :style="{background:preview(pack).background}"></i><i :style="{background:preview(pack).accent}"></i><i></i></span>
                   </label>
                 </div>
               </section>
               <label class="shell-form-row"><span>倾斜反光</span>
                 <span class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" role="switch" aria-label="倾斜反光" class="settings-toggle-input sr-only" :checked="tiltEnabled" @change="setTilt">
+                  <span class="settings-toggle"></span>
+                </span>
+              </label>
+              <label class="shell-form-row"><span>夜间模式</span>
+                <span class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" role="switch" aria-label="夜间模式" class="settings-toggle-input sr-only" :checked="night" @change="toggleDayNight">
                   <span class="settings-toggle"></span>
                 </span>
               </label>

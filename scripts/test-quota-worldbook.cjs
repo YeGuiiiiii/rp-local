@@ -121,7 +121,7 @@ fs.mkdirSync(output, { recursive: true });
         await searchEntry('两张卡共用');
         await page.evaluate(() => { __qa.editingWorldInfo.data.content = 'GLOBAL_EDITED'; __qa.saveWorldInfo(); });
         await page.evaluate(async () => {
-            await __qa.selectConfigurationCharacter(1);
+            await __qa.selectCharacter(1);
             __qa.navigateWorkspace('worldinfo');
         });
         assert.ok((await titles()).includes('两张卡共用'));

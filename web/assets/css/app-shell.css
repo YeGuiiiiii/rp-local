@@ -163,10 +163,6 @@
 .shell-section-heading { display: flex; align-items: center; justify-content: space-between; margin: 27px 0 12px; gap: 10px; }
 .shell-section-heading h2 { font-size: 16px; font-weight: 650; }
 .shell-section-heading > span { font-size: 12px; color: var(--shell-muted); }
-.shell-card-picker { display: flex; align-items: center; gap: 12px; background: var(--shell-surface); min-height: 64px; padding: 12px; border-radius: 8px; }
-.shell-card-picker img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-.shell-card-picker > .shell-icon { color: var(--shell-muted); }
-.shell-card-picker select { appearance: none; flex: 1; min-width: 0; background: transparent; min-height: 40px; font-size: 15px; font-weight: 600; color: var(--shell-text); border: 0; }
 .shell-action-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
 .shell-action-grid > button { display: flex; align-items: center; gap: 14px; padding: 18px 14px; background: var(--shell-surface); border-radius: 8px; text-align: left; min-height: 82px; min-width: 0; }
 .shell-action-grid strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }

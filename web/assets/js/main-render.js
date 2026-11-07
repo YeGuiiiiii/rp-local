@@ -1713,10 +1713,9 @@ return function render(_ctx, _cache) {
               characters: characters,
               selected: currentCharacterIndex,
               busy: isConversationBusy,
-              onSelect: selectConfigurationCharacter,
               onNavigate: navigateWorkspace,
               onEvent: openCompetition
-            }, null, 8 /* PROPS */, ["characters", "selected", "busy", "onSelect", "onNavigate", "onEvent"]))
+            }, null, 8 /* PROPS */, ["characters", "selected", "busy", "onNavigate", "onEvent"]))
           : _createCommentVNode("v-if", true),
         (currentView === 'competition' && selectedCompetition)
           ? (_openBlock(), _createBlock(_component_competition_detail, {
@@ -3654,7 +3653,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_224)
                 ]),
                 _createElementVNode("div", _hoisted_225, [
-                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.006 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.007 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -3664,7 +3663,7 @@ return function render(_ctx, _cache) {
                     _cache[77] || (_cache[77] = _createTextVNode("查看更新公告", -1 /* CACHED */))
                   ], 8 /* PROPS */, _hoisted_226),
                   _createVNode(_component_shell_utilities, { section: "runtime" }),
-                  _cache[79] || (_cache[79] = _createStaticVNode("<ol class=\"space-y-2 text-sm text-gray-600 list-decimal list-inside\"><li>页面与增强功能已随安装包内置，启动直接读取本地文件。</li><li>启动优化：入场页保持到应用就绪，避免加载期间白屏；超时提供重新加载。</li><li>新增「补丁清单」页，可随时查看本机生效的全部增强项。</li><li>主线二次压缩：自动把保留楼层之前的逐轮总结按每 5 条合并为二次总结，原主线保留，删除轮次时自动还原。</li><li>记忆浏览：逐轮总结分页展示，支持单条重试，并可视化正文压缩率。</li><li>记忆专用 API 站：总结与向量请求可走独立站点并从该站获取模型，留空则跟随聊天 API。</li><li>主线保留楼层上限可设置；向量召回按官方增强模式策略执行。</li><li>记忆自动巡检与批量提取，支持中途中止。</li><li>向量缓存：同文本 + 同模型 + 同接口地址的向量只请求一次，命中即复用本机结果；设置页可查看已缓存条数与命中率，并可一键清空，数据只存本机。</li><li>支持多个自定义 API 站，每站独立保存地址与密钥。</li><li>快捷面板内可快速切换 API 站。</li><li>三个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li><li>UI 模板副模型支持独立 API 站；留空时跟随聊天 API。</li><li>输入法高度适配，输入栏自动避开软键盘。</li><li>回车行为可切换：聊天工具栏按钮一键在「Enter 发送」与「Enter 换行」之间切换，按钮带状态高亮。</li><li>编辑消息时自动收起底部输入栏，并自动滚进可视区。</li><li>聊天页右上角眼睛按钮：一键隐藏 / 显示输入栏。</li><li>自定义画师串支持无限条：每条可单独填写负面提示词，支持命名与当前使用条目切换。</li><li>画师串与自定义 API 站支持手风琴式折叠：默认收起展示当前项，点开展开编辑。</li><li>生图固定：切换画师串或风格时旧图保持不变，支持单图精准 reroll 重新生成并独立更新固定。</li><li>保存图片到相册：生成图与聊天区图片保存时自动追加时间戳与扩展名，支持持久连续保存。</li><li>预设支持自定义分组：可保存空组，进入后独立导入 / 导出，也可在分组首页导出整个分组。</li><li>原未命名预设归入 STA1N官方分组；组外导入普通预设归入“默认分组”，保留整组开关与组内拖拽排序。</li><li>预设批量管理：预设页顶栏一键切换批量管理，多选后可批量启用 / 停用与批量移动分组。</li><li>在线时长：记录前台使用时长，按日统计近 7 天，卡片位于设置页最底部。</li><li>灯塔：导航抽屉「高级」分组内置万象灯塔（角色卡发现站），使用官方嵌入视图加载，可直接浏览站内页面。</li><li>名场面手记：把高光对话收藏成手记，支持命名与回看。</li><li>图片管理：导航抽屉「高级」分组「数据备份」之前，汇总聊天里的生图与上传图；只存本地 240px 缩略图，原图按需从远端读取；支持「全部 / 生图 / 上传」筛选、长按多选、存相册、复制生图配方、批量打包导出。</li><li>条目关键词搜索：经典布局的世界书 / 预设管理 / 正则脚本页提供放大镜搜索，实时计数与高亮，可直接进入编辑；白昼手账与夜蔷薇的世界书使用常驻搜索栏。</li><li>全量数据分块备份：支持自定义文件名与保存目录，支持导入恢复与历史数据库遗留数据兼容。</li><li>自动备份：可选「每天提醒我」（启动或回到前台时弹窗问一次，点确定才备份，取消则当天不再提醒）或「全自动」（启动后静默备份）；备份文件存本地，保留天数与历史保留份数均可选，也可随时手动立即备份或从历史记录恢复。</li><li>备份管理：数据备份页一键管理备份文件夹内的全部备份文件，支持行内重命名、删除、另存与刷新列表。</li><li>柳贯一插件备份互通：支持导入柳贯一插件的 ZIP 单文件全站备份与流式 JSON 格式，双向解析还原。</li><li>导入前自动体检，全量备份自动无损瘦身。</li><li>数据体检与安全清理：检查重复模板、旧渲染缓存与超量记录。</li><li>用量记录保留上限可设置，新记录写入时自动裁剪。</li><li>长聊天渲染上限与 UI 模板滚动懒加载。</li><li>角色卡导入无损去重，自动清理完全重复的 UI 模板。</li><li>更新公告：使用本地版公告，每次安装更新后展示一次。设置 → 外观 → 界面主题可切换经典、白昼手账和夜蔷薇。</li><li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li><li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li><li>向量缓存：同一段文本 + 同一向量模型 + 同一接口地址的向量只向服务端请求一次，命中后直接复用本机结果，零请求、零计费；换 API 站、重试、切分支都不再重复扣费。设置页有独立卡片显示已缓存条数与本次命中率，可一键清空，数据只存本机。</li><li>万象广场下载：广场里的角色卡在 App 内点下载会真正存到手机，不再只弹一句「已发起下载」而文件其实没落地。</li><li>深色适配：跟随系统深色模式压暗网页背景，同时保留你自己设定的深色正文容器与封面背景，不会把整页反相成负片。</li><li>后台保持连接：通知栏常驻提示，切到其他应用或锁屏时对话与生成不中断。</li></ol>", 1))
+                  _cache[79] || (_cache[79] = _createStaticVNode("<ol class=\"space-y-2 text-sm text-gray-600 list-decimal list-inside\"><li>页面与增强功能已随安装包内置，启动直接读取本地文件。</li><li>启动优化：入场页保持到应用就绪，避免加载期间白屏；超时提供重新加载。</li><li>新增「补丁清单」页，可随时查看本机生效的全部增强项。</li><li>主线二次压缩：自动把保留楼层之前的逐轮总结按每 5 条合并为二次总结，原主线保留，删除轮次时自动还原。</li><li>记忆浏览：逐轮总结分页展示，支持单条重试，并可视化正文压缩率。</li><li>记忆专用 API 站：总结与向量请求可走独立站点并从该站获取模型，留空则跟随聊天 API。</li><li>主线保留楼层上限可设置；向量召回按官方增强模式策略执行。</li><li>记忆自动巡检与批量提取，支持中途中止。</li><li>向量缓存：同文本 + 同模型 + 同接口地址的向量只请求一次，命中即复用本机结果；设置页可查看已缓存条数与命中率，并可一键清空，数据只存本机。</li><li>支持多个自定义 API 站，每站独立保存地址与密钥。</li><li>快捷面板内可快速切换 API 站。</li><li>三个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li><li>UI 模板副模型支持独立 API 站；留空时跟随聊天 API。</li><li>输入法高度适配，输入栏自动避开软键盘。</li><li>回车行为可切换：聊天工具栏按钮一键在「Enter 发送」与「Enter 换行」之间切换，按钮带状态高亮。</li><li>编辑消息时自动收起底部输入栏，并自动滚进可视区。</li><li>聊天页右上角眼睛按钮：一键隐藏 / 显示输入栏。</li><li>自定义画师串支持无限条：每条可单独填写负面提示词，支持命名与当前使用条目切换。</li><li>画师串与自定义 API 站支持手风琴式折叠：默认收起展示当前项，点开展开编辑。</li><li>生图固定：切换画师串或风格时旧图保持不变，支持单图精准 reroll 重新生成并独立更新固定。</li><li>保存图片到相册：生成图与聊天区图片保存时自动追加时间戳与扩展名，支持持久连续保存。</li><li>预设支持自定义分组：可保存空组，进入后独立导入 / 导出，也可在分组首页导出整个分组。</li><li>原未命名预设归入 STA1N官方分组；组外导入普通预设归入“默认分组”，保留整组开关与组内拖拽排序。</li><li>预设批量管理：预设页顶栏一键切换批量管理，多选后可批量启用 / 停用与批量移动分组。</li><li>在线时长：记录前台使用时长，按日统计近 7 天，卡片位于设置页最底部。</li><li>灯塔：导航抽屉「高级」分组内置万象灯塔（角色卡发现站），使用官方嵌入视图加载，可直接浏览站内页面。</li><li>名场面手记：把高光对话收藏成手记，支持命名与回看。</li><li>图片管理：导航抽屉「高级」分组「数据备份」之前，汇总聊天里的生图与上传图；只存本地 240px 缩略图，原图按需从远端读取；支持「全部 / 生图 / 上传」筛选、长按多选、存相册、复制生图配方、批量打包导出。</li><li>条目关键词搜索：世界书、预设管理和正则脚本页提供放大镜搜索，实时计数与高亮，可直接进入编辑。</li><li>全量数据分块备份：支持自定义文件名与保存目录，支持导入恢复与历史数据库遗留数据兼容。</li><li>自动备份：可选「每天提醒我」（启动或回到前台时弹窗问一次，点确定才备份，取消则当天不再提醒）或「全自动」（启动后静默备份）；备份文件存本地，保留天数与历史保留份数均可选，也可随时手动立即备份或从历史记录恢复。</li><li>备份管理：数据备份页一键管理备份文件夹内的全部备份文件，支持行内重命名、删除、另存与刷新列表。</li><li>柳贯一插件备份互通：支持导入柳贯一插件的 ZIP 单文件全站备份与流式 JSON 格式，双向解析还原。</li><li>导入前自动体检，全量备份自动无损瘦身。</li><li>数据体检与安全清理：检查重复模板、旧渲染缓存与超量记录。</li><li>用量记录保留上限可设置，新记录写入时自动裁剪。</li><li>长聊天渲染上限与 UI 模板滚动懒加载。</li><li>角色卡导入无损去重，自动清理完全重复的 UI 模板。</li><li>更新公告：使用本地版公告，每次安装更新后展示一次。设置 → 外观 → 皮肤可选择经典皮肤或玥玥经典皮肤，日夜可在倾斜反光下方或聊天菜单切换。</li><li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li><li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li><li>向量缓存：同一段文本 + 同一向量模型 + 同一接口地址的向量只向服务端请求一次，命中后直接复用本机结果，零请求、零计费；换 API 站、重试、切分支都不再重复扣费。设置页有独立卡片显示已缓存条数与本次命中率，可一键清空，数据只存本机。</li><li>万象广场下载：广场里的角色卡在 App 内点下载会真正存到手机，不再只弹一句「已发起下载」而文件其实没落地。</li><li>深色适配：跟随系统深色模式压暗网页背景，同时保留你自己设定的深色正文容器与封面背景，不会把整页反相成负片。</li><li>后台保持连接：通知栏常驻提示，切到其他应用或锁屏时对话与生成不中断。</li></ol>", 1))
                 ])
               ])
             ]))
@@ -12481,7 +12480,7 @@ return function render(_ctx, _cache) {
                     class: "inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-100"
                   }, "返回聊天", 8 /* PROPS */, _hoisted_220)
                 ]),
-                _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5\"><div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">红花玲🌹🔔自用改</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">补丁清单</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">动态注入</span></div><ol class=\"space-y-2 text-sm text-gray-600 list-decimal list-inside\"><li>页面与补丁随安装包内置，按 RP-Hub 2.8.118 对照维护。</li><li>入场页：应用就绪前显示加载页，超时提供重新加载。</li><li>补丁清单：导航抽屉「高级」分组标题行右端图标进入，列出本机生效的全部增强项。</li><li>主线二次压缩：自动把保留楼层之前的逐轮总结按每 5 条合并为二次总结，原主线保留，删除轮次时自动还原。</li><li>记忆浏览：逐轮总结分页展示，支持单条重试，并可视化正文压缩率。</li><li>记忆专用 API 站：总结与向量请求可走独立站点并从该站获取模型，留空则跟随聊天 API。</li><li>主线保留楼层上限可设置；向量召回按官方增强模式策略执行。</li><li>记忆自动巡检与批量提取，支持中途中止。</li><li>向量缓存：同文本 + 同模型 + 同接口地址的向量只请求一次，命中即复用本机结果；设置页可查看已缓存条数与命中率，并可一键清空，数据只存本机。</li><li>支持多个自定义 API 站，每站独立保存地址与密钥。</li><li>快捷面板内可快速切换 API 站。</li><li>三个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li><li>UI 模板副模型支持独立 API 站；留空时跟随聊天 API。</li><li>输入法高度适配，输入栏自动避开软键盘。</li><li>回车行为可切换：聊天工具栏按钮一键在「Enter 发送」与「Enter 换行」之间切换，按钮带状态高亮。</li><li>编辑消息时自动收起底部输入栏，并自动滚进可视区。</li><li>聊天页右上角眼睛按钮：一键隐藏 / 显示输入栏。</li><li>自定义画师串支持无限条：每条可单独填写负面提示词，支持命名与当前使用条目切换。</li><li>画师串与自定义 API 站支持手风琴式折叠：默认收起展示当前项，点开展开编辑。</li><li>生图固定：切换画师串或风格时旧图保持不变，支持单图精准 reroll 重新生成并独立更新固定。</li><li>保存图片到相册：生成图与聊天区图片保存时自动追加时间戳与扩展名，支持持久连续保存。</li><li>预设支持自定义分组：编辑预设时可直接点选已有分组或新建分组。</li><li>预设分组可折叠，并支持一键开启 / 关闭整组预设与组内拖拽排序。</li><li>预设批量管理：预设页顶栏一键切换批量管理，多选后可批量启用 / 停用、移动分组或删除；分组标题行可整组删除。</li><li>在线时长：记录前台使用时长，按日统计近 7 天，卡片位于设置页最底部。</li><li>灯塔：导航抽屉「高级」分组内置万象灯塔（角色卡发现站），使用官方嵌入视图加载，可直接浏览站内页面。</li><li>名场面手记：把高光对话收藏成手记，支持命名与回看。</li><li>图片管理：导航抽屉「高级」分组「数据备份」之前，汇总聊天里的生图与上传图；只存本地 240px 缩略图，原图按需从远端读取；支持「全部 / 生图 / 上传」筛选、长按多选、存相册、复制生图配方、批量打包导出。</li><li>条目关键词搜索：世界书 / 预设管理 / 正则脚本页右上角放大镜按钮，跨条目全文检索，实时命中计数与关键词高亮，点击结果直接跳转对应编辑界面。</li><li>全量数据分块备份：支持自定义文件名与保存目录，支持导入恢复与历史数据库遗留数据兼容。</li><li>自动备份：可选「每天提醒我」（启动或回到前台时弹窗问一次，点确定才备份，取消则当天不再提醒）或「全自动」（启动后静默备份）；备份文件存本地，保留天数与历史保留份数均可选，也可随时手动立即备份或从历史记录恢复。</li><li>备份管理：数据备份页一键管理备份文件夹内的全部备份文件，支持行内重命名、删除、另存与刷新列表。</li><li>柳贯一插件备份互通：支持导入柳贯一插件的 ZIP 单文件全站备份与流式 JSON 格式，双向解析还原。</li><li>导入前自动体检，全量备份自动无损瘦身。</li><li>数据体检与安全清理：检查重复模板、旧渲染缓存与超量记录。</li><li>用量记录保留上限可设置，新记录写入时自动裁剪。</li><li>长聊天渲染上限与 UI 模板滚动懒加载。</li><li>角色卡导入无损去重，自动清理完全重复的 UI 模板。</li><li>后台保持连接：通知栏常驻提示，切到其他应用或锁屏时对话与生成不中断。</li><li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li><li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li><li>万象广场下载：广场里的角色卡可直接下载保存到手机本地。</li><li>深色适配：跟随系统深色模式压暗网页背景，同时保留自己设定的深色正文容器与封面背景。</li><li>更新公告：使用本地版公告，首次安装或更新后展示一次。设置 → 外观 → 界面主题可切换经典、白昼手账和夜蔷薇。</li></ol></div>", 1))
+                _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5\"><div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">红花玲🌹🔔自用改</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">补丁清单</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">动态注入</span></div><ol class=\"space-y-2 text-sm text-gray-600 list-decimal list-inside\"><li>页面与补丁随安装包内置，按 RP-Hub 2.8.118 对照维护。</li><li>入场页：应用就绪前显示加载页，超时提供重新加载。</li><li>补丁清单：导航抽屉「高级」分组标题行右端图标进入，列出本机生效的全部增强项。</li><li>主线二次压缩：自动把保留楼层之前的逐轮总结按每 5 条合并为二次总结，原主线保留，删除轮次时自动还原。</li><li>记忆浏览：逐轮总结分页展示，支持单条重试，并可视化正文压缩率。</li><li>记忆专用 API 站：总结与向量请求可走独立站点并从该站获取模型，留空则跟随聊天 API。</li><li>主线保留楼层上限可设置；向量召回按官方增强模式策略执行。</li><li>记忆自动巡检与批量提取，支持中途中止。</li><li>向量缓存：同文本 + 同模型 + 同接口地址的向量只请求一次，命中即复用本机结果；设置页可查看已缓存条数与命中率，并可一键清空，数据只存本机。</li><li>支持多个自定义 API 站，每站独立保存地址与密钥。</li><li>快捷面板内可快速切换 API 站。</li><li>三个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li><li>UI 模板副模型支持独立 API 站；留空时跟随聊天 API。</li><li>输入法高度适配，输入栏自动避开软键盘。</li><li>回车行为可切换：聊天工具栏按钮一键在「Enter 发送」与「Enter 换行」之间切换，按钮带状态高亮。</li><li>编辑消息时自动收起底部输入栏，并自动滚进可视区。</li><li>聊天页右上角眼睛按钮：一键隐藏 / 显示输入栏。</li><li>自定义画师串支持无限条：每条可单独填写负面提示词，支持命名与当前使用条目切换。</li><li>画师串与自定义 API 站支持手风琴式折叠：默认收起展示当前项，点开展开编辑。</li><li>生图固定：切换画师串或风格时旧图保持不变，支持单图精准 reroll 重新生成并独立更新固定。</li><li>保存图片到相册：生成图与聊天区图片保存时自动追加时间戳与扩展名，支持持久连续保存。</li><li>预设支持自定义分组：编辑预设时可直接点选已有分组或新建分组。</li><li>预设分组可折叠，并支持一键开启 / 关闭整组预设与组内拖拽排序。</li><li>预设批量管理：预设页顶栏一键切换批量管理，多选后可批量启用 / 停用、移动分组或删除；分组标题行可整组删除。</li><li>在线时长：记录前台使用时长，按日统计近 7 天，卡片位于设置页最底部。</li><li>灯塔：导航抽屉「高级」分组内置万象灯塔（角色卡发现站），使用官方嵌入视图加载，可直接浏览站内页面。</li><li>名场面手记：把高光对话收藏成手记，支持命名与回看。</li><li>图片管理：导航抽屉「高级」分组「数据备份」之前，汇总聊天里的生图与上传图；只存本地 240px 缩略图，原图按需从远端读取；支持「全部 / 生图 / 上传」筛选、长按多选、存相册、复制生图配方、批量打包导出。</li><li>条目关键词搜索：世界书 / 预设管理 / 正则脚本页右上角放大镜按钮，跨条目全文检索，实时命中计数与关键词高亮，点击结果直接跳转对应编辑界面。</li><li>全量数据分块备份：支持自定义文件名与保存目录，支持导入恢复与历史数据库遗留数据兼容。</li><li>自动备份：可选「每天提醒我」（启动或回到前台时弹窗问一次，点确定才备份，取消则当天不再提醒）或「全自动」（启动后静默备份）；备份文件存本地，保留天数与历史保留份数均可选，也可随时手动立即备份或从历史记录恢复。</li><li>备份管理：数据备份页一键管理备份文件夹内的全部备份文件，支持行内重命名、删除、另存与刷新列表。</li><li>柳贯一插件备份互通：支持导入柳贯一插件的 ZIP 单文件全站备份与流式 JSON 格式，双向解析还原。</li><li>导入前自动体检，全量备份自动无损瘦身。</li><li>数据体检与安全清理：检查重复模板、旧渲染缓存与超量记录。</li><li>用量记录保留上限可设置，新记录写入时自动裁剪。</li><li>长聊天渲染上限与 UI 模板滚动懒加载。</li><li>角色卡导入无损去重，自动清理完全重复的 UI 模板。</li><li>后台保持连接：通知栏常驻提示，切到其他应用或锁屏时对话与生成不中断。</li><li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li><li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li><li>万象广场下载：广场里的角色卡可直接下载保存到手机本地。</li><li>深色适配：跟随系统深色模式压暗网页背景，同时保留自己设定的深色正文容器与封面背景。</li><li>更新公告：使用本地版公告，首次安装或更新后展示一次。设置 → 外观 → 皮肤可选择经典皮肤或玥玥经典皮肤，日夜可在倾斜反光下方或聊天菜单切换。</li></ol></div>", 1))
               ]),
               _createElementVNode("div", _hoisted_221, [
                 _createElementVNode("button", {
@@ -14628,7 +14627,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     class: "settings-action",
                     onClick: $event => (openSettingsSection('appearance'))
-                  }, "界面主题", 8 /* PROPS */, _hoisted_594)
+                  }, "皮肤", 8 /* PROPS */, _hoisted_594)
                 ])
               ])
             ]))
@@ -17805,10 +17804,9 @@ return function render(_ctx, _cache) {
               characters: characters,
               selected: currentCharacterIndex,
               busy: isConversationBusy,
-              onSelect: selectConfigurationCharacter,
               onNavigate: navigateWorkspace,
               onEvent: openCompetition
-            }, null, 8 /* PROPS */, ["characters", "selected", "busy", "onSelect", "onNavigate", "onEvent"]))
+            }, null, 8 /* PROPS */, ["characters", "selected", "busy", "onNavigate", "onEvent"]))
           : _createCommentVNode("v-if", true),
         (currentView === 'competition' && selectedCompetition)
           ? (_openBlock(), _createBlock(_component_competition_detail, {
@@ -23679,9 +23677,27 @@ return function render(_ctx, _cache) {
   }
 }
 })();
+window.RPCompiledRenders.CharacterCover = (function () {
+const _Vue = Vue
+const {  } = _Vue
+
+const _hoisted_1 = ["src", "onLoad", "onError"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { openBlock: _openBlock, createElementBlock: _createElementBlock } = _Vue
+
+    return (_openBlock(), _createElementBlock("img", {
+      src: cover,
+      onLoad: loaded,
+      onError: $event => ($emit('error',$event))
+    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1))
+  }
+}
+})();
 window.RPCompiledRenders.CharacterCard = (function () {
 const _Vue = Vue
-const { createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
 
 const _hoisted_1 = ["aria-busy", "onPointerenter", "onPointerdown", "onPointerup", "onPointercancel", "onPointerleave", "onClick"]
 const _hoisted_2 = ["onClick"]
@@ -23690,64 +23706,62 @@ const _hoisted_3 = {
   class: "character-deck__placeholder",
   "aria-hidden": "true"
 }
-const _hoisted_4 = ["src", "alt", "loading"]
-const _hoisted_5 = {
+const _hoisted_4 = {
   key: 2,
   class: "absolute inset-0 bg-black/40 flex items-center justify-center z-20"
 }
-const _hoisted_6 = {
+const _hoisted_5 = {
   key: 0,
   class: "w-6 h-6 text-white",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_7 = {
+const _hoisted_6 = {
   key: 3,
   class: "absolute top-3 left-3 z-10"
 }
-const _hoisted_8 = {
+const _hoisted_7 = {
   key: 4,
   class: "character-card-actions absolute top-3 right-3 flex flex-col gap-2 z-20"
 }
+const _hoisted_8 = ["onClick"]
 const _hoisted_9 = ["onClick"]
-const _hoisted_10 = ["onClick"]
-const _hoisted_11 = ["onClick", "title", "aria-label"]
-const _hoisted_12 = ["fill"]
-const _hoisted_13 = ["onClick"]
-const _hoisted_14 = { class: "absolute bottom-0 left-0 right-0 p-3 z-10" }
-const _hoisted_15 = ["title"]
-const _hoisted_16 = {
+const _hoisted_10 = ["onClick", "title", "aria-label"]
+const _hoisted_11 = ["fill"]
+const _hoisted_12 = ["onClick"]
+const _hoisted_13 = { class: "absolute bottom-0 left-0 right-0 p-3 z-10" }
+const _hoisted_14 = ["title"]
+const _hoisted_15 = {
   key: 0,
   class: "flex items-center justify-between"
 }
-const _hoisted_17 = { class: "flex flex-wrap gap-1" }
+const _hoisted_16 = { class: "flex flex-wrap gap-1" }
+const _hoisted_17 = { class: "px-1.5 py-0.5 bg-white/20 backdrop-blur-md text-white text-[8px] rounded border border-white/10" }
 const _hoisted_18 = { class: "px-1.5 py-0.5 bg-white/20 backdrop-blur-md text-white text-[8px] rounded border border-white/10" }
-const _hoisted_19 = { class: "px-1.5 py-0.5 bg-white/20 backdrop-blur-md text-white text-[8px] rounded border border-white/10" }
-const _hoisted_20 = {
+const _hoisted_19 = {
   key: 2,
   class: "aspect-w-2 aspect-h-3 relative h-[500px] overflow-hidden"
 }
-const _hoisted_21 = ["src"]
-const _hoisted_22 = {
+const _hoisted_20 = {
   key: 0,
   class: "absolute top-4 left-4 z-10"
 }
-const _hoisted_23 = {
+const _hoisted_21 = {
   key: 1,
   class: "character-card-actions absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
 }
-const _hoisted_24 = ["onClick"]
-const _hoisted_25 = ["onClick"]
-const _hoisted_26 = ["onClick", "title", "aria-label"]
-const _hoisted_27 = ["fill"]
-const _hoisted_28 = ["onClick"]
-const _hoisted_29 = { class: "absolute bottom-0 left-0 p-4 w-full" }
-const _hoisted_30 = { class: "text-xl font-bold text-white mb-1 truncate drop-shadow-lg" }
-const _hoisted_31 = { class: "flex items-center gap-2" }
-const _hoisted_32 = { class: "px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] rounded-md border border-white/10" }
-const _hoisted_33 = { class: "px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] rounded-md border border-white/10" }
-const _hoisted_34 = {
+const _hoisted_22 = ["onClick"]
+const _hoisted_23 = ["onClick"]
+const _hoisted_24 = ["onClick", "title", "aria-label"]
+const _hoisted_25 = ["fill"]
+const _hoisted_26 = ["onClick"]
+const _hoisted_27 = { class: "absolute bottom-0 left-0 p-4 w-full" }
+const _hoisted_28 = { class: "text-xl font-bold text-white mb-1 truncate drop-shadow-lg" }
+const _hoisted_29 = { class: "flex items-center gap-2" }
+const _hoisted_30 = { class: "px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] rounded-md border border-white/10" }
+const _hoisted_31 = { class: "px-2 py-0.5 bg-white/20 backdrop-blur-md text-white text-[10px] rounded-md border border-white/10" }
+const _hoisted_32 = {
   key: 0,
   class: "w-8 h-8 text-white",
   fill: "none",
@@ -23757,7 +23771,9 @@ const _hoisted_34 = {
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, toDisplayString: _toDisplayString, normalizeClass: _normalizeClass, createTextVNode: _createTextVNode, Fragment: _Fragment } = _Vue
+    const { createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, toDisplayString: _toDisplayString, resolveComponent: _resolveComponent, createBlock: _createBlock, normalizeClass: _normalizeClass, createTextVNode: _createTextVNode, Fragment: _Fragment, createVNode: _createVNode } = _Vue
+
+    const _component_character_cover = _resolveComponent("character-cover")
 
     return (_openBlock(), _createElementBlock("div", {
       class: _normalizeClass(["char-grid-item relative rounded-2xl overflow-hidden transition-[transform,shadow,border-color] duration-300", mobile
@@ -23805,24 +23821,25 @@ return function render(_ctx, _cache) {
               ? (_openBlock(), _createElementBlock("div", _hoisted_3, _toDisplayString((char.name || '角').slice(0, 1)), 1 /* TEXT */))
               : _createCommentVNode("v-if", true),
             (!deck || char.avatar)
-              ? (_openBlock(), _createElementBlock("img", {
+              ? (_openBlock(), _createBlock(_component_character_cover, {
                   key: 1,
                   src: char.avatar,
+                  uuid: char.uuid,
                   alt: char.name,
                   draggable: "false",
                   class: "absolute inset-0 w-full h-full object-cover",
                   loading: deck ? 'eager' : 'lazy',
                   decoding: "async"
-                }, null, 8 /* PROPS */, _hoisted_4))
+                }, null, 8 /* PROPS */, ["src", "uuid", "alt", "loading"]))
               : _createCommentVNode("v-if", true),
             _cache[7] || (_cache[7] = _createElementVNode("div", { class: "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" }, null, -1 /* CACHED */)),
             batchMode
-              ? (_openBlock(), _createElementBlock("div", _hoisted_5, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_4, [
                   _createElementVNode("div", {
                     class: _normalizeClass(["w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors", selected ? 'bg-red-500 border-red-500' : 'bg-white/20 border-white/50'])
                   }, [
                     selected
-                      ? (_openBlock(), _createElementBlock("svg", _hoisted_6, [...(_cache[1] || (_cache[1] = [
+                      ? (_openBlock(), _createElementBlock("svg", _hoisted_5, [...(_cache[1] || (_cache[1] = [
                           _createElementVNode("path", {
                             "stroke-linecap": "round",
                             "stroke-linejoin": "round",
@@ -23835,7 +23852,7 @@ return function render(_ctx, _cache) {
                 ]))
               : _createCommentVNode("v-if", true),
             (active && !batchMode)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_7, [...(_cache[2] || (_cache[2] = [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_6, [...(_cache[2] || (_cache[2] = [
                   _createElementVNode("div", { class: "flex items-center text-xs font-bold text-white bg-green-600/60 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/30 shadow-lg" }, [
                     _createElementVNode("span", { class: "w-2 h-2 bg-green-400 rounded-full mr-2 shadow-[0_0_5px_rgba(74,222,128,0.8)]" }),
                     _createTextVNode(" 当前使用 ")
@@ -23843,7 +23860,7 @@ return function render(_ctx, _cache) {
                 ]))]))
               : _createCommentVNode("v-if", true),
             (!batchMode)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_8, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_7, [
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('edit')), ["stop"]),
                     title: "编辑角色",
@@ -23863,7 +23880,7 @@ return function render(_ctx, _cache) {
                         d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                       })
                     ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_9),
+                  ]))], 8 /* PROPS */, _hoisted_8),
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('export-card')), ["stop"]),
                     title: "导出角色",
@@ -23883,7 +23900,7 @@ return function render(_ctx, _cache) {
                         d: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                       })
                     ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_10),
+                  ]))], 8 /* PROPS */, _hoisted_9),
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('toggle-favorite')), ["stop"]),
                     class: _normalizeClass(["p-2 bg-white/20 backdrop-blur-md rounded-full border border-white/20 active:bg-white/40 shadow-lg transition-colors", favorite ? 'text-amber-300' : 'text-white']),
@@ -23897,8 +23914,8 @@ return function render(_ctx, _cache) {
                       viewBox: "0 0 24 24"
                     }, [...(_cache[5] || (_cache[5] = [
                       _createElementVNode("use", { href: "#icon-star" }, null, -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_12))
-                  ], 10 /* CLASS, PROPS */, _hoisted_11),
+                    ]))], 8 /* PROPS */, _hoisted_11))
+                  ], 10 /* CLASS, PROPS */, _hoisted_10),
                   deck
                     ? (_openBlock(), _createElementBlock("button", {
                         key: 0,
@@ -23915,35 +23932,36 @@ return function render(_ctx, _cache) {
                         }, [
                           _createElementVNode("use", { href: "#icon-delete" })
                         ], -1 /* CACHED */)
-                      ]))], 8 /* PROPS */, _hoisted_13))
+                      ]))], 8 /* PROPS */, _hoisted_12))
                     : _createCommentVNode("v-if", true)
                 ]))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_14, [
+            _createElementVNode("div", _hoisted_13, [
               _createElementVNode("h3", {
                 class: "character-card-name text-white font-bold text-sm truncate mb-2 drop-shadow-md",
                 title: char.name
-              }, _toDisplayString(char.name), 9 /* TEXT, PROPS */, _hoisted_15),
+              }, _toDisplayString(char.name), 9 /* TEXT, PROPS */, _hoisted_14),
               (!batchMode)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_16, [
-                    _createElementVNode("div", _hoisted_17, [
-                      _createElementVNode("span", _hoisted_18, _toDisplayString(worldInfoCount) + " 世界书", 1 /* TEXT */),
-                      _createElementVNode("span", _hoisted_19, _toDisplayString(regexCount) + " 正则", 1 /* TEXT */)
+                ? (_openBlock(), _createElementBlock("div", _hoisted_15, [
+                    _createElementVNode("div", _hoisted_16, [
+                      _createElementVNode("span", _hoisted_17, _toDisplayString(worldInfoCount) + " 世界书", 1 /* TEXT */),
+                      _createElementVNode("span", _hoisted_18, _toDisplayString(regexCount) + " 正则", 1 /* TEXT */)
                     ])
                   ]))
                 : _createCommentVNode("v-if", true)
             ])
           ], 64 /* STABLE_FRAGMENT */))
-        : (_openBlock(), _createElementBlock("div", _hoisted_20, [
-            _createElementVNode("img", {
+        : (_openBlock(), _createElementBlock("div", _hoisted_19, [
+            _createVNode(_component_character_cover, {
               src: char.avatar,
+              uuid: char.uuid,
               class: "character-card-cover w-full h-full object-cover",
               loading: "lazy",
               decoding: "async"
-            }, null, 8 /* PROPS */, _hoisted_21),
+            }, null, 8 /* PROPS */, ["src", "uuid"]),
             _cache[14] || (_cache[14] = _createElementVNode("div", { class: "absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" }, null, -1 /* CACHED */)),
             (active && !batchMode)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_22, [...(_cache[8] || (_cache[8] = [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_20, [...(_cache[8] || (_cache[8] = [
                   _createElementVNode("div", { class: "flex items-center text-xs font-bold text-white bg-green-600/60 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/30 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.3)]" }, [
                     _createElementVNode("span", { class: "w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" }),
                     _createTextVNode(" 当前使用 ")
@@ -23951,7 +23969,7 @@ return function render(_ctx, _cache) {
                 ]))]))
               : _createCommentVNode("v-if", true),
             (!batchMode)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_23, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_21, [
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('edit')), ["stop"]),
                     class: "p-2 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-600 rounded-full shadow-lg transition-all hover:scale-110",
@@ -23970,7 +23988,7 @@ return function render(_ctx, _cache) {
                         d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                       })
                     ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_24),
+                  ]))], 8 /* PROPS */, _hoisted_22),
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('export-card')), ["stop"]),
                     class: "p-2 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-600 rounded-full shadow-lg transition-all hover:scale-110",
@@ -23989,7 +24007,7 @@ return function render(_ctx, _cache) {
                         d: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                       })
                     ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_25),
+                  ]))], 8 /* PROPS */, _hoisted_23),
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('toggle-favorite')), ["stop"]),
                     class: _normalizeClass(["p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all hover:scale-110", favorite ? 'text-amber-500 hover:text-amber-600' : 'text-gray-700 hover:text-amber-500']),
@@ -24003,8 +24021,8 @@ return function render(_ctx, _cache) {
                       viewBox: "0 0 24 24"
                     }, [...(_cache[11] || (_cache[11] = [
                       _createElementVNode("use", { href: "#icon-star" }, null, -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_27))
-                  ], 10 /* CLASS, PROPS */, _hoisted_26),
+                    ]))], 8 /* PROPS */, _hoisted_25))
+                  ], 10 /* CLASS, PROPS */, _hoisted_24),
                   _createElementVNode("button", {
                     onClick: _withModifiers($event => ($emit('delete-card')), ["stop"]),
                     class: "p-2 bg-white/90 backdrop-blur-sm text-red-500 hover:text-red-700 rounded-full shadow-lg transition-all hover:scale-110",
@@ -24023,14 +24041,14 @@ return function render(_ctx, _cache) {
                         d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                       })
                     ], -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_28)
+                  ]))], 8 /* PROPS */, _hoisted_26)
                 ]))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_29, [
-              _createElementVNode("h3", _hoisted_30, _toDisplayString(char.name), 1 /* TEXT */),
-              _createElementVNode("div", _hoisted_31, [
-                _createElementVNode("span", _hoisted_32, _toDisplayString(worldInfoCount) + " 世界书", 1 /* TEXT */),
-                _createElementVNode("span", _hoisted_33, _toDisplayString(regexCount) + " 正则", 1 /* TEXT */)
+            _createElementVNode("div", _hoisted_27, [
+              _createElementVNode("h3", _hoisted_28, _toDisplayString(char.name), 1 /* TEXT */),
+              _createElementVNode("div", _hoisted_29, [
+                _createElementVNode("span", _hoisted_30, _toDisplayString(worldInfoCount) + " 世界书", 1 /* TEXT */),
+                _createElementVNode("span", _hoisted_31, _toDisplayString(regexCount) + " 正则", 1 /* TEXT */)
               ])
             ]),
             batchMode
@@ -24045,7 +24063,7 @@ return function render(_ctx, _cache) {
                       class: _normalizeClass(["w-12 h-12 rounded-full border-2 flex items-center justify-center", selected ? 'bg-red-500 border-red-500' : 'border-gray-300'])
                     }, [
                       selected
-                        ? (_openBlock(), _createElementBlock("svg", _hoisted_34, [...(_cache[13] || (_cache[13] = [
+                        ? (_openBlock(), _createElementBlock("svg", _hoisted_32, [...(_cache[13] || (_cache[13] = [
                             _createElementVNode("path", {
                               "stroke-linecap": "round",
                               "stroke-linejoin": "round",
@@ -24572,19 +24590,20 @@ return function render(_ctx, _cache) {
                         title: tab.name,
                         onClick: $event => ($emit('navigate',tab.view))
                       }, [
-                        (selected==='vampire')
+                        nightNavigation
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
-                              src: 'assets/themes/vampire/nav-'+tab.view+'.webp',
+                              src: navigation(tab.view),
                               alt: "",
                               class: "shell-dock-night-art",
                               "data-rphub-no-save": ""
                             }, null, 8 /* PROPS */, _hoisted_4))
                           : (_openBlock(), _createElementBlock("img", {
                               key: 1,
-                              src: 'assets/images/navigation/'+tab.view+'.webp',
+                              src: navigation(tab.view),
                               alt: "",
-                              class: "shell-dock-art"
+                              class: "shell-dock-art",
+                              "data-rphub-no-save": ""
                             }, null, 8 /* PROPS */, _hoisted_5)),
                         _createVNode(_component_icon, {
                           name: tab.icon,
@@ -25059,34 +25078,26 @@ return function render(_ctx, _cache) {
 })();
 window.RPCompiledRenders.Advanced = (function () {
 const _Vue = Vue
-const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createTextVNode: _createTextVNode } = _Vue
 
 const _hoisted_1 = { class: "shell-page shell-advanced" }
-const _hoisted_2 = { class: "shell-section-heading" }
-const _hoisted_3 = { key: 0 }
-const _hoisted_4 = { class: "shell-card-picker" }
-const _hoisted_5 = ["src"]
-const _hoisted_6 = ["value", "onChange", "disabled"]
-const _hoisted_7 = ["value"]
-const _hoisted_8 = ["value"]
-const _hoisted_9 = { class: "shell-action-grid shell-character-actions" }
-const _hoisted_10 = ["disabled", "onClick"]
-const _hoisted_11 = { class: "shell-action-icon" }
-const _hoisted_12 = ["onClick"]
-const _hoisted_13 = { class: "shell-action-grid" }
-const _hoisted_14 = ["onClick"]
-const _hoisted_15 = { class: "shell-action-icon" }
-const _hoisted_16 = ["onClick"]
-const _hoisted_17 = { class: "shell-action-icon" }
-const _hoisted_18 = { class: "shell-section-heading" }
-const _hoisted_19 = ["onClick"]
-const _hoisted_20 = { class: "shell-row-list" }
-const _hoisted_21 = ["disabled", "onClick"]
-const _hoisted_22 = { class: "shell-row-icon" }
+const _hoisted_2 = { class: "shell-action-grid shell-character-actions" }
+const _hoisted_3 = ["disabled", "onClick"]
+const _hoisted_4 = { class: "shell-action-icon" }
+const _hoisted_5 = { class: "shell-action-grid" }
+const _hoisted_6 = ["onClick"]
+const _hoisted_7 = { class: "shell-action-icon" }
+const _hoisted_8 = ["onClick"]
+const _hoisted_9 = { class: "shell-action-icon" }
+const _hoisted_10 = { class: "shell-section-heading" }
+const _hoisted_11 = ["onClick"]
+const _hoisted_12 = { class: "shell-row-list" }
+const _hoisted_13 = ["disabled", "onClick"]
+const _hoisted_14 = { class: "shell-row-icon" }
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, createBlock: _createBlock, renderList: _renderList, Fragment: _Fragment, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode } = _Vue
+    const { resolveComponent: _resolveComponent, createVNode: _createVNode, renderList: _renderList, Fragment: _Fragment, openBlock: _openBlock, createElementBlock: _createElementBlock, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode } = _Vue
 
     const _component_mascot_header = _resolveComponent("mascot-header")
     const _component_icon = _resolveComponent("icon")
@@ -25098,44 +25109,6 @@ return function render(_ctx, _cache) {
         pose: "workshop"
       }),
       _createElementVNode("div", _hoisted_2, [
-        _cache[0] || (_cache[0] = _createElementVNode("h2", null, "当前角色", -1 /* CACHED */)),
-        card
-          ? (_openBlock(), _createElementBlock("span", _hoisted_3, "绑定配置"))
-          : _createCommentVNode("v-if", true)
-      ]),
-      _createElementVNode("label", _hoisted_4, [
-        (card?.avatar)
-          ? (_openBlock(), _createElementBlock("img", {
-              key: 0,
-              src: card.avatar,
-              alt: ""
-            }, null, 8 /* PROPS */, _hoisted_5))
-          : (_openBlock(), _createBlock(_component_icon, {
-              key: 1,
-              name: "Users"
-            })),
-        _createElementVNode("select", {
-          value: selected,
-          onChange: $event => ($emit('select',Number($event.target.value))),
-          "aria-label": "选择配置所属角色",
-          disabled: busy || !characters.length
-        }, [
-          (!characters.length)
-            ? (_openBlock(), _createElementBlock("option", {
-                key: 0,
-                value: -1
-              }, "尚无角色卡", 8 /* PROPS */, _hoisted_7))
-            : _createCommentVNode("v-if", true),
-          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(characters, (item, index) => {
-            return (_openBlock(), _createElementBlock("option", {
-              key: item.uuid,
-              value: index
-            }, _toDisplayString(item.name), 9 /* TEXT, PROPS */, _hoisted_8))
-          }), 128 /* KEYED_FRAGMENT */))
-        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_6),
-        _createVNode(_component_icon, { name: "ChevronDown" })
-      ]),
-      _createElementVNode("div", _hoisted_9, [
         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(cardItems, (item) => {
           return (_openBlock(), _createElementBlock("button", {
             key: item.view,
@@ -25143,67 +25116,56 @@ return function render(_ctx, _cache) {
             disabled: !card || busy,
             onClick: $event => ($emit('navigate',item.view))
           }, [
-            _createElementVNode("span", _hoisted_11, [
+            _createElementVNode("span", _hoisted_4, [
               _createVNode(_component_icon, { name: item.icon }, null, 8 /* PROPS */, ["name"])
             ]),
             _createElementVNode("strong", null, _toDisplayString(item.label), 1 /* TEXT */)
-          ], 8 /* PROPS */, _hoisted_10))
+          ], 8 /* PROPS */, _hoisted_3))
         }), 128 /* KEYED_FRAGMENT */))
       ]),
-      (!card)
-        ? (_openBlock(), _createElementBlock("button", {
-            key: 0,
-            type: "button",
-            class: "shell-text-link",
-            onClick: $event => ($emit('navigate','characters'))
-          }, [
-            _cache[1] || (_cache[1] = _createTextVNode("选择或导入角色卡", -1 /* CACHED */)),
-            _createVNode(_component_icon, { name: "ChevronRight" })
-          ], 8 /* PROPS */, _hoisted_12))
-        : _createCommentVNode("v-if", true),
-      _cache[6] || (_cache[6] = _createElementVNode("div", { class: "shell-section-heading" }, [
+      _cache[4] || (_cache[4] = _createElementVNode("div", { class: "shell-section-heading" }, [
         _createElementVNode("h2", null, "预设与工具"),
         _createElementVNode("span", null, "软件通用")
       ], -1 /* CACHED */)),
-      _createElementVNode("div", _hoisted_13, [
+      _createElementVNode("div", _hoisted_5, [
         _createElementVNode("button", {
           type: "button",
           onClick: $event => ($emit('navigate','presets'))
         }, [
-          _createElementVNode("span", _hoisted_15, [
+          _createElementVNode("span", _hoisted_7, [
             _createVNode(_component_icon, { name: "NotebookPen" })
           ]),
-          _cache[2] || (_cache[2] = _createElementVNode("strong", null, "预设管理", -1 /* CACHED */))
-        ], 8 /* PROPS */, _hoisted_14),
+          _cache[0] || (_cache[0] = _createElementVNode("strong", null, "预设管理", -1 /* CACHED */))
+        ], 8 /* PROPS */, _hoisted_6),
         _createElementVNode("button", {
           type: "button",
           onClick: $event => ($emit('navigate','tools'))
         }, [
-          _createElementVNode("span", _hoisted_17, [
+          _createElementVNode("span", _hoisted_9, [
             _createVNode(_component_icon, { name: "Wrench" })
           ]),
-          _cache[3] || (_cache[3] = _createElementVNode("strong", null, "工具管理", -1 /* CACHED */))
-        ], 8 /* PROPS */, _hoisted_16)
+          _cache[1] || (_cache[1] = _createElementVNode("strong", null, "工具管理", -1 /* CACHED */))
+        ], 8 /* PROPS */, _hoisted_8)
       ]),
-      _createElementVNode("div", _hoisted_18, [
-        _cache[5] || (_cache[5] = _createElementVNode("h2", null, "灯塔赛事", -1 /* CACHED */)),
+      _createElementVNode("div", _hoisted_10, [
+        _cache[3] || (_cache[3] = _createElementVNode("h2", null, "灯塔赛事", -1 /* CACHED */)),
         _createElementVNode("button", {
           type: "button",
           class: "competition-lighthouse-link",
           onClick: $event => ($emit('navigate','lighthouse'))
         }, [
           _createVNode(_component_icon, { name: "Lighthouse" }),
-          _cache[4] || (_cache[4] = _createTextVNode("逛灯塔", -1 /* CACHED */)),
+          _cache[2] || (_cache[2] = _createTextVNode("逛灯塔", -1 /* CACHED */)),
           _createVNode(_component_icon, { name: "ArrowUpRight" })
-        ], 8 /* PROPS */, _hoisted_19)
+        ], 8 /* PROPS */, _hoisted_11)
       ]),
       _createVNode(_component_competition_list, {
         onSelect: $event => ($emit('event',$event))
       }, null, 8 /* PROPS */, ["onSelect"]),
-      _cache[7] || (_cache[7] = _createElementVNode("div", { class: "shell-section-heading" }, [
+      _cache[5] || (_cache[5] = _createElementVNode("div", { class: "shell-section-heading" }, [
         _createElementVNode("h2", null, "已接入功能")
       ], -1 /* CACHED */)),
-      _createElementVNode("div", _hoisted_20, [
+      _createElementVNode("div", _hoisted_12, [
         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(plugins, (plugin) => {
           return (_openBlock(), _createElementBlock("button", {
             key: plugin.view,
@@ -25211,13 +25173,13 @@ return function render(_ctx, _cache) {
             disabled: !plugin.installed,
             onClick: $event => ($emit('navigate',plugin.view))
           }, [
-            _createElementVNode("span", _hoisted_22, [
+            _createElementVNode("span", _hoisted_14, [
               _createVNode(_component_icon, { name: plugin.icon }, null, 8 /* PROPS */, ["name"])
             ]),
             _createElementVNode("span", null, _toDisplayString(plugin.name), 1 /* TEXT */),
             _createElementVNode("small", null, _toDisplayString(plugin.installed?'已接入':'不可用'), 1 /* TEXT */),
             _createVNode(_component_icon, { name: "ChevronRight" })
-          ], 8 /* PROPS */, _hoisted_21))
+          ], 8 /* PROPS */, _hoisted_13))
         }), 128 /* KEYED_FRAGMENT */))
       ])
     ]))
@@ -25390,7 +25352,7 @@ const _hoisted_15 = {
 }
 const _hoisted_16 = { class: "theme-mode-badge" }
 const _hoisted_17 = { class: "theme-pack-name" }
-const _hoisted_18 = ["value", "checked", "onChange"]
+const _hoisted_18 = ["value", "aria-label", "checked", "onChange"]
 const _hoisted_19 = { class: "theme-pack-subtitle" }
 const _hoisted_20 = {
   class: "theme-pack-palette",
@@ -25399,13 +25361,16 @@ const _hoisted_20 = {
 const _hoisted_21 = { class: "shell-form-row" }
 const _hoisted_22 = { class: "relative inline-flex items-center cursor-pointer" }
 const _hoisted_23 = ["checked", "onChange"]
-const _hoisted_24 = {
+const _hoisted_24 = { class: "shell-form-row" }
+const _hoisted_25 = { class: "relative inline-flex items-center cursor-pointer" }
+const _hoisted_26 = ["checked", "onChange"]
+const _hoisted_27 = {
   key: 3,
   class: "shell-row-list"
 }
-const _hoisted_25 = ["onClick"]
-const _hoisted_26 = ["onClick"]
-const _hoisted_27 = ["onClick"]
+const _hoisted_28 = ["onClick"]
+const _hoisted_29 = ["onClick"]
+const _hoisted_30 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -25490,7 +25455,7 @@ return function render(_ctx, _cache) {
       (section==='appearance')
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
             _createElementVNode("section", _hoisted_12, [
-              _cache[13] || (_cache[13] = _createElementVNode("h3", { id: "theme-library-title" }, "界面主题", -1 /* CACHED */)),
+              _cache[13] || (_cache[13] = _createElementVNode("h3", { id: "theme-library-title" }, "皮肤", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_13, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(packs, (pack) => {
                   return (_openBlock(), _createElementBlock("label", {
@@ -25499,12 +25464,12 @@ return function render(_ctx, _cache) {
                   }, [
                     _createElementVNode("div", {
                       class: "theme-pack-preview",
-                      style: _normalizeStyle({'--preview-bg':pack.preview.background,'--preview-accent':pack.preview.accent})
+                      style: _normalizeStyle({'--preview-bg':preview(pack).background,'--preview-accent':preview(pack).accent})
                     }, [
-                      (pack.preview.image)
+                      (preview(pack).image)
                         ? (_openBlock(), _createElementBlock("img", {
                             key: 0,
-                            src: pack.preview.image,
+                            src: preview(pack).image,
                             alt: "",
                             "data-rphub-no-save": ""
                           }, null, 8 /* PROPS */, _hoisted_14))
@@ -25522,13 +25487,14 @@ return function render(_ctx, _cache) {
                         _createElementVNode("i"),
                         _createElementVNode("i")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("span", _hoisted_16, _toDisplayString(pack.modeLabel), 1 /* TEXT */)
+                      _createElementVNode("span", _hoisted_16, _toDisplayString(night?'夜间':'日间'), 1 /* TEXT */)
                     ], 4 /* STYLE */),
                     _createElementVNode("span", _hoisted_17, [
                       _createElementVNode("input", {
                         type: "radio",
                         name: "ui-pack",
                         value: pack.id,
+                        "aria-label": pack.name,
                         checked: selected===pack.id,
                         onChange: $event => (selectPack(pack.id))
                       }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_18),
@@ -25537,10 +25503,10 @@ return function render(_ctx, _cache) {
                     _createElementVNode("span", _hoisted_19, _toDisplayString(pack.subtitle), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_20, [
                       _createElementVNode("i", {
-                        style: _normalizeStyle({background:pack.preview.background})
+                        style: _normalizeStyle({background:preview(pack).background})
                       }, null, 4 /* STYLE */),
                       _createElementVNode("i", {
-                        style: _normalizeStyle({background:pack.accent})
+                        style: _normalizeStyle({background:preview(pack).accent})
                       }, null, 4 /* STYLE */),
                       _cache[12] || (_cache[12] = _createElementVNode("i", null, null, -1 /* CACHED */))
                     ])
@@ -25561,35 +25527,49 @@ return function render(_ctx, _cache) {
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_23),
                 _cache[14] || (_cache[14] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
+            ]),
+            _createElementVNode("label", _hoisted_24, [
+              _cache[17] || (_cache[17] = _createElementVNode("span", null, "夜间模式", -1 /* CACHED */)),
+              _createElementVNode("span", _hoisted_25, [
+                _createElementVNode("input", {
+                  type: "checkbox",
+                  role: "switch",
+                  "aria-label": "夜间模式",
+                  class: "settings-toggle-input sr-only",
+                  checked: night,
+                  onChange: toggleDayNight
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_26),
+                _cache[16] || (_cache[16] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+              ])
             ])
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (section==='legacy')
-        ? (_openBlock(), _createElementBlock("div", _hoisted_24, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_27, [
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'worldinfo',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "BookOpen" }),
-              _cache[16] || (_cache[16] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
+              _cache[18] || (_cache[18] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_25),
+            ], 8 /* PROPS */, _hoisted_28),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'regex',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "Code2" }),
-              _cache[17] || (_cache[17] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
+              _cache[19] || (_cache[19] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_26),
+            ], 8 /* PROPS */, _hoisted_29),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'uitemplates',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "PanelsTopLeft" }),
-              _cache[18] || (_cache[18] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
+              _cache[20] || (_cache[20] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_27)
+            ], 8 /* PROPS */, _hoisted_30)
           ]))
         : _createCommentVNode("v-if", true)
     ]))
@@ -25722,33 +25702,32 @@ const _hoisted_9 = { class: "shell-album-grid" }
 const _hoisted_10 = ["onClick", "aria-label"]
 const _hoisted_11 = { class: "shell-album-cover" }
 const _hoisted_12 = { class: "shell-album-aperture image-glass" }
-const _hoisted_13 = ["src", "alt", "onError", "onLoad"]
-const _hoisted_14 = {
+const _hoisted_13 = {
   key: 0,
   class: "shell-empty"
 }
-const _hoisted_15 = {
+const _hoisted_14 = {
   key: 0,
   role: "status"
 }
-const _hoisted_16 = {
+const _hoisted_15 = {
   key: 1,
   class: "shell-empty"
 }
-const _hoisted_17 = { class: "shell-photo-grid" }
-const _hoisted_18 = ["onClick", "aria-label"]
-const _hoisted_19 = ["src"]
+const _hoisted_16 = { class: "shell-photo-grid" }
+const _hoisted_17 = ["onClick", "aria-label"]
+const _hoisted_18 = ["src"]
+const _hoisted_19 = ["onClick"]
 const _hoisted_20 = ["onClick"]
-const _hoisted_21 = ["onClick"]
-const _hoisted_22 = ["onClick", "onPointermovePassive", "onPointerleave"]
-const _hoisted_23 = ["onClick"]
-const _hoisted_24 = ["disabled", "onClick"]
-const _hoisted_25 = { class: "shell-photo-glass image-glass" }
-const _hoisted_26 = ["src", "onClick"]
-const _hoisted_27 = ["disabled", "onClick"]
-const _hoisted_28 = ["onClick"]
-const _hoisted_29 = ["disabled", "onClick"]
-const _hoisted_30 = {
+const _hoisted_21 = ["onClick", "onPointermovePassive", "onPointerleave"]
+const _hoisted_22 = ["onClick"]
+const _hoisted_23 = ["disabled", "onClick"]
+const _hoisted_24 = { class: "shell-photo-glass image-glass" }
+const _hoisted_25 = ["src", "onClick"]
+const _hoisted_26 = ["disabled", "onClick"]
+const _hoisted_27 = ["onClick"]
+const _hoisted_28 = ["disabled", "onClick"]
+const _hoisted_29 = {
   key: 0,
   role: "alert",
   class: "shell-viewer-error"
@@ -25760,6 +25739,7 @@ return function render(_ctx, _cache) {
 
     const _component_mascot_header = _resolveComponent("mascot-header")
     const _component_icon = _resolveComponent("icon")
+    const _component_character_cover = _resolveComponent("character-cover")
     const _component_theme_mascot = _resolveComponent("theme-mascot")
 
     return (_openBlock(), _createElementBlock("main", {
@@ -25823,14 +25803,16 @@ return function render(_ctx, _cache) {
                     _createElementVNode("div", _hoisted_12, [
                       _createVNode(_component_icon, { name: "Images" }),
                       (card.avatar)
-                        ? (_openBlock(), _createElementBlock("img", {
+                        ? (_openBlock(), _createBlock(_component_character_cover, {
                             key: 0,
                             src: card.avatar,
+                            uuid: card.uuid,
                             alt: card.name,
                             loading: "lazy",
+                            decoding: "async",
                             onError: $event => {$event.target.classList.add('is-missing');$event.target.closest('.shell-album-cover').style.removeProperty('--album-ratio')},
                             onLoad: coverLoaded
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_13))
+                          }, null, 8 /* PROPS */, ["src", "uuid", "alt", "onError", "onLoad"]))
                         : _createCommentVNode("v-if", true)
                     ])
                   ]),
@@ -25840,7 +25822,7 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (!albums.length)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_14, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_13, [
                   _createVNode(_component_theme_mascot, {
                     class: "yy-empty-mascot",
                     pose: "confused",
@@ -25853,9 +25835,9 @@ return function render(_ctx, _cache) {
           ], 64 /* STABLE_FRAGMENT */))
         : (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
             loading
-              ? (_openBlock(), _createElementBlock("p", _hoisted_15, "正在读取本地图片…"))
+              ? (_openBlock(), _createElementBlock("p", _hoisted_14, "正在读取本地图片…"))
               : (!photos.length && !error)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_16, [
+                ? (_openBlock(), _createElementBlock("div", _hoisted_15, [
                     _createVNode(_component_theme_mascot, {
                       class: "yy-empty-mascot",
                       pose: "album",
@@ -25865,7 +25847,7 @@ return function render(_ctx, _cache) {
                     _cache[1] || (_cache[1] = _createElementVNode("p", null, "这张角色卡生成并保存的图片会出现在这里。", -1 /* CACHED */))
                   ]))
                 : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_17, [
+            _createElementVNode("div", _hoisted_16, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(photos.slice(0,limit), (photo, index) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: photo.name,
@@ -25878,9 +25860,9 @@ return function render(_ctx, _cache) {
                     src: photo.url,
                     alt: "",
                     loading: "lazy"
-                  }, null, 8 /* PROPS */, _hoisted_19),
+                  }, null, 8 /* PROPS */, _hoisted_18),
                   _createElementVNode("small", null, _toDisplayString(Math.round(photo.bytes/1024)) + " KB", 1 /* TEXT */)
-                ], 8 /* PROPS */, _hoisted_18))
+                ], 8 /* PROPS */, _hoisted_17))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (limit<photos.length)
@@ -25889,7 +25871,7 @@ return function render(_ctx, _cache) {
                   type: "button",
                   class: "shell-button",
                   onClick: $event => (limit+=48)
-                }, "加载更多图片", 8 /* PROPS */, _hoisted_20))
+                }, "加载更多图片", 8 /* PROPS */, _hoisted_19))
               : _createCommentVNode("v-if", true),
             error
               ? (_openBlock(), _createElementBlock("button", {
@@ -25900,7 +25882,7 @@ return function render(_ctx, _cache) {
                 }, [
                   _createVNode(_component_icon, { name: "RefreshCw" }),
                   _cache[2] || (_cache[2] = _createTextVNode("重新读取", -1 /* CACHED */))
-                ], 8 /* PROPS */, _hoisted_21))
+                ], 8 /* PROPS */, _hoisted_20))
               : _createCommentVNode("v-if", true)
           ], 64 /* STABLE_FRAGMENT */)),
       (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
@@ -25924,7 +25906,7 @@ return function render(_ctx, _cache) {
                   onClick: back
                 }, [
                   _createVNode(_component_icon, { name: "X" })
-                ], 8 /* PROPS */, _hoisted_23),
+                ], 8 /* PROPS */, _hoisted_22),
                 _createElementVNode("span", null, _toDisplayString(previewIndex+1) + " / " + _toDisplayString(photos.length), 1 /* TEXT */),
                 _createElementVNode("button", {
                   type: "button",
@@ -25935,17 +25917,17 @@ return function render(_ctx, _cache) {
                   onClick: save
                 }, [
                   _createVNode(_component_icon, { name: "Download" })
-                ], 8 /* PROPS */, _hoisted_24)
+                ], 8 /* PROPS */, _hoisted_23)
               ]),
               _createElementVNode("div", {
                 class: _normalizeClass(["shell-photo-stage", {'is-zoomed':zoomed}])
               }, [
-                _createElementVNode("div", _hoisted_25, [
+                _createElementVNode("div", _hoisted_24, [
                   _createElementVNode("img", {
                     src: preview.url,
                     alt: "生成的图片",
                     onClick: $event => (zoomed=!zoomed)
-                  }, null, 8 /* PROPS */, _hoisted_26)
+                  }, null, 8 /* PROPS */, _hoisted_25)
                 ])
               ], 2 /* CLASS */),
               _createElementVNode("footer", null, [
@@ -25957,7 +25939,7 @@ return function render(_ctx, _cache) {
                   onClick: $event => (move(-1))
                 }, [
                   _createVNode(_component_icon, { name: "ChevronLeft" })
-                ], 8 /* PROPS */, _hoisted_27),
+                ], 8 /* PROPS */, _hoisted_26),
                 _createElementVNode("button", {
                   type: "button",
                   class: "shell-icon-button",
@@ -25965,7 +25947,7 @@ return function render(_ctx, _cache) {
                   onClick: $event => (zoomed=!zoomed)
                 }, [
                   _createVNode(_component_icon, { name: "Expand" })
-                ], 8 /* PROPS */, _hoisted_28),
+                ], 8 /* PROPS */, _hoisted_27),
                 _createElementVNode("button", {
                   type: "button",
                   class: "shell-icon-button",
@@ -25974,12 +25956,12 @@ return function render(_ctx, _cache) {
                   onClick: $event => (move(1))
                 }, [
                   _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_29)
+                ], 8 /* PROPS */, _hoisted_28)
               ]),
               error
-                ? (_openBlock(), _createElementBlock("p", _hoisted_30, _toDisplayString(error), 1 /* TEXT */))
+                ? (_openBlock(), _createElementBlock("p", _hoisted_29, _toDisplayString(error), 1 /* TEXT */))
                 : _createCommentVNode("v-if", true)
-            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_22))
+            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_21))
           : _createCommentVNode("v-if", true)
       ]))
     ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1))

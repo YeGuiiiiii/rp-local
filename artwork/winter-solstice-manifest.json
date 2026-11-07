@@ -1,0 +1,1080 @@
+{
+  "id": "yueyue-winter-solstice",
+  "name": "玥玥 · 冬至小暖屋",
+  "version": "1.0.0",
+  "created": "2026-11-07",
+  "assetCount": 42,
+  "assets": [
+    {
+      "id": "welcome",
+      "label": "捧汤圆 · 主形象",
+      "group": "mascots",
+      "width": 1408,
+      "height": 1339,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        1392,
+        1323
+      ],
+      "png": "assets/png/mascots/welcome.png",
+      "webp": "assets/webp/mascots/welcome.webp",
+      "source": "source-art/hero.png",
+      "sourceBox": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "sha256": "34edfe947ecf9d54f037988d137b8ee1a60f405f09cd0f4d5ec059a26a354a18"
+    },
+    {
+      "id": "writing",
+      "label": "写字",
+      "group": "mascots",
+      "width": 888,
+      "height": 787,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        872,
+        771
+      ],
+      "png": "assets/png/mascots/writing.png",
+      "webp": "assets/webp/mascots/writing.webp",
+      "source": "source-art/poses-library.png",
+      "sourceBox": [
+        100,
+        15,
+        963,
+        778
+      ],
+      "sha256": "eaf2dd94bf2959f266412fa21a2591b1e3e70fd39a163bc14cdb8508c100764d"
+    },
+    {
+      "id": "album",
+      "label": "抱相簿",
+      "group": "mascots",
+      "width": 888,
+      "height": 784,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        872,
+        768
+      ],
+      "png": "assets/png/mascots/album.png",
+      "webp": "assets/webp/mascots/album.webp",
+      "source": "source-art/poses-library.png",
+      "sourceBox": [
+        1115,
+        24,
+        1978,
+        784
+      ],
+      "sha256": "b778666269122863d454c61ed7a3c75164c5ecbf6b0676bf872bb9dc9659ea80"
+    },
+    {
+      "id": "workshop",
+      "label": "小工坊",
+      "group": "mascots",
+      "width": 886,
+      "height": 774,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        870,
+        758
+      ],
+      "png": "assets/png/mascots/workshop.png",
+      "webp": "assets/webp/mascots/workshop.webp",
+      "source": "source-art/poses-library.png",
+      "sourceBox": [
+        94,
+        778,
+        956,
+        1527
+      ],
+      "sha256": "c753dde9b6c5d95536aed5233749b2c9734c4f23307caad45e5789267a089ea2"
+    },
+    {
+      "id": "peek",
+      "label": "雪沿探头",
+      "group": "mascots",
+      "width": 960,
+      "height": 656,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        944,
+        640
+      ],
+      "png": "assets/png/mascots/peek.png",
+      "webp": "assets/webp/mascots/peek.webp",
+      "source": "source-art/poses-library.png",
+      "sourceBox": [
+        1058,
+        857,
+        2013,
+        1502
+      ],
+      "sha256": "ff486e8189c2ba57220dcd711b8bc803d7a103d4461e720c6eb21d94af5c2ad1"
+    },
+    {
+      "id": "waiting",
+      "label": "等你回来",
+      "group": "mascots",
+      "width": 914,
+      "height": 801,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        898,
+        785
+      ],
+      "png": "assets/png/mascots/waiting.png",
+      "webp": "assets/webp/mascots/waiting.webp",
+      "source": "source-art/poses-states.png",
+      "sourceBox": [
+        75,
+        12,
+        964,
+        788
+      ],
+      "sha256": "05ed8c89045fcbb694331b71f9cedc7eee6b9e75959b4bddab5bf52de23e2884"
+    },
+    {
+      "id": "loading",
+      "label": "吹凉汤圆",
+      "group": "mascots",
+      "width": 925,
+      "height": 795,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        909,
+        779
+      ],
+      "png": "assets/png/mascots/loading.png",
+      "webp": "assets/webp/mascots/loading.webp",
+      "source": "source-art/poses-states.png",
+      "sourceBox": [
+        1082,
+        12,
+        1983,
+        782
+      ],
+      "sha256": "5cd0de1d6e8bd7149d823e0bc53f413ae3f6618c496e8e2b9523397d13ff247f"
+    },
+    {
+      "id": "confused",
+      "label": "有点困惑",
+      "group": "mascots",
+      "width": 960,
+      "height": 734,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        944,
+        718
+      ],
+      "png": "assets/png/mascots/confused.png",
+      "webp": "assets/webp/mascots/confused.webp",
+      "source": "source-art/poses-states.png",
+      "sourceBox": [
+        49,
+        793,
+        1013,
+        1525
+      ],
+      "sha256": "58606cb863b4fc844a3f3f6797216889e64fdc0fdd85b24094e756e8a81932f5"
+    },
+    {
+      "id": "sleep",
+      "label": "打个小盹",
+      "group": "mascots",
+      "width": 960,
+      "height": 663,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        944,
+        647
+      ],
+      "png": "assets/png/mascots/sleep.png",
+      "webp": "assets/webp/mascots/sleep.webp",
+      "source": "source-art/poses-states.png",
+      "sourceBox": [
+        1036,
+        832,
+        2029,
+        1509
+      ],
+      "sha256": "47c6e5133866db25aff1d9806f82052b51ba25ad52ee91783c3e06cd1307b1d7"
+    },
+    {
+      "id": "poke-happy",
+      "label": "开心投喂",
+      "group": "mascots",
+      "width": 878,
+      "height": 784,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        862,
+        768
+      ],
+      "png": "assets/png/mascots/poke-happy.png",
+      "webp": "assets/webp/mascots/poke-happy.webp",
+      "source": "source-art/poses-interactions.png",
+      "sourceBox": [
+        121,
+        10,
+        975,
+        766
+      ],
+      "sha256": "1a4377f857d8c6e6e4f0e36903ff21fb3c5ffcf1166b0d9f3fc81005996ff124"
+    },
+    {
+      "id": "poke-pout",
+      "label": "鼓起脸",
+      "group": "mascots",
+      "width": 868,
+      "height": 776,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        852,
+        760
+      ],
+      "png": "assets/png/mascots/poke-pout.png",
+      "webp": "assets/webp/mascots/poke-pout.webp",
+      "source": "source-art/poses-interactions.png",
+      "sourceBox": [
+        1093,
+        10,
+        1937,
+        762
+      ],
+      "sha256": "7cae37a54bd1ebadc7b9c82629dc96b13a5d755b74a49e3da69116fd3b32d68d"
+    },
+    {
+      "id": "poke-angry",
+      "label": "轻轻生气",
+      "group": "mascots",
+      "width": 871,
+      "height": 788,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        855,
+        772
+      ],
+      "png": "assets/png/mascots/poke-angry.png",
+      "webp": "assets/webp/mascots/poke-angry.webp",
+      "source": "source-art/poses-interactions.png",
+      "sourceBox": [
+        123,
+        761,
+        970,
+        1521
+      ],
+      "sha256": "d1abcaa147bf74e10defc986b38c4f9a4f6a767ae20e20469d3ba989700071d1"
+    },
+    {
+      "id": "transfer",
+      "label": "抱包裹归来",
+      "group": "mascots",
+      "width": 870,
+      "height": 776,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        854,
+        760
+      ],
+      "png": "assets/png/mascots/transfer.png",
+      "webp": "assets/webp/mascots/transfer.webp",
+      "source": "source-art/poses-interactions.png",
+      "sourceBox": [
+        1102,
+        774,
+        1948,
+        1525
+      ],
+      "sha256": "09d7b5935f2ca91831ef019dab342500eb09a2d32d5e7115ddef032a31745820"
+    },
+    {
+      "id": "title-label",
+      "label": "标题标签",
+      "group": "ui",
+      "width": 685,
+      "height": 345,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        669,
+        329
+      ],
+      "png": "assets/png/ui/title-label.png",
+      "webp": "assets/webp/ui/title-label.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        57,
+        116,
+        718,
+        437
+      ],
+      "sha256": "3be387e0abc29b0c0a6d1b443a7339261423d026e161194c5a8b329f737fe3f3"
+    },
+    {
+      "id": "button-primary",
+      "label": "主按钮",
+      "group": "ui",
+      "width": 599,
+      "height": 236,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        583,
+        220
+      ],
+      "png": "assets/png/ui/button-primary.png",
+      "webp": "assets/webp/ui/button-primary.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        744,
+        146,
+        1319,
+        358
+      ],
+      "sha256": "eac7c1616721bfd219112ce241fdad13e4db6dd0467e82d6ea5dc1ab8012f6e3"
+    },
+    {
+      "id": "button-paper",
+      "label": "次按钮",
+      "group": "ui",
+      "width": 652,
+      "height": 236,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        636,
+        220
+      ],
+      "png": "assets/png/ui/button-paper.png",
+      "webp": "assets/webp/ui/button-paper.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        1349,
+        149,
+        1977,
+        361
+      ],
+      "sha256": "cfde6dbd787e2afc7aebd092130ee8ceef5d11117f73257ffb155011c94e3a0e"
+    },
+    {
+      "id": "content-panel",
+      "label": "内容面板",
+      "group": "ui",
+      "width": 584,
+      "height": 568,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        568,
+        552
+      ],
+      "png": "assets/png/ui/content-panel.png",
+      "webp": "assets/webp/ui/content-panel.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        107,
+        479,
+        667,
+        1023
+      ],
+      "sha256": "0deafcf19edeafe137446abefb6f1d615a57f0774da25e040fc98ab6d251553e"
+    },
+    {
+      "id": "album-frame",
+      "label": "相簿边框",
+      "group": "ui",
+      "width": 591,
+      "height": 575,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        575,
+        559
+      ],
+      "png": "assets/png/ui/album-frame.png",
+      "webp": "assets/webp/ui/album-frame.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        737,
+        472,
+        1304,
+        1023
+      ],
+      "sha256": "3f51db839bb35ee54d5cedfe10bfb2662df446dfb9bdd90f2b8d2b15ded167ce"
+    },
+    {
+      "id": "dialog-panel",
+      "label": "弹窗面板",
+      "group": "ui",
+      "width": 621,
+      "height": 572,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        605,
+        556
+      ],
+      "png": "assets/png/ui/dialog-panel.png",
+      "webp": "assets/webp/ui/dialog-panel.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        1384,
+        473,
+        1981,
+        1021
+      ],
+      "sha256": "b95a9153b0db536860db6b3a75eb034049430f94419703c317dc56f06cece571"
+    },
+    {
+      "id": "album-corner-moon",
+      "label": "月牙边饰",
+      "group": "ui",
+      "width": 371,
+      "height": 442,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        355,
+        426
+      ],
+      "png": "assets/png/ui/album-corner-moon.png",
+      "webp": "assets/webp/ui/album-corner-moon.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        190,
+        1062,
+        537,
+        1480
+      ],
+      "sha256": "2e5511776aa88413c343130c40ec9627149a03a53a45edeadfe11a72bbc7493a"
+    },
+    {
+      "id": "album-corner-leaf",
+      "label": "霜花边饰",
+      "group": "ui",
+      "width": 426,
+      "height": 403,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        410,
+        387
+      ],
+      "png": "assets/png/ui/album-corner-leaf.png",
+      "webp": "assets/webp/ui/album-corner-leaf.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        816,
+        1081,
+        1218,
+        1460
+      ],
+      "sha256": "12b5494fa9992ca0fffb2ef4b555851050e6882f51f87fb8cceb01124e74e778"
+    },
+    {
+      "id": "close",
+      "label": "关闭按钮",
+      "group": "ui",
+      "width": 263,
+      "height": 280,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        247,
+        264
+      ],
+      "png": "assets/png/ui/close.png",
+      "webp": "assets/webp/ui/close.webp",
+      "source": "source-art/ui-day.png",
+      "sourceBox": [
+        1543,
+        1129,
+        1782,
+        1385
+      ],
+      "sha256": "f80f2c4cbc34c83befe3380103b3a80aa8145d72d6921039a8c2455b04969c1c"
+    },
+    {
+      "id": "title-label-night",
+      "label": "标题标签 · 夜",
+      "group": "ui",
+      "width": 689,
+      "height": 347,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        673,
+        331
+      ],
+      "png": "assets/png/ui/title-label-night.png",
+      "webp": "assets/webp/ui/title-label-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        54,
+        114,
+        719,
+        437
+      ],
+      "sha256": "e51b7e58ca649cdd540b497dde2fa052ff5267cc8b399a419623e47852f6eca0"
+    },
+    {
+      "id": "button-primary-night",
+      "label": "主按钮 · 夜",
+      "group": "ui",
+      "width": 600,
+      "height": 247,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        584,
+        231
+      ],
+      "png": "assets/png/ui/button-primary-night.png",
+      "webp": "assets/webp/ui/button-primary-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        745,
+        139,
+        1320,
+        360
+      ],
+      "sha256": "3f32d86e82c2f2349459d3c519b880949510d6b33307c0dcd8253b0741c27870"
+    },
+    {
+      "id": "button-paper-night",
+      "label": "次按钮 · 夜",
+      "group": "ui",
+      "width": 653,
+      "height": 237,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        637,
+        221
+      ],
+      "png": "assets/png/ui/button-paper-night.png",
+      "webp": "assets/webp/ui/button-paper-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        1350,
+        146,
+        1978,
+        358
+      ],
+      "sha256": "9d0fd272c6026cbfdc7215c08d475d9bb3e66358cf534a19d9a8b6f4751cbeae"
+    },
+    {
+      "id": "content-panel-night",
+      "label": "内容面板 · 夜",
+      "group": "ui",
+      "width": 588,
+      "height": 575,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        572,
+        559
+      ],
+      "png": "assets/png/ui/content-panel-night.png",
+      "webp": "assets/webp/ui/content-panel-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        106,
+        472,
+        670,
+        1023
+      ],
+      "sha256": "16084f1908674b153f8a8a99729aa91d0de3a3142e6dea46a0f8bed94ac7927c"
+    },
+    {
+      "id": "album-frame-night",
+      "label": "相簿边框 · 夜",
+      "group": "ui",
+      "width": 610,
+      "height": 577,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        594,
+        561
+      ],
+      "png": "assets/png/ui/album-frame-night.png",
+      "webp": "assets/webp/ui/album-frame-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        720,
+        471,
+        1306,
+        1023
+      ],
+      "sha256": "705f3982966bd2300c44ef8f8d1e42c8d5a3bdca5b41c9e24f30252b2356d542"
+    },
+    {
+      "id": "dialog-panel-night",
+      "label": "弹窗面板 · 夜",
+      "group": "ui",
+      "width": 629,
+      "height": 577,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        613,
+        561
+      ],
+      "png": "assets/png/ui/dialog-panel-night.png",
+      "webp": "assets/webp/ui/dialog-panel-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        1382,
+        470,
+        1986,
+        1023
+      ],
+      "sha256": "5474bca40d2ba64d3e567d4cf009b5d5d70fb4501c0f91f6570f869baa97efca"
+    },
+    {
+      "id": "album-corner-moon-night",
+      "label": "月牙边饰 · 夜",
+      "group": "ui",
+      "width": 386,
+      "height": 448,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        370,
+        432
+      ],
+      "png": "assets/png/ui/album-corner-moon-night.png",
+      "webp": "assets/webp/ui/album-corner-moon-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        181,
+        1060,
+        542,
+        1483
+      ],
+      "sha256": "5d3f2304d4ad8bdb335a110f72f3bfff98212a233307f9941bd54873f4d60581"
+    },
+    {
+      "id": "album-corner-leaf-night",
+      "label": "霜花边饰 · 夜",
+      "group": "ui",
+      "width": 439,
+      "height": 414,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        423,
+        398
+      ],
+      "png": "assets/png/ui/album-corner-leaf-night.png",
+      "webp": "assets/webp/ui/album-corner-leaf-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        809,
+        1076,
+        1224,
+        1466
+      ],
+      "sha256": "e33d3fbfdfb0ddc884c92f7eb9d96c4e71f3d41492bd1d8c4e0bb2713d5756c2"
+    },
+    {
+      "id": "close-night",
+      "label": "关闭按钮 · 夜",
+      "group": "ui",
+      "width": 263,
+      "height": 283,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        247,
+        267
+      ],
+      "png": "assets/png/ui/close-night.png",
+      "webp": "assets/webp/ui/close-night.webp",
+      "source": "source-art/ui-night.png",
+      "sourceBox": [
+        1544,
+        1128,
+        1783,
+        1386
+      ],
+      "sha256": "699bb2c3149d279c191ad92526c4a6af398165cafaeeee12030837934f4adb10"
+    },
+    {
+      "id": "snow-cap",
+      "label": "薄积雪",
+      "group": "ornaments",
+      "width": 685,
+      "height": 302,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        669,
+        286
+      ],
+      "png": "assets/png/ornaments/snow-cap.png",
+      "webp": "assets/webp/ornaments/snow-cap.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        53,
+        190,
+        714,
+        468
+      ],
+      "sha256": "ae4697aff2f3059d1e955f456af91597d3421ecbdb165c206c60d24f3b7493dd"
+    },
+    {
+      "id": "frost-corner",
+      "label": "窗角霜花",
+      "group": "ornaments",
+      "width": 514,
+      "height": 542,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        498,
+        526
+      ],
+      "png": "assets/png/ornaments/frost-corner.png",
+      "webp": "assets/webp/ornaments/frost-corner.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        788,
+        35,
+        1278,
+        553
+      ],
+      "sha256": "d028bbd6e283871f65765c777c69e6c2d16604e781d574c5c9524002934a513e"
+    },
+    {
+      "id": "moon-ribbon",
+      "label": "月牙红结",
+      "group": "ornaments",
+      "width": 452,
+      "height": 528,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        436,
+        512
+      ],
+      "png": "assets/png/ornaments/moon-ribbon.png",
+      "webp": "assets/webp/ornaments/moon-ribbon.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        1507,
+        64,
+        1935,
+        568
+      ],
+      "sha256": "6d6d5ff48e0ed07af39db77e384f822d5f431dae5865df0a07eaf72b9113f177"
+    },
+    {
+      "id": "tangyuan",
+      "label": "一碗汤圆",
+      "group": "ornaments",
+      "width": 472,
+      "height": 453,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        456,
+        437
+      ],
+      "png": "assets/png/ornaments/tangyuan.png",
+      "webp": "assets/webp/ornaments/tangyuan.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        145,
+        539,
+        593,
+        968
+      ],
+      "sha256": "49dae795ab6438d19bdc23c4e20ee14adaf6cbf4f70298fd596efa43f9641922"
+    },
+    {
+      "id": "dumplings",
+      "label": "一碟饺子",
+      "group": "ornaments",
+      "width": 564,
+      "height": 338,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        548,
+        322
+      ],
+      "png": "assets/png/ornaments/dumplings.png",
+      "webp": "assets/webp/ornaments/dumplings.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        756,
+        625,
+        1294,
+        939
+      ],
+      "sha256": "3b4174743fdb5a06c6e1af31203c82423c6f6b9c9e2e0e134298a056f2916512"
+    },
+    {
+      "id": "scarf",
+      "label": "暗红围巾",
+      "group": "ornaments",
+      "width": 620,
+      "height": 391,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        604,
+        375
+      ],
+      "png": "assets/png/ornaments/scarf.png",
+      "webp": "assets/webp/ornaments/scarf.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        1398,
+        613,
+        1994,
+        980
+      ],
+      "sha256": "e10fb6e9c2af8a3a340cd573346af339d06f0df8c014f0fa28e470efb7900bc1"
+    },
+    {
+      "id": "lantern",
+      "label": "暖灯",
+      "group": "ornaments",
+      "width": 311,
+      "height": 497,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        295,
+        481
+      ],
+      "png": "assets/png/ornaments/lantern.png",
+      "webp": "assets/webp/ornaments/lantern.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        212,
+        1000,
+        498,
+        1473
+      ],
+      "sha256": "a8031a60b7d3bbec7f33510fe5f2183842fd938d54557da5ed7f79c192bfc2bf"
+    },
+    {
+      "id": "snowflake",
+      "label": "六角雪花",
+      "group": "ornaments",
+      "width": 405,
+      "height": 447,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        389,
+        431
+      ],
+      "png": "assets/png/ornaments/snowflake.png",
+      "webp": "assets/webp/ornaments/snowflake.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        835,
+        1035,
+        1216,
+        1458
+      ],
+      "sha256": "5733f6d1b10bc1b8838879ef005f71ef56d43c41fb23b49f7a0013c12fb9d88a"
+    },
+    {
+      "id": "bells",
+      "label": "铃铛红结",
+      "group": "ornaments",
+      "width": 551,
+      "height": 403,
+      "transparent": true,
+      "contentBox": [
+        16,
+        16,
+        535,
+        387
+      ],
+      "png": "assets/png/ornaments/bells.png",
+      "webp": "assets/webp/ornaments/bells.webp",
+      "source": "source-art/ornaments.png",
+      "sourceBox": [
+        1437,
+        1056,
+        1964,
+        1435
+      ],
+      "sha256": "3bb4cbfcc0d4a381a7d5f669dc6d5f5c03007d97fef226fde55d3a82d6ea8536"
+    },
+    {
+      "id": "window-day",
+      "label": "雪窗 · 日间",
+      "group": "backgrounds",
+      "width": 2048,
+      "height": 1152,
+      "transparent": false,
+      "contentBox": null,
+      "png": "assets/png/backgrounds/window-day.png",
+      "webp": "assets/webp/backgrounds/window-day.webp",
+      "source": "source-art/scene-day.png",
+      "sourceBox": [
+        0,
+        0,
+        2048,
+        1152
+      ],
+      "sha256": "07fbd7da57645fec98281382745ff2791d38433eeae462a6bd8a852f145fe16a"
+    },
+    {
+      "id": "window-night",
+      "label": "雪窗 · 夜间",
+      "group": "backgrounds",
+      "width": 2048,
+      "height": 1152,
+      "transparent": false,
+      "contentBox": null,
+      "png": "assets/png/backgrounds/window-night.png",
+      "webp": "assets/webp/backgrounds/window-night.webp",
+      "source": "source-art/scene-night.png",
+      "sourceBox": [
+        0,
+        0,
+        2048,
+        1152
+      ],
+      "sha256": "8c7e4f0ab968381c061c983302e291b26760b6abbbd74aedddb3505325bcb423"
+    }
+  ],
+  "provenance": [
+    {
+      "sheet": "hero",
+      "jobId": "job_a3f4d820639f44acb5a55a7c929b53ea",
+      "eyeHighlightsCorrected": true,
+      "generator": "Meowa",
+      "prompt": "Draw one transparent-background winter-solstice mascot, the exact same girl and loose hand-drawn sticker style as the reference. Rounded big head and half body, long near-black hair, soft crooked bun with dark red ribbon, one cowlick, round cheeks, soft dark burgundy eyes. Silver crescent clip on the viewer's right, small gold bell on the viewer's left, never together. Ivory cardigan, thick dark red scarf, both hands in long sleeves gently holding a pale celadon bowl of white tangyuan rice balls. She looks at the viewer with a small warm smile and rosy cheeks. A little curved warm steam above the bowl. Keep her face, bowl, whole hair silhouette and scarf ends inside the canvas with generous transparent margins. Flat muted colors, rough broken charcoal outlines, restrained hard-edged shading. No text, scenery, sticker border or cast shadow.",
+      "eyeCorrection": "Meowa edit: small white oval upper-left catchlight plus tiny secondary reflection in every open burgundy iris; closed eyes unchanged."
+    },
+    {
+      "sheet": "poses-library",
+      "jobId": "job_3b0169266c2c484eb665114854f90093",
+      "eyeHighlightsCorrected": true,
+      "generator": "Meowa",
+      "prompt": "Make exactly four separated transparent half-body mascot illustrations in a spacious equal 2 by 2 grid, one complete girl per quadrant. Match the reference girl's identity, red winter scarf, ivory cardigan and rough flat hand-drawn style exactly. Top left: holding an open book and pencil, quietly writing. Top right: hugging a photo album with a silver crescent on its cover. Bottom left: holding a small toolbox and adjusting a tiny silver snowflake ornament, pleased and focused. Bottom right: peeking over a short snowy windowsill, only head and hands visible. Silver crescent clip stays on viewer right and small gold side bell on viewer left in every pose. Small round face, black long hair and cowlick, muted burgundy eyes. Hands mostly covered by sleeves. Transparent background, no labels, no frames, no lettering. Every illustration has clear space around it and stays wholly inside its quadrant.",
+      "eyeCorrection": "Meowa edit: small white oval upper-left catchlight plus tiny secondary reflection in every open burgundy iris; closed eyes unchanged."
+    },
+    {
+      "sheet": "poses-states",
+      "jobId": "job_994f4533736b4143be92990ae537c602",
+      "eyeHighlightsCorrected": true,
+      "generator": "Meowa",
+      "prompt": "Make exactly four separated transparent half-body mascot illustrations in an equal 2 by 2 grid, one complete girl per quadrant. Match the reference girl's identity, dark red scarf, ivory cardigan, rounded big head and rough flat hand-drawn style. Top left: patiently waiting with both hands around a small warm teacup and an expectant gentle face. Top right: gently blowing on a spoon holding one tangyuan, cheeks puffed slightly, bowl below. Bottom left: mildly confused and embarrassed, scarf raised just below her mouth, a little tilted head; no symbols or text. Bottom right: sleeping peacefully with cheek resting on folded sleeves, a dark red scarf loosely around shoulders. Silver crescent clip stays on viewer right, small gold side bell on viewer left. Long black hair and cowlick, soft round cheeks, dark burgundy eyes when open. Transparent background, no frames, labels or lettering. Generous margins in each quadrant.",
+      "eyeCorrection": "Meowa edit: small white oval upper-left catchlight plus tiny secondary reflection in every open burgundy iris; closed eyes unchanged."
+    },
+    {
+      "sheet": "poses-interactions",
+      "jobId": "job_916e27c5518a4d2cae97eb964c7abe74",
+      "eyeHighlightsCorrected": true,
+      "generator": "Meowa",
+      "prompt": "Make exactly four separated transparent half-body mascot illustrations in an equal 2 by 2 grid, one complete girl per quadrant. Keep the reference girl's identity, dark red scarf, ivory cardigan, rounded head and rough flat hand-drawn sticker style. Top left: happy eyes closed, smiling with a tiny friendly fang, offering one white tangyuan on a spoon. Top right: adorable small pout, hands hidden in sleeves, cheeks slightly puffed. Bottom left: lightly annoyed, eyebrows gently lowered, arms folded in oversized sleeves, still cute and friendly. Bottom right: carrying a small closed parcel tied with burgundy ribbon, two little snow specks on scarf and hair, just returned from outdoors. Silver crescent clip viewer right, small gold bell viewer left. Long black hair and cowlick. If wrist ribbon is visible it is only on the viewer's left wrist, otherwise sleeves cover both. Transparent background, no frames, labels, text or extra symbols. Each complete pose wholly inside its own quadrant with clear gaps.",
+      "eyeCorrection": "Meowa edit: small white oval upper-left catchlight plus tiny secondary reflection in every open burgundy iris; closed eyes unchanged."
+    },
+    {
+      "sheet": "ui-day",
+      "jobId": "job_f1e7258da1604c199b0fc5ca9c4ff657",
+      "eyeHighlightsCorrected": false,
+      "generator": "Meowa",
+      "prompt": "A production winter-solstice UI asset sheet, exactly nine individual blank components centered separately in a regular 3 by 3 grid on transparent background. Match the reference's loose hand-drawn charcoal outline and flat cozy colors. Snow white paper, pale icy mint, burgundy scarf accents, tiny warm gold details. In reading order: 1 wide blank title ribbon with scarf fold left and a little snow along top; 2 wide burgundy primary button with a tiny snow cap, blank center; 3 wide white secondary button with charcoal outline, blank; 4 square snow-white content panel with restrained corner lines, empty center; 5 square photo frame with transparent opening and small crescent at top left, thin snow on top; 6 square snow-white dialog panel with neat corners and a tiny red ribbon at top right, empty center; 7 standalone small silver crescent and burgundy ribbon corner ornament; 8 standalone small snow crystal and icy leaf corner ornament; 9 small circular close button with an unmistakable simple X. Wide items must fit their cell, generous transparent gutters, all components complete and disconnected, no character, no words, no labels, no sheet background. Functional restrained decoration, not Christmas."
+    },
+    {
+      "sheet": "ui-night",
+      "jobId": "job_717ff5fa61d349da8de64a97bfc0355b",
+      "eyeHighlightsCorrected": false,
+      "generator": "Meowa",
+      "prompt": "Create the NIGHT MODE version of this exact nine-component winter-solstice UI sheet. Preserve the arrangement, silhouettes, empty centers, snow caps, ornaments and rough hand-drawn style. Change white paper interiors to neutral charcoal gray and dark outlines to softly contrasting pale silver; keep burgundy ribbon, burgundy primary button, warm small gold bells and white snow. The photo frame opening remains truly transparent. The primary button has enough contrast for white text. All nine objects remain separate, fully inside the canvas with generous transparent gutters. Transparent background, no words, labels or character. Neutral charcoal, never navy or purple."
+    },
+    {
+      "sheet": "ornaments",
+      "jobId": "job_eca01a802892475cb68e03862dd4644c",
+      "eyeHighlightsCorrected": false,
+      "generator": "Meowa",
+      "prompt": "Exactly nine separated winter-solstice decorative assets in a spacious regular 3 by 3 grid on transparent background. The same loose charcoal broken outlines and simple flat colors as the reference girl's art. Reading order: a long low soft white snow cap with icy blue underside; a delicate sparse branching frost corner; a small silver crescent tied with dark red ribbon; a pale celadon bowl of three round white tangyuan with tiny warm steam; a small white plate of three handmade dumplings; a short dark red knitted scarf folded horizontally; a small warm glowing gold desk lantern; a single simple six-branched white ice crystal with fine gray-blue outline; a tiny paired gold bell with burgundy bow. No girl, no words, no Christmas elements, no labels, no shadows under objects, each object complete with generous transparent spacing inside its own cell. Assets must read clearly when small, little shading, no dense textures."
+    },
+    {
+      "sheet": "scene-day",
+      "jobId": "job_17e5c395f0f44063b21471aab3271359",
+      "eyeHighlightsCorrected": false,
+      "generator": "Meowa",
+      "prompt": "Wide quiet background illustration for a winter-solstice desktop app, matching the reference's simple flat hand-drawn charcoal outline style but without the girl. A snow-white reading room, a window on the RIGHT third showing a peaceful pale gray-blue snowy courtyard, bare branches and just a few snowflakes. Thin snow on the outer windowsill. A dark red scarf hangs on the right edge, a small warm gold lamp and pale celadon tangyuan bowl sit at the far bottom right. LEFT two thirds and center are a very light clean almost-white wall with very little detail so real software controls remain readable. Cozy subtle warm indoor light against cool snow outside. Restrained flat color blocks, soft edges with simple linework, no text, furniture clutter, festive Christmas ornaments, dark overlays, blur or gradients. Full-bleed complete background."
+    },
+    {
+      "sheet": "scene-night",
+      "jobId": "job_cfc4a96e810e46ccb06f558e3333d0c4",
+      "eyeHighlightsCorrected": false,
+      "generator": "Meowa",
+      "prompt": "Wide quiet NIGHT MODE background illustration for a winter-solstice desktop app, matching the reference's simple flat hand-drawn charcoal outline style but without the girl. A charcoal neutral gray reading room, a window on the RIGHT third showing a snow-covered courtyard at night with a small silver crescent moon, bare branches and only a few snowflakes. Thin snow on the outer windowsill. A dark red scarf hangs on the right edge, a small warm gold lamp and pale celadon tangyuan bowl sit at the far bottom right. LEFT two thirds and center are a clean nearly uniform charcoal wall with minimal detail so software controls remain readable. Gentle warm gold pools of lamplight at far right contrast with cool silvery outdoor snow. Restrained flat colors and simple linework, neutral charcoal rather than blue or purple. No text, characters, Christmas elements, blur or dark overlay. Complete full-bleed background."
+    }
+  ],
+  "verification": {
+    "softwareInstalled": false,
+    "softwareRuntimeVerified": false
+  }
+}

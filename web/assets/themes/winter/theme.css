@@ -1,0 +1,194 @@
+/* Winter Solstice skin. Semantic controls stay HTML; these images are only surfaces and ornaments. */
+:root[data-ui-skin="winter"] {
+    --yy-label: url("assets/webp/ui/title-label.webp");
+    --yy-button: url("assets/webp/ui/content-panel.webp");
+    --yy-moon: url("assets/webp/ui/album-corner-moon.webp");
+    --yy-leaf: url("assets/webp/ui/album-corner-leaf.webp");
+    --yy-close: url("assets/webp/ui/close.webp");
+    --yy-ink: #343a3d;
+    --yy-rose: #963d49;
+    --yy-muted: #59666b;
+    --yy-paper: #fcfdfa;
+    --yy-line: #cdd8d8;
+    --yy-field: #f1f5f4;
+    --yy-depth: 0 5px 16px #27383a0c;
+    --shell-bg: #edf2f2;
+    --shell-surface: #fcfdfa;
+    --shell-text: #303639;
+    --shell-muted: #59666b;
+    --shell-line: #d7e0df;
+    --shell-accent: #963d49;
+    --shell-tint: #f5e6e6;
+    --shell-online: #bedbd0;
+    --winter-panel: url("assets/webp/ui/content-panel.webp");
+    --winter-frame: url("assets/webp/ui/album-frame.webp");
+    --winter-window: url("assets/webp/backgrounds/window-day.webp");
+    --winter-primary: url("assets/webp/ui/button-primary.webp");
+    --winter-secondary: url("assets/webp/ui/button-paper.webp");
+    --winter-dialog: url("assets/webp/ui/dialog-panel.webp");
+}
+:root[data-ui-skin="winter"][data-app-theme="dark"] {
+    color-scheme: dark;
+    --yy-label: url("assets/webp/ui/title-label-night.webp");
+    --yy-button: url("assets/webp/ui/content-panel-night.webp");
+    --yy-moon: url("assets/webp/ui/album-corner-moon-night.webp");
+    --yy-leaf: url("assets/webp/ui/album-corner-leaf-night.webp");
+    --yy-close: url("assets/webp/ui/close-night.webp");
+    --yy-ink: #e1e8e6;
+    --yy-rose: #f0a7ac;
+    --yy-muted: #afbebd;
+    --yy-paper: #303638;
+    --yy-line: #536365;
+    --yy-field: #373f41;
+    --yy-depth: 0 5px 16px #00000020;
+    --shell-bg: #252a2c;
+    --shell-surface: #303638;
+    --shell-text: #f0f4f1;
+    --shell-muted: #afbebd;
+    --shell-line: #48585a;
+    --shell-accent: #f0a7ac;
+    --shell-tint: #53383f;
+    --shell-online: #a4cbbd;
+    --winter-panel: url("assets/webp/ui/content-panel-night.webp");
+    --winter-frame: url("assets/webp/ui/album-frame-night.webp");
+    --winter-window: url("assets/webp/backgrounds/window-night.webp");
+    --winter-primary: url("assets/webp/ui/button-primary-night.webp");
+    --winter-secondary: url("assets/webp/ui/button-paper-night.webp");
+    --winter-dialog: url("assets/webp/ui/dialog-panel-night.webp");
+}
+
+:root[data-ui-skin="winter"] .chenyue-theme .yy-page-heading > h1 {
+    width: 216px;
+    min-height: 110px;
+    padding-left: 60px;
+    background-image: url("assets/webp/ui/title-label.webp");
+    background-position: left center;
+    background-size: 216px auto;
+    background-repeat: no-repeat;
+}
+:root[data-ui-skin="winter"][data-app-theme="dark"] .chenyue-theme .yy-page-heading > h1 {
+    background-image: url("assets/webp/ui/title-label-night.webp");
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu {
+    border-image: var(--winter-panel) 74 fill / 12px / 0 stretch;
+    isolation: isolate;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: 8px;
+    bottom: 8px;
+    width: min(64%, 240px);
+    height: 150px;
+    background: var(--winter-window) right bottom / auto 100% no-repeat;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%), linear-gradient(0deg, #000 0%, #000 45%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent, #000 45%), linear-gradient(0deg, #000 0%, #000 45%, transparent 100%);
+    mask-composite: intersect;
+    pointer-events: none;
+    opacity: .46;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu > :is(.yy-menu-header,.yy-menu-return,.yy-menu-section,.yy-menu-grid,.yy-menu-bottom,.yy-menu-signature) {
+    position: relative;
+    z-index: 1;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu .yy-menu-header .yy-menu-close {
+    z-index: 3;
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--yy-line);
+    border-radius: 50%;
+    background: url("assets/webp/ui/close.webp") center / 100% 100% no-repeat;
+    box-shadow: 0 2px 6px #0002;
+}
+:root[data-ui-skin="winter"][data-app-theme="dark"] .chenyue-theme .shell-chat-menu .yy-menu-header .yy-menu-close {
+    background-image: url("assets/webp/ui/close-night.webp");
+}
+:root[data-ui-skin="winter"] .yy-online-return {
+    background-image: url("assets/webp/ui/close.webp");
+}
+:root[data-ui-skin="winter"][data-app-theme="dark"] .yy-online-return {
+    background-image: url("assets/webp/ui/close-night.webp");
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-action-grid > button,
+:root[data-ui-skin="winter"] .chenyue-theme .shell-profile {
+    box-shadow: none;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-profile {
+    border: 12px solid transparent;
+    border-image: var(--winter-panel) 74 fill / 12px / 0 stretch;
+    border-radius: 0;
+    background: transparent;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .yy-menu-return {
+    border: 10px solid transparent;
+    border-image: var(--winter-primary) 80 fill / 8px / 0 stretch;
+    border-radius: 0;
+    color: #fff;
+    background: transparent;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-action-grid > button {
+    min-height: 82px;
+    padding: 8px 6px;
+    border: 12px solid transparent;
+    border-image: var(--winter-secondary) 76 fill / 10px / 0 stretch;
+    border-radius: 0;
+    background: transparent;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-album-cover {
+    border: 12px solid transparent;
+    border-image: var(--winter-frame) 136 fill / 12px / 0 stretch;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-album-aperture {
+    inset: 0;
+    border-radius: 0;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-album-cover::before,
+:root[data-ui-skin="winter"] .chenyue-theme .shell-album-cover::after {
+    display: none;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-dock,
+:root[data-ui-skin="winter"] .chenyue-theme .shell-dock-fold,
+:root[data-ui-skin="winter"] .chenyue-theme .shell-online-trigger {
+    box-shadow: var(--yy-depth);
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-dock-art {
+    filter: grayscale(.25) saturate(.8);
+}
+:root[data-ui-skin="winter"] .chenyue-theme .shell-dock > button.is-active .shell-dock-art {
+    filter: none;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .transfer-dialog {
+    border: 14px solid transparent;
+    border-image: var(--winter-dialog) 70 fill / 12px / 0 stretch;
+    border-radius: 0;
+    background: transparent;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .transfer-close {
+    background: var(--yy-close) center / 100% 100% no-repeat;
+    border-radius: 50%;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .transfer-close > .shell-icon {
+    opacity: 0;
+}
+:root[data-ui-skin="winter"] .chenyue-theme .transfer-dialog .transfer-primary {
+    border: 10px solid transparent;
+    border-image: var(--winter-primary) 80 fill / 8px / 0 stretch;
+    border-radius: 0;
+    color: #fff;
+    background: transparent;
+}
+@media (max-width: 400px) {
+    :root[data-ui-skin="winter"] .chenyue-theme .yy-page-heading > h1 {
+        width: 188px;
+        min-height: 96px;
+        padding-left: 54px;
+        background-size: 188px auto;
+    }
+}

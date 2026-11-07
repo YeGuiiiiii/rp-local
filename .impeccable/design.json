@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T18:57:19+08:00",
-  "title": "Design System: RP 本地版 · 经典、白昼手账与夜蔷薇",
+  "generatedAt": "2026-11-07T22:16:10+08:00",
+  "title": "Design System: RP 本地版 · 经典、玥玥经典与冬至皮肤",
   "extensions": {
     "colorMeta": {
       "night-canvas": { "role": "neutral", "displayName": "炭黑书布", "tonalRamp": ["oklch(15% 0.008 310)", "oklch(26% 0.008 310)", "oklch(38% 0.008 310)", "oklch(49% 0.008 310)", "oklch(61% 0.008 310)", "oklch(72% 0.008 310)", "oklch(84% 0.008 310)", "oklch(95% 0.008 310)"] },
@@ -13,10 +13,18 @@
       "night-rose": { "role": "primary", "displayName": "夜蔷薇", "tonalRamp": ["rgb(51 30 41)", "rgb(68 39 50)", "rgb(88 45 62)", "rgb(126 62 83)", "rgb(175 104 128)", "rgb(209 143 164)", "rgb(231 172 187)", "rgb(250 235 239)"] },
       "night-wine": { "role": "primary", "displayName": "酒红内衬", "tonalRamp": ["rgb(51 30 41)", "rgb(68 39 50)", "rgb(88 45 62)", "rgb(126 62 83)", "rgb(175 104 128)", "rgb(209 143 164)", "rgb(231 172 187)", "rgb(250 235 239)"] },
       "day-canvas": { "role": "neutral", "displayName": "淡灰紫桌面", "tonalRamp": ["oklch(15% 0.009 310)", "oklch(26% 0.009 310)", "oklch(38% 0.009 310)", "oklch(49% 0.009 310)", "oklch(61% 0.009 310)", "oklch(72% 0.009 310)", "oklch(84% 0.009 310)", "oklch(95% 0.009 310)"] },
-      "day-paper": { "role": "neutral", "displayName": "白昼纸页", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(49% 0.006 95)", "oklch(61% 0.006 95)", "oklch(72% 0.006 95)", "oklch(84% 0.006 95)", "oklch(95% 0.006 95)"] }
+      "day-paper": { "role": "neutral", "displayName": "白昼纸页", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(49% 0.006 95)", "oklch(61% 0.006 95)", "oklch(72% 0.006 95)", "oklch(84% 0.006 95)", "oklch(95% 0.006 95)"] },
+      "winter-day-canvas": { "role": "neutral", "displayName": "冬日冷白桌面", "tonalRamp": ["oklch(15% 0.006 195)", "oklch(26% 0.006 195)", "oklch(38% 0.006 195)", "oklch(49% 0.006 195)", "oklch(61% 0.006 195)", "oklch(72% 0.006 195)", "oklch(84% 0.006 195)", "oklch(95% 0.006 195)"] },
+      "winter-day-paper": { "role": "neutral", "displayName": "冬日冷白纸页", "tonalRamp": ["oklch(15% 0.004 130)", "oklch(26% 0.004 130)", "oklch(38% 0.004 130)", "oklch(49% 0.004 130)", "oklch(61% 0.004 130)", "oklch(72% 0.004 130)", "oklch(84% 0.004 130)", "oklch(95% 0.004 130)"] },
+      "winter-day-text": { "role": "neutral", "displayName": "冬日深灰文字", "tonalRamp": ["oklch(15% 0.009 225)", "oklch(26% 0.009 225)", "oklch(38% 0.009 225)", "oklch(49% 0.009 225)", "oklch(61% 0.009 225)", "oklch(72% 0.009 225)", "oklch(84% 0.009 225)", "oklch(95% 0.009 225)"] },
+      "winter-day-accent": { "role": "primary", "displayName": "冬至酒红", "tonalRamp": ["oklch(15% 0.07 14)", "oklch(26% 0.07 14)", "oklch(38% 0.07 14)", "oklch(49% 0.07 14)", "oklch(61% 0.07 14)", "oklch(72% 0.07 14)", "oklch(84% 0.07 14)", "oklch(95% 0.07 14)"] },
+      "winter-night-canvas": { "role": "neutral", "displayName": "冬夜炭灰桌面", "tonalRamp": ["oklch(15% 0.009 225)", "oklch(26% 0.009 225)", "oklch(38% 0.009 225)", "oklch(49% 0.009 225)", "oklch(61% 0.009 225)", "oklch(72% 0.009 225)", "oklch(84% 0.009 225)", "oklch(95% 0.009 225)"] },
+      "winter-night-paper": { "role": "neutral", "displayName": "冬夜炭灰纸页", "tonalRamp": ["oklch(15% 0.009 220)", "oklch(26% 0.009 220)", "oklch(38% 0.009 220)", "oklch(49% 0.009 220)", "oklch(61% 0.009 220)", "oklch(72% 0.009 220)", "oklch(84% 0.009 220)", "oklch(95% 0.009 220)"] },
+      "winter-night-text": { "role": "neutral", "displayName": "冬夜亮白文字", "tonalRamp": ["oklch(15% 0.005 155)", "oklch(26% 0.005 155)", "oklch(38% 0.005 155)", "oklch(49% 0.005 155)", "oklch(61% 0.005 155)", "oklch(72% 0.005 155)", "oklch(84% 0.005 155)", "oklch(95% 0.005 155)"] },
+      "winter-night-accent": { "role": "primary", "displayName": "冬至暖粉", "tonalRamp": ["oklch(15% 0.07 14)", "oklch(26% 0.07 14)", "oklch(38% 0.07 14)", "oklch(49% 0.07 14)", "oklch(61% 0.07 14)", "oklch(72% 0.07 14)", "oklch(84% 0.07 14)", "oklch(95% 0.07 14)"] }
     },
     "typographyMeta": {
-      "title": { "displayName": "页面标题", "purpose": "紧凑页面标题，不附口号副标题；画廊数量并入标题。窄屏夜蔷薇降至22px。" },
+      "title": { "displayName": "页面标题", "purpose": "紧凑页面标题，不附口号副标题；画廊数量并入标题。同款皮肤日夜共用字号和尺寸。" },
       "body": { "displayName": "界面正文", "purpose": "设置行与普通说明；资源按钮另用600字重。" },
       "label": { "displayName": "辅助说明", "purpose": "必要的辅助信息与套装副标题。" },
       "composer": { "displayName": "聊天输入", "purpose": "聊天编辑区域，保留16px和1.6行高。" }
@@ -27,7 +35,9 @@
       { "name": "composer", "value": "inset 0 1px 0 var(--ui-polish),0 7px 18px -9px var(--ui-shadow)", "purpose": "不透明输入栏的亮边与轻投影，不启用背景模糊。" },
       { "name": "recessed-field", "value": "inset 0 1px 2px var(--ui-recess),0 1px 0 var(--ui-polish-soft)", "purpose": "字段凹槽与下沿亮边。" },
       { "name": "glass-edge", "value": "inset 0 1px 0 #ffffffc4,inset 1px 0 0 #ffffff78,inset -1px -1px 0 #ffffff52,inset 0 -3px 4px #0b07131c", "purpose": "图片表面玻璃层，不改变原图。" },
-      { "name": "transfer-dialog", "value": "0 18px 54px rgb(0 0 0 / .24)", "purpose": "2.9.004 导入、完整导出等候与聊天导出共用弹窗，沿用当前 shell 配色。" }
+      { "name": "transfer-dialog", "value": "0 18px 54px rgb(0 0 0 / .24)", "purpose": "2.9.004 导入、完整导出等候与聊天导出共用弹窗，沿用当前 shell 配色。" },
+      { "name": "winter-day-depth", "value": "0 5px 16px #27383a0c", "purpose": "冬至日间底部导航、收起钮与在线圆钮的轻投影。" },
+      { "name": "winter-night-depth", "value": "0 5px 16px #00000020", "purpose": "冬至夜间底部导航、收起钮与在线圆钮的轻投影。" }
     ],
     "motion": [
       { "name": "control-color", "value": "background-color 120ms ease, color 120ms ease, translate 100ms ease", "purpose": "页面、导航和设置详情按钮反馈。" },
@@ -50,7 +60,7 @@
       "name": "资源操作按钮",
       "kind": "button",
       "refersTo": "resource-button",
-      "description": "高级页真实操作入口；右上角银色短线。",
+      "description": "高级页真实操作入口；玥玥经典右上角保留银色短线。高级页移除当前角色绑定提示和选择栏，世界书、正则、UI模板与记忆仍作用于当前角色，无角色或切卡忙碌时禁用。冬至次按钮使用原包九宫格76 fill / 10px，主按钮80 fill / 8px。",
       "html": "<button class=\"ds-resource\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 4h16v16H4zM8 4v16M11 9h6M11 13h6\"/></svg><strong>预设管理</strong></button>",
       "css": ".ds-resource{position:relative;display:flex;align-items:center;gap:14px;min-height:82px;padding:16px 12px;background:linear-gradient(160deg,var(--ui-polish-soft,#eedee615),transparent 52%),var(--yy-paper,#211d23);border:1px solid var(--yy-line,#57434e);border-radius:6px;box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615);color:var(--shell-text,#f2e9eb);font:500 14px var(--font-sans,system-ui);text-align:left;cursor:pointer}.ds-resource strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}.ds-resource svg{width:28px;height:34px;flex:none;color:var(--shell-accent,#e7acbb)}.ds-resource::after{content:'';position:absolute;right:5px;top:5px;width:10px;height:10px;border-top:1px solid #b9a4b0;border-right:1px solid #b9a4b0;pointer-events:none}.ds-resource:hover:not(:disabled){border-color:var(--shell-accent,#e7acbb)}.ds-resource:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-resource:active:not(:disabled){translate:0 1px}.ds-resource:disabled{opacity:.4;cursor:default}"
     },
@@ -88,7 +98,7 @@
     {
       "name": "底部导航",
       "kind": "nav",
-      "description": "白昼手账与夜蔷薇的58px紧凑胶囊，四个图标入口，夜间28px徽章；整体最大360px，右侧独立54px在线圆钮。经典保留原版导航菜单及昼夜开关。名称由提示与无障碍标签提供。",
+      "description": "玥玥经典与冬至的58px紧凑胶囊，四个图标入口，玥玥经典夜间28px徽章；整体最大360px，右侧独立54px在线圆钮。经典保留原版导航菜单及昼夜开关。名称由提示与无障碍标签提供。现代布局聊天菜单底部提供当前皮肤日夜快捷切换，保留菜单、页面与草稿。",
       "html": "<nav class=\"ds-dock\" aria-label=\"主要入口\"><button class=\"ds-dock-item ds-dock-active\" type=\"button\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"2\"/><circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M8 17c0-4 8-4 8 0\"/></svg><span>角色卡</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"m3 16 5-5 4 4 4-6 5 7\"/></svg><span>画廊</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 4h16v16H4zM8 4v16M11 9h6M11 13h6\"/></svg><span>高级</span></button><button class=\"ds-dock-item\" type=\"button\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M12 2v3M12 19v3M2 12h3M19 12h3\"/></svg><span>设置</span></button></nav>",
       "css": ".ds-dock{display:flex;max-width:296px;height:58px;padding:6px;background:linear-gradient(180deg,var(--ui-polish-soft,#eedee615),transparent 38%),var(--yy-paper,#211d23);border:1px solid var(--yy-line,#57434e);border-radius:30px;box-shadow:inset 0 1px 0 var(--ui-polish,#eedee64d),inset 0 -2px 0 var(--ui-recess,#0000005c)}.ds-dock-item{position:relative;flex:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 2px;background:transparent;border:0;border-radius:24px;color:var(--shell-muted,#c5b7bf);cursor:pointer}.ds-dock-item svg{width:28px;height:28px}.ds-dock-item span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.ds-dock-active{background:linear-gradient(170deg,var(--ui-polish-soft,#eedee615),transparent),var(--shell-tint,#442732);color:var(--yy-rose,#e7acbb);box-shadow:inset 0 1px 0 var(--ui-polish-soft,#eedee615)}.ds-dock-item:hover{color:var(--shell-text,#f2e9eb)}.ds-dock-item:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-dock-item:active{translate:0 1px}"
     },
@@ -96,23 +106,23 @@
       "name": "外观套装卡",
       "kind": "card",
       "refersTo": "theme-pack",
-      "description": "界面主题可选经典、白昼手账与夜蔷薇。经典预览展示布局示意，另外两套使用实际玥玥美术并关联昼夜与配色。入口为导航 → 设置 → 外观 → 界面主题；初次默认经典一次，之后记住手动选择。",
-      "html": "<label class=\"ds-pack\"><span class=\"ds-pack-title\"><input type=\"radio\" name=\"ds-pack\" checked>夜蔷薇</span><span class=\"ds-pack-subtitle\">银月、酒红与玥玥的夜晚</span><span class=\"ds-pack-subtitle\">夜间</span></label>",
+      "description": "导航 → 设置 → 外观 → 皮肤列经典、玥玥经典与冬至三款，每款固定布局并有独立日夜配色、素材和预览；更换皮肤沿用当前日夜。白昼手账与夜蔷薇为玥玥经典的日夜形态；旧journal/vampire只作兼容入口。冬至使用用户包内42张WebP：标题牌等比显示，菜单与资料框九宫格74 fill / 12px、相簿136 fill / 12px、传输弹窗70 fill / 12px。窗景只在菜单右下方底部文字后显示，右下各8px、宽min(64%,240px)、高150px、透明度0.46，双向渐隐且不截获点击；44px圆形关闭钮始终可见。玥玥经典夜间相簿右下角为实际corner-lower.webp，34×36px、右下各2px，延续银色酒红美术。目录、叠卡和相簿共用封面显示组件，目录预览最长边1280px、缩图质量0.92；旧最长边不超过256px的预览在实际加载时从原封面记录更新，按队列写入，不启动读取全部正文、不改变原图与导出；新上传封面宽度上限1600px、质量0.92。2.9.007冬至与最新相簿审查为ship，截图见.impeccable/review/skins-2.9.007/；未做Android真机验证，检测器缺失未形成检测结论。",
+      "html": "<label class=\"ds-pack\"><span class=\"ds-pack-title\"><input type=\"radio\" name=\"ds-pack\" checked>玥玥经典皮肤</span><span class=\"ds-pack-subtitle\">白昼手账 · 夜蔷薇</span><span class=\"ds-pack-subtitle\">夜间</span></label>",
       "css": ".ds-pack{display:flex;flex-direction:column;min-width:140px;gap:6px;padding:14px 12px 16px;background:var(--shell-surface,#211d23);border:1px solid var(--shell-accent,#e7acbb);border-radius:8px;cursor:pointer;font-family:var(--font-sans,system-ui)}.ds-pack-title{display:flex;align-items:center;gap:7px;color:var(--shell-text,#f2e9eb);font-size:14px;font-weight:700}.ds-pack-title input{width:16px;height:16px;accent-color:var(--shell-accent,#e7acbb);flex:none}.ds-pack-subtitle{font-size:12px;color:var(--shell-muted,#c5b7bf);overflow-wrap:anywhere}.ds-pack:hover{border-color:var(--shell-accent,#e7acbb)}.ds-pack:focus-within{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:3px}.ds-pack input:focus-visible{outline:2px solid var(--shell-accent,#e7acbb);outline-offset:2px}"
     },
     {
       "name": "套装模式标签",
       "kind": "chip",
       "refersTo": "mode-badge",
-      "description": "套装自带的经典、日间或夜间信息标记；经典保留原版导航中的昼夜开关。",
+      "description": "皮肤预览显示当前日间或夜间形态；日夜为独立开关，不作为不同皮肤列出。",
       "html": "<span class=\"ds-category\">夜间</span>",
       "css": ".ds-category{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--shell-surface,#211d23);color:var(--shell-text,#f2e9eb);font:500 10px var(--font-sans,system-ui)}"
     },
     {
-      "name": "倾斜反光开关",
+      "name": "外观开关",
       "kind": "custom",
-      "description": "外观中的独立开关，默认开启并保存选择；关闭后保留静态玻璃。",
-      "html": "<label class=\"ds-tilt\"><span>倾斜反光</span><input class=\"ds-tilt-input\" type=\"checkbox\" role=\"switch\" checked><span class=\"ds-tilt-track\" aria-hidden=\"true\"></span></label>",
+      "description": "外观先显示倾斜反光开关，默认开启并保存选择，关闭后保留静态玻璃；下一行紧接夜间模式开关，关闭为日间。切换日夜保留当前皮肤、布局、页面、打开的菜单与草稿。",
+      "html": "<div><label class=\"ds-tilt\"><span>倾斜反光</span><input class=\"ds-tilt-input\" type=\"checkbox\" role=\"switch\" checked><span class=\"ds-tilt-track\" aria-hidden=\"true\"></span></label><label class=\"ds-tilt\"><span>夜间模式</span><input class=\"ds-tilt-input\" type=\"checkbox\" role=\"switch\" checked><span class=\"ds-tilt-track\" aria-hidden=\"true\"></span></label></div>",
       "css": ".ds-tilt{display:flex;align-items:center;gap:16px;min-height:58px;color:var(--yy-ink,#f2e9eb);font:500 14px var(--font-sans,system-ui);cursor:pointer}.ds-tilt>span:first-child{flex:1}.ds-tilt-input{position:absolute;width:1px;height:1px;opacity:0}.ds-tilt-track{display:block;flex:none;width:42px;height:24px;border:1px solid var(--yy-line,#57434e);border-radius:12px;background:var(--yy-field,#19161b);position:relative;transition:background-color 180ms ease}.ds-tilt-track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 180ms ease}.ds-tilt-input:checked+.ds-tilt-track{background:var(--ui-command,#853e59)}.ds-tilt-input:checked+.ds-tilt-track::after{transform:translateX(18px)}.ds-tilt:hover .ds-tilt-track{border-color:var(--yy-rose,#e7acbb)}.ds-tilt-input:focus-visible+.ds-tilt-track{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:3px}.ds-tilt:active .ds-tilt-track::after{box-shadow:0 0 0 2px #ffffff33}@media(prefers-reduced-motion:reduce){.ds-tilt-track,.ds-tilt-track::after{transition:none}}"
     },
     {
@@ -132,39 +142,41 @@
     {
       "name": "公告阅读区",
       "kind": "custom",
-      "description": "经典复用当前秘书装玥玥公告，固定顶部与滚动正文、右下人物及底部避让保留。鸣谢注明更新群472441481、132292045；经典说明写明导航 → 设置 → 外观 → 界面主题的位置。",
-      "html": "<section class=\"ds-release\" aria-label=\"更新公告\"><header class=\"ds-release-header\"><div><h2>玥玥的更新简报</h2><p>RP 本地版 1.23<span>与 RP-Hub 2.8.118 对照</span></p></div><button class=\"ds-release-close\" type=\"button\" aria-label=\"关闭更新公告\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></header><div class=\"ds-release-reading\" tabindex=\"0\" role=\"region\" aria-label=\"更新内容\"><section><h3>经典皮肤与界面切换</h3><p>默认使用 RP-Hub 2.8.118 的经典布局。打开导航 → 设置 → 外观 → 界面主题，可切换经典、白昼手账或夜蔷薇。原版导航的“外观”入口也可直接进入。切换后保留角色卡、聊天和记忆。</p></section></div></section>",
-      "css": ".ds-release{display:flex;flex-direction:column;max-width:660px;max-height:360px;overflow:hidden;border:1px solid var(--yy-line,#57434e);border-radius:8px;background:var(--yy-paper,#211d23);color:var(--yy-ink,#f2e9eb);font-family:var(--font-sans,system-ui);letter-spacing:0;box-shadow:0 18px 55px #0004}.ds-release-header{display:flex;align-items:flex-start;gap:12px;flex:none;padding:24px 24px 17px;border-bottom:1px solid var(--yy-line,#57434e)}.ds-release-header>div{flex:1;min-width:0}.ds-release-header h2{margin:0;font-size:24px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}.ds-release-header p{margin:8px 0 0;color:var(--yy-rose,#e7acbb);font-size:13px;line-height:1.7}.ds-release-header p span{display:block;color:var(--yy-muted,#c5b7bf);font-size:12px}.ds-release-close{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:10px;border:1px solid var(--yy-line,#57434e);border-radius:6px;background:var(--yy-field,#19161b);color:inherit;cursor:pointer;transition:background-color 120ms ease,transform 120ms ease}.ds-release-close svg{width:24px;height:24px}.ds-release-close:hover{background:var(--shell-tint,#442732)}.ds-release-close:active{transform:translateY(1px)}.ds-release-close:focus-visible,.ds-release-reading:focus-visible{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:-3px}.ds-release-reading{min-height:96px;overflow-y:auto;padding:20px 24px 158px;scroll-padding-bottom:158px;font-size:15px;line-height:1.85;overflow-wrap:anywhere}.ds-release-reading h3{margin:0 0 7px;color:var(--yy-rose,#e7acbb);font-size:16px;font-weight:700;line-height:1.6}.ds-release-reading p{margin:0}"
+      "description": "经典复用当前秘书装玥玥公告，固定顶部与滚动正文、右下人物及底部避让保留。鸣谢注明更新群472441481、132292045；皮肤说明写明导航 → 设置 → 外观 → 皮肤的位置及下方夜间模式开关。",
+      "html": "<section class=\"ds-release\" aria-label=\"更新公告\"><header class=\"ds-release-header\"><div><h2>玥玥的更新简报</h2><p>RP 本地版 2.9.007<span>与 RP-Hub 2.8.118 对照</span></p></div><button class=\"ds-release-close\" type=\"button\" aria-label=\"关闭更新公告\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></header><div class=\"ds-release-reading\" tabindex=\"0\" role=\"region\" aria-label=\"更新内容\"><section><h3>皮肤与日夜</h3><p>打开导航 → 设置 → 外观 → 皮肤，可选择经典皮肤、玥玥经典皮肤和冬至皮肤。下方倾斜反光后紧接夜间模式开关；每款皮肤均有日夜形态。切换后保留角色卡、聊天、记忆和草稿。</p></section></div></section>",
+      "css": ".ds-release{display:flex;flex-direction:column;max-width:660px;max-height:360px;overflow:hidden;border:1px solid var(--yy-line,#57434e);border-radius:8px;background:var(--yy-paper,#211d23);color:var(--yy-ink,#f2e9eb);font-family:var(--font-sans,system-ui);letter-spacing:0;box-shadow:0 18px 55px #0004}.ds-release-header{display:flex;align-items:flex-start;gap:12px;flex:none;padding:24px 24px 17px;border-bottom:1px solid var(--yy-line,#57434e)}.ds-release-header>div{flex:1;min-width:0}.ds-release-header h2{margin:0;font-size:24px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}.ds-release-header p{margin:8px 0 0;color:var(--yy-rose,#e7acbb);font-size:13px;line-height:1.7}.ds-release-header p span{display:block;color:var(--yy-muted,#c5b7bf);font-size:12px}.ds-release-close{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:10px;border:1px solid var(--yy-line,#57434e);border-radius:50%;background:var(--yy-field,#19161b);color:inherit;cursor:pointer;transition:background-color 120ms ease,transform 120ms ease}.ds-release-close svg{width:24px;height:24px}.ds-release-close:hover{background:var(--shell-tint,#442732)}.ds-release-close:active{transform:translateY(1px)}.ds-release-close:focus-visible,.ds-release-reading:focus-visible{outline:2px solid var(--yy-rose,#e7acbb);outline-offset:-3px}.ds-release-reading{min-height:96px;overflow-y:auto;padding:20px 24px 158px;scroll-padding-bottom:158px;font-size:15px;line-height:1.85;overflow-wrap:anywhere}.ds-release-reading h3{margin:0 0 7px;color:var(--yy-rose,#e7acbb);font-size:16px;font-weight:700;line-height:1.6}.ds-release-reading p{margin:0}"
     }
   ],
   "narrative": {
     "northStar": "月下手账",
-    "overview": "版本 1.23 默认使用 RP-Hub 2.8.118 的经典完整布局，保留原版页面、导航菜单与昼夜开关。经典是原版界面的局部接入；下述“月下手账”、前置 token 与美术规范继续适用于白昼手账和夜蔷薇，不重新定义经典的视觉系统。\n\n白昼手账与夜蔷薇分别拥有日间、夜间模式和配套颜色。夜间使用炭黑书布、酒红内衬、珍珠色文字与银月配饰；控件带细腻亮边，画廊使用随倾斜变化的玻璃反光，保持适合长时间阅读与操作的安静密度。\n\n软件美术与角色卡正文各有边界。玥玥陪伴菜单、页面标题、空状态和操作区域，正文继续按角色卡自身内容渲染。图案负责气氛，文字、输入框、选项和点击区域保持真实控件。",
+    "overview": "版本 1.23 默认使用 RP-Hub 2.8.118 的经典完整布局，保留原版页面、导航菜单与昼夜开关。经典是原版界面的局部接入；下述“月下手账”、前置 token 与美术规范继续适用于白昼手账和夜蔷薇，不重新定义经典的视觉系统。\n\n自 2.9.007 起，白昼手账与夜蔷薇合并为“玥玥经典皮肤”的日间与夜间形态，并加入“冬至皮肤”。三款皮肤分别固定一套布局，日夜仅切换配色、素材与装饰；更换皮肤沿用当前日夜。玥玥经典夜间继续使用炭黑书布、酒红内衬、珍珠色文字与银月配饰。冬至使用酒红围巾、冬日窗景、纸质边框与中性炭灰夜色，共用真实控件与安静的操作密度。\n\n软件美术与角色卡正文各有边界。玥玥陪伴菜单、页面标题、空状态和操作区域，正文继续按角色卡自身内容渲染。图案负责气氛，文字、输入框、选项和点击区域保持真实控件。",
     "keyCharacteristics": [
-      "经典保留原版布局与独立昼夜开关；白昼手账对应日间，夜蔷薇对应夜间。",
+      "每款皮肤保留自己的布局和日夜两种形态，日夜切换不改变当前皮肤、页面、菜单或草稿。",
       "紧凑标题、分组列表、明确的资源按钮和低干扰聊天输入栏。",
       "炭黑层次、酒红操作色、柔和亮文字与银色小配饰。",
+      "冬至沿用用户提供的日夜素材，以九宫格边框和菜单底部淡窗景承载季节气氛。",
       "玻璃反光默认开启，只在外观提供独立开关；反光移动，原图保持不动。",
       "玥玥保留圆脸、黑发、暗红瞳和角色自身左右不同的配饰。"
     ],
     "rules": [
-      { "name": "The Pack and Mode Rule", "body": "白昼手账与夜蔷薇各自绑定显示模式、配色与美术；经典保留原版昼夜开关，不因切换昼夜离开经典布局。", "section": "colors" },
+      { "name": "The Pack and Mode Rule", "body": "皮肤与日夜分别选择：皮肤定义布局，日夜选择该皮肤内部的颜色与素材。经典、玥玥及后续季节皮肤均遵守同一规则；切换日夜不重建页面。", "section": "colors" },
       { "name": "The Composer Surface Rule", "body": "聊天输入栏在各尺寸使用对应 UI 的不透明底色和细亮边；移动端不启用实时背景模糊，保证输入清楚。", "section": "layout" },
       { "name": "The Original Image Rule", "body": "倾斜只移动玻璃反光层，不位移、拉伸或修改原图；保存图片直接读取原始文件，不包含玻璃效果。", "section": "elevation" }
     ],
     "dos": [
-      "**Do** 保留经典的原版布局与昼夜开关，让白昼手账和夜蔷薇同步各自配色，并记住手动选择。",
+      "**Do** 保留经典、玥玥经典与冬至各自布局；皮肤内独立切换日夜，记住手动选择，并保留页面、菜单与草稿。",
       "**Do** 用真实文本、字段、单选和按钮承载功能，用玥玥与小配饰补充气氛。",
       "**Do** 让倾斜反光默认开启，只在外观用独立开关保存选择。",
       "**Do** 保持原图比例与保存字节，反光只作用于显示层。",
       "**Do** 按 `陈玥-视觉规范.md` 维护外貌与角色自身左右配饰。",
+      "**Do** 用冬至原包九宫格边框与菜单底部淡窗景承载季节材质，保持文字、关闭钮与点击区域清楚。",
       "**Do** 区分浏览器界面检查与 Android 真机验证。"
     ],
     "donts": [
       "**Don't** 把软件立绘或大面积装饰叠到角色卡阅读正文上。",
       "**Don't** 用惨白恐怖形象、亮红星星瞳或尖下巴替代玥玥的既定形象。",
       "**Don't** 为玻璃效果拉伸原图、扩大白边或阻挡图片操作。",
-      "**Don't** 把手账材质和底部四入口导航套进经典，或改变现有白昼手账与夜蔷薇设计。",
+      "**Don't** 把现代布局的材质和底部四入口导航套进经典，或让日夜切换改变当前皮肤布局。",
       "**Don't** 把尚未制作的季节套装写成已经可用的内容。"
     ]
   }

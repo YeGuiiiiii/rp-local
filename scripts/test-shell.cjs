@@ -88,6 +88,24 @@ fs.mkdirSync(transferEvidence, { recursive: true });
     await firstCard.getByRole('button', { name: '取消收藏', exact: true }).click();
     await firstCard.getByRole('button', { name: '编辑角色', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.editingCharacter.data.uuid), 'shell-card-a');
+    const sharpCover = await page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200; canvas.height = 1800;
+      const context = canvas.getContext('2d');
+      context.fillStyle = '#222'; context.fillRect(0, 0, 1200, 1800);
+      context.fillStyle = '#f4b3c6'; context.fillRect(200, 250, 800, 1300);
+      return canvas.toDataURL('image/png').split(',')[1];
+    });
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({
+      name: 'clear-cover.png', mimeType: 'image/png', buffer: Buffer.from(sharpCover, 'base64')
+    });
+    await page.waitForFunction(() => __qa.editingCharacter.data.avatar !== '/fixture.png');
+    const uploadedCoverSize = await page.evaluate(() => new Promise(resolve => {
+      const image = new Image();
+      image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
+      image.src = __qa.editingCharacter.data.avatar;
+    }));
+    assert.ok(uploadedCoverSize.width >= 1000, 'Uploaded character covers must not be reduced to a small thumbnail');
     await page.evaluate(() => window.rphubHandleBack());
     assert.equal(await page.evaluate(() => __qa.showCharacterEditor), false);
     await firstCard.getByRole('button', { name: '导出角色', exact: true }).click();
@@ -171,14 +189,16 @@ fs.mkdirSync(transferEvidence, { recursive: true });
     await page.evaluate(() => window.rphubHandleBack());
     await nav('高级').click();
     await page.screenshot({ path: path.join(evidence, 'shell-advanced-390.png') });
+    assert.equal(await page.getByText('当前角色', { exact: true }).count(), 0, 'Advanced must not repeat the current character picker');
+    assert.equal(await page.getByLabel('选择配置所属角色', { exact: true }).count(), 0);
+    assert.equal(await page.getByRole('button', { name: '世界书', exact: true }).isEnabled(), true,
+      'Character tools remain available for the current chat card');
     await page.getByRole('button', { name: '预设管理', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'presets');
     await page.getByRole('button', { name: '返回', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'advanced');
-    await page.getByLabel('选择配置所属角色', { exact: true }).selectOption('1');
-    await page.waitForFunction(() => __qa.currentCharacter?.uuid === 'shell-card-b');
     await page.getByRole('button', { name: '世界书', exact: true }).click();
-    assert.ok((await page.locator('#worldinfo-list h3').allTextContents()).includes('洛茜的午后世界书'));
+    assert.ok((await page.locator('#worldinfo-list h3').allTextContents()).includes('地牢小馆：炒翻日常世界书'));
     await page.getByRole('button', { name: '返回', exact: true }).click();
     await nav('设置').click();
     await page.screenshot({ path: path.join(evidence, 'shell-settings-390.png') });

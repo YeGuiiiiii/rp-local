@@ -19,6 +19,7 @@ const web = path.resolve(__dirname, '../web');
         }
         await page.addScriptTag({ content: fs.readFileSync(path.join(web, 'assets/js/data-services.js'), 'utf8')
             .split('// --- Shared summary memory utilities ---')[0] });
+        await page.addScriptTag({ path: path.join(web, 'assets/js/ui-components.js') });
     };
     try {
         await load();
@@ -39,8 +40,12 @@ const web = path.resolve(__dirname, '../web');
                 request.onerror = () => reject(request.error);
             });
             const canvas = document.createElement('canvas');
-            canvas.width = 400; canvas.height = 585;
-            canvas.getContext('2d').fillRect(0, 0, 400, 585);
+            canvas.width = 1200; canvas.height = 1800;
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#202020';
+            context.fillRect(0, 0, 1200, 1800);
+            context.fillStyle = '#f0b0c0';
+            context.fillRect(200, 250, 800, 1300);
             const png = new Uint8Array(await (await fetch(canvas.toDataURL())).arrayBuffer());
             const cover = RPHubCardUtils.injectPngTextChunk(png, 'chara', 'X'.repeat(300000));
             const avatar = await new Promise(resolve => {
@@ -64,8 +69,43 @@ const web = path.resolve(__dirname, '../web');
             finally { IDBObjectStore.prototype.put = put; }
             const afterAbort = await rawGet('rp_hub_characters');
             const partial = await rawGet('__rp_card__:atomic-a');
-            const directory = await s.readCharacterDirectory();
+            let directory = await s.readCharacterDirectory();
             const complete = await s.readCharacter(directory[0]);
+            const previewUrl = s.characterPreviewUrl(complete);
+            const previewBitmap = await createImageBitmap(await fetch(previewUrl).then(response => response.blob()));
+            const oldPreview = await new Promise(resolve => {
+                const image = new Image();
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = 256 / Math.max(image.naturalWidth, image.naturalHeight);
+                    canvas.width = Math.round(image.naturalWidth * scale);
+                    canvas.height = Math.round(image.naturalHeight * scale);
+                    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/webp', 0.86));
+                };
+                image.src = avatar;
+            });
+            const staleDirectory = await rawGet('rp_hub_characters');
+            staleDirectory.cards[0].avatar = oldPreview;
+            delete staleDirectory.cards[0].previewEdge;
+            await rawPut(staleDirectory, 'rp_hub_characters');
+            const coverHost = document.createElement('div');
+            document.body.append(coverHost);
+            const refreshedPreview = await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error('Visible legacy cover did not upgrade')), 5000);
+                Vue.createApp({
+                    components: { CharacterCover: RPHubComponents.CharacterCover },
+                    setup: () => ({ src: oldPreview }),
+                    methods: { loaded(event) {
+                        if (Math.max(event.target.naturalWidth, event.target.naturalHeight) < 1024) return;
+                        clearTimeout(timeout);
+                        resolve(event.target.src);
+                    } },
+                    template: '<character-cover :src="src" uuid="atomic-a" @load="loaded" />'
+                }).mount(coverHost);
+            });
+            const refreshedBitmap = await createImageBitmap(await fetch(refreshedPreview).then(response => response.blob()));
+            directory = await s.readCharacterDirectory();
             const writes = [];
             IDBObjectStore.prototype.put = function (value, key) {
                 if (String(key).startsWith('__rp_card__:')) writes.push(key);
@@ -107,6 +147,8 @@ const web = path.resolve(__dirname, '../web');
                 aborted, originalRetained: JSON.stringify(afterAbort) === JSON.stringify(original),
                 partialAbsent: partial === undefined,
                 thumbnailChars: directory[0].avatar.length, originalChars: avatar.length,
+                previewWidth: previewBitmap.width, previewHeight: previewBitmap.height,
+                refreshedPreviewWidth: refreshedBitmap.width, refreshedPreviewHeight: refreshedBitmap.height,
                 originalCoverRetained: complete.avatar === avatar,
                 fullWorld: complete.worldInfo[0].content, fullUI: complete.uiTemplates[0].htmlTemplate,
                 unknown: complete.unknown.nested[0], favorite: favorite.favoriteAt, favoriteBodyWrites: writes,
@@ -121,6 +163,10 @@ const web = path.resolve(__dirname, '../web');
         assert.equal(result.originalRetained, true, 'An aborted migration must keep the entire old collection');
         assert.equal(result.partialAbsent, true, 'An aborted migration must not leave partial card records');
         assert.ok(result.thumbnailChars < result.originalChars / 10, 'Directory images must not carry embedded card JSON');
+        assert.ok(Math.max(result.previewWidth, result.previewHeight) >= 1024,
+            'Directory cover previews must retain enough pixels for mobile cards and album covers');
+        assert.ok(Math.max(result.refreshedPreviewWidth, result.refreshedPreviewHeight) >= 1024,
+            'A visible legacy card cover must refresh its old low-resolution directory preview');
         assert.equal(result.originalCoverRetained, true);
         assert.equal(result.fullWorld, '保留内容');
         assert.equal(result.fullUI, '<div>保留模板</div>');

@@ -299,7 +299,7 @@
             const { ref, watch, nextTick, onMounted, onBeforeUnmount } = Vue;
             const isDark = ref(window.RPHubTheme.current === 'dark');
             const syncTheme = event => { isDark.value = event.detail === 'dark'; };
-            const toggleTheme = () => window.RPHubTheme.set(isDark.value ? 'light' : 'dark');
+            const toggleTheme = () => window.RPThemePacks.toggleMode();
             onMounted(() => window.addEventListener('rphub-theme-change', syncTheme));
             onBeforeUnmount(() => window.removeEventListener('rphub-theme-change', syncTheme));
             const panel = ref(null);
@@ -2553,7 +2553,30 @@
             </modal-shell>`
     };
 
+    const CharacterCover = {
+        props: { src: String, uuid: String },
+        emits: ['load', 'error'],
+        setup(props, { emit }) {
+            const cover = Vue.ref(props.src || '');
+            let checked = '', active = true;
+            Vue.watch(() => props.src, source => { cover.value = source || ''; checked = ''; });
+            Vue.onBeforeUnmount(() => { active = false; });
+            const loaded = async event => {
+                emit('load', event);
+                const image = event.target, key = props.uuid + ':' + props.src;
+                if (!props.uuid || checked === key || Math.max(image.naturalWidth, image.naturalHeight) > 256) return;
+                checked = key;
+                try {
+                    const preview = await window.RPHubStorage.refreshCharacterPreview(props.uuid);
+                    if (active && key === props.uuid + ':' + props.src && preview) cover.value = preview;
+                } catch (_) {}
+            };
+            return { cover, loaded };
+        },
+        template: `<img :src="cover" @load="loaded" @error="$emit('error',$event)">`
+    };
     const CharacterCard = {
+        components: { CharacterCover },
         props: {
             char: { type: Object, required: true },
             mobile: Boolean,
@@ -2635,8 +2658,8 @@
                 </div>
                 <template v-if="mobile">
                     <div v-if="deck" class="character-deck__placeholder" aria-hidden="true">{{ (char.name || '角').slice(0, 1) }}</div>
-                    <img v-if="!deck || char.avatar" :src="char.avatar" :alt="char.name" draggable="false"
-                        class="absolute inset-0 w-full h-full object-cover" :loading="deck ? 'eager' : 'lazy'" decoding="async">
+                    <character-cover v-if="!deck || char.avatar" :src="char.avatar" :uuid="char.uuid" :alt="char.name" draggable="false"
+                        class="absolute inset-0 w-full h-full object-cover" :loading="deck ? 'eager' : 'lazy'" decoding="async"></character-cover>
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
                     <div v-if="batchMode" class="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
@@ -2695,7 +2718,7 @@
 
                 <template v-else>
                     <div class="aspect-w-2 aspect-h-3 relative h-[500px] overflow-hidden">
-                        <img :src="char.avatar" class="character-card-cover w-full h-full object-cover" loading="lazy" decoding="async">
+                        <character-cover :src="char.avatar" :uuid="char.uuid" class="character-card-cover w-full h-full object-cover" loading="lazy" decoding="async"></character-cover>
                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
 
                         <div v-if="active && !batchMode" class="absolute top-4 left-4 z-10">
@@ -2996,6 +3019,7 @@
         AutoImageGenModal,
         CharacterExportModal,
         CharacterEditorModal,
+        CharacterCover,
         CharacterCard,
         CharacterDeck,
         ContextViewerModal,

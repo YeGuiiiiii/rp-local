@@ -14,6 +14,7 @@ __pycache__/
 *.pyc
 verification/
 artwork/**/final_outputs.json
+artwork/winter-solstice-1.0/
 .env
 .env.*
 !.env.example

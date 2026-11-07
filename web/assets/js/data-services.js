@@ -387,29 +387,31 @@
     const isCharacterDirectory = value => value?.rphubCardLibrary === 1 && Array.isArray(value.cards);
     const isCharacterStub = card => card?.rphubCardStub === 1;
     const characterPreviews = new WeakMap();
+    const characterPreviewUpgrades = new Map();
     let characterWriteQueue = Promise.resolve();
     const characterMetadata = ['uuid', 'name', 'importedName', 'storageFolder', 'createdAt', 'favoriteAt'];
+    const CHARACTER_PREVIEW_MAX_EDGE = 1280;
     const characterPreview = async card => {
         const source = String(card.avatar || '');
         const cached = characterPreviews.get(card);
-        if (cached && cached.source === source) return cached.preview;
+        if (cached && cached.source === source && cached.edge === CHARACTER_PREVIEW_MAX_EDGE) return cached.preview;
         const preview = !source.startsWith('data:') || source.length < 65536 ? source : await new Promise(resolve => {
             const image = new Image();
             image.onload = () => {
                 try {
                     const canvas = document.createElement('canvas');
-                    const scale = Math.min(1, 256 / Math.max(image.naturalWidth, image.naturalHeight));
+                    const scale = Math.min(1, CHARACTER_PREVIEW_MAX_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
                     canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
                     canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
                     const context = canvas.getContext('2d');
                     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/webp', 0.86));
+                    resolve(canvas.toDataURL('image/webp', 0.92));
                 } catch (_) { resolve(''); }
             };
             image.onerror = () => resolve('');
             image.src = source;
         });
-        characterPreviews.set(card, { source, preview });
+        characterPreviews.set(card, { source, preview, edge: CHARACTER_PREVIEW_MAX_EDGE });
         return preview;
     };
     const toCharacterStub = async source => {
@@ -417,7 +419,7 @@
         if (isCharacterStub(card)) return cloneForStorage(card);
         return {
             ...Object.fromEntries(characterMetadata.filter(key => card[key] !== undefined).map(key => [key, card[key]])),
-            rphubCardStub: 1, avatar: await characterPreview(card),
+            rphubCardStub: 1, avatar: await characterPreview(card), previewEdge: CHARACTER_PREVIEW_MAX_EDGE,
             description: card.description || '',
             worldInfoNames: (card.worldInfo || []).map(entry => entry.comment),
             regexNames: (card.regexScripts || []).map(script => script.name || script.scriptName)
@@ -440,7 +442,7 @@
             if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
             else delete value[key];
         });
-        characterPreviews.set(value, { source: value.avatar || '', preview: card.avatar || '', imageSaved });
+        characterPreviews.set(value, { source: value.avatar || '', preview: card.avatar || '', imageSaved, edge: card.previewEdge || 256 });
         return value;
     };
     const saveCharacterLibrary = (list, inputOptions = {}) => {
@@ -467,6 +469,9 @@
             const summaries = await Promise.all(payload.map(async (card, index) => {
                 if (isCharacterStub(card) && !previousCards.some(old => old.uuid === card.uuid))
                     throw storageWriteError('StorageDataError', '角色卡目录已变化，请重新载入');
+                const saved = previousCards.find(old => old.uuid === card.uuid);
+                if (isCharacterStub(card) && saved?.previewEdge > (card.previewEdge || 0))
+                    return { ...cloneForStorage(card), avatar: saved.avatar, previewEdge: saved.previewEdge };
                 const preview = characterPreviews.get(sources[index]);
                 if (preview) characterPreviews.set(card, preview);
                 return toCharacterStub(card);
@@ -512,7 +517,7 @@
             sources.forEach((source, index) => {
                 if (!isCharacterStub(source)) characterPreviews.set(source, {
                     source: source.avatar || '', preview: summaries[index].avatar,
-                    imageSaved: hasLargeCardImage(payload[index])
+                    imageSaved: hasLargeCardImage(payload[index]), edge: summaries[index].previewEdge
                 });
             });
             return summaries;
@@ -527,6 +532,54 @@
         if (isCharacterDirectory(value)) return value.cards;
         if (!Array.isArray(value)) throw storageWriteError('StorageDataError', '角色卡目录损坏，未执行覆盖');
         return saveCharacterLibrary(value);
+    };
+    const refreshCharacterPreview = uuid => {
+        if (characterPreviewUpgrades.has(uuid)) return characterPreviewUpgrades.get(uuid);
+        const refresh = async () => {
+            const options = { writeEpoch: storageWriteEpoch };
+            assertStorageWriteAllowed(options, options.writeEpoch);
+            if (!mainDb) await initDB();
+            const directory = await dbGet('rp_hub_characters');
+            if (!isCharacterDirectory(directory)) return '';
+            const index = directory.cards.findIndex(card => card.uuid === uuid);
+            if (index < 0) return '';
+            const stub = directory.cards[index];
+            if (stub.previewEdge >= CHARACTER_PREVIEW_MAX_EDGE) return stub.avatar || '';
+            let avatar = (await dbGet(CARD_IMAGE_PREFIX + uuid))?.avatar;
+            if (typeof avatar !== 'string') {
+                const record = await dbGet(CARD_RECORD_PREFIX + uuid);
+                if (!record || isCharacterStub(record)) return '';
+                avatar = record.avatar?.rphubCardImage === 1 ? '' : record.avatar;
+            }
+            if (typeof avatar !== 'string' || !avatar.startsWith('data:')) return '';
+            const preview = await characterPreview({ avatar });
+            if (!preview) return '';
+            const next = cloneForStorage(directory);
+            next.cards[index].avatar = preview;
+            next.cards[index].previewEdge = CHARACTER_PREVIEW_MAX_EDGE;
+            const perform = () => runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
+                const request = store.get('rp_hub_characters');
+                request.onsuccess = () => {
+                    try {
+                        assertStorageWriteAllowed(options, options.writeEpoch);
+                        if (JSON.stringify(request.result) !== JSON.stringify(directory))
+                            throw storageWriteError('StorageConflictError', '角色卡目录已更新，封面预览未覆盖新内容');
+                        store.put(next, 'rp_hub_characters');
+                    } catch (error) { abortWith(error); }
+                };
+            }, options);
+            try { await perform(); }
+            catch (error) {
+                if (!isDatabaseClosingError(error)) throw error;
+                await reopenAfterStorageError(error);
+                await perform();
+            }
+            return preview;
+        };
+        const task = characterWriteQueue.then(refresh, refresh).finally(() => characterPreviewUpgrades.delete(uuid));
+        characterWriteQueue = task.catch(() => {});
+        characterPreviewUpgrades.set(uuid, task);
+        return task;
     };
     const expandStorageEntry = async entry => {
         if (entry.key === storageKey('characters') && isCharacterDirectory(entry.value)) {
@@ -941,6 +994,7 @@
         compareAndWriteStoredValues,
         cloneForStorage,
         readCharacterDirectory,
+        refreshCharacterPreview,
         readCharacter,
         toCharacterStub,
         characterPreviewUrl: card => characterPreviews.get(Vue.toRaw(card))?.preview ?? card?.avatar ?? '',
