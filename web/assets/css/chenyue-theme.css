@@ -111,7 +111,7 @@
     --shell-text: var(--c-text);
     --yy-ink: var(--c-text-2);
 }
-.chenyue-theme :is(.shell-page, .shell-settings-detail, .workspace-memory-dialog) {
+.chenyue-theme :is(.shell-page, .shell-settings-detail) {
     color: var(--shell-text);
 }
 .yy-page-header {
@@ -313,8 +313,6 @@
 .chenyue-theme .app-main:not([data-view="chat"]) .segmented-switch__option.is-active { color: var(--yy-rose); }
 .chenyue-theme .app-main:not([data-view="chat"]) .settings-action { border-radius: 6px; box-shadow: none; min-height: 44px; }
 .chenyue-theme .app-main:not([data-view="chat"]) .settings-action--icon { min-width: 44px; }
-.chenyue-theme .workspace-memory-dialog > section { background: var(--yy-paper); border: 1px solid var(--yy-line); box-shadow: 0 12px 40px #39283a25; }
-.chenyue-theme .workspace-memory-dialog h2 { color: var(--yy-rose); }
 .chenyue-theme .app-modal-panel {
     background-color: var(--yy-paper); border-color: var(--yy-line);
     box-shadow: 0 18px 55px #1c152d24;

@@ -36,16 +36,6 @@ body {
 }
 
 .font-normal { font-weight: 500 !important; }
-.worldinfo-search { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.worldinfo-search input {
-    flex: 1; min-width: 0; height: 44px; padding: 0 12px;
-    border: 1px solid var(--c-border); border-radius: 6px;
-    background: var(--c-field); color: var(--c-text); font: inherit;
-}
-.worldinfo-search input:focus-visible { outline: 2px solid rgb(var(--primary-400)); outline-offset: 1px; }
-.worldinfo-search input::-webkit-search-cancel-button { display: none; }
-.worldinfo-search > span { flex: none; font-size: 12px; color: var(--c-text-2); white-space: nowrap; }
-.worldinfo-search > button { flex: none; font-size: 24px; }
 [v-cloak] { display: none !important; }
 
 #app {

@@ -701,7 +701,7 @@
         {
             key: 'worldinfo', headerTitle: '世界书', arrKey: 'worldInfo', editFn: 'editWorldInfo', label: '世界书',
             nameOf: function (e) { return sakuraPick(e, 'comment', 'name') || '未命名条目'; },
-            searchOf: function (e) { return [sakuraPick(e, 'comment', 'name'), sakuraPick(e, 'content')].join('\n'); }
+            searchOf: function (e) { return [sakuraPick(e, 'comment', 'name'), (e.keys || []).join(' '), sakuraPick(e, 'content')].join('\n'); }
         },
         {
             key: 'presets', headerTitle: '预设管理', arrKey: 'presets', editFn: 'editPreset', label: '预设',
@@ -734,7 +734,6 @@
                 }
             }
             if (!def) continue;
-            if (def.key === 'worldinfo' && window.RPThemePacks.current !== 'classic') continue;
             if (hdr.querySelector('.sakura-entry-search-btn')) continue;
 
             // 优先查找 SettingsPageHeader 的按钮容器 slot

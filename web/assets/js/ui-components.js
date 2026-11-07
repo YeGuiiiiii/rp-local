@@ -2566,7 +2566,7 @@
             worldInfoCount: { type: Number, default: 0 },
             regexCount: { type: Number, default: 0 }
         },
-        emits: ['select', 'edit', 'export-card', 'toggle-favorite', 'delete-card', 'memories'],
+        emits: ['select', 'edit', 'export-card', 'toggle-favorite', 'delete-card'],
         setup() {
             let pressStartedAt = 0;
             let releaseTimer = null;
@@ -2656,10 +2656,6 @@
                     </div>
 
                     <div v-if="!batchMode" class="character-card-actions absolute top-3 right-3 flex flex-col gap-2 z-20">
-                        <button type="button" @click.stop="$emit('memories')" title="管理记忆" aria-label="管理记忆"
-                            class="p-2 bg-white/20 backdrop-blur-md text-white rounded-full border border-white/20">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18h6M10 21h4M8 14a6 6 0 1 1 8 0l-1 2H9z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        </button>
                         <button @click.stop="$emit('edit')"
                             title="编辑角色" aria-label="编辑角色"
                             class="p-2 bg-white/20 backdrop-blur-md text-white rounded-full border border-white/20 active:bg-white/40 shadow-lg">
@@ -2710,9 +2706,6 @@
                         </div>
 
                         <div v-if="!batchMode" class="character-card-actions absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <button type="button" @click.stop="$emit('memories')" title="管理记忆" aria-label="管理记忆" class="p-2 bg-white/90 text-gray-700 rounded-full shadow-lg">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18h6M10 21h4M8 14a6 6 0 1 1 8 0l-1 2H9z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                            </button>
                             <button @click.stop="$emit('edit')" class="p-2 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-600 rounded-full shadow-lg transition-all hover:scale-110" title="编辑角色">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -2770,7 +2763,7 @@
             worldInfoCount: { type: Function, required: true },
             regexCount: { type: Function, required: true }
         },
-        emits: ['select', 'edit', 'export-card', 'toggle-favorite', 'delete-card', 'memories'],
+        emits: ['select', 'edit', 'export-card', 'toggle-favorite', 'delete-card'],
         setup(props, { expose }) {
             const focusedId = ref(props.activeId || '');
             const opening = ref(false);
@@ -2974,7 +2967,6 @@
                                 :world-info-count="worldInfoCount(item.char)" :regex-count="regexCount(item.char)"
                                 :inert="item.offset !== 0" :aria-hidden="item.offset !== 0"
                                 @edit="$emit('edit', item.originalIndex)" @export-card="$emit('export-card', item.originalIndex)"
-                                @memories="$emit('memories', item.originalIndex)"
                                 @toggle-favorite="$emit('toggle-favorite', item.originalIndex)" @delete-card="$emit('delete-card', item.originalIndex)">
                             </character-card>
                             <button v-if="item.offset !== 0" class="character-deck__peek" :disabled="busy"

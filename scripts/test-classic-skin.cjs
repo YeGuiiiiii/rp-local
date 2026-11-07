@@ -66,21 +66,16 @@ fs.mkdirSync(output, { recursive: true });
             __qa.characters = [{ uuid: 'classic-sentinel', name: '经典皮肤测试卡', first_mes: '', description: '',
                 avatar: 'assets/images/chenyue/welcome.webp', worldInfo: [], regexScripts: [], uiTemplates: [] }];
             await RPHubStorage.setStoredValue('characters', RPHubStorage.cloneForStorage(__qa.characters));
+            await RPHubStorage.replaceMemoryScopeList('classic-sentinel',
+                [{ id: 'classic-memory', classicMemory: true, no: 1, turn: 1, summary: '约好明天见面。' }]);
             await __qa.selectCharacter(0, false, { silent: true });
             __qa.chatHistory = [{ id: 'classic-message', role: 'assistant', content: '保留原来的故事。' }];
             await RPHubStorage.setScopedStoredValue('chat', 'classic-sentinel', RPHubStorage.cloneForStorage(__qa.chatHistory));
-            await RPHubStorage.replaceMemoryScopeList('classic-sentinel',
-                [{ id: 'classic-memory', classicMemory: true, no: 1, turn: 1, summary: '约好明天见面。' }]);
             window.__memoryBeforeSkin = await RPHubStorage.readMemoryState('classic-sentinel');
-            __qa.applyManagedMemories({ scope: 'classic-sentinel',
-                memories: __memoryBeforeSkin.list, state: __memoryBeforeSkin });
             __qa.navigateWorkspace('characters');
         });
         await capture('mobile');
-        await page.getByRole('button', { name: '管理记忆', exact: true }).first().click();
-        await page.getByRole('dialog', { name: '角色卡记忆管理' }).waitFor({ timeout: 2000 });
-        await page.waitForFunction(() => document.querySelector('.workspace-memory textarea')?.value.includes('约好明天见面。'));
-        await page.getByRole('button', { name: '关闭记忆管理', exact: true }).click();
+        assert.equal(await page.getByRole('button', { name: '管理记忆', exact: true }).count(), 0);
         await page.evaluate(async () => { window.__memoryBeforeSkin = await RPHubStorage.readMemoryState('classic-sentinel'); });
         await page.getByRole('button', { name: '打开导航', exact: true }).first().click();
         const nav = page.getByRole('navigation', { name: '页面', exact: true });
