@@ -1,8 +1,29 @@
 # RP 本地版 2.9.006
 
-安装包：[dist/RP-local-2.9.006.apk](dist/RP-local-2.9.006.apk)。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+安装包：[下载最新版](https://github.com/YeGuiiiiii/rp-local/releases/latest) · [2.9.006 版本](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.006)。进入发布页，在 Assets 中下载 `RP-local-2.9.006.apk`。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
 当前正式版为 **2.9.006**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+
+## 获取源码
+
+仓库公开后，无需 GitHub 账号即可通过 Git 下载：
+
+```sh
+git clone https://github.com/YeGuiiiiii/rp-local.git
+cd rp-local
+```
+
+需要与安装包一致的固定版本时：
+
+```sh
+git clone --branch v2.9.006 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+```
+
+Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
+
+其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
+
+源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
 
 ## 2.9.006 页面精简
 
@@ -424,7 +445,7 @@
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`1.21`，Android versionCode `261`。
+- 版本：`2.9.006`，Android versionCode `270`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。
