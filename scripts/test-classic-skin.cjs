@@ -95,6 +95,16 @@ fs.mkdirSync(output, { recursive: true });
         await page.locator('#rphub-emb-cache-card').waitFor();
         await page.locator('#sf-presence-card').waitFor();
         await capture('settings-mobile');
+        const appearance = page.locator('.settings-card').filter({
+            has: page.locator('.settings-card__title').filter({ hasText: /高级设置/ })
+        }).getByRole('button', { name: '外观与皮肤', exact: true });
+        assert.equal(await appearance.count(), 1, 'Appearance must be reachable inside Advanced Settings');
+        await appearance.locator('..').screenshot({ path: path.join(output, 'appearance-entry-mobile.png') });
+        await appearance.click();
+        await page.getByRole('radio', { name: '经典皮肤', exact: true }).waitFor();
+        assert.equal(await page.evaluate(() => __qa.settingsSection), 'appearance');
+        await page.getByRole('button', { name: '返回', exact: true }).click();
+        assert.equal(await page.evaluate(() => __qa.currentView), 'settings');
         async function embedding() {
             return page.evaluate(async () => (await fetch('https://patch.test/v1/embeddings', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer fixture' },

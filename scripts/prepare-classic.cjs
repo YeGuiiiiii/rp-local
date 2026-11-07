@@ -36,9 +36,13 @@ for (const name of ['settings-detail', 'cache', 'album', 'advanced', 'competitio
     originalMain.childNodes.push(node);
 }
 const settings = view(originalMain, 'settings');
-const stack = find(settings, node => attr(node, 'class') === 'settings-stack');
-append(stack, `<section class="settings-card"><h3 class="settings-card__title">外观</h3>
-    <button type="button" class="settings-action" @click="openSettingsSection('appearance')">界面主题</button></section>`);
+const toggles = find(settings, node => attr(node, 'class')?.split(' ').includes('grid')
+    && node.childNodes?.some(child => child.tagName === 'label'
+        && find(child, item => attr(item, 'v-model') === 'settings.styleFilterEnabled')));
+if (!toggles) throw new Error('Missing classic advanced settings toggles');
+append(toggles, `<button type="button" class="settings-toggle-row group md:col-span-2 text-left" aria-label="外观与皮肤" @click="openSettingsSection('appearance')">
+    <span class="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">外观</span>
+    <span class="inline-flex items-center gap-2 text-sm text-gray-500">皮肤<shell-icon name="ChevronRight" class="w-4 h-4"></shell-icon></span></button>`);
 const about = view(originalMain, 'patchlist');
 const aboutItems = find(about, node => node.tagName === 'ol').childNodes.filter(node => node.tagName === 'li');
 aboutItems[0].childNodes[0].value = '页面与补丁随安装包内置，按 RP-Hub 2.8.118 对照维护。';

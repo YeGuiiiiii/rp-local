@@ -95,6 +95,14 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await fresh.locator('.release-footer').innerText(), '', 'No explanatory footer');
         assert.match(await fresh.locator('.release-reading').innerText(), /特别鸣谢红花铃🔔老师、启元老师/);
         assert.match(await fresh.locator('.release-reading').innerText(), /QQ 群 472441481、132292045 发布/);
+        assert.equal(await fresh.locator('.release-reading').evaluate(reading => {
+            const viewport = reading.getBoundingClientRect();
+            return [...reading.querySelectorAll('.competition-entry')].length === 2
+                && [...reading.querySelectorAll('.competition-entry')].every(button => {
+                    const bounds = button.getBoundingClientRect();
+                    return bounds.top >= viewport.top && bounds.bottom <= viewport.bottom;
+                });
+        }), true, 'Both competition entries must be visible before scrolling the announcement');
         assert.equal(await fresh.locator('.release-reading').innerText().then(text => /预编译|并发写入|隔离数据|同一版本|把故事留在本地/.test(text)), false);
         await fresh.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === '关闭更新公告');
         await fresh.keyboard.press('Tab');
@@ -178,7 +186,8 @@ fs.mkdirSync(output, { recursive: true });
             restartWithoutCloseNoRepeat: true, upgradeOnce: true, sameVersionAndDowngradeNoRepeat: true,
             oldBackupBrowserMarkerCannotReplayNativeNotice: true, manualReopenAndFocusReturn: true, keyboardAndAndroidBack: true,
             browserFallbackAndReducedMotion: true, softwareArtworkNotDownloadable: true, noRemoteUpdateChecks: true,
-            originalBaseline: '2.8.116', viewports: screenshots, errors, missing, actualAndroidTested: false
+            previousRelease: await fresh.evaluate(() => RPReleaseNotes.notes.baseline),
+            viewports: screenshots, errors, missing, actualAndroidTested: false
         }, null, 2));
         console.log('Release announcement lifecycle, version gating, keyboard, themes and responsive layout passed.');
     } finally { await browser.close(); }

@@ -22,7 +22,6 @@
     const getPack = () => catalog.find(pack => pack.id === selected) || catalog[0];
     const variant = (pack = getPack()) => pack.variants[mode()] || pack.variants.day;
     const asset = name => variant()[name] || variant().overrides?.[name] || (variant().assets || fallback) + name + '.webp';
-    const navigation = view => (variant().navigation || 'assets/images/navigation/') + view + '.webp';
     const syncStandalone = () => document.querySelectorAll('[data-ui-mascot]').forEach(image => {
         image.src = asset(image.dataset.uiMascot);
     });
@@ -53,7 +52,7 @@
         }
     }
     window.RPThemePacks = Object.freeze({
-        catalog, asset, navigation, variant, setMode, get mode() { return mode(); }, get current() { return getPack().id; },
+        catalog, asset, variant, setMode, get mode() { return mode(); }, get current() { return getPack().id; },
         toggleMode: () => setMode(mode() === 'night' ? 'day' : 'night'),
         set(id) {
             const pack = catalog.find(pack => pack.id === skinId(id));
