@@ -396,22 +396,6 @@ const app = createApp({
             dockFolded.value = folded;
             localStorage.setItem('rp-dock-folded', folded ? '1' : '0');
         };
-        const managedMemoryCharacter = ref(null);
-        const openCharacterMemories = async index => {
-            const card = characters.value[index];
-            if (!card) return;
-            try {
-                if (card.uuid === currentCharacter.value?.uuid) await saveClassicMemoriesNow();
-                managedMemoryCharacter.value = card;
-            } catch (error) {
-                showToast('读取记忆前保存失败：' + error.message, 'error');
-            }
-        };
-        const applyManagedMemories = ({ scope, memories, state }) => {
-            if (scope === getCurrentStoryBranchScopeId()) {
-                adoptMemoryState(state, numberClassicMemories(prepareClassicMemoriesForRuntime(memories)));
-            }
-        };
         const resourceScope = ref('character');
         const selectedCompetition = ref(null);
         const openCompetition = id => {
@@ -469,10 +453,6 @@ const app = createApp({
             if (showAnnouncement.value) { closeAnnouncement(); return true; }
             if (onlineOpen.value) { onlineOpen.value = false; return true; }
             if (isNavigationOpen.value) { isNavigationOpen.value = false; return true; }
-            if (managedMemoryCharacter.value) {
-                window.dispatchEvent(new Event('rp:close-memory'));
-                return true;
-            }
             if (globalConfirmModal.value.show) { globalConfirmModal.value.onCancel?.(); return true; }
             if (showConfirmModal.value) { showConfirmModal.value = false; return true; }
             for (const modal of [showCharacterEditor, showCharacterExportModal, showAddCharacterMenu,
@@ -1894,39 +1874,31 @@ const app = createApp({
         };
         const globalWorldInfo = ref([]);
         const worldInfo = ref([]);
-        const worldInfoSearch = ref('');
-        const worldInfoPage = ref(1);
+        const worldInfoLimit = ref(100);
         const worldInfoViewport = ref(null);
         const worldInfoScrolled = ref(false);
-        const WORLDINFO_PAGE_SIZE = 100;
-        const filteredWorldInfo = computed(() => {
-            const query = worldInfoSearch.value.trim().toLocaleLowerCase();
-            return worldInfo.value.map((entry, index) => ({ entry, index })).filter(({ entry }) =>
-                (entry.scope === 'global' ? 'global' : 'character') === resourceScope.value &&
-                (!query || [entry.comment, ...(entry.keys || []), entry.content]
-                    .join('\n').toLocaleLowerCase().includes(query)));
-        });
-        const worldInfoPageCount = computed(() => Math.max(1, Math.ceil(filteredWorldInfo.value.length / WORLDINFO_PAGE_SIZE)));
-        const visibleWorldInfo = computed(() => filteredWorldInfo.value.slice(
-            (worldInfoPage.value - 1) * WORLDINFO_PAGE_SIZE, worldInfoPage.value * WORLDINFO_PAGE_SIZE));
+        const globalFirst = (a, b) => Number(b.scope === 'global') - Number(a.scope === 'global');
+        const orderedWorldInfo = computed(() => worldInfo.value.map((entry, index) => ({ entry, index }))
+            .sort((a, b) => globalFirst(a.entry, b.entry)));
+        const visibleWorldInfo = computed(() => orderedWorldInfo.value.slice(0, worldInfoLimit.value));
+        const onWorldInfoScroll = event => {
+            const view = event.target;
+            worldInfoScrolled.value = view.scrollTop > 300;
+            if (view.scrollHeight - view.scrollTop - view.clientHeight < 600) {
+                worldInfoLimit.value = Math.min(worldInfo.value.length, worldInfoLimit.value + 100);
+            }
+        };
         const scrollWorldInfoTop = () => {
             worldInfoViewport.value?.scrollTo({
                 top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
             });
         };
-        const setWorldInfoPage = value => {
-            worldInfoPage.value = Math.max(1, Math.min(worldInfoPageCount.value, Math.trunc(Number(value)) || 1));
-            nextTick(() => {
-                if (worldInfoViewport.value) worldInfoViewport.value.scrollTop = 0;
-                worldInfoScrolled.value = false;
-            });
-        };
-        watch([worldInfoSearch, resourceScope, currentCharacterIndex], () => setWorldInfoPage(1));
-        watch(worldInfoPageCount, count => {
-            if (worldInfoPage.value > count) setWorldInfoPage(count);
+        watch([currentView, currentCharacterIndex], () => {
+            worldInfoLimit.value = 100;
+            worldInfoScrolled.value = false;
         });
         const managedRegexScripts = computed(() => regexScripts.value.map((script, index) => ({ script, index }))
-            .filter(({ script }) => (script.scope === 'global' ? 'global' : 'character') === resourceScope.value));
+            .sort((a, b) => globalFirst(a.script, b.script)));
         const globalUiTemplates = ref([]);
         const recentGenerationTimes = ref([]);
         const currentWaitTime = ref('0.0');
@@ -7172,7 +7144,6 @@ const app = createApp({
                 if (!element || typeof Sortable === 'undefined') return;
                 activeSortable?.destroy();
                 activeSortable = new Sortable(element, {
-                    disabled: elementId === 'worldinfo-list' && !!worldInfoSearch.value.trim(),
                     handle: '.sortable-list-handle',
                     draggable: '.sortable-list-item',
                     direction: 'vertical',
@@ -7184,6 +7155,8 @@ const app = createApp({
                     ghostClass: 'sortable-list-placeholder',
                     chosenClass: 'sortable-list-chosen',
                     fallbackClass: 'sortable-list-preview',
+                    onMove: ({ dragged, related }) => (items.value[Number(dragged.dataset.resourceIndex)]?.scope || 'character')
+                        === (items.value[Number(related.dataset.resourceIndex)]?.scope || 'character'),
                     onEnd: ({ item: movedElement, oldIndex, newIndex }) => {
                         if (!Number.isInteger(oldIndex) || !Number.isInteger(newIndex) || oldIndex === newIndex) return;
                         // 先还原 Sortable 移动过的 DOM，再让 Vue 按稳定 key 更新顺序。
@@ -7192,7 +7165,7 @@ const app = createApp({
                             element.children[oldIndex < newIndex ? oldIndex : oldIndex + 1]
                         );
                         const visible = [...element.children].map(node => Number(node.dataset.resourceIndex));
-                        const slots = visible.slice().sort((a, b) => a - b);
+                        const slots = visible;
                         if (visible.some(index => !Number.isInteger(index) || index < 0 || index >= items.value.length)) return;
                         const reordered = visible.map(index => items.value[index]);
                         const moved = reordered.splice(oldIndex, 1)[0];
@@ -7203,10 +7176,6 @@ const app = createApp({
                 });
             });
         };
-
-        watch(worldInfoSearch, query => {
-            if (currentView.value === 'worldinfo') activeSortable?.option('disabled', !!query.trim());
-        });
 
         // --- 预设分组的拖拽排序 ---
         // Sortable 默认 draggable = '>*'，即「容器的直接子元素」。分组后 #presets-list 的直接
@@ -8947,7 +8916,7 @@ const app = createApp({
             .sort((a, b) => (Number(b.template.order) || 0) - (Number(a.template.order) || 0) || a.index - b.index)
             .map(item => item.template));
         const activeUiTemplates = computed(() => currentUiTemplates.value.filter(t => t.enabled !== false));
-        const managedUiTemplates = computed(() => currentUiTemplates.value.filter(template => template.scope === resourceScope.value));
+        const managedUiTemplates = computed(() => currentUiTemplates.value.slice().sort(globalFirst));
         const isUiTemplateAnalysisEnabled = () => settings.uiTemplateEnabled
             && settings.uiTemplateMainModelAnalysis
             && activeUiTemplates.value.length > 0;
@@ -16165,7 +16134,7 @@ const app = createApp({
             showAnnouncement, openAnnouncement, closeAnnouncement,
             prepareStreamImport, restoreRphubBinaryDeep, showVueConfirmModal,
             settingsSection, settingTitles, openSettingsSection, selectConfigurationCharacter,
-            managedMemoryCharacter, openCharacterMemories, applyManagedMemories, downloadJsonFile,
+            downloadJsonFile,
             fetchModels, fetchMemoryModels, isFetchingMemoryModels, exportAllData, importAllData, selectModel, selectQuickModels, sendMessage,
             fetchUiTemplateModels, isFetchingUiTemplateModels,
             appBackupFolder, defaultBackupFolder, chooseAppBackupFolder, isExportingAllData,
@@ -16216,7 +16185,7 @@ const app = createApp({
                 } else if (type === 'regex') {
                     exportItems.value = managedRegexScripts.value.map(item => item.script);
                 } else if (type === 'worldinfo') {
-                    exportItems.value = worldInfo.value.filter(entry => (entry.scope === 'global' ? 'global' : 'character') === resourceScope.value);
+                    exportItems.value = worldInfo.value.slice().sort(globalFirst);
                 } else if (type === 'uitemplates') {
                     exportItems.value = managedUiTemplates.value;
                 }
@@ -16448,8 +16417,7 @@ const app = createApp({
             },
 
             showRegexEditor, showWorldInfoEditor, editingRegex, editingWorldInfo, worldInfoKeysText, updateEditingWorldInfoKeys,
-            worldInfoSearch, filteredWorldInfo, visibleWorldInfo, worldInfoPage, worldInfoPageCount,
-            worldInfoViewport, worldInfoScrolled, setWorldInfoPage, scrollWorldInfoTop, resourceScope, managedRegexScripts,
+            visibleWorldInfo, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
             worldInfoSettings, showWorldInfoSettings, showMemorySettings, settingsHelpTopic, showActiveToolSettings, showUiTemplateSettings, estimatedGenerationTime, currentWaitTime,
             globalConfirmModal,
 
@@ -16512,7 +16480,6 @@ const app = createApp({
 app.component('ModalShell', ModalShell);
 app.component('ModalHeader', ModalHeader);
 app.component('LocalFilesPanel', window.RPLocalPanel);
-app.component('RoleMemoryManager', window.RPLocalWorkspace.RoleMemoryManager);
 app.component('ShellIcon', window.RPAppShell.Icon);
 app.component('MascotHeader', window.RPAppShell.MascotHeader);
 app.component('ThemeMascot', window.RPAppShell.ThemeMascot);

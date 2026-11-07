@@ -31,7 +31,6 @@ fs.mkdirSync(output, { recursive: true });
     const settings = async section => page.evaluate(section => {
         __qa.navigateWorkspace('settings'); __qa.openSettingsSection(section);
     }, section);
-    const scope = name => page.getByRole('group', { name: '正则作用范围' }).getByRole('button', { name, exact: true });
     const stepInput = () => page.locator('.shell-image-section input[type="number"]').first();
     try {
         await page.goto('https://sta1n156.github.io/RP-Hub/');
@@ -57,8 +56,7 @@ fs.mkdirSync(output, { recursive: true });
                 await __qa.selectCharacter(0);
                 __qa.navigateWorkspace('regex');
             });
-            assert.equal(await scope('全局生效').count(), 1);
-            await scope('全局生效').click();
+            assert.equal(await page.getByRole('group', { name: '正则作用范围' }).count(), 0);
             const row = page.locator('#regex-list .sortable-list-item').filter({ hasText: 'NAI画图正则' });
             assert.equal(await row.count(), 1);
             await row.getByTitle('编辑', { exact: true }).click();
@@ -66,11 +64,7 @@ fs.mkdirSync(output, { recursive: true });
                 __qa.editingRegex.data.enabled = true;
                 __qa.saveRegex();
             });
-            assert.equal(await scope('全局生效').getAttribute('aria-pressed'), 'true');
-            await scope('当前角色卡').click();
-            assert.equal(await page.locator('#regex-list h3').filter({ hasText: 'NAI画图正则' }).count(), 0);
             await page.evaluate(async () => { await __qa.selectConfigurationCharacter(1); __qa.navigateWorkspace('regex'); });
-            await scope('全局生效').click();
             assert.equal(await page.locator('#regex-list .sortable-list-item').filter({ hasText: 'NAI画图正则' }).getByRole('checkbox').isChecked(), true);
         });
         await check('settings detail headings are not repeated', async () => {
@@ -158,22 +152,28 @@ fs.mkdirSync(output, { recursive: true });
             entries: 1200, rendered: await page.locator('#worldinfo-list .sortable-list-item').count(),
             openMs: timings.map(value => Math.round(value)), medianMs: Math.round(timings.slice().sort((a, b) => a - b)[1])
         };
-        await check('large books render a bounded page while search still covers the last entry', async () => {
+        await check('large books initially render bounded rows while icon search covers the last entry', async () => {
             assert.ok(performanceReport.rendered <= 100, 'A 1200-entry book must not create all row controls');
-            const search = page.getByRole('searchbox', { name: '搜索世界书', exact: true });
+            assert.equal(await page.locator('.workspace-context, .worldinfo-search, .worldinfo-pagination').count(), 0);
+            await page.getByRole('button', { name: '搜索世界书', exact: true }).click();
+            const search = page.locator('#sakura-entry-search input[type="search"]');
             await search.fill('世界书条目 1200');
-            assert.equal(await page.locator('#worldinfo-list h3').innerText(), '世界书条目 1200');
-            await page.locator('#worldinfo-list button[title="编辑"]').click();
+            await search.press('Enter');
+            assert.equal(await page.locator('.sakura-es-name').innerText(), '世界书条目 1200');
+            await page.locator('.sakura-es-item').click();
             assert.equal(await page.evaluate(() => __qa.editingWorldInfo.id), 1199);
             await page.evaluate(() => { __qa.showWorldInfoEditor = false; });
-            await search.fill('');
         });
-        await check('paging edits original entries and quick return reaches the top', async () => {
-            const pageInput = page.getByRole('spinbutton', { name: '世界书页码', exact: true });
-            assert.equal(await pageInput.count(), 1);
-            await pageInput.fill('12'); await pageInput.press('Enter');
-            assert.equal(await page.locator('#worldinfo-list h3').first().innerText(), '世界书条目 1101');
-            await page.locator('#worldinfo-list button[title="编辑"]').nth(6).click();
+        await check('continuous scrolling reaches later entries and the circular button returns to top', async () => {
+            const view = page.locator('.worldinfo-view');
+            while (await page.locator('#worldinfo-list .sortable-list-item').count() < 1200) {
+                const previous = await page.locator('#worldinfo-list .sortable-list-item').count();
+                await view.evaluate(el => { el.scrollTop = el.scrollHeight; });
+                await page.waitForFunction(previous => document.querySelectorAll('#worldinfo-list .sortable-list-item').length > previous, previous);
+            }
+            assert.equal(await page.getByRole('spinbutton', { name: '世界书页码', exact: true }).count(), 0);
+            assert.equal(await page.locator('#worldinfo-list h3').last().innerText(), '世界书条目 1200');
+            await page.locator('#worldinfo-list button[title="编辑"]').nth(1106).click();
             assert.equal(await page.evaluate(() => __qa.editingWorldInfo.id), 1106);
             await page.evaluate(() => {
                 __qa.editingWorldInfo.data.comment = '已修改的远处条目';
@@ -181,17 +181,20 @@ fs.mkdirSync(output, { recursive: true });
             });
             assert.equal(await page.evaluate(() => __qa.worldInfo[1106].comment), '已修改的远处条目');
             assert.equal(await page.evaluate(() => __qa.worldInfo.length), 1200);
-            const view = page.locator('.worldinfo-view');
             await view.evaluate(el => { el.scrollTop = el.scrollHeight; });
             assert.ok(await view.evaluate(el => el.scrollTop > 500));
-            await page.getByRole('button', { name: '返回世界书顶部', exact: true }).click();
+            const top = page.getByRole('button', { name: '返回世界书顶部', exact: true });
+            const shape = await top.evaluate(el => {
+                const box = el.getBoundingClientRect(), css = getComputedStyle(el);
+                return { width: box.width, height: box.height, radius: css.borderRadius, right: innerWidth - box.right, bottom: innerHeight - box.bottom };
+            });
+            assert.equal(shape.width, 46); assert.equal(shape.height, 46); assert.equal(shape.radius, '50%');
+            assert.ok(shape.right >= 12 && shape.right <= 32 && shape.bottom >= 12 && shape.bottom <= 32);
+            await top.click();
             await page.waitForFunction(() => document.querySelector('.worldinfo-view').scrollTop === 0);
             assert.equal(await view.evaluate(el => getComputedStyle(el, '::-webkit-scrollbar').display), 'block');
-            await pageInput.fill('1'); await pageInput.press('Enter');
-            await page.getByRole('button', { name: '下一页世界书', exact: true }).click();
-            assert.equal(await page.locator('#worldinfo-list h3').first().innerText(), '世界书条目 101');
         });
-        await check('sorting a later page only changes the rows on that page', async () => {
+        await check('sorting visible rows preserves all unloaded data', async () => {
             const handles = page.locator('#worldinfo-list .sortable-list-handle');
             await page.waitForFunction(() => {
                 const sortable = Sortable.get(document.getElementById('worldinfo-list'));
@@ -206,20 +209,40 @@ fs.mkdirSync(output, { recursive: true });
                 await page.locator('.sortable-list-preview').waitFor();
                 await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 15 });
                 await page.waitForFunction(() =>
-                    document.querySelector('#worldinfo-list .sortable-list-item').dataset.resourceIndex !== '100');
+                    document.querySelector('#worldinfo-list .sortable-list-item').dataset.resourceIndex !== '0');
             } finally { await page.mouse.up(); }
-            await page.waitForFunction(() => __qa.worldInfo[100].comment !== '世界书条目 101');
+            await page.waitForFunction(() => __qa.worldInfo[0].comment !== '世界书条目 1');
             const result = await page.evaluate(() => ({
-                beforePage: __qa.worldInfo[99].comment,
-                page: __qa.worldInfo.slice(100, 103).map(entry => entry.comment),
+                page: __qa.worldInfo.slice(0, 3).map(entry => entry.comment),
                 afterPage: __qa.worldInfo[200].comment
             }));
-            assert.equal(result.beforePage, '世界书条目 100');
             assert.equal(result.afterPage, '世界书条目 201');
-            assert.notDeepEqual(result.page, ['世界书条目 101', '世界书条目 102', '世界书条目 103']);
-            assert.deepEqual(result.page.slice().sort(), ['世界书条目 101', '世界书条目 102', '世界书条目 103']);
+            assert.notDeepEqual(result.page, ['世界书条目 1', '世界书条目 2', '世界书条目 3']);
+            assert.deepEqual(result.page.slice().sort(), ['世界书条目 1', '世界书条目 2', '世界书条目 3']);
         });
         if (!baseline) {
+            const review = path.join(root, '.impeccable/review/cleanup-2.9.006');
+            fs.mkdirSync(review, { recursive: true });
+            for (const width of [390, 1280]) {
+                await page.setViewportSize({ width, height: 844 });
+                for (const [theme, scheme] of [['classic','day'], ['classic','night'], ['journal','day'], ['vampire','night']]) {
+                    await page.evaluate(({ theme, scheme }) => {
+                        RPThemePacks.set(theme); RPHubThemeKit.setScheme(scheme); __qa.toasts = [];
+                    }, { theme, scheme });
+                    await page.waitForTimeout(200);
+                    assert.equal(await page.locator('.workspace-context, .worldinfo-search, .worldinfo-pagination').count(), 0);
+                    assert.equal(await page.getByRole('button', { name: '搜索世界书', exact: true }).count(), 1);
+                    await page.screenshot({ path: path.join(review, `${theme}-${scheme}-${width}-top.png`) });
+                    await page.locator('.worldinfo-view').evaluate(el => { el.scrollTop = 700; });
+                    const top = page.getByRole('button', { name: '返回世界书顶部', exact: true });
+                    await top.waitFor();
+                    const rect = await top.boundingBox();
+                    assert.equal(rect.width, 46); assert.equal(rect.height, 46);
+                    await page.screenshot({ path: path.join(review, `${theme}-${scheme}-${width}-scrolled.png`) });
+                    await top.click();
+                    await page.waitForFunction(() => document.querySelector('.worldinfo-view').scrollTop === 0);
+                }
+            }
             for (const width of [360, 390, 1280]) {
                 await page.setViewportSize({ width, height: 844 });
                 for (const theme of ['journal', 'vampire']) {

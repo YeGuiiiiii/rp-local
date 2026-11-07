@@ -52,8 +52,13 @@ fs.mkdirSync(output, { recursive: true });
     }
     const quota = () => page.locator('.shell-image-section .image-quota');
     const refresh = () => page.getByRole('button', { name: '刷新剩余生图次数', exact: true });
-    const scope = name => page.getByRole('group', { name: '世界书作用范围' }).getByRole('button', { name, exact: true });
     const titles = () => page.locator('#worldinfo-list h3').allTextContents();
+    const searchEntry = async query => {
+        await page.getByRole('button', { name: '搜索世界书', exact: true }).click();
+        const input = page.locator('#sakura-entry-search input');
+        await input.fill(query); await input.press('Enter');
+        await page.locator('.sakura-es-item').click();
+    };
     try {
         await page.goto('https://sta1n156.github.io/RP-Hub/'); await ready(); await imagePage();
         assert.match(await quota().innerText(), /未填写密钥/);
@@ -111,30 +116,21 @@ fs.mkdirSync(output, { recursive: true });
         });
         await page.waitForTimeout(220);
         assert.ok((await titles()).includes('角色甲专属'));
-        assert.equal((await titles()).includes('两张卡共用'), false);
-        await scope('全局生效').click();
         assert.ok((await titles()).includes('两张卡共用'));
-        assert.equal((await titles()).includes('角色甲专属'), false);
-        await page.getByRole('searchbox', { name: '搜索世界书' }).fill('两张卡共用');
-        await page.locator('#worldinfo-list button[title="编辑"]').click();
+        assert.ok((await titles()).indexOf('两张卡共用') < (await titles()).indexOf('角色甲专属'));
+        await searchEntry('两张卡共用');
         await page.evaluate(() => { __qa.editingWorldInfo.data.content = 'GLOBAL_EDITED'; __qa.saveWorldInfo(); });
-        assert.equal(await scope('全局生效').getAttribute('aria-pressed'), 'true');
         await page.evaluate(async () => {
             await __qa.selectConfigurationCharacter(1);
             __qa.navigateWorkspace('worldinfo');
         });
-        await scope('全局生效').click();
         assert.ok((await titles()).includes('两张卡共用'));
         assert.equal(await page.evaluate(() => __qa.worldInfo.find(entry => entry.comment === '两张卡共用').content), 'GLOBAL_EDITED');
         assert.equal(await page.evaluate(() => RPHubContextUtils.resolveWorldInfoEntries(__qa.worldInfo, [], {})
             .entries.some(entry => entry.content === 'GLOBAL_EDITED')), true, 'Global content still participates in context matching');
-        await scope('当前角色卡').click();
-        await page.getByRole('searchbox', { name: '搜索世界书' }).fill('角色乙专属');
-        await page.locator('#worldinfo-list button[title="编辑"]').click();
+        await searchEntry('角色乙专属');
         await page.evaluate(() => { __qa.editingWorldInfo.data.scope = 'global'; __qa.saveWorldInfo(); });
-        assert.equal(await scope('全局生效').getAttribute('aria-pressed'), 'true');
         assert.ok((await titles()).includes('角色乙专属'), 'Changing scope follows the entry instead of hiding it');
-        await page.getByRole('searchbox', { name: '搜索世界书' }).fill('');
         await page.locator('#worldinfo-list button[title="编辑"]').filter({ visible: true }).first().waitFor();
         for (const theme of ['journal', 'vampire']) {
             await page.evaluate(theme => RPThemePacks.set(theme), theme);
@@ -146,18 +142,15 @@ fs.mkdirSync(output, { recursive: true });
         await page.evaluate(() => RPLocalStore.flush());
         await page.reload(); await ready();
         await page.evaluate(() => __qa.navigateWorkspace('worldinfo'));
-        await scope('全局生效').click();
         const persisted = await titles();
         assert.ok(persisted.includes('两张卡共用') && persisted.includes('角色乙专属'));
-        await page.getByRole('searchbox', { name: '搜索世界书' }).fill('两张卡共用');
-        await page.locator('#worldinfo-list button[title="编辑"]').click();
+        await searchEntry('两张卡共用');
         await page.evaluate(() => { __qa.editingWorldInfo.data.scope = 'character'; __qa.saveWorldInfo(); });
-        assert.equal(await scope('当前角色卡').getAttribute('aria-pressed'), 'true');
         assert.ok((await titles()).includes('两张卡共用'));
         assert.deepEqual(errors, []);
         fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify({
             quotaRefresh: true, apiPageSharesQuota: true, loadingAndEmptyAndFailureAndZero: true,
-            staleKeyIgnored: true, worldbookScopeSwitch: true, globalAcrossCharacters: true,
+            staleKeyIgnored: true, globalFirstWithoutScopeSwitch: true, globalAcrossCharacters: true,
             scopeChangeFollowsEntry: true, persistence: true, dayNightAndResponsive: true, errors
         }, null, 2));
         console.log('Image quota refresh/key isolation and visible global worldbook scopes passed.');

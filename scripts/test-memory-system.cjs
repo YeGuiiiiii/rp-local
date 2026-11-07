@@ -60,7 +60,7 @@ const web = path.join(root, 'web');
     await page.getByRole('button', { name: '记忆系统', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'memory');
     assert.equal(await page.locator('#memory-settings-panel').getAttribute('aria-hidden'), 'false');
-    assert.equal(await page.getByRole('button', { name: '管理分支记忆', exact: true }).isDisabled(), true);
+    assert.equal(await page.getByRole('button', { name: '管理分支记忆', exact: true }).count(), 0);
     await page.getByRole('checkbox', { name: '启用记忆系统', exact: true }).locator('..').click();
     assert.equal(await page.getByRole('checkbox', { name: '启用记忆系统', exact: true }).isChecked(), true);
     await page.getByPlaceholder('https://api.example.com/v1', { exact: true }).fill('https://memory.test/v1');
@@ -112,9 +112,7 @@ const web = path.join(root, 'web');
     await page.getByText('测试角色答应在钟楼等候旅人。', { exact: true }).waitFor();
     const saved = await page.evaluate(() => RPHubStorage.getScopedStoredValue('classic_memories', 'memory-card-a'));
     assert.ok(saved.some(memory => memory.summary === '测试角色答应在钟楼等候旅人。'));
-    await page.getByRole('button', { name: '管理分支记忆', exact: true }).click();
-    await page.getByRole('dialog', { name: '角色卡记忆管理', exact: true }).locator('textarea').waitFor();
-    await page.getByRole('button', { name: '关闭记忆管理', exact: true }).click();
+    assert.equal(await page.getByRole('button', { name: '管理分支记忆', exact: true }).count(), 0);
     await page.getByRole('button', { name: '返回', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'chat');
     await page.evaluate(() => __qa.shellGoBack());
@@ -141,7 +139,7 @@ const web = path.join(root, 'web');
     assert.deepEqual(errors, []);
     const report = { fullMemoryPageFromChatAndAdvancedAndSettings: true, settingsInitiallyExpanded: true,
       enableAndModesAndModelSelection: true, slidersAndLocksPersist: true, mockBackfillStored: true,
-      characterMemoriesStaySeparate: true, branchEditorStillAvailable: true, returnToCaller: true,
+      characterMemoriesStaySeparate: true, redundantBranchDialogRemoved: true, returnToCaller: true,
       reloadPreservesSettings: true, runtimeVersionsDisplayed: true, widths: [390, 1280], summaryRequests, realApiUsed: false, errors };
     fs.writeFileSync(path.join(root, 'verification/memory-system.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));

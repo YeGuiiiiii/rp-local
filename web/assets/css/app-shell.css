@@ -242,17 +242,11 @@
 }
 .persona-avatar--default > img { width: 94%; height: 94%; object-fit: contain; object-position: center; }
 .settings-profile-avatar .persona-avatar { width: 100%; height: 100%; }
-.worldinfo-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--yy-muted); font-size: 13px; }
-.worldinfo-pagination label { display: flex; align-items: center; gap: 6px; }
-.worldinfo-pagination input {
-    width: 56px; min-height: 44px; padding: 6px; text-align: center; font-size: 16px;
-    border: 1px solid var(--yy-line); border-radius: 6px; background: var(--yy-field); color: var(--yy-ink);
-}
-:root .chenyue-theme .worldinfo-top-button {
+:root #app .worldinfo-top-button {
     position: fixed; z-index: 20; right: 24px; bottom: max(20px, env(safe-area-inset-bottom));
-    width: 46px; height: 46px; border-radius: 50%; box-shadow: 0 4px 14px var(--ui-shadow);
+    width: 46px; min-width: 46px; max-width: 46px; height: 46px; padding: 0; border-radius: 50%; box-shadow: 0 4px 14px var(--ui-shadow);
     display: inline-flex; align-items: center; justify-content: center;
-    background: var(--yy-paper); color: var(--yy-ink); border: 1px solid var(--yy-line);
+    background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border);
 }
 .worldinfo-view { scrollbar-width: thin !important; scrollbar-color: var(--yy-line) transparent; scrollbar-gutter: stable; }
 .worldinfo-view::-webkit-scrollbar { display: block !important; width: 8px !important; }
@@ -325,7 +319,6 @@
 .preset-group-form input { flex: 1; min-width: 0; padding: 10px 12px; min-height: 44px; border: 1px solid var(--yy-line); border-radius: 6px; background: var(--yy-field); color: var(--yy-ink); font-size: 16px; }
 .preset-group-form p { color: var(--c-danger, #b73548); font-size: 13px; margin-top: 8px; }
 .preset-group-empty { padding: 32px 0; text-align: center; color: var(--yy-muted); font-size: 14px; }
-.shell-root .workspace-context { display: none; }
 .shell-page button:focus-visible, .shell-dock-wrap button:focus-visible, .shell-online-mask button:focus-visible, .shell-menu-mask button:focus-visible {
     outline: 2px solid var(--shell-accent); outline-offset: 3px;
 }

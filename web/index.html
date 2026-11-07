@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>window.RP_LOCAL_VERSION = '2.9.005'; window.RP_LOCAL_RELEASE = 269;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.006'; window.RP_LOCAL_RELEASE = 270;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/themes/catalog.js"></script>
     <script src="assets/js/local-files.js"></script>
@@ -448,9 +448,6 @@
         <shell-dock v-if="shellRoot" :active="currentView" :folded="dockFolded" :online="onlineOpen"
             @navigate="navigateWorkspace" @fold="foldDock" @online="onlineOpen=!onlineOpen"
             @close-online="onlineOpen=false"></shell-dock>
-        <role-memory-manager v-if="managedMemoryCharacter" :key="managedMemoryCharacter.uuid" :character="managedMemoryCharacter"
-            :busy="managedMemoryCharacter.uuid === currentCharacter?.uuid && (isConversationBusy || isActiveBatchExtracting)"
-            @close="managedMemoryCharacter=null" @saved="applyManagedMemories"></role-memory-manager>
         <stream-import-panel ref="streamImportPanel" :prepare="prepareStreamImport" :decode="restoreRphubBinaryDeep"
             :task="backupTask" :profile="backupProfile"></stream-import-panel>
 
@@ -465,17 +462,6 @@
             <div v-if="currentView === 'cache'" class="management-view shell-settings-detail">
                 <settings-page-header title="向量缓存" @menu="shellGoBack"></settings-page-header>
                 <shell-utilities section="cache"></shell-utilities>
-            </div>
-            <div v-if="['worldinfo','regex','uitemplates','memory'].includes(currentView)" class="workspace-context px-4 pt-3">
-                <strong>{{currentView !== 'memory' && resourceScope === 'global' ? ({worldinfo:'全局世界书',regex:'全局正则'})[currentView] || '软件内置与旧共享条目' : currentCharacter?.name || '尚未选择角色卡'}}</strong>
-                <button type="button" class="settings-action" @click="currentView='characters'">角色卡管理</button>
-                <div v-if="['worldinfo','regex'].includes(currentView)" class="segmented-switch segmented-switch--compact workspace-scope" role="group" :aria-label="currentView === 'worldinfo' ? '世界书作用范围' : '正则作用范围'">
-                    <span class="segmented-switch__indicator" :class="{'is-right':resourceScope === 'global'}" aria-hidden="true"></span>
-                    <button type="button" class="segmented-switch__option" :class="{'is-active':resourceScope === 'character'}"
-                        :aria-pressed="resourceScope === 'character'" @click="resourceScope='character'">当前角色卡</button>
-                    <button type="button" class="segmented-switch__option" :class="{'is-active':resourceScope === 'global'}"
-                        :aria-pressed="resourceScope === 'global'" @click="resourceScope='global'">全局生效</button>
-                </div>
             </div>
 
 
@@ -1417,7 +1403,6 @@
                     :items="filteredCharacters" :active-id="currentCharacter?.uuid" :loading-index="switchingCharacterIndex"
                     :world-info-count="getCharacterWICount" :regex-count="getCharacterRegexCount"
                     @select="selectCharacter" @edit="editCharacter" @export-card="openCharacterExportModal"
-                    @memories="openCharacterMemories"
                     @toggle-favorite="toggleCharacterFavorite" @delete-card="deleteCharacter">
                 </character-deck>
 
@@ -1436,7 +1421,6 @@
                         :regex-count="char.regexCount"
                         @select="isBatchDeleteMode ? toggleCharacterSelection(char.originalIndex) : selectCharacter(char.originalIndex)"
                         @edit="editCharacter(char.originalIndex)"
-                        @memories="openCharacterMemories(char.originalIndex)"
                         @export-card="openCharacterExportModal(char.originalIndex)"
                         @toggle-favorite="toggleCharacterFavorite(char.originalIndex)"
                         @delete-card="deleteCharacter(char.originalIndex)">
@@ -1492,7 +1476,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.005 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.006 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -3306,11 +3290,6 @@
                                 </svg>
                             </span>
                     </template>
-                        <button type="button" @click="openCharacterMemories(currentCharacterIndex)"
-                            :disabled="!currentCharacter"
-                            class="shell-icon-button" title="管理分支记忆" aria-label="管理分支记忆">
-                            <shell-icon name="FolderOpen"/>
-                        </button>
                         <button @click="openMemTools()"
                             class="p-2.5 bg-white text-primary-600 rounded-xl border border-gray-200 shadow-sm active:scale-95 transition-all"
                             title="记忆工具">
@@ -3631,7 +3610,7 @@
 
             <!-- World Info View -->
             <div v-if="currentView === 'worldinfo'" ref="worldInfoViewport" class="management-view worldinfo-view"
-                @scroll.passive="worldInfoScrolled = $event.target.scrollTop > 300">
+                @scroll.passive="onWorldInfoScroll">
                 <settings-page-header title="世界书" @menu="shellGoBack">
                     <template #icon>
                         <svg class="w-6 h-6 md:w-7 md:h-7 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3707,22 +3686,6 @@
                     </div>
                 </div>
 
-                <div class="worldinfo-search">
-                    <input id="worldinfo-search" type="search" v-model="worldInfoSearch"
-                        aria-label="搜索世界书" placeholder="搜索标题、关键词或正文" autocomplete="off">
-                    <span role="status" aria-live="polite">{{ filteredWorldInfo.length }} / {{ worldInfo.length }}</span>
-                    <button v-if="worldInfoSearch" type="button" @click="worldInfoSearch = ''"
-                        class="settings-icon-button" title="清空搜索" aria-label="清空搜索">×</button>
-                </div>
-                <p v-if="worldInfoSearch.trim() && !filteredWorldInfo.length" class="text-sm text-gray-500 py-4">没有匹配的世界书条目</p>
-                <nav v-if="worldInfoPageCount > 1" class="worldinfo-pagination" aria-label="世界书翻页">
-                    <button type="button" class="settings-icon-button" aria-label="上一页世界书" title="上一页"
-                        :disabled="worldInfoPage <= 1" @click="setWorldInfoPage(worldInfoPage - 1)"><shell-icon name="ChevronLeft"></shell-icon></button>
-                    <label>第 <input type="number" min="1" :max="worldInfoPageCount" :value="worldInfoPage" aria-label="世界书页码"
-                        @change="setWorldInfoPage($event.target.value); $event.target.value = worldInfoPage"> / {{worldInfoPageCount}} 页</label>
-                    <button type="button" class="settings-icon-button" aria-label="下一页世界书" title="下一页"
-                        :disabled="worldInfoPage >= worldInfoPageCount" @click="setWorldInfoPage(worldInfoPage + 1)"><shell-icon name="ChevronRight"></shell-icon></button>
-                </nav>
                 <div id="worldinfo-list" class="sortable-list">
                     <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index"
                         class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
