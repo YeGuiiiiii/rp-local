@@ -6,6 +6,8 @@ const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
 const evidence = path.join(root, 'verification');
+const transferEvidence = path.join(root, '.impeccable/review/transfer-2.9.004');
+fs.mkdirSync(transferEvidence, { recursive: true });
 
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -103,6 +105,34 @@ const evidence = path.join(root, 'verification');
     await memoryDialog.getByRole('button', { name: '保存记忆', exact: true }).click();
     await memoryDialog.getByText('记忆已保存', { exact: true }).waitFor();
     await memoryDialog.getByRole('button', { name: '关闭记忆管理', exact: true }).click();
+    await page.evaluate(async () => {
+      await RPHubStorage.setStoredValue('chat_shell-card-a', [{ role: 'assistant', content: '带记忆导出的测试聊天', id: 'export-probe' }]);
+      window.AndroidBridge = { isNativeApp: () => true, saveFile: (base64, name) => {
+        window.__chatExport = { name, text: new TextDecoder().decode(Uint8Array.from(atob(base64), char => char.charCodeAt(0))) };
+      } };
+    });
+    const openChatExport = async () => {
+      await firstCard.getByRole('button', { name: '导出角色', exact: true }).click();
+      await page.getByText('导出聊天记录', { exact: true }).click();
+      await page.getByRole('dialog', { name: '导出聊天记录', exact: true }).waitFor();
+    };
+    await openChatExport();
+    await page.keyboard.press('Tab');
+    assert.equal(await page.evaluate(() => !!document.activeElement.closest('#rphub-chat-export-panel')), true);
+    await page.evaluate(() => window.rphubHandleBack());
+    assert.equal(await page.evaluate(() => __qa.currentView), 'characters', '返回只关闭聊天导出选项');
+    assert.equal(await page.evaluate(() => document.getElementById('app').inert), false);
+    await openChatExport();
+    const exportDialog = page.getByRole('dialog', { name: '导出聊天记录', exact: true });
+    await exportDialog.getByRole('checkbox', { name: /记忆系统/ }).check();
+    await exportDialog.locator('img').evaluate(image => image.decode());
+    await page.screenshot({ path: path.join(transferEvidence, 'chat-export-390-day.png'), animations: 'disabled' });
+    await exportDialog.getByRole('button', { name: '开始导出', exact: true }).click();
+    await page.waitForFunction(() => window.__chatExport);
+    const exported = await page.evaluate(() => __chatExport.text.split('\n').map(line => JSON.parse(line)));
+    assert.equal(exported[0].memory.branches.main.classicMemories[0].summary, '通过卡片修改的记忆');
+    assert.equal(exported[1].messages[0].content, '带记忆导出的测试聊天');
+    await page.evaluate(() => { delete window.AndroidBridge; });
     await page.screenshot({ path: path.join(evidence, 'shell-home-390.png') });
     await page.getByRole('button', { name: '切换为叠卡布局', exact: true }).click();
     assert.equal(await page.locator('.character-deck:visible').count(), 1);

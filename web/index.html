@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>window.RP_LOCAL_VERSION = '2.9.003'; window.RP_LOCAL_RELEASE = 267;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.004'; window.RP_LOCAL_RELEASE = 268;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/themes/catalog.js"></script>
     <script src="assets/js/local-files.js"></script>
@@ -254,7 +254,7 @@
     <div class="entry-transition rphub-splash-hold startup-home" role="status" aria-label="启动欢迎页">
         <div class="startup-brand">RP<span>记录每一次相遇</span></div>
         <div class="startup-main">
-            <img class="startup-mascot is-loading" data-ui-mascot="writing" src="assets/images/chenyue/writing.webp" alt="正在写故事的陈玥">
+            <img class="startup-mascot is-loading" data-ui-mascot="transfer" src="assets/images/chenyue/transfer.webp" alt="正在整理故事的玥玥">
             <p class="startup-eyebrow">欢迎回来</p>
             <h1>今天，也有新故事。</h1>
             <div class="startup-progress" aria-hidden="true"><span></span></div>
@@ -450,7 +450,7 @@
             @close-online="onlineOpen=false"></shell-dock>
         <role-memory-manager v-if="managedMemoryCharacter" :key="managedMemoryCharacter.uuid" :character="managedMemoryCharacter"
             :busy="managedMemoryCharacter.uuid === currentCharacter?.uuid && (isConversationBusy || isActiveBatchExtracting)"
-            @close="managedMemoryCharacter=null" @saved="applyManagedMemories" @export="downloadJsonFile"></role-memory-manager>
+            @close="managedMemoryCharacter=null" @saved="applyManagedMemories"></role-memory-manager>
 
         <div class="app-main flex-1 flex flex-col h-full overflow-hidden bg-gray-50 relative"
             :class="{'shell-root':shellRoot,'shell-dock-folded':dockFolded}" :data-view="currentView" :inert="isNavigationOpen || onlineOpen">
@@ -1490,7 +1490,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.003 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.004 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -1582,7 +1582,7 @@
                             </button>
                         </div>
                         <stream-import-panel ref="streamImportPanel" :prepare="prepareStreamImport"
-                            :decode="restoreRphubBinaryDeep" :confirm="showVueConfirmModal"></stream-import-panel>
+                            :decode="restoreRphubBinaryDeep" :exporting="isExportingAllData"></stream-import-panel>
                     </div>
                     <div class="mt-4">
                         <h4 class="text-sm font-bold text-gray-700 mb-2">备份内容</h4>

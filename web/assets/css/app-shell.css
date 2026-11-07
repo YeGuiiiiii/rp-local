@@ -263,12 +263,39 @@
 .shell-settings-detail[data-section="image"] .shell-image-section { margin: 0 !important; padding-top: 0 !important; border: 0 !important; }
 .shell-settings-detail[data-section="api"] .shell-image-section { display: none; }
 .settings-page-header .app-nav-trigger { width: 40px; height: 40px; margin-right: 8px; }
-.stream-import-panel progress { display: block; height: 8px; border: 0; border-radius: 4px; overflow: hidden; appearance: none; background: var(--shell-line); }
-.stream-import-panel progress::-webkit-progress-bar { background: var(--shell-line); }
-.stream-import-panel progress::-webkit-progress-value { background: var(--shell-accent); }
-.stream-import-panel progress::-moz-progress-bar { background: var(--shell-accent); }
-.stream-import-overlay { position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center; padding: 24px; background: rgb(0 0 0 / .4); }
-.stream-import-dialog { width: min(100%, 420px); padding: 24px; border-radius: 8px; background: var(--shell-surface); color: var(--shell-text); box-shadow: 0 12px 40px rgb(0 0 0 / .16); }
+.stream-import-overlay { position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center; padding: max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom)); background: rgb(12 10 16 / .52); }
+.transfer-dialog { position: relative; width: min(100%,440px); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 24px; border-radius: 8px; background: var(--shell-surface); color: var(--shell-text); box-shadow: 0 18px 54px rgb(0 0 0 / .24); scrollbar-color: var(--shell-accent) transparent; animation: transfer-open 180ms ease-out; }
+.transfer-dialog:focus { outline: none; }
+.transfer-dialog h3 { margin: 0; font-size: 20px; line-height: 1.5; font-weight: 750; overflow-wrap: anywhere; }
+.transfer-dialog p { margin: 12px 0; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.transfer-mascot { display: block; width: 184px; height: 144px; object-fit: contain; margin: 0 auto 16px; pointer-events: none; user-select: none; }
+.transfer-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--shell-tint); color: var(--shell-text); }
+.transfer-dialog .transfer-filename { margin: 4px 0 20px; color: var(--shell-text); opacity: .8; font-size: 13px; }
+.transfer-dialog progress { display: block; width: 100%; height: 7px; margin: 20px 0 10px; border: 0; border-radius: 4px; overflow: hidden; appearance: none; background: var(--shell-line); accent-color: var(--shell-accent); }
+.transfer-dialog progress::-webkit-progress-bar { background: var(--shell-line); }
+.transfer-dialog progress::-webkit-progress-value { background: var(--shell-accent); transition: width 180ms ease-out; }
+.transfer-dialog progress::-moz-progress-bar { background: var(--shell-accent); }
+.transfer-dialog progress:indeterminate { background: linear-gradient(90deg,var(--shell-line) 30%,var(--shell-accent) 50%,var(--shell-line) 70%); background-size: 220% 100%; animation: transfer-progress 1.8s linear infinite; }
+.transfer-dialog progress:indeterminate::-webkit-progress-bar { background: transparent; }
+.transfer-progress-meta { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.transfer-dialog .transfer-summary { padding: 12px 0; border-block: 1px solid var(--shell-line); font-weight: 600; }
+.transfer-dialog .transfer-warning { margin: 16px 0; }
+.transfer-dialog .transfer-error { color: var(--c-danger,#b73548); }
+.transfer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.transfer-dialog .shell-button { min-height: 44px; justify-content: center; padding: 10px 16px; border: 1px solid var(--shell-line); border-radius: 6px; color: var(--shell-text); background: var(--shell-surface); font-size: 14px; }
+.transfer-dialog .transfer-primary { background: var(--shell-text); border-color: var(--shell-text); color: var(--shell-surface); }
+.transfer-dialog button:hover { filter: brightness(.94); }
+.transfer-dialog button:active { transform: translateY(1px); }
+.transfer-dialog :is(button,input):focus-visible { outline: 2px solid var(--shell-accent); outline-offset: 3px; }
+.transfer-option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--shell-line); cursor: pointer; }
+.transfer-option input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: var(--shell-accent); }
+.transfer-option span { min-width: 0; }
+.transfer-option strong { display: block; font-size: 14px; line-height: 1.5; font-weight: 650; }
+.transfer-option small { display: block; margin-top: 4px; font-size: 12px; line-height: 1.6; }
+@keyframes transfer-open { from { opacity: .7; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes transfer-progress { from { background-position: 100% 0; } to { background-position: -120% 0; } }
+@media (max-height: 600px) { .transfer-mascot { width: 112px; height: 80px; margin-bottom: 8px; } .transfer-dialog { padding: 20px; } .transfer-actions { margin-top: 16px; } }
+@media (prefers-reduced-motion: reduce) { .transfer-dialog,.transfer-dialog progress:indeterminate { animation: none; } .transfer-dialog progress::-webkit-progress-value { transition: none; } }
 .preset-group { border-bottom: 1px solid var(--yy-line); }
 .preset-group-row { display: flex; align-items: center; gap: 12px; padding-right: 8px; }
 .preset-group-row > label { min-width: 44px; min-height: 44px; justify-content: center; }
@@ -298,8 +325,6 @@
 .preset-group-form input { flex: 1; min-width: 0; padding: 10px 12px; min-height: 44px; border: 1px solid var(--yy-line); border-radius: 6px; background: var(--yy-field); color: var(--yy-ink); font-size: 16px; }
 .preset-group-form p { color: var(--c-danger, #b73548); font-size: 13px; margin-top: 8px; }
 .preset-group-empty { padding: 32px 0; text-align: center; color: var(--yy-muted); font-size: 14px; }
-.stream-import-dialog h3 { font-size: 18px; font-weight: 700; }
-.stream-import-dialog p { margin: 12px 0 20px; overflow-wrap: anywhere; }
 .shell-root .workspace-context { display: none; }
 .shell-page button:focus-visible, .shell-dock-wrap button:focus-visible, .shell-online-mask button:focus-visible, .shell-menu-mask button:focus-visible {
     outline: 2px solid var(--shell-accent); outline-offset: 3px;

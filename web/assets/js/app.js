@@ -412,7 +412,7 @@ const app = createApp({
             closeAnnouncement();
         };
         const navigateWorkspace = target => {
-            if (streamImportPanel.value?.isApplying) return;
+            if (streamImportPanel.value?.isOpen) return;
             const view = typeof target === 'string' ? target : target.view;
             if (view === 'appearance') { openSettingsSection('appearance'); return; }
             onlineOpen.value = false;
@@ -451,8 +451,10 @@ const app = createApp({
             currentView.value = previous;
         };
         const shellGoBack = () => {
+            if (streamImportPanel.value?.handleBack()) return true;
+            const chatExportPanel = document.getElementById('rphub-chat-export-panel');
+            if (chatExportPanel) { chatExportPanel.dispatchEvent(new Event('rp:close')); return true; }
             if (showAnnouncement.value) { closeAnnouncement(); return true; }
-            if (streamImportPanel.value?.isApplying) return true;
             if (onlineOpen.value) { onlineOpen.value = false; return true; }
             if (isNavigationOpen.value) { isNavigationOpen.value = false; return true; }
             if (managedMemoryCharacter.value) {
@@ -15362,46 +15364,71 @@ const app = createApp({
 
         const openChatExportPanel = (char, onConfirm) => {
             const previous = document.getElementById('rphub-chat-export-panel');
-            if (previous) previous.remove();
+            previous?.dispatchEvent(new Event('rp:close'));
+            const previousFocus = document.activeElement;
+            const app = document.getElementById('app');
+            const previousInert = app.inert;
+            const previousOverflow = document.body.style.overflow;
             const mask = document.createElement('div');
             mask.id = 'rphub-chat-export-panel';
-            mask.style.cssText = 'position:fixed;inset:0;z-index:2147483200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55);';
+            mask.className = 'stream-import-overlay';
+            mask.setAttribute('role', 'dialog');
+            mask.setAttribute('aria-modal', 'true');
+            mask.setAttribute('aria-label', '导出聊天记录');
             const row = (key, title, desc, locked) => [
-                '<label style="display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #eef2f7;cursor:',
-                locked ? 'default' : 'pointer',
-                ';"><input type="checkbox" data-key="', key, '"', locked ? ' checked disabled' : '',
-                ' style="margin-top:2px;width:16px;height:16px;flex:0 0 auto;"><span style="min-width:0;">',
-                '<span style="display:block;font-weight:600;font-size:13px;">', title, locked ? '（必选）' : '',
-                '</span><span style="display:block;font-size:11px;color:#6b7280;margin-top:2px;">', desc,
-                '</span></span></label>'
+                '<label class="transfer-option"><input type="checkbox" data-key="', key, '"',
+                locked ? ' checked disabled' : chatExportOptions[key] ? ' checked' : '',
+                '><span><strong>', title, locked ? '（必选）' : '',
+                '</strong><small>', desc, '</small></span></label>'
             ].join('');
             const box = document.createElement('div');
-            box.style.cssText = 'width:100%;max-width:340px;background:#fff;color:#1f2937;border-radius:16px;padding:18px;box-shadow:0 18px 40px rgba(15,23,42,.28);';
+            box.className = 'transfer-dialog';
+            box.tabIndex = -1;
             box.innerHTML = [
-                '<div style="font-weight:700;font-size:15px;">导出聊天记录</div>',
-                '<div style="font-size:12px;color:#6b7280;margin:3px 0 8px;">',
+                '<img class="transfer-mascot" src="', window.RPThemePacks.asset('transfer'), '" alt="" aria-hidden="true">',
+                '<h3>导出聊天记录</h3><p class="transfer-filename">',
                 String((char && char.name) || '当前角色').replace(/[<>&]/g, ''),
-                '</div>',
+                '</p>',
                 row('chat', '聊天记录', '消息本体与全部分支', true),
                 row('uiVariables', 'UI 变量记录', '模板初始值、当前值与变更日志', false),
                 row('memory', '记忆系统', '逐轮总结', false),
-                '<div style="display:flex;gap:10px;margin-top:16px;">',
-                '<button type="button" data-act="cancel" style="flex:1;padding:9px 0;border-radius:10px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:13px;font-weight:600;">取消</button>',
-                '<button type="button" data-act="ok" style="flex:1;padding:9px 0;border-radius:10px;border:0;background:#4f46e5;color:#fff;font-size:13px;font-weight:600;">开始导出</button>',
+                '<div class="transfer-actions">',
+                '<button type="button" data-act="cancel" class="shell-button">取消</button>',
+                '<button type="button" data-act="ok" class="shell-button transfer-primary">开始导出</button>',
                 '</div>'
             ].join('');
             mask.appendChild(box);
             document.body.appendChild(mask);
+            app.inert = true;
+            document.body.style.overflow = 'hidden';
+            box.focus();
+            const close = () => {
+                mask.remove();
+                app.inert = previousInert;
+                document.body.style.overflow = previousOverflow;
+                if (previousFocus?.isConnected) previousFocus.focus();
+            };
+            mask.addEventListener('rp:close', close, { once: true });
+            mask.addEventListener('keydown', event => {
+                if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
+                if (event.key !== 'Tab') return;
+                const items = [...box.querySelectorAll('button,input:not(:disabled)')];
+                if (event.shiftKey && [box, items[0]].includes(document.activeElement)) {
+                    event.preventDefault(); items.at(-1).focus();
+                } else if (!event.shiftKey && [box, items.at(-1)].includes(document.activeElement)) {
+                    event.preventDefault(); items[0].focus();
+                }
+            });
             mask.addEventListener('click', (event) => {
-                if (event.target === mask) { mask.remove(); return; }
+                if (event.target === mask) { close(); return; }
                 const act = event.target && event.target.dataset ? event.target.dataset.act : '';
-                if (act === 'cancel') { mask.remove(); return; }
+                if (act === 'cancel') { close(); return; }
                 if (act !== 'ok') return;
                 mask.querySelectorAll('input[data-key]').forEach(input => {
                     if (input.disabled) return;
                     chatExportOptions[input.dataset.key] = input.checked === true;
                 });
-                mask.remove();
+                close();
                 onConfirm();
             });
         };

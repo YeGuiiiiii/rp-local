@@ -14,7 +14,7 @@ from androguard.core.dex import DEX
 
 root = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
-parser.add_argument("--version", default="2.9.003")
+parser.add_argument("--version", default="2.9.004")
 version = parser.parse_args().version
 file = root / "dist" / f"RP-local-{version}.apk"
 apk = APK(str(file))

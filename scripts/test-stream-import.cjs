@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
 const output = path.join(root, 'verification', 'stream-import-1.05');
 fs.mkdirSync(output, { recursive: true });
+const transferEvidence = path.join(root, '.impeccable/review/transfer-2.9.004');
+fs.mkdirSync(transferEvidence, { recursive: true });
 const revision = '0123456789abcdef0123456789abcdef';
 const fixture = () => ({
   type: 'rp-hub-complete-backup', version: 8, entries: [
@@ -67,6 +69,8 @@ const fixture = () => ({
     await page.getByRole('button', { name: '流式导入 JSON', exact: true }).waitFor();
   }
   async function stage(data = fixture(), phase = 'ready') {
+    if (await page.evaluate(() => __qa.streamImportPanel?.state.phase === 'ready'))
+      await page.getByRole('button', { name: '取消', exact: true }).click();
     const buffer = Buffer.from(typeof data === 'string' ? data : JSON.stringify(data));
     await page.getByLabel('选择流式导入文件').setInputFiles({ name: 'fixture.json', mimeType: 'application/json', buffer });
     await page.waitForFunction(phase => __qa.streamImportPanel?.state.phase === phase, phase, { timeout: 60000 });
@@ -119,13 +123,42 @@ const fixture = () => ({
     });
     assert.deepEqual(await page.evaluate(() => ({ view: __qa.currentView, scope: __qa.resourceScope })), { view: 'regex', scope: 'global' });
     await backup();
+    // Hold a real storage transaction open to exercise a slow full export.
+    await page.evaluate(() => {
+      window.__holdExport = true;
+      const store = RPHubStorage.getMainDb().transaction('store', 'readwrite').objectStore('store');
+      const keepOpen = () => { store.get('rp_hub_stream_probe').onsuccess = () => { if (__holdExport) keepOpen(); }; };
+      keepOpen();
+      window.AndroidBridge = { isNativeApp: () => true, saveFile: (base64, name) => { window.__fullExport = { base64, name }; } };
+    });
+    await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
+    await page.getByRole('dialog', { name: '导出备份', exact: true }).waitFor();
+    await page.locator('.transfer-mascot').evaluate(image => image.decode());
+    await page.screenshot({ path: path.join(transferEvidence, 'export-wait-390.png'), animations: 'disabled' });
+    await page.evaluate(() => { __qa.shellGoBack(); __qa.navigateWorkspace('characters'); });
+    assert.equal(await page.evaluate(() => __qa.currentView), 'backup', '导出过程中返回不得离开等候弹窗');
+    await page.evaluate(() => { __holdExport = false; });
+    await page.waitForFunction(() => !__qa.isExportingAllData && window.__fullExport);
+    assert.equal(await page.evaluate(() => document.getElementById('app').inert), false);
+    await page.evaluate(() => { delete window.AndroidBridge; });
     await stage();
+    await page.evaluate(() => { __qa.shellGoBack(); __qa.navigateWorkspace('characters'); });
+    assert.equal(await page.evaluate(() => __qa.currentView), 'backup', '返回和切页不得中断等待确认的导入');
+    assert.equal(await page.getByRole('dialog', { name: '导入备份' }).count(), 1, '读文件起使用独立弹窗');
+    assert.equal(await page.evaluate(() => document.getElementById('app').inert), true);
+    await page.keyboard.press('Tab');
+    assert.equal(await page.evaluate(() => !!document.activeElement.closest('.stream-import-dialog')), true, '焦点保持在弹窗内');
     assert.deepEqual(await page.evaluate(() => JSON.parse(JSON.stringify(__qa.streamImportPanel.state.summary))), { records: 11, cards: 1, messages: 1, memories: 1 });
     await unchanged();
     await page.getByRole('button', { name: '取消', exact: true }).click();
     await unchanged();
     await stage('{"type":"rp-hub-complete-backup","entries":[', 'failed');
     await unchanged();
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: '重新选择', exact: true }).click();
+    await (await chooser).setFiles({ name: 'retry.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture())) });
+    await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready');
+    await page.getByRole('button', { name: '取消', exact: true }).click();
     const invalid = fixture();
     invalid.entries.find(item => item.key === 'rp_hub_b1_memory_state_stream-new').value.revision = 'broken';
     await stage(invalid, 'failed'); await unchanged();
@@ -139,10 +172,14 @@ const fixture = () => ({
     await page.getByLabel('选择流式导入文件').setInputFiles({ name: 'pause.json', mimeType: 'application/json', buffer });
     await page.waitForFunction(() => __qa.streamImportPanel.state.read > 0);
     await page.getByRole('button', { name: '暂停', exact: true }).click();
+    await page.evaluate(() => { for (let i = 0; i < 3; i++) __qa.shellGoBack(); });
+    assert.equal(await page.evaluate(() => __qa.currentView), 'backup', '暂停时连续返回不得离开数据页');
     await page.waitForTimeout(250);
     const read = await page.evaluate(() => __qa.streamImportPanel.state.read);
     await page.waitForTimeout(250);
     assert.equal(await page.evaluate(() => __qa.streamImportPanel.state.read), read);
+    await page.locator('.transfer-mascot').evaluate(image => image.decode());
+    await page.screenshot({ path: path.join(transferEvidence, 'import-paused-390.png'), animations: 'disabled' });
     await page.getByRole('button', { name: '继续', exact: true }).click();
     await page.getByRole('button', { name: '取消', exact: true }).click();
     workerMode = '';
@@ -199,17 +236,26 @@ const fixture = () => ({
     });
     await page.reload(); await ready(); await unchanged(); await backup();
     await stage();
-    for (const width of [360, 390, 1280]) {
-      await page.setViewportSize({ width, height: 900 });
-      for (const theme of ['day', 'night']) {
-        await page.evaluate(theme => RPHubThemeKit.setScheme(theme), theme);
-        await page.screenshot({ path: path.join(output, `backup-${width}-${theme}.png`), fullPage: true });
-        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow ${width}/${theme}`);
+    for (const [skin, theme] of [['journal','day'],['vampire','night'],['classic','day'],['classic','night']]) {
+      await page.getByRole('button', { name: '取消', exact: true }).click();
+      await page.evaluate(() => __qa.shellGoBack());
+      await page.evaluate(({skin,theme}) => { RPThemePacks.set(skin); RPHubThemeKit.setScheme(theme); }, {skin,theme});
+      await backup(); await stage();
+      for (const [width, height] of [[360,640],[390,844],[844,390],[1280,900]]) {
+        await page.setViewportSize({ width, height });
+        await page.locator('.transfer-mascot').evaluate(image => image.decode());
+        await page.waitForTimeout(250);
+        await page.screenshot({ path: path.join(transferEvidence, `import-${skin}-${theme}-${width}.png`), fullPage: true });
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow ${width}/${skin}/${theme}`);
+        const box = await page.locator('.stream-import-dialog').boundingBox();
+        assert.ok(box.y >= 0 && box.y + box.height <= height, '弹窗适应短屏并独立滚动');
+        await page.getByRole('button', { name: '确认导入', exact: true }).scrollIntoViewIfNeeded();
+        await page.keyboard.press('Escape');
+        assert.equal(await page.evaluate(() => __qa.currentView), 'backup', 'Escape 不打断等待确认');
       }
     }
     // Exercise the real confirmation, commit, reload and native-file synchronization.
     await page.getByRole('button', { name: '确认导入', exact: true }).click();
-    await page.getByRole('button', { name: '确认导入', exact: true }).last().click();
     await page.waitForURL('**/RP-Hub/', { waitUntil: 'load' });
     await page.waitForFunction(() => !window.__qa || __qa.streamImportPanel?.state.phase === 'success');
     await page.waitForTimeout(1000);

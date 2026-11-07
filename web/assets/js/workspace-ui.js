@@ -193,7 +193,7 @@
             character: { type: Object, required: true },
             busy: Boolean
         },
-        emits: ['close', 'saved', 'export'],
+        emits: ['close', 'saved'],
         setup(props, { emit }) {
             const entries = ref([]);
             const branches = ref([]);
@@ -278,11 +278,6 @@
                     error.value = '';
                 } catch (failure) { error.value = failure.message; }
             };
-            const exportFile = () => emit('export', {
-                type: 'rp-local-character-memory', version: 1,
-                characterId: props.character.uuid, characterName: props.character.name,
-                branchId: branchId.value, exportedAt: new Date().toISOString(), memories: clone(entries.value)
-            }, window.RPLocalStore.safeName(props.character.importedName || props.character.name) + '-记忆-' + branchId.value + '.json');
             const close = () => {
                 if (!dirty.value || confirm('放弃尚未保存的记忆修改？')) emit('close');
             };
@@ -313,7 +308,7 @@
                 epoch++;
                 if (previousFocus?.isConnected) previousFocus.focus();
             });
-            return { panel, trapFocus, entries, branches, branchId, error, status, loading, dirty, limit, load, save, edit, importFile, exportFile, close };
+            return { panel, trapFocus, entries, branches, branchId, error, status, loading, dirty, limit, load, save, edit, importFile, close };
         },
         template: `
           <teleport to="body">
@@ -333,7 +328,6 @@
                   <label class="settings-action workspace-memory-file">导入记忆
                     <input type="file" accept=".json" @change="importFile" :disabled="loading || busy">
                   </label>
-                  <button type="button" class="settings-action" @click="exportFile" :disabled="loading">导出记忆</button>
                   <button type="button" class="settings-action" @click="save" :disabled="loading || busy || !dirty">保存记忆</button>
                 </div>
                 <p v-if="!entries.length && !loading" class="text-gray-500">这张角色卡的当前分支暂无记忆。</p>

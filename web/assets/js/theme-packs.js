@@ -14,7 +14,8 @@
     const mode = () => root.dataset.appTheme === 'dark' ? 'night' : 'day';
     const getPack = () => catalog.find(pack => pack.id === selected)
         || catalog.find(pack => pack.mode === mode()) || catalog[0];
-    const asset = name => (getPack().assets || fallback) + name + '.webp';
+    const asset = name => (name === 'transfer' && mode() === 'night'
+        ? 'assets/themes/vampire/' : getPack().assets || fallback) + name + '.webp';
     const syncStandalone = () => document.querySelectorAll('[data-ui-mascot]').forEach(image => {
         image.src = asset(image.dataset.uiMascot);
     });

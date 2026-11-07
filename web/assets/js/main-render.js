@@ -1720,9 +1720,8 @@ return function render(_ctx, _cache) {
             character: managedMemoryCharacter,
             busy: managedMemoryCharacter.uuid === currentCharacter?.uuid && (isConversationBusy || isActiveBatchExtracting),
             onClose: $event => (managedMemoryCharacter=null),
-            onSaved: applyManagedMemories,
-            onExport: downloadJsonFile
-          }, null, 8 /* PROPS */, ["character", "busy", "onClose", "onSaved", "onExport"]))
+            onSaved: applyManagedMemories
+          }, null, 8 /* PROPS */, ["character", "busy", "onClose", "onSaved"]))
         : _createCommentVNode("v-if", true),
       _createElementVNode("div", {
         class: _normalizeClass(["app-main flex-1 flex flex-col h-full overflow-hidden bg-gray-50 relative", {'shell-root':shellRoot,'shell-dock-folded':dockFolded}]),
@@ -3720,7 +3719,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_229)
                 ]),
                 _createElementVNode("div", _hoisted_230, [
-                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.003 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[78] || (_cache[78] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.004 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -3806,8 +3805,8 @@ return function render(_ctx, _cache) {
                       ref: "streamImportPanel",
                       prepare: prepareStreamImport,
                       decode: restoreRphubBinaryDeep,
-                      confirm: showVueConfirmModal
-                    }, null, 8 /* PROPS */, ["prepare", "decode", "confirm"])
+                      exporting: isExportingAllData
+                    }, null, 8 /* PROPS */, ["prepare", "decode", "exporting"])
                   ]),
                   _createElementVNode("div", _hoisted_249, [
                     _cache[85] || (_cache[85] = _createElementVNode("h4", { class: "text-sm font-bold text-gray-700 mb-2" }, "备份内容", -1 /* CACHED */)),
@@ -10744,9 +10743,8 @@ return function render(_ctx, _cache) {
             character: managedMemoryCharacter,
             busy: managedMemoryCharacter.uuid === currentCharacter?.uuid && (isConversationBusy || isActiveBatchExtracting),
             onClose: $event => (managedMemoryCharacter=null),
-            onSaved: applyManagedMemories,
-            onExport: downloadJsonFile
-          }, null, 8 /* PROPS */, ["character", "busy", "onClose", "onSaved", "onExport"]))
+            onSaved: applyManagedMemories
+          }, null, 8 /* PROPS */, ["character", "busy", "onClose", "onSaved"]))
         : _createCommentVNode("v-if", true),
       _createElementVNode("div", {
         class: "app-main flex-1 flex flex-col h-full overflow-hidden bg-gray-50 relative",
@@ -12760,8 +12758,8 @@ return function render(_ctx, _cache) {
                       ref: "streamImportPanel",
                       prepare: prepareStreamImport,
                       decode: restoreRphubBinaryDeep,
-                      confirm: showVueConfirmModal
-                    }, null, 8 /* PROPS */, ["prepare", "decode", "confirm"])
+                      exporting: isExportingAllData
+                    }, null, 8 /* PROPS */, ["prepare", "decode", "exporting"])
                   ]),
                   _createElementVNode("div", _hoisted_246, [
                     _cache[83] || (_cache[83] = _createElementVNode("h4", { class: "text-sm font-bold text-gray-700 mb-2" }, "备份内容", -1 /* CACHED */)),
@@ -24728,14 +24726,13 @@ const _hoisted_10 = { class: "workspace-links" }
 const _hoisted_11 = { class: "settings-action workspace-memory-file" }
 const _hoisted_12 = ["onChange", "disabled"]
 const _hoisted_13 = ["onClick", "disabled"]
-const _hoisted_14 = ["onClick", "disabled"]
-const _hoisted_15 = {
+const _hoisted_14 = {
   key: 4,
   class: "text-gray-500"
 }
-const _hoisted_16 = ["for"]
-const _hoisted_17 = ["id", "onUpdate:modelValue", "onInput", "disabled"]
-const _hoisted_18 = ["onClick"]
+const _hoisted_15 = ["for"]
+const _hoisted_16 = ["id", "onUpdate:modelValue", "onInput", "disabled"]
+const _hoisted_17 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -24799,31 +24796,25 @@ return function render(_ctx, _cache) {
             _createElementVNode("button", {
               type: "button",
               class: "settings-action",
-              onClick: exportFile,
-              disabled: loading
-            }, "导出记忆", 8 /* PROPS */, _hoisted_13),
-            _createElementVNode("button", {
-              type: "button",
-              class: "settings-action",
               onClick: save,
               disabled: loading || busy || !dirty
-            }, "保存记忆", 8 /* PROPS */, _hoisted_14)
+            }, "保存记忆", 8 /* PROPS */, _hoisted_13)
           ]),
           (!entries.length && !loading)
-            ? (_openBlock(), _createElementBlock("p", _hoisted_15, "这张角色卡的当前分支暂无记忆。"))
+            ? (_openBlock(), _createElementBlock("p", _hoisted_14, "这张角色卡的当前分支暂无记忆。"))
             : _createCommentVNode("v-if", true),
           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(entries.slice(0,limit), (entry, index) => {
             return (_openBlock(), _createElementBlock("div", {
               key: index,
               class: "my-3"
             }, [
-              _createElementVNode("label", { for: 'managed-memory-'+index }, "第 " + _toDisplayString(entry.turn || index+1) + " 轮", 9 /* TEXT, PROPS */, _hoisted_16),
+              _createElementVNode("label", { for: 'managed-memory-'+index }, "第 " + _toDisplayString(entry.turn || index+1) + " 轮", 9 /* TEXT, PROPS */, _hoisted_15),
               _withDirectives(_createElementVNode("textarea", {
                 id: 'managed-memory-'+index,
                 "onUpdate:modelValue": $event => ((entry.summary) = $event),
                 onInput: $event => (edit(entry)),
                 disabled: busy || loading
-              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_17), [
+              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_16), [
                 [_vModelText, entry.summary]
               ])
             ]))
@@ -24834,7 +24825,7 @@ return function render(_ctx, _cache) {
                 type: "button",
                 class: "settings-action",
                 onClick: $event => (limit+=20)
-              }, "加载更多记忆", 8 /* PROPS */, _hoisted_18))
+              }, "加载更多记忆", 8 /* PROPS */, _hoisted_17))
             : _createCommentVNode("v-if", true)
         ], 512 /* NEED_PATCH */)
       ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1)
@@ -26423,58 +26414,52 @@ return function render(_ctx, _cache) {
 })();
 window.RPCompiledRenders.StreamImportPanel = (function () {
 const _Vue = Vue
-const { createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode } = _Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode } = _Vue
 
 const _hoisted_1 = ["onChange"]
-const _hoisted_2 = {
-  key: 0,
-  class: "stream-import-panel mt-4 pt-4 border-t border-gray-200",
-  "aria-label": "流式导入"
+const _hoisted_2 = ["aria-label"]
+const _hoisted_3 = ["onKeydown"]
+const _hoisted_4 = ["onClick"]
+const _hoisted_5 = ["src"]
+const _hoisted_6 = {
+  key: 1,
+  class: "transfer-filename"
 }
-const _hoisted_3 = { class: "flex flex-wrap items-start justify-between gap-2" }
-const _hoisted_4 = { class: "text-xs text-gray-500" }
-const _hoisted_5 = { class: "text-sm text-gray-700 mt-2 break-all" }
-const _hoisted_6 = ["value"]
-const _hoisted_7 = {
-  role: "status",
-  class: "text-sm text-gray-500 mt-2"
-}
+const _hoisted_7 = ["value"]
 const _hoisted_8 = {
-  key: 0,
+  key: 3,
+  class: "transfer-progress-meta"
+}
+const _hoisted_9 = { role: "status" }
+const _hoisted_10 = {
+  key: 4,
   role: "alert",
-  class: "text-sm text-red-500 mt-2 break-words"
+  class: "transfer-error"
 }
-const _hoisted_9 = {
-  key: 1,
-  class: "text-sm text-gray-700 mt-2"
+const _hoisted_11 = {
+  key: 5,
+  class: "transfer-summary"
 }
-const _hoisted_10 = { class: "flex flex-wrap gap-2 mt-3" }
-const _hoisted_11 = ["onClick"]
-const _hoisted_12 = ["onClick"]
-const _hoisted_13 = ["onClick"]
+const _hoisted_12 = {
+  key: 6,
+  class: "transfer-warning"
+}
+const _hoisted_13 = {
+  key: 7,
+  class: "transfer-actions"
+}
 const _hoisted_14 = ["onClick"]
-const _hoisted_15 = {
-  key: 0,
-  class: "stream-import-overlay",
-  role: "dialog",
-  "aria-modal": "true",
-  "aria-label": "正在导入数据"
-}
-const _hoisted_16 = ["onKeydown"]
-const _hoisted_17 = {
-  key: 0,
-  role: "alert"
-}
-const _hoisted_18 = {
-  key: 1,
-  role: "status"
-}
+const _hoisted_15 = ["onClick"]
+const _hoisted_16 = ["onClick"]
+const _hoisted_17 = ["onClick"]
+const _hoisted_18 = ["onClick"]
 const _hoisted_19 = ["onClick"]
-const _hoisted_20 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, withModifiers: _withModifiers, withKeys: _withKeys, Teleport: _Teleport, createBlock: _createBlock, Fragment: _Fragment } = _Vue
+    const { createElementVNode: _createElementVNode, resolveComponent: _resolveComponent, createVNode: _createVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, toDisplayString: _toDisplayString, Teleport: _Teleport, createBlock: _createBlock, Fragment: _Fragment } = _Vue
+
+    const _component_shell_icon = _resolveComponent("shell-icon")
 
     return (_openBlock(), _createElementBlock(_Fragment, null, [
       _createElementVNode("input", {
@@ -26485,92 +26470,121 @@ return function render(_ctx, _cache) {
         "aria-label": "选择流式导入文件",
         onChange: start
       }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1),
-      (state.phase !== 'idle')
-        ? (_openBlock(), _createElementBlock("section", _hoisted_2, [
-            _createElementVNode("div", _hoisted_3, [
-              _cache[0] || (_cache[0] = _createElementVNode("h4", { class: "text-sm font-bold text-gray-700" }, "流式导入 JSON", -1 /* CACHED */)),
-              _createElementVNode("span", _hoisted_4, _toDisplayString(format(state.read)) + " / " + _toDisplayString(format(state.bytes)), 1 /* TEXT */)
-            ]),
-            _createElementVNode("p", _hoisted_5, _toDisplayString(state.name), 1 /* TEXT */),
-            _createElementVNode("progress", {
-              value: percent,
-              max: "100",
-              class: "w-full mt-3",
-              "aria-label": "文件读取进度"
-            }, null, 8 /* PROPS */, _hoisted_6),
-            _createElementVNode("p", _hoisted_7, _toDisplayString(state.paused ? '已暂停' : state.message), 1 /* TEXT */),
-            (state.error)
-              ? (_openBlock(), _createElementBlock("p", _hoisted_8, _toDisplayString(state.error), 1 /* TEXT */))
-              : _createCommentVNode("v-if", true),
-            (state.summary)
-              ? (_openBlock(), _createElementBlock("p", _hoisted_9, " 角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条 ", 1 /* TEXT */))
-              : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_10, [
-              (state.phase === 'reading')
-                ? (_openBlock(), _createElementBlock("button", {
-                    key: 0,
-                    class: "shell-button",
-                    type: "button",
-                    onClick: pause
-                  }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_11))
-                : _createCommentVNode("v-if", true),
-              (state.phase === 'ready')
-                ? (_openBlock(), _createElementBlock("button", {
-                    key: 1,
-                    class: "shell-button",
-                    type: "button",
-                    onClick: apply
-                  }, "确认导入", 8 /* PROPS */, _hoisted_12))
-                : _createCommentVNode("v-if", true),
-              (['reading','ready'].includes(state.phase))
-                ? (_openBlock(), _createElementBlock("button", {
-                    key: 2,
-                    class: "shell-button",
-                    type: "button",
-                    onClick: cancel
-                  }, "取消", 8 /* PROPS */, _hoisted_13))
-                : _createCommentVNode("v-if", true),
-              (['failed','cancelled'].includes(state.phase))
-                ? (_openBlock(), _createElementBlock("button", {
-                    key: 3,
-                    class: "shell-button",
-                    type: "button",
-                    onClick: choose
-                  }, "重新选择", 8 /* PROPS */, _hoisted_14))
-                : _createCommentVNode("v-if", true)
-            ])
-          ]))
-        : _createCommentVNode("v-if", true),
       (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
-        isApplying
-          ? (_openBlock(), _createElementBlock("div", _hoisted_15, [
-              _createElementVNode("div", {
-                class: "stream-import-dialog",
+        isOpen
+          ? (_openBlock(), _createElementBlock("div", {
+              key: 0,
+              class: "stream-import-overlay",
+              role: "dialog",
+              "aria-modal": "true",
+              "aria-label": exporting ? '导出备份' : '导入备份'
+            }, [
+              _createElementVNode("section", {
+                ref: "panel",
+                class: "stream-import-dialog transfer-dialog",
                 tabindex: "-1",
-                onKeydown: _withKeys(_withModifiers(() => {}, ["prevent"]), ["tab"])
+                onKeydown: trapFocus
               }, [
-                _createElementVNode("h3", null, _toDisplayString(state.phase === 'recovery' ? '需要恢复原数据' : '正在恢复数据'), 1 /* TEXT */),
-                (state.phase === 'recovery')
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_17, _toDisplayString(state.error), 1 /* TEXT */))
-                  : (_openBlock(), _createElementBlock("p", _hoisted_18, _toDisplayString(state.message), 1 /* TEXT */)),
-                (state.phase === 'applying')
+                canClose
                   ? (_openBlock(), _createElementBlock("button", {
-                      key: 2,
-                      class: "shell-button",
+                      key: 0,
+                      class: "transfer-close",
                       type: "button",
-                      onClick: cancel
-                    }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_19))
+                      "aria-label": "关闭导入弹窗",
+                      onClick: close
+                    }, [
+                      _createVNode(_component_shell_icon, { name: "X" })
+                    ], 8 /* PROPS */, _hoisted_4))
                   : _createCommentVNode("v-if", true),
-                (state.phase === 'recovery')
-                  ? (_openBlock(), _createElementBlock("button", {
-                      key: 3,
-                      class: "shell-button",
-                      type: "button",
-                      onClick: reload
-                    }, "重新打开并恢复", 8 /* PROPS */, _hoisted_20))
+                _createElementVNode("img", {
+                  class: "transfer-mascot",
+                  src: art,
+                  alt: "",
+                  "aria-hidden": "true",
+                  draggable: "false"
+                }, null, 8 /* PROPS */, _hoisted_5),
+                _createElementVNode("h3", null, _toDisplayString(exporting ? '正在整理备份' : state.phase === 'recovery' ? '需要恢复原数据' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
+                (!exporting)
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_6, _toDisplayString(state.name), 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                (exporting || ['reading','ready','applying','success'].includes(state.phase))
+                  ? (_openBlock(), _createElementBlock("progress", {
+                      key: 2,
+                      value: exporting || isApplying ? undefined : percent,
+                      max: "100",
+                      "aria-label": "文件读取进度"
+                    }, null, 8 /* PROPS */, _hoisted_7))
+                  : _createCommentVNode("v-if", true),
+                (!exporting && ['reading','ready'].includes(state.phase))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_8, [
+                      _createElementVNode("span", null, _toDisplayString(format(state.read)) + " / " + _toDisplayString(format(state.bytes)), 1 /* TEXT */),
+                      _createElementVNode("span", null, _toDisplayString(percent) + "%", 1 /* TEXT */)
+                    ]))
+                  : _createCommentVNode("v-if", true),
+                _createElementVNode("p", _hoisted_9, _toDisplayString(exporting ? '玥玥正在收好你的故事，请稍候。' : state.paused ? '已暂停，随时可以继续。' : state.message), 1 /* TEXT */),
+                (!exporting && state.error)
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_10, _toDisplayString(state.error), 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                (!exporting && state.summary)
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_11, "角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条", 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                (!exporting && state.phase === 'ready')
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_12, "导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。"))
+                  : _createCommentVNode("v-if", true),
+                (!exporting)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_13, [
+                      (state.phase === 'reading')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 0,
+                            class: "shell-button",
+                            type: "button",
+                            onClick: pause
+                          }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_14))
+                        : _createCommentVNode("v-if", true),
+                      (['reading','ready'].includes(state.phase))
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 1,
+                            class: "shell-button",
+                            type: "button",
+                            onClick: cancel
+                          }, "取消", 8 /* PROPS */, _hoisted_15))
+                        : _createCommentVNode("v-if", true),
+                      (state.phase === 'ready')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 2,
+                            class: "shell-button transfer-primary",
+                            type: "button",
+                            onClick: apply
+                          }, "确认导入", 8 /* PROPS */, _hoisted_16))
+                        : _createCommentVNode("v-if", true),
+                      (['failed','cancelled'].includes(state.phase))
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 3,
+                            class: "shell-button transfer-primary",
+                            type: "button",
+                            onClick: choose
+                          }, "重新选择", 8 /* PROPS */, _hoisted_17))
+                        : _createCommentVNode("v-if", true),
+                      (state.phase === 'applying')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 4,
+                            class: "shell-button",
+                            type: "button",
+                            onClick: cancel
+                          }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_18))
+                        : _createCommentVNode("v-if", true),
+                      (state.phase === 'recovery')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 5,
+                            class: "shell-button transfer-primary",
+                            type: "button",
+                            onClick: reload
+                          }, "重新打开并恢复", 8 /* PROPS */, _hoisted_19))
+                        : _createCommentVNode("v-if", true)
+                    ]))
                   : _createCommentVNode("v-if", true)
-              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_16)
-            ]))
+              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_3)
+            ], 8 /* PROPS */, _hoisted_2))
           : _createCommentVNode("v-if", true)
       ]))
     ], 64 /* STABLE_FRAGMENT */))
