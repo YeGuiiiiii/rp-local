@@ -14,7 +14,7 @@ from androguard.core.dex import DEX
 
 root = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
-parser.add_argument("--version", default="2.9.007")
+parser.add_argument("--version", default="2.9.008")
 version = parser.parse_args().version
 file = root / "dist" / f"RP-local-{version}.apk"
 apk = APK(str(file))
@@ -49,6 +49,18 @@ if tuple(map(int, version.split('.'))) >= (1, 23):
                    if method.get_name() == "onCreate")
     assert "WebViewSupport;->loadEntry" in "\n".join(i.get_output() for i in startup.get_instructions())
 activity = classes["Lcom/rphub/app/MainActivity;"]
+if tuple(map(int, version.split("."))) >= (2, 9, 8):
+    darkening = list(next(method for method in activity.get_methods()
+                          if method.get_name() == "applyForceDark").get_instructions())
+    for index, instruction in enumerate(darkening):
+        if not any(name in instruction.get_output()
+                   for name in ("->setAlgorithmicDarkeningAllowed(", "->setForceDark(")):
+            continue
+        argument = instruction.get_operands()[-2][1]
+        assigned = next(previous for previous in reversed(darkening[:index])
+                        if previous.get_name().startswith("const")
+                        and previous.get_operands()[0][1] == argument)
+        assert assigned.get_operands()[1][1] == 0, "WebView must not recolor card-authored text or backgrounds"
 if tuple(map(int, version.split('.'))) >= (1, 13):
     back = next(method for method in activity.get_methods() if method.get_name() == "handleBackPressed")
     back_code = "\n".join(instruction.get_output() for instruction in back.get_instructions())
@@ -139,6 +151,7 @@ report = {
     "signatureSchemesPresent": ["v2", "v3"],
     "sameSigningCertificateAs01": True,
     "nativeLighthouseReturnWired": True,
+    "cardRecoloringDisabled": tuple(map(int, version.split("."))) >= (2, 9, 8),
     "bundledFonts": 0,
     "duplicateAssets": 0,
     "sha256": hashlib.sha256(file.read_bytes()).hexdigest(),

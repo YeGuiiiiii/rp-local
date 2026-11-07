@@ -695,7 +695,7 @@
 
     move-result-object p1
 
-    const/4 v0, 0x1
+    const/4 v0, 0x0
 
     invoke-virtual {p1, v0}, Landroid/webkit/WebSettings;->setAlgorithmicDarkeningAllowed(Z)V
 
@@ -709,16 +709,8 @@
 
     move-result-object v0
 
-    if-eqz p1, :cond_1
-
-    const/4 p1, 0x2
-
-    goto :goto_0
-
-    :cond_1
     const/4 p1, 0x0
 
-    :goto_0
     invoke-virtual {v0, p1}, Landroid/webkit/WebSettings;->setForceDark(I)V
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0

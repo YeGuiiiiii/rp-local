@@ -159,6 +159,7 @@
       "玥玥保留圆脸、黑发、暗红瞳和角色自身左右不同的配饰。"
     ],
     "rules": [
+      { "name": "Card Color Ownership", "body": "自 2.9.008 起，Android WebView 不启用自动改色；夜间桥只同步窗口底色，不改写页面或 iframe 的颜色模式，不对卡片 HTML 与 UI 模板叠加亮度滤镜。角色卡自带的文字、纸张与图片配色由卡片控制，软件外框继续采用当前皮肤日夜形态。", "section": "colors" },
       { "name": "The Pack and Mode Rule", "body": "皮肤与日夜分别选择：皮肤定义布局，日夜选择该皮肤内部的颜色与素材。经典、玥玥及后续季节皮肤均遵守同一规则；切换日夜不重建页面。", "section": "colors" },
       { "name": "The Composer Surface Rule", "body": "聊天输入栏在各尺寸使用对应 UI 的不透明底色和细亮边；移动端不启用实时背景模糊，保证输入清楚。", "section": "layout" },
       { "name": "The Original Image Rule", "body": "倾斜只移动玻璃反光层，不位移、拉伸或修改原图；保存图片直接读取原始文件，不包含玻璃效果。", "section": "elevation" }

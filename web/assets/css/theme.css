@@ -373,11 +373,6 @@
 .appearance-switch:active { transform: rotate(-24deg) scale(0.9); }
 .appearance-switch:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 
-/* Card authors style their own HTML; soften it once in dark mode, never touching images. */
-:root[data-app-theme="dark"] :is(.msg-bubble-glass .markdown-body > :is(div, section, article, aside, header, footer, table, iframe), .ui-template-render, .ui-template-preview) {
-    filter: brightness(0.9);
-}
-
 /* Novel editor paper tones written as arbitrary values. */
 :root[data-app-theme="dark"] :is([class~="bg-[#f5f5f0]"], [class~="bg-[#e8e8e3]"]) { background-color: rgb(var(--stone-50)) !important; }
 :root[data-app-theme="dark"] :is([class~="bg-[#e4e4df]"], [class~="bg-[#e0e0db]"]) { background-color: rgb(var(--stone-100)) !important; }
