@@ -1,4 +1,4 @@
-param([string]$Version = '2.9.002')
+param([string]$Version = '2.9.003')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $buildAlias = Join-Path $env:USERPROFILE '.cache\rphub-local-build'

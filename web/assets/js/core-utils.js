@@ -249,6 +249,7 @@ const getToastIcon = (message, type = 'info') => {
 };
 
 window.RPHubUtils = {
+    clearParseCache: () => parseCotCache.clear(),
     compressImage,
     defaultAvatar,
     extractApiErrorMessage,

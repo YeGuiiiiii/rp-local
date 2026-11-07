@@ -63,7 +63,7 @@
                 let entries;
                 if (synchronized) {
                     const value = await dbGetFrom(mainDb, 'rp_hub_characters');
-                    synchronized = Array.isArray(value);
+                    synchronized = Array.isArray(value) || isCharacterDirectory(value);
                     if (synchronized) entries = [{ key: 'rp_hub_characters', value }];
                 }
                 if (!synchronized) {
@@ -270,6 +270,7 @@
     };
 
     const dbSet = async (key, value, options = {}) => {
+        if (key === storageKey('characters')) return saveCharacterLibrary(value, options);
         const memoryScope = memoryScopeFromKey(key);
         if (memoryScope !== null) return setMemoryWithState(memoryScope, value, options);
         if (String(key).startsWith(storageKey(MEMORY_STATE_NAME) + '_')) throw storageWriteError('MemoryProtocolError', '版本键不能单独覆盖');
@@ -378,6 +379,169 @@
         };
         request.onerror = () => reject(request.error);
     });
+
+    const CARD_RECORD_PREFIX = '__rp_card__:';
+    const CARD_IMAGE_PREFIX = '__rp_card_image__:';
+    const isPrivateCardKey = key => key.startsWith(CARD_RECORD_PREFIX) || key.startsWith(CARD_IMAGE_PREFIX);
+    const hasLargeCardImage = card => typeof card.avatar === 'string' && card.avatar.startsWith('data:') && card.avatar.length >= 65536;
+    const isCharacterDirectory = value => value?.rphubCardLibrary === 1 && Array.isArray(value.cards);
+    const isCharacterStub = card => card?.rphubCardStub === 1;
+    const characterPreviews = new WeakMap();
+    let characterWriteQueue = Promise.resolve();
+    const characterMetadata = ['uuid', 'name', 'importedName', 'storageFolder', 'createdAt', 'favoriteAt'];
+    const characterPreview = async card => {
+        const source = String(card.avatar || '');
+        const cached = characterPreviews.get(card);
+        if (cached && cached.source === source) return cached.preview;
+        const preview = !source.startsWith('data:') || source.length < 65536 ? source : await new Promise(resolve => {
+            const image = new Image();
+            image.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(1, 256 / Math.max(image.naturalWidth, image.naturalHeight));
+                    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+                    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+                    const context = canvas.getContext('2d');
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/webp', 0.86));
+                } catch (_) { resolve(''); }
+            };
+            image.onerror = () => resolve('');
+            image.src = source;
+        });
+        characterPreviews.set(card, { source, preview });
+        return preview;
+    };
+    const toCharacterStub = async source => {
+        const card = Vue.toRaw(source);
+        if (isCharacterStub(card)) return cloneForStorage(card);
+        return {
+            ...Object.fromEntries(characterMetadata.filter(key => card[key] !== undefined).map(key => [key, card[key]])),
+            rphubCardStub: 1, avatar: await characterPreview(card),
+            description: card.description || '',
+            worldInfoNames: (card.worldInfo || []).map(entry => entry.comment),
+            regexNames: (card.regexScripts || []).map(script => script.name || script.scriptName)
+        };
+    };
+    const readCharacter = async card => {
+        if (!isCharacterStub(card)) return card;
+        const value = await dbGet(CARD_RECORD_PREFIX + card.uuid);
+        if (!value || value.uuid !== card.uuid || isCharacterStub(value))
+            throw storageWriteError('StorageDataError', '角色卡内容缺失，已保留当前会话，请从备份恢复');
+        const imageSaved = value.avatar?.rphubCardImage === 1;
+        if (imageSaved) {
+            const image = await dbGet(CARD_IMAGE_PREFIX + card.uuid);
+            if (image?.uuid !== card.uuid || typeof image.avatar !== 'string')
+                throw storageWriteError('StorageDataError', '角色卡封面缺失，请从备份恢复');
+            value.avatar = image.avatar;
+        }
+        // Directory edits (for example favorites) never replace the full card body.
+        characterMetadata.forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
+            else delete value[key];
+        });
+        characterPreviews.set(value, { source: value.avatar || '', preview: card.avatar || '', imageSaved });
+        return value;
+    };
+    const saveCharacterLibrary = (list, inputOptions = {}) => {
+        if (!Array.isArray(list)) return Promise.reject(storageWriteError('StorageDataError', '角色卡集合必须是数组'));
+        const options = { ...inputOptions, writeEpoch: inputOptions.writeEpoch ?? storageWriteEpoch };
+        const sources = list.filter(Boolean).map(card => Vue.toRaw(card));
+        const payload = sources.map(card => unwrapForStorage(card));
+        const task = async () => {
+            assertStorageWriteAllowed(options, options.writeEpoch);
+            if (!mainDb) await initDB();
+            const previous = await dbGet('rp_hub_characters');
+            const baseline = JSON.stringify(previous);
+            const previousCards = isCharacterDirectory(previous) ? previous.cards : [];
+            const previousKeys = isCharacterDirectory(previous)
+                ? previousCards.flatMap(card => [CARD_RECORD_PREFIX + card.uuid, CARD_IMAGE_PREFIX + card.uuid])
+                : (await readStorageKeys(mainDb)).filter(isPrivateCardKey);
+            const ids = new Set();
+            payload.forEach(card => {
+                if (!card.uuid) card.uuid = crypto.randomUUID();
+                if (ids.has(card.uuid)) throw storageWriteError('StorageDataError', '角色卡标识重复，未执行保存');
+                ids.add(card.uuid);
+            });
+            window.RPLocalStore?.assignFolders(payload);
+            const summaries = await Promise.all(payload.map(async (card, index) => {
+                if (isCharacterStub(card) && !previousCards.some(old => old.uuid === card.uuid))
+                    throw storageWriteError('StorageDataError', '角色卡目录已变化，请重新载入');
+                const preview = characterPreviews.get(sources[index]);
+                if (preview) characterPreviews.set(card, preview);
+                return toCharacterStub(card);
+            }));
+            const directory = { rphubCardLibrary: 1, cards: summaries };
+            const perform = () => runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
+                const request = store.get('rp_hub_characters');
+                request.onsuccess = () => {
+                    try {
+                        assertStorageWriteAllowed(options, options.writeEpoch);
+                        // A restore or another page must not be replaced by an older directory.
+                        if (JSON.stringify(request.result) !== baseline)
+                            throw storageWriteError('StorageConflictError', '角色卡目录已更新，请重新载入');
+                        payload.forEach((card, index) => {
+                            if (isCharacterStub(card)) return;
+                            if (hasLargeCardImage(card)) {
+                                const saved = characterPreviews.get(sources[index]);
+                                if (!saved?.imageSaved || saved.source !== card.avatar) {
+                                    store.put({ uuid: card.uuid, storageFolder: card.storageFolder, avatar: card.avatar },
+                                        CARD_IMAGE_PREFIX + card.uuid);
+                                }
+                                store.put({ ...card, avatar: { rphubCardImage: 1 } }, CARD_RECORD_PREFIX + card.uuid);
+                            } else {
+                                store.put(card, CARD_RECORD_PREFIX + card.uuid);
+                                store.delete(CARD_IMAGE_PREFIX + card.uuid);
+                            }
+                        });
+                        previousKeys.forEach(key => {
+                            const prefix = key.startsWith(CARD_RECORD_PREFIX) ? CARD_RECORD_PREFIX : CARD_IMAGE_PREFIX;
+                            if (!ids.has(key.slice(prefix.length))) store.delete(key);
+                        });
+                        if (baseline !== JSON.stringify(directory))
+                            store.put(directory, 'rp_hub_characters');
+                    } catch (error) { abortWith(error); }
+                };
+            }, options);
+            try { await perform(); }
+            catch (error) {
+                if (!isDatabaseClosingError(error)) throw error;
+                await reopenAfterStorageError(error);
+                await perform();
+            }
+            sources.forEach((source, index) => {
+                if (!isCharacterStub(source)) characterPreviews.set(source, {
+                    source: source.avatar || '', preview: summaries[index].avatar,
+                    imageSaved: hasLargeCardImage(payload[index])
+                });
+            });
+            return summaries;
+        };
+        const pending = characterWriteQueue.then(task, task);
+        characterWriteQueue = pending.catch(() => {});
+        return pending;
+    };
+    const readCharacterDirectory = async () => {
+        const value = await dbGetWithLegacy(storageKey('characters'), legacyStorageKey('characters'));
+        if (value === undefined) return [];
+        if (isCharacterDirectory(value)) return value.cards;
+        if (!Array.isArray(value)) throw storageWriteError('StorageDataError', '角色卡目录损坏，未执行覆盖');
+        return saveCharacterLibrary(value);
+    };
+    const expandStorageEntry = async entry => {
+        if (entry.key === storageKey('characters') && isCharacterDirectory(entry.value)) {
+            return { key: entry.key, value: await Promise.all(entry.value.cards.map(readCharacter)) };
+        }
+        return entry;
+    };
+    // Each entry gets its own read transaction: awaiting a card read cannot expire a cursor.
+    const eachStoredEntry = async (targetDb, onEntry, shouldStop) => {
+        for (const key of await readStorageKeys(targetDb)) {
+            if (shouldStop?.()) return;
+            if (isPrivateCardKey(key) || key === LOCAL_MIRROR_KEY) continue;
+            await onEntry(await expandStorageEntry({ key, value: await dbGetFrom(targetDb, key) }));
+        }
+    };
 
     // B1 storage CAS primitives. Callers must capture expected values when intent is created.
     // This layer neither invents a current revision for an old payload nor publishes UI state.
@@ -770,12 +934,21 @@
         readStoredValueSet,
         compareAndWriteStoredValues,
         cloneForStorage,
+        readCharacterDirectory,
+        readCharacter,
+        toCharacterStub,
+        characterPreviewUrl: card => characterPreviews.get(Vue.toRaw(card))?.preview ?? card?.avatar ?? '',
+        saveCharacterLibrary,
+        eachStoredEntry,
         deleteScopedStoredValue: (name, id, options = {}) => dbDeleteWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id), options),
         deleteStoredValue: (name, options = {}) => dbDeleteWithLegacy(storageKey(name), legacyStorageKey(name), options),
         getLegacyDb: () => legacyDb,
         getMainDb: () => mainDb,
         getScopedStoredValue: (name, id, options = {}) => dbGetWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id), options),
-        getStoredValue: (name, options = {}) => dbGetWithLegacy(storageKey(name), legacyStorageKey(name), options),
+        getStoredValue: async (name, options = {}) => {
+            const value = await dbGetWithLegacy(storageKey(name), legacyStorageKey(name), options);
+            return (await expandStorageEntry({ key: storageKey(name), value })).value;
+        },
         getStorageLogicalKey,
         initDB,
         isDatabaseClosingError,

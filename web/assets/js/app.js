@@ -1468,22 +1468,6 @@ const app = createApp({
             '<div class="text-[11px] text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-center">UI 模板已延迟，滚动到此处加载</div>' +
             '</div>'
         );
-        const slimChatHistoryForStorage = (history = []) => {
-            if (!Array.isArray(history)) return history;
-            const retention = getMobileUiTemplateRetention(history);
-            return history.map((message, index) => {
-                if (retention.keptIndexes.has(index) || message?.role !== 'assistant' || !message.uiTemplateBlocks) return message;
-                return {
-                    ...message,
-                    uiTemplateBlocks: {
-                        top: [buildMobileUiLazyBlock(index, 'top')],
-                        bottom: [buildMobileUiLazyBlock(index, 'bottom')],
-                        lazy: true,
-                        updatedAt: Date.now()
-                    }
-                };
-            });
-        }
         const CHAT_RENDER_BATCH_SIZE = 10;
         const chatRenderLimit = ref(CHAT_RENDER_INITIAL_LIMIT);
         let isLoadingEarlierChatMessages = false;
@@ -4934,39 +4918,13 @@ const app = createApp({
             }
         };
 
-        // 2.8.14：游标逐条读 → 过滤 → 瘦身 → 同步回调。
-        // 旧实现是 readMainDbEntries 全量数组 + .map(slim) 再全量，双份驻留 ⇒ 堆峰值 3.5~4 倍数据量，
-        // 直接打死渲染进程（onRenderProcessGone 自动重载 ⇒ 6s 后再备份 ⇒ 循环自持 = 用户说的「反复重启」）。
-        // 本助手全程只保留 slim 后的一份；onEntry 内禁止 await（IDB 事务跨任务会自动失活），
-        // 游标 success 回调本身就是天然的逐条目出让点。
+        // Backup readers reconstruct full cards on demand and omit private storage records.
         const readMainDbEntriesSlim = async (onEntry, shouldStop) => {
             const targetDb = getMainDb();
             if (!targetDb) return;
-            await new Promise((resolve, reject) => {
-                let settled = false;
-                const finish = () => { if (!settled) { settled = true; resolve(); } };
-                const fail = (error) => { if (!settled) { settled = true; reject(error); } };
-                try {
-                    const transaction = targetDb.transaction(['store'], 'readonly');
-                    const request = transaction.objectStore('store').openCursor();
-                    request.onsuccess = () => {
-                        if (shouldStop && shouldStop()) return finish();
-                        const cursor = request.result;
-                        if (!cursor) return finish();
-                        const raw = { key: String(cursor.key), value: cursor.value };
-                        if (!shouldIncludeBackupEntry(raw)) { cursor.continue(); return; }
-                        try {
-                            onEntry(slimBackupEntry(raw));
-                        } catch (error) {
-                            console.warn('[AutoBackup] 跳过无法瘦身的条目:', raw.key, error);
-                        }
-                        cursor.continue();
-                    };
-                    request.onerror = () => fail(request.error);
-                } catch (error) {
-                    fail(error);
-                }
-            });
+            await window.RPHubStorage.eachStoredEntry(targetDb, entry => {
+                if (shouldIncludeBackupEntry(entry)) onEntry(slimBackupEntry(entry));
+            }, shouldStop);
         };
 
         // 执行单次全量物理流式自动备份（2.8.14 重修，详见 readMainDbEntriesSlim 注释）
@@ -5997,11 +5955,6 @@ const app = createApp({
             });
             return { templates: result, removedCount, savedBytes };
         };
-        const buildDataHealthLazyUiBlock = (index, placement) => (
-            '<div class="rphub-ui-lazy" data-rphub-ui-lazy="' + index + '" data-rphub-ui-placement="' + placement + '">' +
-            '<div class="text-[11px] text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-center">UI 模板已延迟，滚动到此处加载</div>' +
-            '</div>'
-        );
         const slimChatHistoryForHealth = (history) => {
             if (!Array.isArray(history)) return { history, changed: false, savedBytes: 0, cleanedCount: 0 };
             const retention = getMobileUiTemplateRetention(history);
@@ -6010,19 +5963,11 @@ const app = createApp({
             let cleanedCount = 0;
             const result = history.map((message, index) => {
                 if (retention.keptIndexes.has(index) || message?.role !== 'assistant') return message;
-                const hasUiBlocks = message.uiTemplateBlocks && message.uiTemplateBlocks.lazy !== true;
                 const hasRenderCache = typeof message.renderedContent === 'string' && message.renderedContent.length > 0;
-                if (!hasUiBlocks && !hasRenderCache) return message;
-                savedBytes += hasUiBlocks ? estimateDataHealthSize(message.uiTemplateBlocks) : 0;
+                if (!hasRenderCache) return message;
                 savedBytes += hasRenderCache ? estimateDataHealthSize(message.renderedContent) : 0;
-                cleanedCount += (hasUiBlocks ? 1 : 0) + (hasRenderCache ? 1 : 0);
+                cleanedCount += 1;
                 const nextMessage = { ...message };
-                nextMessage.uiTemplateBlocks = {
-                    top: [buildDataHealthLazyUiBlock(index, 'top')],
-                    bottom: [buildDataHealthLazyUiBlock(index, 'bottom')],
-                    lazy: true,
-                    updatedAt: Date.now()
-                };
                 delete nextMessage.renderedContent;
                 changed = true;
                 return nextMessage;
@@ -6105,10 +6050,6 @@ const app = createApp({
                         let entryOldCacheCount = 0;
                         value.forEach((message, index) => {
                             if (retention.keptIndexes.has(index) || message?.role !== 'assistant') return;
-                            if (message.uiTemplateBlocks && message.uiTemplateBlocks.lazy !== true) {
-                                entryOldCacheCount += 1;
-                                oldUiCacheBytes += estimateDataHealthSize(message.uiTemplateBlocks);
-                            }
                             if (typeof message.renderedContent === 'string' && message.renderedContent.length > 0) {
                                 entryOldCacheCount += 1;
                                 oldUiCacheBytes += estimateDataHealthSize(message.renderedContent);
@@ -6199,8 +6140,8 @@ const app = createApp({
                 if (oldUiCacheCount > 0) {
                     items.push({
                         id: 'old-ui-cache',
-                        label: '旧楼 UI 渲染缓存',
-                        detail: '旧楼保留轻量占位，滚动时按模板状态重建。',
+                        label: '旧楼正文显示缓存',
+                        detail: '清理重复的正文显示缓存，保留历史 UI 和变量。',
                         bytes: oldUiCacheBytes,
                         count: oldUiCacheCount,
                         cleanable: true,
@@ -6348,20 +6289,25 @@ const app = createApp({
             try {
                 if (item.action === 'dedupe-ui') {
                     let changed = false;
-                    characters.value.forEach(character => {
+                    for (let index = 0; index < characters.value.length; index++) {
+                        const character = await window.RPHubStorage.readCharacter(characters.value[index]);
                         const result = dedupeUiTemplatesForHealth(character?.uiTemplates);
                         if (result.removedCount > 0) {
                             character.uiTemplates = result.templates;
+                            const library = characters.value.slice();
+                            library[index] = character;
+                            await window.RPHubStorage.saveCharacterLibrary(library);
+                            characters.value[index] = index === currentCharacterIndex.value
+                                ? character : await window.RPHubStorage.toCharacterStub(character);
                             changed = true;
                         }
-                    });
+                    }
                     const globalResult = dedupeUiTemplatesForHealth(globalUiTemplates.value);
                     if (globalResult.removedCount > 0) {
                         globalUiTemplates.value = globalResult.templates;
                         changed = true;
                     }
                     if (changed) {
-                        await saveCharactersNow();
                         await setStoredValue('global_ui_templates', globalUiTemplates.value);
                     }
                 } else if (item.action === 'slim-chat-ui') {
@@ -6393,19 +6339,11 @@ const app = createApp({
 
         const showExportModal = ref(false);
         const exportType = ref(null); // 'presets', 'regex', 'worldinfo', 'uitemplates'
-        const readMainDbEntries = (targetDb) => new Promise((resolve, reject) => {
-            if (!targetDb) return resolve([]);
-            const transaction = targetDb.transaction(['store'], 'readonly');
-            const request = transaction.objectStore('store').openCursor();
+        const readMainDbEntries = async (targetDb) => {
             const entries = [];
-            request.onsuccess = () => {
-                const cursor = request.result;
-                if (!cursor) return resolve(entries);
-                entries.push({ key: String(cursor.key), value: cursor.value });
-                cursor.continue();
-            };
-            request.onerror = () => reject(request.error);
-        });
+            if (targetDb) await window.RPHubStorage.eachStoredEntry(targetDb, entry => entries.push(entry));
+            return entries;
+        };
 
         // [rphub 2.8.103] 不筛条目、逐条回调的流式读取。
         //   数据体检原本用 readMainDbEntries 把**全部条目一次性读进数组**，153 条里含 187MB 的
@@ -6415,29 +6353,7 @@ const app = createApp({
         const readMainDbEntriesStream = async (onEntry) => {
             const targetDb = getMainDb();
             if (!targetDb) return;
-            await new Promise((resolve, reject) => {
-                let settled = false;
-                const finish = () => { if (!settled) { settled = true; resolve(); } };
-                const fail = (error) => { if (!settled) { settled = true; reject(error); } };
-                try {
-                    const transaction = targetDb.transaction(['store'], 'readonly');
-                    const request = transaction.objectStore('store').openCursor();
-                    request.onsuccess = () => {
-                        const cursor = request.result;
-                        if (!cursor) return finish();
-                        const raw = { key: String(cursor.key), value: cursor.value };
-                        try {
-                            onEntry(raw);
-                        } catch (error) {
-                            console.warn('[DataHealth] 跳过无法处理的条目:', raw.key, error);
-                        }
-                        cursor.continue();
-                    };
-                    request.onerror = () => fail(request.error);
-                } catch (error) {
-                    fail(error);
-                }
-            });
+            await window.RPHubStorage.eachStoredEntry(targetDb, onEntry);
         };
                 // 2.8.14：indexedDB.open 对不存在的库会**创建空库**——没装插件的用户也会被留下
         // sf_moments_db 空库 litter。现代 WebView 有
@@ -7482,7 +7398,7 @@ const app = createApp({
                 const scopeEpoch = _b1ScopeEpoch;
                 const intentId = (chatWriteIntents.get(storyScopeId) || 0) + 1;
                 chatWriteIntents.set(storyScopeId, intentId);
-                const historyToSave = cloneForStorage(slimChatHistoryForStorage(history));
+                const historyToSave = cloneForStorage(history);
                 const guard = () => !storage.getStorageWriteState().paused
                     && storage.getStorageWriteState().epoch === writeState.epoch
                     && _b1ScopeEpoch === scopeEpoch
@@ -7660,19 +7576,14 @@ const app = createApp({
             return requireMemoryPublished(await commitMemoryDraft(captured, memorySource));
         };
 
-        // [rphub 2.8.117] 整库 characters 的写入屏障。
-        //   导入一张卡会经过三条路径各写一遍 characters：saveStoryBranchesAndRuntime（保存上一张卡状态）、
-        //   importCharacterData 的显式保存、characters 自动保存 watcher。
-        //   characters 是单键存整个数组，每写一遍都要把整份值序列化落盘 —— 库里那条 187MB 的角色卡
-        //   因此被完整复制三次，主线程被占满就是「导入后卡死几秒」；峰值撞上 V8 堆上限则渲染进程被杀、
-        //   页面被 recreate 重载。屏障期间只记 dirty，收尾统一写一次；需要立刻落盘的调用方传 { force: true }。
+        // The import barrier defers ordinary saves; a departing card must be saved before release.
         let _characterWriteBarrier = 0;
         const saveCharactersNow = async (options = {}) => {
             if (_characterWriteBarrier > 0 && options.force !== true) {
                 return;
             }
             if (!getMainDb()) await initDB();
-            await setStoredValue('characters', unwrapForStorage(characters.value), { clone: false });
+            await window.RPHubStorage.saveCharacterLibrary(characters.value);
         };
 
         // B1: three explicit groups instead of one long chain of independent puts.
@@ -7697,7 +7608,7 @@ const app = createApp({
                 const writes = [];
                 const keyOf = name => window.RPHubStorage.storageKeyFor(name);
                 if (saveCharacters && _characterWriteBarrier === 0) {
-                    writes.push({ key: keyOf('characters'), value: unwrapForStorage(characters.value) });
+                    await saveCharactersNow();
                 }
                 if (startupConfigOnly) {
                     // 2.8.84: 启动那次只为落强制默认值（contextSize 归一化、工具强度归一化）。
@@ -7810,7 +7721,7 @@ const app = createApp({
                 chatWriteIntents.set(storyScopeId, (chatWriteIntents.get(storyScopeId) || 0) + 1);
                 const chatKey = 'rp_hub_chat_' + storyScopeId;
                 const chatRecords = await window.RPHubStorage.readStoredValueSet([chatKey]);
-                const chatPayload = cloneForStorage(slimChatHistoryForStorage(history));
+                const chatPayload = cloneForStorage(history);
                 // [rphub 2.8.106] 同一个不变量在事务路径上再拦一次：空数组不许覆盖非空。
                 //   4 个调用点共用这里，其中「重新生成第 1 条」必然传 []（chatHistory.slice(0, 0)）。
                 //   返回 ok:false 之后调用方会在 chatHistory.value = nextHistory 之前 return，
@@ -7892,7 +7803,7 @@ const app = createApp({
 
 
                 // Load from DB
-                const savedChars = await getStoredValue('characters');
+                const savedChars = await window.RPHubStorage.readCharacterDirectory();
                 if (savedChars) {
                     // Migration: Ensure all characters have a UUID and createdAt
                     let migrated = false;
@@ -8006,7 +7917,7 @@ const app = createApp({
                 const savedGlobalRegex = await getStoredValue('global_regex');
                 if (savedGlobalRegex) globalRegexScripts.value = savedGlobalRegex.map(script => normalizeRegexScript(script, 'global'));
 
-                const savedRegex = await getStoredValue('regex');
+                const savedRegex = savedGlobalRegex ? null : await getStoredValue('regex');
                 if (savedGlobalRegex) {
                     regexScripts.value = JSON.parse(JSON.stringify(globalRegexScripts.value)).map(script => normalizeRegexScript(script, 'global'));
                 } else if (savedRegex) {
@@ -8016,7 +7927,7 @@ const app = createApp({
                 const savedGlobalWI = await getStoredValue('global_worldinfo');
                 if (savedGlobalWI) globalWorldInfo.value = savedGlobalWI.map(entry => normalizeWorldInfoEntry({ ...entry, scope: 'global' }));
 
-                const savedWI = await getStoredValue('worldinfo');
+                const savedWI = savedGlobalWI ? null : await getStoredValue('worldinfo');
                 if (savedGlobalWI) {
                     worldInfo.value = JSON.parse(JSON.stringify(globalWorldInfo.value)).map(entry => normalizeWorldInfoEntry({ ...entry, scope: 'global' }));
                 } else if (savedWI) {
@@ -8583,7 +8494,6 @@ const app = createApp({
         };
 
         const renderGeneratedImageJob = (card, task, job) => {
-            if (!card.isConnected) return;
             if (!card.isConnected) return task.cards.delete(card);
             task.job = job;
             card.dataset.imageJobId = job.id || '';
@@ -8747,6 +8657,15 @@ const app = createApp({
             generatedImageObserver.observe(container, { childList: true, subtree: true });
             hydrateGeneratedImages(container);
         });
+        const releaseCharacterRuntime = async () => {
+            clearMessageRenderCaches();
+            styleFilteredContentCache.clear();
+            window.RPHubUtils.clearParseCache();
+            await nextTick();
+            generatedImageTasks.forEach(task => {
+                task.cards.forEach(card => { if (!card.isConnected) task.cards.delete(card); });
+            });
+        };
 
         const handleGeneratedImageReroll = async (event, messageIndex) => {
             const button = event.target.closest('.generated-image-reroll');
@@ -8943,7 +8862,7 @@ const app = createApp({
             char?.uiTemplates,
             char?.recentGenerationTimes
         ]), () => {
-            if (_initComplete && !suspendCharacterAutoSave) debouncedCharacterSave();
+            if (_initComplete && !suspendCharacterAutoSave && !_isApplyingCharacterScopedData) debouncedCharacterSave();
         });
         watch([settings, presets, presetGroupNames, regexScripts, globalRegexScripts, worldInfo, globalWorldInfo, globalUiTemplates, activeTools, user, recentGenerationTimes], () => {
             if (!_initComplete) return;
@@ -8974,6 +8893,10 @@ const app = createApp({
         const currentCharacterAvatar = computed(() => {
             const source = currentCharacter.value?.avatar || '';
             const comma = source.indexOf(',');
+            if (avatarDisplayCache.source !== source && avatarDisplayCache.url) {
+                if (avatarDisplayCache.url.startsWith('blob:')) URL.revokeObjectURL(avatarDisplayCache.url);
+                avatarDisplayCache = { source: '', url: '' };
+            }
             // 2.8.79：阈值原为 1e6。1e6 是 base64 字符数，按 4:3 折算约 750KB 二进制，
             // 而典型 PNG 角色卡头像落在 200KB~800KB —— 正好卡在悬崖下面，这段 blob 化对
             // 绝大多数真实头像从未生效，每次重绘仍在反复解析整段 data URL。
@@ -9559,7 +9482,7 @@ const app = createApp({
                 originalIndex,
                 uuid: char.uuid,
                 name: char.name,
-                avatar: listAvatarUrl(char.avatar),
+                avatar: listAvatarUrl(window.RPHubStorage.characterPreviewUrl(char)),
                 favoriteAt: char.favoriteAt,
                 worldInfoCount: getCharacterWICount(char),
                 regexCount: getCharacterRegexCount(char)
@@ -9695,7 +9618,8 @@ const app = createApp({
                 }
                 const turnInfo = getConversationTurnAtIndex(index);
                 const turn = Number(turnInfo?.turn) || 0;
-                const html = activeUiTemplates.value
+                const savedBlocks = source.uiTemplateBlocks?.lazy !== true && source.uiTemplateBlocks?.[placement];
+                const html = Array.isArray(savedBlocks) ? savedBlocks.join('') : activeUiTemplates.value
                     .filter(template => template.placement === placement)
                     .map(template => renderUiTemplateHtml({
                         htmlTemplate: template.htmlTemplate,
@@ -10144,14 +10068,14 @@ const app = createApp({
         });
 
         const getCharacterWICount = (char) => {
-            if (!char.worldInfo) return 0;
+            if (!char.worldInfo) return (char.worldInfoNames || []).filter(name => !systemWorldInfoNames.includes(name)).length;
             return char.worldInfo.reduce((count, entry) => (
                 count + (systemWorldInfoNames.includes(entry.comment) ? 0 : 1)
             ), 0);
         };
 
         const getCharacterRegexCount = (char) => {
-            if (!char.regexScripts) return 0;
+            if (!char.regexScripts) return (char.regexNames || []).filter(name => !systemRegexNames.includes(name)).length;
             return char.regexScripts.reduce((count, script) => (
                 count + (systemRegexNames.includes(script.name || script.scriptName) ? 0 : 1)
             ), 0);
@@ -13906,19 +13830,28 @@ const app = createApp({
             showCharacterEditor.value = true;
         };
 
-        const editCharacter = (index) => {
-            const char = characters.value[index];
+        const editCharacter = async (index) => {
+            let char = characters.value[index];
             if (!char) {
                 console.error('Invalid character index:', index);
                 return;
             }
-            editingCharacter.id = index;
-            editingCharacter.data = JSON.parse(JSON.stringify(char));
-            editorTab.value = 'basic';
-            showCharacterEditor.value = true;
+            try {
+                char = await window.RPHubStorage.readCharacter(char);
+                editingCharacter.id = index;
+                editingCharacter.data = JSON.parse(JSON.stringify(char));
+                editorTab.value = 'basic';
+                showCharacterEditor.value = true;
+            } catch (error) { showToast(error.message, 'error'); }
         };
+        watch(showCharacterEditor, opened => {
+            if (!opened) editingCharacter.data = {};
+        });
+        watch(showUiTemplateEditor, opened => {
+            if (!opened) editingUiTemplate.data = {};
+        });
 
-        const saveCharacter = () => {
+        const saveCharacter = async () => {
             const characterRegexScripts = (editingCharacter.data.regexScripts || [])
                 .map(script => normalizeRegexScript({ ...script, scope: 'character' }, 'character'))
                 .filter(script => script.scope !== 'global');
@@ -13928,13 +13861,19 @@ const app = createApp({
                 uiTemplates: (editingCharacter.data.uiTemplates || []).map(template => normalizeUiTemplate({ ...template, scope: 'character' }))
             };
             delete normalizedCharacterData.scenario;
-            if (editingCharacter.id !== undefined) {
-                characters.value[editingCharacter.id] = normalizedCharacterData;
-            } else {
-                characters.value.push(normalizedCharacterData);
+            const previous = characters.value.slice();
+            try {
+                const index = editingCharacter.id ?? characters.value.length;
+                characters.value[index] = normalizedCharacterData;
+                await saveCharactersNow();
+                if (index !== currentCharacterIndex.value)
+                    characters.value[index] = await window.RPHubStorage.toCharacterStub(normalizedCharacterData);
+                showCharacterEditor.value = false;
+                showToast('角色已保存', 'success');
+            } catch (error) {
+                if (!error.committed) characters.value = previous;
+                showToast('角色保存未完成，请重试：' + error.message, 'error');
             }
-            showCharacterEditor.value = false;
-            showToast('角色已保存', 'success');
         };
 
         const createUiTemplate = () => {
@@ -14147,6 +14086,7 @@ const app = createApp({
             // 角色上下文已卸载：连同已提交基线一起清掉，避免下次加载前被当成可用基线
             _b1MemoryState = null;
             _b1MemoryViewKey = '';
+            releaseCharacterRuntime();
         };
 
         const deleteCharacter = (index) => {
@@ -14836,7 +14776,7 @@ const app = createApp({
         };
 
         const selectCharacter = async (index, isNewImport = false, { silent = false } = {}) => {
-            const char = characters.value[index];
+            let char = characters.value[index];
             if (!char) {
                 showToast('角色不存在，无法读取聊天记录', 'error');
                 return;
@@ -14874,12 +14814,20 @@ const app = createApp({
             const previousCharacterIndex = currentCharacterIndex.value;
             abortClassicBatchExtraction();
             if (previousCharacterIndex !== -1 && !await saveCurrentStoryBranchState(switchEpoch)) return;
+            if (previousCharacterIndex !== -1 && _characterWriteBarrier > 0)
+                await window.RPHubStorage.saveCharacterLibrary(characters.value.filter(card => card.uuid !== char.uuid));
             if (!isLatestSwitch()) return;
 
             let branchState;
             let loadedChatHistory;
             let loadedMemories;
+            let previousStub;
             try {
+                char = await window.RPHubStorage.readCharacter(char);
+                if (!isLatestSwitch()) return;
+                if (previousCharacterIndex >= 0 && previousCharacterIndex !== index)
+                    previousStub = await window.RPHubStorage.toCharacterStub(characters.value[previousCharacterIndex]);
+                if (!isLatestSwitch()) return;
                 if (!char.uuid) {
                     char.uuid = generateUUID();
                     await saveCharactersNow();
@@ -14915,6 +14863,8 @@ const app = createApp({
             }
 
             _isApplyingCharacterScopedData = true;
+            if (previousStub) characters.value[previousCharacterIndex] = previousStub;
+            characters.value[index] = char;
             currentCharacterIndex.value = index;
             storyBranches.value = branchState.branches;
             activeStoryBranchId.value = branchState.activeBranchId;
@@ -14930,6 +14880,7 @@ const app = createApp({
             applyCharacterScopedResources(char);
             clearStoryBranchTransientContext();
             finishApplyingCharacterScopedData();
+            await releaseCharacterRuntime();
 
             if (char.recentGenerationTimes) {
                 recentGenerationTimes.value = JSON.parse(JSON.stringify(char.recentGenerationTimes));
@@ -15062,10 +15013,7 @@ const app = createApp({
                 createdAt: Date.now()
             };
 
-            // [rphub 2.8.117] 这一趟只写一次整库 characters（见 saveCharactersNow 的屏障说明）。
-            //   原来：push 后显式写一遍，1 秒后自动保存 watcher 再写一遍，切卡前
-            //   saveStoryBranchesAndRuntime 里还要写一遍 —— 三遍整份序列化。
-            //   失败语义严格分开：切卡失败不回滚（卡本身是好的），只有写库失败才回滚内存。
+            // A failed switch does not remove an imported card; an uncommitted save does.
             characters.value.push(char);
             _characterWriteBarrier++;
             let _importError = null;
@@ -15085,8 +15033,11 @@ const app = createApp({
                     // 切卡失败不等于导入失败：只记下来，等落盘之后再抛，不删卡
                     _importError = error;
                 }
-                // 落盘是导入的终点，只在这里写一次，且包含切卡带来的全部运行时变更
+                // Persist the imported card and its initial runtime before releasing inactive content.
                 await saveCharactersNow({ force: true });
+                const savedIndex = characters.value.findIndex(item => item.uuid === char.uuid);
+                if (savedIndex !== currentCharacterIndex.value && savedIndex >= 0)
+                    characters.value[savedIndex] = await window.RPHubStorage.toCharacterStub(char);
             } catch (saveError) {
                 const index = characters.value.findIndex(item => item.uuid === char.uuid);
                 if (index >= 0 && saveError.committed !== true) characters.value.splice(index, 1);
@@ -15361,11 +15312,12 @@ const app = createApp({
             regexScriptMapper: (script) => toRegexExportEntry({ ...script, scope: 'character' }, 'character')
         });
 
-        const exportCharacterJson = (index) => {
-            const char = characters.value[index];
+        const exportCharacterJson = async (index) => {
+            let char = characters.value[index];
             if (!char) return;
 
             try {
+                char = await window.RPHubStorage.readCharacter(char);
                 const v2Data = buildCharacterExportData(char);
                 const blob = new Blob([JSON.stringify(v2Data, null, 2)], { type: 'application/json' });
                 cardUtils.downloadBlob(blob, (char.name || 'character') + '.json');
@@ -15455,10 +15407,11 @@ const app = createApp({
         };
 
         const exportCharacterChat = async (index) => {
-            const char = characters.value[index];
+            let char = characters.value[index];
             if (!char) return;
 
             try {
+                char = await window.RPHubStorage.readCharacter(char);
                 if (!getMainDb()) await initDB();
                 const isCurrentCharacter = currentCharacterIndex.value === index;
                 if (isCurrentCharacter) await flushPendingChatHistorySave();
@@ -15546,10 +15499,11 @@ const app = createApp({
         };
 
         const exportCharacterPng = async (index) => {
-            const char = characters.value[index];
+            let char = characters.value[index];
             if (!char) return;
 
             try {
+                char = await window.RPHubStorage.readCharacter(char);
                 const v2Data = buildCharacterExportData(char);
                 const pngBytes = await cardUtils.imageUrlToPngBytes(char.avatar, { crossOrigin: "Anonymous" });
                 const finalPng = cardUtils.injectPngTextChunk(
@@ -15778,10 +15732,12 @@ const app = createApp({
                 _isApplyingCharacterScopedData = true;
                 currentCharacterIndex.value = lastActiveCharacterId.value;
                 resetChatRenderWindow();
-                const char = characters.value[currentCharacterIndex.value];
+                let char = characters.value[currentCharacterIndex.value];
 
                 // Load Chat History for this character
                 try {
+                    char = await window.RPHubStorage.readCharacter(char);
+                    characters.value[currentCharacterIndex.value] = char;
                     if (!char.uuid) {
                         char.uuid = generateUUID();
                         await saveCharactersNow();

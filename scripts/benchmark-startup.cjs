@@ -162,6 +162,7 @@ fs.mkdirSync(output, { recursive: true });
                 const state = document.getElementById('app').__vue_app__._container._vnode.component.setupState;
                 return {
                     ...__bootStats, visibleMs: performance.now(), cards: state.characters.length,
+                    fullCards: state.characters.filter(card => Array.isArray(card.worldInfo)).length,
                     activeId: state.currentCharacter?.uuid, messages: state.chatHistory.length,
                     worldInfo: state.worldInfo.length, view: state.currentView
                 };
@@ -184,7 +185,9 @@ fs.mkdirSync(output, { recursive: true });
             await page.evaluate(async () => {
                 const db = RPHubStorage.getMainDb();
                 for (const expected of window.opener.__benchmarkChecks) {
-                    const value = await new Promise((resolve, reject) => {
+                    const value = expected.key === 'rp_hub_characters'
+                        ? await RPHubStorage.getStoredValue('characters')
+                        : await new Promise((resolve, reject) => {
                         const request = db.transaction('store').objectStore('store').get(expected.key);
                         request.onsuccess = () => resolve(request.result);
                         request.onerror = () => reject(request.error);
@@ -197,11 +200,20 @@ fs.mkdirSync(output, { recursive: true });
             });
         }
         assert.deepEqual(errors, []);
+        const directory = await page.evaluate(async () => {
+            const request = RPHubStorage.getMainDb().transaction('store').objectStore('store').get('rp_hub_characters');
+            const value = await new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+            });
+            return value?.rphubCardLibrary === 1
+                ? { cards: value.cards.length, bytes: new Blob([JSON.stringify(value)]).size }
+                : { cards: Array.isArray(value) ? value.length : 0 };
+        });
         const median = values => values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
         const report = {
             environment: `Desktop Edge, CPU ${rate}x slower, simulated synchronous file bridge. Not Android timing.`,
             revision: revision || 'working-tree',
-            backupBytes: fs.statSync(backup).size, fixture, runs, errors,
+            backupBytes: fs.statSync(backup).size, fixture, directory, runs, errors,
             savedContentVerified: true,
             medianInteractiveMs: median(runs.slice(1).map(run => run.interactiveMs)),
             medianVisibleMs: median(runs.slice(1).map(run => run.visibleMs))

@@ -45,7 +45,7 @@
             card.storageFolder = folder;
             used.add(folder);
         });
-        cards = list;
+        cards = list.map(({ uuid, storageFolder, importedName }) => ({ uuid, storageFolder, importedName }));
         return list;
     };
     const pathOf = async key => {
@@ -57,11 +57,19 @@
     };
     async function saveEntry(key, value) {
         if (!bridge) return;
-        if (key === 'rp_hub_characters' && Array.isArray(value)) {
-            assignFolders(value);
-            for (const card of value) write(`角色卡数据/${folderOf(card)}/角色卡.json`, card);
-            write('个人数据/角色卡索引.json', value.map(card => ({
+        if (key.startsWith('__rp_card_image__:')) {
+            write(`角色卡数据/${folderOf(value)}/封面数据.json`, value.avatar);
+        } else if (key.startsWith('__rp_card__:')) {
+            write(`角色卡数据/${folderOf(value)}/角色卡.json`, value);
+        } else if (key === 'rp_hub_characters' && (Array.isArray(value) || value?.rphubCardLibrary === 1)) {
+            const list = Array.isArray(value) ? value : value.cards;
+            assignFolders(list);
+            if (Array.isArray(value)) {
+                for (const card of list) write(`角色卡数据/${folderOf(card)}/角色卡.json`, card);
+            }
+            write('个人数据/角色卡索引.json', list.map(card => ({
                 uuid: card.uuid, importedName: card.importedName, storageFolder: folderOf(card),
+                name: card.name, favoriteAt: card.favoriteAt || null, createdAt: card.createdAt
             })));
         } else {
             const file = await pathOf(key);
@@ -73,17 +81,18 @@
         if (!bridge) return;
         const existing = entries.find(entry => entry.key === 'rp_hub_characters');
         if (existing) {
-            const previous = existing.value.map(card => [card.uuid, card.storageFolder, card.importedName]);
+            const list = Array.isArray(existing.value) ? existing.value : existing.value.cards;
+            const previous = list.map(card => [card.uuid, card.storageFolder, card.importedName]);
             const index = read('个人数据/角色卡索引.json') || [];
-            for (const card of existing.value) {
+            for (const card of list) {
                 const old = index.find(item => item.uuid === card.uuid);
                 if (old) {
                     card.storageFolder ||= old.storageFolder;
                     card.importedName ||= old.importedName;
                 }
             }
-            assignFolders(existing.value);
-            if (existing.value.some((card, i) => card.uuid !== previous[i][0]
+            assignFolders(list);
+            if (list.some((card, i) => card.uuid !== previous[i][0]
                 || card.storageFolder !== previous[i][1] || card.importedName !== previous[i][2])) {
                 await put(existing.key, existing.value);
             }
@@ -103,7 +112,18 @@
         for (const entry of entries) await saveEntry(entry.key, entry.value);
         if (!existing) {
             const index = read('个人数据/角色卡索引.json') || [];
-            const restored = index.map(card => read(`角色卡数据/${card.storageFolder}/角色卡.json`)).filter(Boolean);
+            const restored = index.map(card => {
+                const value = read(`角色卡数据/${card.storageFolder}/角色卡.json`);
+                if (!value) throw new Error('角色卡文件缺失，请从备份恢复');
+                if (value.avatar?.rphubCardImage === 1) {
+                    value.avatar = read(`角色卡数据/${card.storageFolder}/封面数据.json`);
+                    if (typeof value.avatar !== 'string') throw new Error('角色卡封面缺失，请从备份恢复');
+                }
+                ['name', 'favoriteAt', 'createdAt'].forEach(key => {
+                    if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
+                });
+                return value;
+            });
             if (restored.length) {
                 assignFolders(restored);
                 await put('rp_hub_characters', restored);
@@ -158,6 +178,7 @@
             if (bridge) write('个人数据/文件索引.json', inventory);
         }),
         remove: key => ordered(async () => {
+            if (key.startsWith('__rp_card__:') || key.startsWith('__rp_card_image__:')) return;
             call('remove', inventory[key] || await pathOf(key));
             delete inventory[key];
             if (bridge) write('个人数据/文件索引.json', inventory);
