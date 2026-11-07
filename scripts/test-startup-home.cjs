@@ -74,7 +74,7 @@ const web=path.join(root,'web');
     await page.waitForTimeout(1800);
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
-    await page.evaluate(()=>window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState);
+    await page.evaluate(()=>{window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState;});
     assert.equal(await page.evaluate(()=>__qa.currentView),'chat');
     assert.equal(await page.evaluate(()=>__qa.currentCharacter.uuid),'startup-card');
     assert.equal(await page.evaluate(()=>__qa.chatHistory[1].content),'这里是保存的剧情。');

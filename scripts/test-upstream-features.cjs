@@ -98,14 +98,30 @@ const evidence = path.join(root, 'verification/upstream-118');
             window.RPLocalFiles.prepareBackupFileRead = () => 'fixture-token';
             __qa.restoreAutoBackupRecord({ id: 'fixture-native-file', name: '测试备份', sizeBytes: 1000 });
         });
-        await page.waitForFunction(() => __qa.globalConfirmModal.show);
+        await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready');
         const reloaded = page.waitForEvent('load');
-        await page.evaluate(() => __qa.globalConfirmModal.onConfirm());
+        await page.evaluate(() => { __qa.streamImportPanel.apply(); });
         await reloaded;
         assert.equal(nativeReads, 1, 'Native backup restore must use the local streaming reader');
         await ready();
         assert.equal(await page.evaluate(() => __qa.characters[0].uuid), 'native-restored');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.readMemoryState('restore-deleted')).deleted), true);
+        await page.evaluate(async () => {
+            window.__savedBackupParts = [];
+            window.RPLocalFiles.prepareBackupFileRead = () => 'fixture-token';
+            window.AndroidBridge = {
+                isNativeApp: () => true,
+                beginPickerSave: () => setTimeout(() => rphubPickerSaveReady('copy-token'), 0),
+                writeBackupChunk: (token, bytes) => { __savedBackupParts.push(bytes); return 'OK'; },
+                finishBackupWrite: () => 'OK', abortBackupWrite: () => {}
+            };
+            await __qa.exportBackupManagerFile({ id: 'fixture-native-file', fileName: '另存测试.json', sizeBytes: 1000 });
+        });
+        const copied = await page.evaluate(() => JSON.parse(new TextDecoder().decode(Uint8Array.from(
+            __savedBackupParts.map(part => atob(part)).join(''), char => char.charCodeAt(0)))));
+        assert.equal(copied.entries.find(entry => entry.key === 'rp_hub_characters').value[0].uuid, 'native-restored');
+        assert.equal(nativeReads, 2, '备份历史另存直接复制文件流');
+        await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
         assert.deepEqual(errors, []);
         console.log('PASS: import saves once, existing chat survives, reload keeps cards, backup details and back navigation');
     } finally { await browser.close(); }

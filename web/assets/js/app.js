@@ -345,6 +345,16 @@ const app = createApp({
         const shellRoots = ['characters', 'album', 'advanced', 'settings'];
         const shellHistory = [];
         const streamImportPanel = ref(null);
+        const backupTask = reactive({ active: false, locked: false, title: '', message: '', percent: 0, detail: '', error: '', confirm: null, recovery: false });
+        const backupProfiles = window.RPStreamImport.profiles;
+        const backupProfile = ref(window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile')).id);
+        watch(backupProfile, id => localStorage.setItem('rp-backup-profile', window.RPStreamImport.profile(id).id));
+        const beginBackupTask = title => Object.assign(backupTask, {
+            active: true, locked: true, title, message: '正在准备…', percent: 0, detail: '', error: '', confirm: null, recovery: false
+        });
+        const confirmBackupTask = (title, message) => new Promise(resolve => {
+            Object.assign(backupTask, { title, message, confirm: answer => { backupTask.confirm = null; resolve(answer); } });
+        });
         const shellScroll = new Map();
         let shellMotion;
         let shellReturning = false;
@@ -452,6 +462,8 @@ const app = createApp({
         };
         const shellGoBack = () => {
             if (streamImportPanel.value?.handleBack()) return true;
+            if (cloudBackup.busy) return true;
+            if (cloudBackup.mode) { closeCloudBackup(); return true; }
             const chatExportPanel = document.getElementById('rphub-chat-export-panel');
             if (chatExportPanel) { chatExportPanel.dispatchEvent(new Event('rp:close')); return true; }
             if (showAnnouncement.value) { closeAnnouncement(); return true; }
@@ -4618,8 +4630,20 @@ const app = createApp({
             startCloudBackup,
             startCloudRestore
         } = window.RPHubCloudBackup.useCloudBackup({
-            saveAll: () => saveData(),
-            toast: (...args) => showToast(...args)
+            saveAll: async () => {
+                if (isConversationBusy.value || isClassicBatchExtracting.value) throw new Error('请先停止当前生成或记忆补录，再进行备份');
+                await flushPendingChatHistorySave();
+                return saveData({ saveMemories: !!currentCharacter.value });
+            },
+            decode: value => restoreRphubBinaryDeep(value),
+            toast: (...args) => showToast(...args),
+            transfer: {
+                start: beginBackupTask,
+                progress: value => Object.assign(backupTask, { percent: value.percent, message: value.label, detail: value.detail }),
+                finish: () => { backupTask.active = false; },
+                fail: error => Object.assign(backupTask, { locked: !!error.recoveryRequired, recovery: !!error.recoveryRequired,
+                    error: error.message || String(error), message: error.recoveryRequired ? '需要恢复原数据' : '操作未完成，请重试' })
+            }
         });
         // Export Modal State
         const backupScope = ref({
@@ -4951,6 +4975,7 @@ const app = createApp({
             return Math.max(0, Math.round((today - lastDay) / 86400000));
         });
         const maybeRemindDailyBackup = async () => {
+            if (backupTask.active || streamImportPanel.value?.isOpen || cloudBackup.busy) return;
             const cfg = autoBackupConfig.value;
             if (!cfg.enabled) return;
             if (cfg.triggerMode !== 'remind') return;
@@ -4973,6 +4998,7 @@ const app = createApp({
             );
         };
         const performDailyAutoBackup = async (isManualTrigger = false) => {
+            if (backupTask.active || streamImportPanel.value?.isOpen || cloudBackup.busy) return;
             if (isAutoBackingUp.value) return;
             const now = new Date();
             const year = now.getFullYear();
@@ -5369,7 +5395,7 @@ const app = createApp({
             if (entry.key.startsWith('rp_hub_b1_memory_state_') && entry.value?.deleted === true) {
                 store.delete(entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
             }
-            store.put(restoreRphubBinaryDeep(entry.value), entry.key);
+            return store.put(restoreRphubBinaryDeep(entry.value), entry.key);
         };
         const pauseBackupWrites = async () => {
             if (isConversationBusy.value) throw new Error('请先停止当前生成再恢复数据');
@@ -5416,6 +5442,17 @@ const app = createApp({
 
         const restoreAutoBackupRecord = async (record) => {
             if (!record?.id || isRestoringAutoBackup.value) return;
+            const bridge = window.AndroidBridge;
+            const reader = typeof window.RPLocalFiles?.prepareBackupFileRead === 'function' ? window.RPLocalFiles : bridge;
+            if (bridge?.isNativeApp?.() && typeof reader?.prepareBackupFileRead === 'function') {
+                try {
+                    const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
+                    if (!token || token.startsWith('ERR:')) throw new Error(token.slice(4) || '读取备份失败');
+                    await streamImportPanel.value.startUrl(new URL('__rphub_backup_read__?t=' + encodeURIComponent(token), location.href).href,
+                        record.fileName || record.name || '备份.json', Number(record.sizeBytes) || 0);
+                } catch (error) { showToast(error.message || '读取备份失败', 'error'); }
+                return;
+            }
             const confirmed = await showVueConfirmModal(
                 '还原自动备份',
                 '确认还原「' + record.name + '」吗？将覆盖当前全部软件数据，建议先导出当前备份。',
@@ -5515,15 +5552,7 @@ const app = createApp({
 
         // 导出物理自动备份到其他位置（重新下载）
         const downloadAutoBackupRecord = async (record) => {
-            if (!record?.id) return;
-            try {
-                const bridge = window.AndroidBridge;
-                const data = await readLocalBackupJson(bridge, record);
-                downloadJsonFile(data, record.fileName || 'backup.json');
-                showToast('已另存备份文件: ' + record.fileName, 'success');
-            } catch (e) {
-                showToast('导出备份失败: ' + (e.message || e), 'error');
-            }
+            return exportBackupManagerFile(record);
         };
 
         // 删除单项物理自动备份文件
@@ -5660,20 +5689,57 @@ const app = createApp({
         };
 
         const exportBackupManagerFile = async (record) => {
-            if (!record || !record.id) return;
+            if (!record?.id || streamImportPanel.value?.isOpen) return;
             const bridge = window.AndroidBridge;
-            if (!bridge?.isNativeApp?.()
-                || (typeof bridge.prepareBackupFileRead !== 'function' && typeof bridge.readBackupFileText !== 'function')) {
-                showToast('当前环境不支持另存备份文件', 'error');
-                return;
-            }
+            const reader = typeof window.RPLocalFiles?.prepareBackupFileRead === 'function' ? window.RPLocalFiles : bridge;
+            beginBackupTask('导出备份');
+            let session, timer;
+            const controller = new AbortController();
+            const resetTimeout = () => { clearTimeout(timer); timer = setTimeout(() => controller.abort(), 45000); };
             try {
-                const data = await readLocalBackupJson(bridge, record);
-                downloadJsonFile(data, record.fileName || 'backup.json');
-                showToast('已另存为 ' + (record.fileName || 'backup.json'), 'success');
+                const fileName = record.fileName || 'RP本地版-数据备份.json';
+                session = await openBackupPicker(fileName);
+                if (!session) {
+                    if (Number(record.sizeBytes) > LOCAL_BACKUP_READ_SAFE_BYTES) throw new Error('当前环境不支持大文件另存，请使用本地版');
+                    const data = await readLocalBackupJson(bridge, record);
+                    downloadJsonFile(data, fileName);
+                } else if (typeof reader?.prepareBackupFileRead === 'function') {
+                    const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
+                    if (!token || token.startsWith('ERR:')) throw new Error(token.slice(4) || '读取备份失败');
+                    resetTimeout();
+                    const response = await fetch('__rphub_backup_read__?t=' + encodeURIComponent(token), { cache: 'no-store', signal: controller.signal });
+                    if (!response.ok) throw new Error('读取备份失败');
+                    const stream = response.body?.getReader?.(), decoder = new TextDecoder('utf-8', { fatal: true });
+                    const total = Number(response.headers.get('content-length')) || Number(record.sizeBytes) || 0;
+                    let bytes = 0;
+                    try {
+                        for (;;) {
+                            const part = stream ? await stream.read() : { done: false, value: new Uint8Array(await response.arrayBuffer()) };
+                            if (part.done) break;
+                            writeBackupText(session, decoder.decode(part.value, { stream: true }));
+                            bytes += part.value.byteLength;
+                            Object.assign(backupTask, { percent: total ? Math.min(99, bytes / total * 100) : 0,
+                                message: '正在另存备份文件', detail: '已写 ' + fmtMB(bytes) });
+                            resetTimeout();
+                            await new Promise(resolve => setTimeout(resolve, 0));
+                            if (!stream) break;
+                        }
+                        writeBackupText(session, decoder.decode());
+                    } finally { await stream?.cancel().catch(() => {}); }
+                    await finishChunkedBackup(session, 1);
+                } else {
+                    if (Number(record.sizeBytes) > LOCAL_BACKUP_READ_SAFE_BYTES) throw new Error('请改用支持大文件读取的本地版');
+                    const text = String(bridge.readBackupFileText(record.id, !!record.isTreeDoc) || '');
+                    if (text.startsWith('ERR:')) throw new Error(text.slice(4));
+                    writeBackupText(session, text);
+                    await finishChunkedBackup(session, 1);
+                }
+                Object.assign(backupTask, { locked: false, percent: 100, message: '备份已另存' });
             } catch (error) {
-                showToast('另存失败：' + (error?.message || error), 'error', 4000);
-            }
+                abortChunkedBackup(session);
+                Object.assign(backupTask, { locked: false, error: error.name === 'AbortError' ? '读取超时，请重试' : error.message || String(error),
+                    message: '另存未完成，请重试' });
+            } finally { clearTimeout(timer); }
         };
 
         const backupScopeOptions = [
@@ -5762,9 +5828,9 @@ const app = createApp({
             }
             return item;
         }) : templates;
-        const slimBackupEntry = (entry) => {
+        const slimBackupEntry = (entry, raw = false) => {
             const logicalKey = getStorageLogicalKey(entry.key);
-            const value = unwrapForStorage(entry.value);
+            const value = raw === true ? entry.value : unwrapForStorage(entry.value);
             if (logicalKey === 'global_ui_templates') {
                 return { key: entry.key, value: slimUiTemplatesForBackup(value, backupScope.value.uiRuntime) };
             }
@@ -5889,6 +5955,9 @@ const app = createApp({
                 showToast(session.target === 'downloads'
                     ? `已保存到 下载 / RP本地版 / 数据备份（${entryCount} 项）`
                     : `已保存到默认备份文件夹（${entryCount} 项）`, 'success', 3000);
+            } catch (error) {
+                abortChunkedBackup(session);
+                throw error;
             } finally {
                 session.token = '';
             }
@@ -6407,7 +6476,7 @@ const app = createApp({
             return dbs;
         };
 
-        const saveBackupWithPicker = async (entries, backupFileName) => {
+        const openBackupPicker = async (backupFileName) => {
             const bridge = window.AndroidBridge;
             if (!(bridge?.isNativeApp?.() && typeof bridge.beginPickerSave === 'function' && typeof bridge.writeBackupChunk === 'function' && typeof bridge.finishBackupWrite === 'function')) return false;
             const pickedToken = await new Promise((resolve) => {
@@ -6427,52 +6496,8 @@ const app = createApp({
                     finish(null);
                 }
             });
-            if (!pickedToken) return false;
-            const session = { bridge, token: pickedToken };
-            try {
-                const companionDbs = await collectCompanionDatabasesDump();
-                const lsDump = {};
-                try {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        if (k) lsDump[k] = localStorage.getItem(k);
-                    }
-                } catch (_) {}
-
-                writeBackupText(session, '{"type":"rp-hub-complete-backup","__rphub_backup__":1,"version":8,"exportedAt":"' + new Date().toISOString() + '","entries":[');
-                let first = true;
-                for (const entry of entries) {
-                    const item = jsonChunkStringifyEntry({ key: entry.key, value: unwrapForStorage(entry.value) });
-                    writeBackupText(session, (first ? '' : ',') + item);
-                    first = false;
-                    await new Promise(resolve => setTimeout(resolve, 0));
-                }
-                // 2.8.19：删除 databases.RPHubDB.store 的重复写入 —— 旧实现把同一批数据在此再写一遍，
-                // 备份文件因此恒为逻辑数据的 2 倍（夹具实测 21.4MB 数据 → 42.7MB 文件）。该块没有任何消费方：
-                // 官方恢复端 parseUniversalBackupPackage 走分支 A 取 entries[]，databases 只交给
-                // restoreCompanionDatabases 的白名单（sf_moments_db /
-                // SakuraMomentsDB / moments）；柳贯一插件 V20.2.1 的导入只接受 .zip 自产格式；
-                // 桌面版 script_v12.6 读的是 __rphub_backup__.data。databases 现在只承载伴随库。
-                writeBackupText(session, '],"databases":{');
-                let firstDb = true;
-                Object.keys(companionDbs).forEach(dbName => {
-                    writeBackupText(session, (firstDb ? '' : ',') + '"' + dbName + '":' + JSON.stringify(companionDbs[dbName]));
-                    firstDb = false;
-                });
-                writeBackupText(session, '},"webStorage":{"localStorage":' + JSON.stringify(lsDump) + '}}');
-
-                const finished = String(bridge.finishBackupWrite(pickedToken) || '');
-                if (finished !== 'OK') {
-                    throw new Error(finished.startsWith('ERR:') ? finished.slice(4) : '完成备份写入失败');
-                }
-                showToast(`已保存到所选位置（${entries.length} 项）`, 'success', 3000);
-                return true;
-            } catch (error) {
-                console.warn('Picker streaming backup failed:', error);
-                try { bridge.abortBackupWrite?.(pickedToken); } catch (_) {}
-                showToast('保存失败：' + (error.message || error), 'error', 5000);
-                return true;
-            }
+            if (!pickedToken) throw new Error('已取消保存，原数据未改动');
+            return { bridge, token: pickedToken };
         };
         const exportAllData = async () => {
             if (isExportingAllData.value) {
@@ -6480,31 +6505,14 @@ const app = createApp({
                 return;
             }
             isExportingAllData.value = true;
+            beginBackupTask('导出备份');
             let session = null;
-            let entries = [];
-            let backupFileName = '';
+            let browserWriter;
             try {
-                showToast('正在准备全量备份...', 'info');
+                if (isConversationBusy.value || isClassicBatchExtracting.value) throw new Error('请先停止当前生成或记忆补录，再进行备份');
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
-                const allEntries = await readMainDbEntries(getMainDb());
-                for (const entry of allEntries) {
-                    if (window.RPBackupFormat.hasBinary(entry.value)) {
-                        entry.value = await window.RPBackupFormat.encodeBinary(entry.value);
-                    }
-                }
-                entries = allEntries.filter(shouldIncludeBackupEntry).map(slimBackupEntry);
-                if (backupScope.value.localData) entries = entries.concat(collectLocalStorageEntries());
-                const legacyEntries = await collectLegacyBackupEntries(entries);
-                if (legacyEntries.length) {
-                    entries = entries.concat(legacyEntries);
-                    showToast('已附带 ' + legacyEntries.length + ' 项旧版遗留数据', 'info', 3000);
-                }
-                backupFileName = buildBackupFileName();
-                // 2.8.78：落点选择改成三态。设了默认备份文件夹 → 'folder'（原行为）；
-                // 没设 → 'downloads'（写系统下载目录，不再弹文件选择器）；
-                // 非原生环境或宿主没有下载接口 → ''，退回文件选择器。
-                // 自动备份仍只走 createBackupFile，不受这里影响。
+                const fileName = buildBackupFileName();
                 const nativeBridge = window.AndroidBridge;
                 const nativeExportTarget = nativeBridge?.isNativeApp?.()
                     ? (String(appBackupFolder.value || nativeBridge.getBackupFolder?.() || '').trim()
@@ -6512,81 +6520,68 @@ const app = createApp({
                         : (typeof nativeBridge.createBackupFileToDownloads === 'function' ? 'downloads' : ''))
                     : '';
                 if (nativeExportTarget) {
-                    try {
-                        session = startChunkedBackup(backupFileName, nativeExportTarget);
-                        if (session) {
-                            const companionDbs = await collectCompanionDatabasesDump();
-                            const lsDump = {};
-                            try {
-                                for (let i = 0; i < localStorage.length; i++) {
-                                    const k = localStorage.key(i);
-                                    if (k) lsDump[k] = localStorage.getItem(k);
-                                }
-                            } catch (_) {}
-
-                            writeBackupText(session, '{"type":"rp-hub-complete-backup","__rphub_backup__":1,"version":8,"exportedAt":"' + new Date().toISOString() + '","entries":[');
-                            let first = true;
-                            for (const entry of entries) {
-                                const item = jsonChunkStringifyEntry({ key: entry.key, value: unwrapForStorage(entry.value) });
-                                writeBackupText(session, (first ? '' : ',') + item);
-                                first = false;
-                                await new Promise(resolve => setTimeout(resolve, 0));
-                            }
-                            // 2.8.19：删除 databases.RPHubDB.store 的重复写入 —— 旧实现把同一批数据在此再写一遍，
-                            // 备份文件因此恒为逻辑数据的 2 倍（夹具实测 21.4MB 数据 → 42.7MB 文件）。该块没有任何消费方：
-                            // 官方恢复端 parseUniversalBackupPackage 走分支 A 取 entries[]，databases 只交给
-                            // restoreCompanionDatabases 的白名单（sf_moments_db /
-                            // SakuraMomentsDB / moments）；柳贯一插件 V20.2.1 的导入只接受 .zip 自产格式；
-                            // 桌面版 script_v12.6 读的是 __rphub_backup__.data。databases 现在只承载伴随库。
-                            writeBackupText(session, '],"databases":{');
-                            let firstDb = true;
-                            Object.keys(companionDbs).forEach(dbName => {
-                                writeBackupText(session, (firstDb ? '' : ',') + '"' + dbName + '":' + JSON.stringify(companionDbs[dbName]));
-                                firstDb = false;
-                            });
-                            writeBackupText(session, '},"webStorage":{"localStorage":' + JSON.stringify(lsDump) + '}}');
-
-                            await finishChunkedBackup(session, entries.length);
-                            return;
+                    session = startChunkedBackup(fileName, nativeExportTarget);
+                }
+                if (!session) session = await openBackupPicker(fileName);
+                if (!session && !nativeBridge?.isNativeApp?.() && window.showSaveFilePicker) {
+                    browserWriter = await (await window.showSaveFilePicker({ suggestedName: fileName,
+                        types: [{ description: 'JSON 备份', accept: { 'application/json': ['.json'] } }] })).createWritable();
+                }
+                const sources = [getMainDb(), getLegacyDb()].filter(Boolean);
+                const keys = await Promise.all(sources.map(db => window.RPHubStorage.readStorageKeys(db)));
+                const seen = new Set(), local = backupScope.value.localData ? collectLocalStorageEntries() : [];
+                const entries = async function* () {
+                    for (const db of sources) {
+                        for await (const entry of window.RPHubStorage.iterateStoredEntries(db, false,
+                            key => !seen.has(getStorageLogicalKey(key)) && shouldIncludeBackupEntry({ key }))) {
+                            const logical = getStorageLogicalKey(entry.key);
+                            if (seen.has(logical)) continue;
+                            seen.add(logical);
+                            const item = { key: 'rp_hub_' + logical, value: entry.value };
+                            if (shouldIncludeBackupEntry(item)) yield item;
                         }
-                    } catch (chunkError) {
-                        console.warn('Chunked backup failed, falling back to picker:', chunkError);
-                        abortChunkedBackup(session);
-                        session = null;
+                    }
+                    yield* local;
+                };
+                const parts = [];
+                let fallbackBytes = 0;
+                const result = await window.RPBackupTransfer.writeBackup({
+                    entries: entries(), total: new Set(keys.flat().filter(key => !key.startsWith('__rp_')
+                        && shouldIncludeBackupEntry({ key })).map(getStorageLogicalKey)).size + local.length,
+                    readCharacter: window.RPHubStorage.readCharacter,
+                    transform: entry => slimBackupEntry(entry, true), companions: collectCompanionDatabasesDump,
+                    webStorage: () => Object.fromEntries(Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
+                        .filter(Boolean).map(key => [key, localStorage.getItem(key)])),
+                    progress: value => Object.assign(backupTask, { percent: value.percent, message: value.message,
+                        detail: value.done + ' / ' + value.total + ' 项 · 已写 ' + fmtMB(value.bytes) }),
+                    write: async text => {
+                        if (session) writeBackupText(session, text);
+                        else if (browserWriter) await browserWriter.write(text);
+                        else {
+                            fallbackBytes += text.length * 2;
+                            if (fallbackBytes > 64 * 1048576) throw new Error('当前环境不支持大文件直接保存，请在本地版或支持文件保存的浏览器中导出');
+                            parts.push(text);
+                        }
+                    }
+                });
+                if (session) await finishChunkedBackup(session, result.count);
+                else if (browserWriter) await browserWriter.close();
+                else {
+                    const blob = new Blob(parts, { type: 'application/json' });
+                    if (nativeBridge?.isNativeApp?.()) cardUtils.downloadBlob(blob, fileName);
+                    else {
+                        const url = URL.createObjectURL(blob), link = document.createElement('a');
+                        link.href = url; link.download = fileName; link.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 3000);
                     }
                 }
-                if (await saveBackupWithPicker(entries, backupFileName)) return;
-
-                const companionDbs = await collectCompanionDatabasesDump();
-                const lsDump = {};
-                try {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        if (k) lsDump[k] = localStorage.getItem(k);
-                    }
-                } catch (_) {}
-                const rphubStoreRecords = entries.filter(e => e && typeof e.key === 'string' && e.key.indexOf(LOCAL_BACKUP_PREFIX) !== 0).map(e => ({ k: e.key, v: unwrapForStorage(e.value) }));
-
-                const backupPayload = {
-                    type: 'rp-hub-complete-backup',
-                    __rphub_backup__: 1,
-                    version: 8,
-                    exportedAt: new Date().toISOString(),
-                    entries: entries.map(entry => ({ key: entry.key, value: unwrapForStorage(entry.value) })),
-                    databases: {
-                        RPHubDB: { store: rphubStoreRecords },
-                        ...companionDbs
-                    },
-                    webStorage: {
-                        localStorage: lsDump
-                    }
-                };
-                downloadJsonFile(backupPayload, backupFileName);
-                showToast(`已导出全部软件数据（${entries.length} 项）`, 'success');
+                Object.assign(backupTask, { percent: 100, locked: false, message: '备份已导出' });
+                showToast(`已导出全部软件数据（${result.count} 项）`, 'success');
             } catch (error) {
                 console.error('Full backup failed:', error);
                 abortChunkedBackup(session);
-                showToast('全量导出失败：' + (error.message || error), 'error', 5000);
+                await browserWriter?.abort().catch(() => {});
+                Object.assign(backupTask, { locked: false, error: error.message || String(error), message: '导出未完成，请重新尝试' });
             } finally {
                 isExportingAllData.value = false;
             }
@@ -6701,7 +6696,14 @@ const app = createApp({
                 // 辅助：从 ZIP 中解析所有 chunk 数据
         const parseUniversalZipPackage = async (file) => {
             if (!window.JSZip) throw new Error('ZIP 组件尚未加载完成，请稍候重试');
-            const zip = await window.JSZip.loadAsync(file);
+            const data = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onprogress = event => { if (event.lengthComputable) backupTask.percent = event.loaded / event.total * 15; };
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error || new Error('读取文件失败'));
+                reader.readAsArrayBuffer(file);
+            });
+            const zip = await window.JSZip.loadAsync(data);
             const mfEntry = zip.file('manifest.json');
             if (!mfEntry) throw new Error('不是有效的 ZIP 备份：缺少 manifest.json');
             const manifest = JSON.parse(await mfEntry.async('string'));
@@ -6726,6 +6728,8 @@ const app = createApp({
 
             // 2. 遍历各数据库及其分块 chunk
             const databases = manifest.databases || [];
+            const totalChunks = databases.reduce((sum, db) => sum + (db.stores || []).reduce((n, store) => n + (store.chunks || []).length, 0), 0);
+            let readChunks = 0;
             for (const dbm of databases) {
                 const dbName = dbm.name;
                 extraDatabases[dbName] = extraDatabases[dbName] || {};
@@ -6742,6 +6746,10 @@ const app = createApp({
                                 try { records.push(JSON.parse(line)); } catch (_) {}
                             }
                         });
+                        backupTask.percent = 15 + ++readChunks / Math.max(1, totalChunks) * 40;
+                        backupTask.message = '正在解压与校验';
+                        backupTask.detail = readChunks + ' / ' + totalChunks + ' 块';
+                        await new Promise(resolve => setTimeout(resolve, 0));
                     }
                     extraDatabases[dbName][storeName] = records;
 
@@ -6772,16 +6780,16 @@ const app = createApp({
             const input = event.target;
             const file = input.files?.[0];
             if (!file) return;
+            if (streamImportPanel.value?.isOpen) return;
+            if (!/\.zip$/i.test(file.name)) return streamImportPanel.value.start(event);
+            beginBackupTask('导入备份');
 
             const handleSuccess = async (pack) => {
                 try {
                     if (!pack.entries || !pack.entries.length) throw new Error('备份文件中未找到有效的应用数据条目');
                     pack.entries = window.RPBackupFormat.prepareMemoryEntries(pack.entries);
-                    const formatTip = pack.isZipFormat
-                        ? '检测到 RP-Hub 扩展 ZIP 备份，将完整解析并导入'
-                        : (pack.isPluginFormat ? '检测到 RP-Hub 扩展流式备份，将无缝互通解析' : '检测到 RP-Hub 标准全量备份');
-                    const confirmed = await showVueConfirmModal('导入数据', formatTip + '。将覆盖当前软件数据，导入前建议先备份。确定继续吗？', { confirmText: '确认导入' });
-                    if (!confirmed) return;
+                    const confirmed = await confirmBackupTask('导入备份', '备份已读取。将覆盖对应的现有数据，请先保留当前备份，再确认导入。');
+                    if (!confirmed) { backupTask.message = '已取消，原数据未改动'; return; }
                     await flushPendingChatHistorySave();
                     if (!getMainDb()) await initDB();
 
@@ -6877,7 +6885,7 @@ const app = createApp({
                     if (preflight.warnings.length) {
                         const head = preflight.warnings.slice(0, 3).join('；');
                         const more = preflight.warnings.length > 3 ? ' 等 ' + preflight.warnings.length + ' 项' : '';
-                        const goOn = await showVueConfirmModal('备份有异常条目',
+                        const goOn = await confirmBackupTask('备份有异常条目',
                             '校验发现：' + head + more + '。继续导入会缺少这部分数据。仍要继续吗？',
                             { confirmText: '仍然导入' });
                         if (!goOn) return;
@@ -6962,12 +6970,18 @@ const app = createApp({
                         const restoredEntries = window.RPHubStorage.prepareRestoredMemoryEntries(preflight.idbEntries);
                         const transaction = getMainDb().transaction(['store'], 'readwrite');
                         const store = transaction.objectStore('store');
+                        backupTask.message = '正在写入备份';
+                        let written = 0;
                         restoredEntries.forEach(entry => {
                             // [rphub 2.8.98] 同自动备份还原那条：去掉多余 clone。
                             //   preflight.idbEntries 同样来自 slimFullBackupImportEntries，
                             //   即 JSON.parse 的纯对象，不含代理 / Date / ArrayBuffer。
                             //   __rphub_bin__ 仍在 restore 这一步转 Blob，语义不变。
-                            putBackupEntry(store, entry);
+                            const request = putBackupEntry(store, entry);
+                            if (request) request.onsuccess = () => {
+                                backupTask.percent = 60 + ++written / restoredEntries.length * 35;
+                                backupTask.detail = written + ' / ' + restoredEntries.length + ' 项';
+                            };
                         });
                         await new Promise((resolve, reject) => {
                             transaction.oncomplete = resolve;
@@ -6992,6 +7006,7 @@ const app = createApp({
                     }
 
                     showToast('全量数据导入成功，正在刷新页面', 'success');
+                    Object.assign(backupTask, { percent: 100, message: '导入完成，正在重新打开' });
                     try {
                         if (window.AndroidBridge && typeof window.AndroidBridge.clearPatchCacheBeforeReload === 'function') {
                             window.AndroidBridge.clearPatchCacheBeforeReload();
@@ -7001,15 +7016,16 @@ const app = createApp({
                     }
                     setTimeout(() => window.location.reload(), 500);
                 } catch (err) {
-                    showToast('全量数据导入失败：' + (err.message || err), 'error');
+                    Object.assign(backupTask, { locked: false, error: err.message || String(err), message: '导入未完成' });
                 } finally {
                     input.value = '';
+                    if (backupTask.percent < 100) backupTask.locked = false;
                 }
             };
 
             const handleError = (error) => {
                 input.value = '';
-                showToast('全量数据导入失败：' + (error.message || error), 'error');
+                Object.assign(backupTask, { locked: false, error: error.message || String(error), message: '读取失败，原数据未改动' });
             };
 
             const fileName = (file.name || '').toLowerCase();
@@ -7023,70 +7039,24 @@ const app = createApp({
                 const startZipRead = () => parseUniversalZipPackage(file).then(handleSuccess).catch(handleError);
                 const zipVerdict = checkRestoreSize(zipBytes, file.name || '');
                 if (zipVerdict === 'refuse') {
-                    showVueConfirmModal('备份远超设备上限',
+                    confirmBackupTask('备份远超设备上限',
                         '这个 ZIP 备份有 ' + fmtMB(file.size) + '，解压后约 ' + fmtMB(zipBytes)
                         + '，超过当前设备预检上限（约 ' + fmtMB(getRestoreBudget().maxFileBytes)
                         + '）的 3 倍以上。继续导入很可能直接闪退，且不会改动任何现有数据。'
                         + '建议先在电脑上解压整理或换用更小的备份。仍要强行尝试吗？',
                         { confirmText: '强行导入' }).then(function (goOn) {
-                            if (goOn) { startZipRead(); } else { input.value = ''; }
+                            if (goOn) { startZipRead(); } else { input.value = ''; backupTask.locked = false; backupTask.message = '已取消'; }
                         });
                 } else if (zipVerdict === 'confirm') {
-                    showVueConfirmModal('备份较大，导入可能失败',
+                    confirmBackupTask('备份较大，导入可能失败',
                         '这个 ZIP 有 ' + fmtMB(file.size) + '，解压后约 ' + fmtMB(zipBytes)
                         + '，当前设备内存偏紧（预检上限约 ' + fmtMB(getRestoreBudget().maxFileBytes)
                         + '）。继续导入有失败甚至闪退的风险。仍要尝试吗？',
                         { confirmText: '仍然导入' }).then(function (goOn) {
-                            if (goOn) { startZipRead(); } else { input.value = ''; }
+                            if (goOn) { startZipRead(); } else { input.value = ''; backupTask.locked = false; backupTask.message = '已取消'; }
                         });
                 } else {
                     startZipRead();
-                }
-            } else {
-                // 读取 JSON 文件
-                const startJsonRead = () => {
-                    const reader = new FileReader();
-                    // 2.8.78：parse 完立刻断开 FileReader 对源字符串的持有。
-                    // 原实现把整段导入 await 在 onload 里，target.result 那份源字符串
-                    // 约 0.77× 文件字节，与 JSON.parse 出来的对象图全程并存。
-                    // 改成同步 onload、解析完立即返回，FileReader 与其 result 尽快变成垃圾，
-                    // 导入全程只留对象图。
-                    reader.onload = ({ target }) => {
-                        let rawData;
-                        try {
-                            rawData = JSON.parse(target.result);
-                        } catch (error) {
-                            handleError(error);
-                            return;
-                        } finally {
-                            target.onload = null;
-                            target.onerror = null;
-                        }
-                        parseUniversalBackupPackage(rawData).then(handleSuccess).catch(handleError);
-                    };
-                    reader.onerror = () => handleError(reader.error || new Error('读取文件失败'));
-                    reader.readAsText(file);
-                };
-                // 2.8.19：readAsText 会把整份文件变成 JS 字符串，撑爆渲染进程时只表现为闪退，
-                // 用户会误以为「备份文件坏了」。读之前先量体积。
-                const importVerdict = checkRestoreSize(file.size, file.name || '');
-                if (importVerdict === 'refuse') {
-                    // 2.8.78：原来是硬拒，用户没有任何出路。体积判据基于性能计数器，
-                    // 估偏时不该让用户彻底无法恢复数据 ⇒ 改成强警告 + 可强制继续。
-                    showVueConfirmModal('备份远超设备上限',
-                        '这个备份有 ' + fmtMB(file.size) + '，超过当前设备预检上限（约 '
-                        + fmtMB(getRestoreBudget().maxFileBytes) + '）的 3 倍以上。继续导入很可能直接闪退，'
-                        + '且不会改动任何现有数据。建议先在电脑上拆分或换用更小的备份。仍要强行尝试吗？',
-                        { confirmText: '强行导入' }).then(function (goOn) {
-                            if (goOn) { startJsonRead(); } else { input.value = ''; }
-                        });
-                } else if (importVerdict === 'confirm') {
-                    showVueConfirmModal('备份较大，导入可能失败',
-                        '这个备份有 ' + fmtMB(file.size) + '，当前设备内存偏紧（预检上限约 '
-                        + fmtMB(getRestoreBudget().maxFileBytes) + '）。继续导入有失败甚至闪退的风险。仍要尝试吗？',
-                        { confirmText: '仍然导入' }).then(function (goOn) { if (goOn) startJsonRead(); });
-                } else {
-                    startJsonRead();
                 }
             }
         };
@@ -12273,10 +12243,14 @@ const app = createApp({
             });
         };
 
-        const buildClassicSummaryJob = (snapshot, targetIndex) => {
+        const buildClassicSummaryJob = (snapshot, targetIndex, includeText = true) => {
             const turns = snapshot.turns;
             const targetTurn = turns[targetIndex];
             if (!targetTurn || !currentCharacter.value?.uuid) return null;
+            const sourceUserIds = getClassicTurnSourceIds(targetTurn, 'user');
+            const sourceAssistantIds = getClassicTurnSourceIds(targetTurn, 'assistant');
+            const key = getClassicMemoryKey(sourceAssistantIds, targetTurn.turn);
+            if (!includeText) return { index: targetIndex, turn: targetTurn.turn, sourceAssistantIds, key };
 
             const contextTurns = turns.slice(Math.max(0, targetIndex - 3), targetIndex + 1).map(turnInfo => ({
                 turn: turnInfo.turn,
@@ -12287,8 +12261,6 @@ const app = createApp({
             const targetContext = contextTurns[contextTurns.length - 1];
             if (!targetContext?.userContent || !targetContext?.assistantContent) return null;
 
-            const sourceUserIds = getClassicTurnSourceIds(targetTurn, 'user');
-            const sourceAssistantIds = getClassicTurnSourceIds(targetTurn, 'assistant');
             return {
                 characterId: currentCharacter.value.uuid,
                 storyScopeId: getCurrentStoryBranchScopeId(),
@@ -12303,7 +12275,7 @@ const app = createApp({
                     .map(message => String(message.content || ''))
                     .join('\n\n') || String(targetTurn.user?.content || ''),
                 sourceAssistantText: targetContext.assistantContent,
-                key: getClassicMemoryKey(sourceAssistantIds, targetTurn.turn)
+                key
             };
         };
 
@@ -13677,6 +13649,7 @@ const app = createApp({
             };
 
             let vectorSkippedNoSource = 0;
+            const emptyTargets = new Set();
             try {
                 while (_classicBatchExtractAbort === batchController && !batchController.signal.aborted) {
                     _classicBatchRescanRequested = false;
@@ -13685,10 +13658,18 @@ const app = createApp({
                     const safeTurnCount = isConversationBusy.value
                         ? Math.max(0, snapshot.turns.length - 1)
                         : snapshot.turns.length;
-                    const jobs = snapshot.turns
-                        .slice(0, safeTurnCount)
-                        .map((_, index) => buildClassicSummaryJob(snapshot, index))
-                        .filter(job => job && !hasClassicMemoryForJob(job));
+                    const coveredIds = new Set(classicMemories.value.flatMap(memory => memory.sourceAssistantIds || []));
+                    const coveredTurns = new Set(classicMemories.value.map(memory => Number(memory.turn)));
+                    const jobs = [];
+                    for (let index = 0; index < safeTurnCount; index++) {
+                        const job = buildClassicSummaryJob(snapshot, index, false);
+                        if (job && !emptyTargets.has(job.key) && !(job.sourceAssistantIds.length
+                            ? job.sourceAssistantIds.some(id => coveredIds.has(id)) : coveredTurns.has(job.turn))) jobs.push(job);
+                        if (index % 128 === 0) {
+                            await new Promise(resolve => setTimeout(resolve, 0));
+                            if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
+                        }
+                    }
                     const remaining = {
                         summary: jobs.length,
                         vector: memorySettings.mode === MEMORY_MODE_ENHANCED
@@ -13700,13 +13681,19 @@ const app = createApp({
                     let summarized = 0;
                     reportSummary(0, jobs.length);
 
-                    const runClassicJob = async job => {
+                    const runClassicJob = async target => {
+                        const job = buildClassicSummaryJob(snapshot, target.index);
+                        if (!job) {
+                            emptyTargets.add(target.key);
+                            reportSummary(++summarized, jobs.length);
+                            return { job: target, added: false };
+                        }
                         try {
                             const added = await generateAndStoreClassicMemory(job, batchController.signal);
                             if (added || hasClassicMemoryForJob(job)) reportSummary(++summarized, jobs.length);
                             return { job, added };
                         } catch (error) {
-                            return { job, error };
+                            return { job: { ...job, index: target.index }, error };
                         }
                     };
                     const concurrency = normalizeClassicMemoryConcurrency(memorySettings.classicConcurrency);
@@ -16174,7 +16161,7 @@ const app = createApp({
                 });
             },
             toggleNavigation, closeNavigation, navigateWorkspace, shellRoot, shellParent, selectedCompetition, openCompetition, classicUi,
-            onlineOpen, dockFolded, foldDock, galleryPage, shellGoBack, streamImportPanel,
+            onlineOpen, dockFolded, foldDock, galleryPage, shellGoBack, streamImportPanel, backupTask, backupProfiles, backupProfile,
             showAnnouncement, openAnnouncement, closeAnnouncement,
             prepareStreamImport, restoreRphubBinaryDeep, showVueConfirmModal,
             settingsSection, settingTitles, openSettingsSection, selectConfigurationCharacter,

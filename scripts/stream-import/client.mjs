@@ -1,10 +1,36 @@
-import { upgrade, database, resultOf, completed, rangeOf, saveSession, removeSession, each } from './storage.mjs';
+import { upgrade, database, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate } from './storage.mjs';
+import { profile, profiles } from './profiles.mjs';
 
 const readSession = (db, id) => resultOf(db.transaction('restore_sessions').objectStore('restore_sessions').get(id));
 const webText = value => String(value ?? '');
 const cancelled = signal => {
     if (signal?.aborted) throw new DOMException('导入已取消', 'AbortError');
 };
+export async function stageEntries(entries, { limits = profile() } = {}) {
+    const db = await window.RPHubStorage.initDB(), id = crypto.randomUUID().replaceAll('-', '');
+    const sink = new StagingSink(db, id), encoder = new TextEncoder();
+    try {
+        await saveSession(db, { id, state: 'reading' });
+        let index = 0;
+        for await (const entry of entries) {
+            const array = Array.isArray(entry.value) || !!entry.value?.[Symbol.asyncIterator];
+            let part = 0;
+            const write = async value => {
+                const bytes = encoder.encode(JSON.stringify(value)).length;
+                if (bytes > limits.unitBytes) throw new Error('单条云端数据超过当前读取档位，请调整后重试');
+                sink.emit({ kind: 'unit', source: 'entries', entry: index, part: part++, value, bytes });
+                await sink.flush();
+            };
+            if (array) { for await (const value of entry.value) await write(value); }
+            else await write(entry.value);
+            sink.emit({ kind: 'record', source: 'entries', entry: index++, key: entry.key, hasValue: true, array, count: part });
+            await sink.flush();
+        }
+        const result = await validate(db, id, 'entries', async () => {}, limits.collectionBytes);
+        await saveSession(db, { id, ...result, source: 'entries', state: 'complete' });
+        return id;
+    } catch (error) { await removeSession(db, id); throw error; }
+}
 async function momentsDb() {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open('sf_moments_db', 1);
@@ -182,4 +208,4 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
         }
     }
 }
-window.RPStreamImport = { upgrade, database, recover, apply, readSession, removeSession };
+window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles };

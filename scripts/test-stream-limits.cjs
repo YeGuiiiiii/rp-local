@@ -53,6 +53,19 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     });
     report.singleRecordLimit = await failed();
     assert.match(report.singleRecordLimit, /32 MB/);
+    await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
+    await page.getByLabel('备份读取档位', { exact: true }).selectOption('fast');
+    await page.evaluate(() => {
+      const input = document.querySelector('[aria-label="选择流式导入文件"]'), transfer = new DataTransfer();
+      transfer.items.add(new File(['{"type":"rp-hub-complete-backup","entries":[{"key":"rp_hub_characters","value":[{"uuid":"fast-card","name":"大卡","description":"',
+        'x'.repeat(33 * 1048576), '"}]}]}'], 'fast-33mb.json', { type: 'application/json' }));
+      input.files = transfer.files; input.dispatchEvent(new Event('change'));
+    });
+    await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready', null, { timeout: 120000 });
+    assert.equal(await page.evaluate(() => __qa.streamImportPanel.state.summary.cards), 1);
+    await page.getByRole('dialog', { name: '导入备份', exact: true }).getByRole('button', { name: '取消', exact: true }).click();
+    await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
+    await page.getByLabel('备份读取档位', { exact: true }).selectOption('balanced');
     const largeFile = path.resolve(root, '../RP-流式导入实验/test-data/large-340mb.json');
     await page.getByLabel('选择流式导入文件').setInputFiles(largeFile);
     report.largeFileBytes = fs.statSync(largeFile).size;

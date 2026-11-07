@@ -84,7 +84,7 @@ export class BackupStreamDecoder {
         parser.onValue = ({ value, stack }) => {
             if (stack.length) return;
             const bytes = utf8.encode(JSON.stringify(value)).length;
-            if (bytes > this.maxUnitBytes) throw this.failure('单条记录超过设定上限，已停止；文件未启用', path);
+            if (bytes > this.maxUnitBytes) throw this.failure('单条记录超过 ' + this.maxUnitBytes / 1048576 + ' MB，请切换读取档位；原数据未改动', path);
             this.maxUnit = Math.max(this.maxUnit, bytes);
             active.accept(value, bytes);
             this.active = null;
@@ -191,7 +191,7 @@ export class BackupStreamDecoder {
             this.bytes += bytes.byteLength;
             const earliest = this.active?.start ?? this.lastToken;
             if (this.bytes - earliest > this.maxUnitBytes + bytes.byteLength) {
-                throw this.failure('当前字符串或单条记录超过 32 MB，已停止读取');
+                throw this.failure('当前字符串或单条记录超过 ' + this.maxUnitBytes / 1048576 + ' MB，请切换读取档位');
             }
         } catch (error) {
             if (error instanceof TokenizerError || error instanceof TokenParserError) {

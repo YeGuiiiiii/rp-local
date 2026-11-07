@@ -75,7 +75,7 @@ export class StagingSink {
         this.queue.length = 0;
     }
 }
-export async function validate(db, session, source, wait) {
+export async function validate(db, session, source, wait, maxCollectionBytes = 128 * 1048576) {
     const last = new Map();
     await each(db, 'restore_records', rangeOf(session, source), item => {
         last.set(item.key, item);
@@ -106,7 +106,7 @@ export async function validate(db, session, source, wait) {
         });
         if (count !== record.count) throw new Error('暂存记录不完整：' + key);
         // The formal reader still loads one collection at a time. Do not accept an unsafe final write.
-        if (bytes > 128 * 1048576) throw new Error('单个数据集合超过 128 MB，需先拆分备份：' + key);
+        if (bytes > maxCollectionBytes) throw new Error('单个数据集合超过 ' + maxCollectionBytes / 1048576 + ' MB，请切换读取档位或拆分备份：' + key);
         if (key === 'rp_hub_characters') summary.cards = record.count;
         if (key.startsWith('rp_hub_chat_') && record.array) summary.messages += record.count;
         if (key.startsWith('rp_hub_classic_memories_')) summary.memories += record.count;

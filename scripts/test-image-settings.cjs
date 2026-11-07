@@ -136,6 +136,7 @@ fs.mkdirSync(output, { recursive: true });
       if (pack.entries.find(entry => entry.key === 'rp_hub_characters').value[0].name !== '采样器测试') throw new Error('Export text corrupted');
       return pack.type;
     }), 'rp-hub-complete-backup');
+    await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     await page.setViewportSize({ width: 390, height: 900 });
     await page.evaluate(() => { __qa.toasts = []; });
     await page.locator('.management-view:visible').evaluate(element => { element.scrollTop = 0; });
@@ -143,6 +144,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.evaluate(() => { __folder = 'content://test/custom-folder'; window.rphubBackupFolderChanged(__folder); __qa.backupFileName = '我的备份'; });
     await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
     await page.waitForFunction(() => __exported.length === 2 && !__qa.isExportingAllData);
+    await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     assert.deepEqual(await page.evaluate(() => __exported.map(({ name, target }) => ({ name, target }))), [
       { name: await page.evaluate(() => __exported[0].name), target: 'downloads' }, { name: '我的备份.json', target: 'custom' },
     ]);

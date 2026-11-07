@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T09:14:36+08:00",
+  "generatedAt": "2026-11-07T18:57:19+08:00",
   "title": "Design System: RP 本地版 · 经典、白昼手账与夜蔷薇",
   "extensions": {
     "colorMeta": {
@@ -35,7 +35,7 @@
       { "name": "segmented-selection", "value": "transform 180ms cubic-bezier(.22,1,.36,1)", "purpose": "现有设置分段控件。" },
       { "name": "glass-reflection", "value": "transform 180ms cubic-bezier(.22,1,.36,1)", "purpose": "姿态或指针只推动反光层；关闭、后台、离开画廊或减少动态效果时停止。" },
       { "name": "transfer-open", "value": "180ms ease-out", "purpose": "弹窗从透明度 .7、下移 8px 进入；减少动态效果时停用。" },
-      { "name": "transfer-progress", "value": "1.8s linear infinite", "purpose": "等候状态的不定进度条；确定进度宽度以 180ms ease-out 过渡，两者均服从减少动态效果设置。" }
+      { "name": "transfer-progress", "value": "1.8s linear infinite", "purpose": "保留的不定进度 CSS 样式；2.9.005 完整导出使用实际百分比、处理项数与已写大小，不使用此动画。确定进度宽度以 180ms ease-out 过渡，减少动态效果时停用动画与过渡。" }
     ],
     "breakpoints": [
       { "name": "compact-heading", "value": "max-width: 400px" },
@@ -125,7 +125,7 @@
     {
       "name": "导入与导出弹窗",
       "kind": "custom",
-      "description": "2.9.004 现有表面的扩展。导入与完整导出等候共用组件，聊天导出共用样式；沿用当前 shell 昼夜配色、8px 弹窗、6px 操作按钮与44px圆形关闭钮。选文件后直接读取，可暂停/继续/取消；校验后显示数量与覆盖提醒，一次确认才写入，写入取消恢复原数据，还原失败提供重新打开。活动任务拦截返回、Escape与跳转，失败/已取消可关闭或重选。背景 inert、焦点循环、关闭恢复焦点与滚动；短横屏独立滚动，减少动态效果时停用动画。聊天导出保留可选记忆，记忆管理保留导入/编辑/保存。应用使用日夜504×384透明整理存档玥玥，启动等候共用；静态预览省略人物，仅展示待确认布局，不模拟运行行为。源图与精确提示词见 artwork/transfer-2.9.004-day/、artwork/transfer-2.9.004-night/ 及两份 transfer.webp.json。19张截图与审查见 .impeccable/review/transfer-2.9.004/；记录40/40检查、重选文件补测及APK140网页文件/原签名核对通过，未做Android真机系统手势验证，检测器缺失未形成检测结论。",
+      "description": "2.9.004 建立的现有表面在2.9.005扩展为全局共用任务弹窗，不随备份页面销毁。导入、完整导出与云端任务共用组件，聊天导出共用样式；沿用当前shell昼夜配色、8px弹窗、6px操作按钮与44px圆形关闭钮。普通JSON、流式JSON与历史还原共用逐段读取，显示已读/总大小与百分比，可暂停/继续/取消；校验后在同一弹窗显示数量、覆盖提醒并确认写入，写入取消恢复原数据，还原失败提供重新打开。ZIP保留兼容入口和分阶段进度。完整导出准备时0%，随后显示实际百分比、处理项数与已写大小，收尾成功才完成，不使用不定进度动画。数据页原生下拉框保存省内存/均衡/高速档位，默认均衡，选项显示单条与集合上限，超限提示调整。运行任务拦截返回、Escape与跳转；导出完成、一般失败、已取消可叉掉，JSON失败/已取消可重选。云端恢复提交后保持锁定并重开，需要恢复原数据时仅提供重新打开并恢复。背景inert、焦点循环、关闭恢复焦点与滚动；短横屏独立滚动，减少动态效果时停用动画。聊天导出保留可选记忆，记忆管理保留导入/编辑/保存。沿用日夜504×384透明整理存档玥玥，启动等候共用，未新增美术或视觉体系；静态预览省略人物，仅展示仍适用的待确认布局，不模拟运行行为。源图与精确提示词见artwork/transfer-2.9.004-day/、artwork/transfer-2.9.004-night/及两份transfer.webp.json。历史19张截图、40/40检查与APK140网页文件/原签名核对保留于.impeccable/review/transfer-2.9.004/；2.9.005的22张截图均已审阅，审查结论ship，见.impeccable/review/backup-2.9.005/。浏览器与模拟接口证据不证明Android真机手势、进程存活、真实云端部署或全部长聊天模型请求完成；检测器缺失未形成检测结论。",
       "html": "<section class=\"ds-transfer\" aria-label=\"导入备份示例\"><h3>备份已准备好</h3><p class=\"ds-transfer-file\">故事备份.json</p><progress value=\"100\" max=\"100\" aria-label=\"文件读取进度\"></progress><div class=\"ds-transfer-meta\"><span>4.0 MB / 4.0 MB</span><span>100%</span></div><p role=\"status\">校验完成，等待确认</p><p class=\"ds-transfer-summary\">角色卡 3 张 · 聊天 128 条 · 记忆 12 条</p><p>导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。</p><div class=\"ds-transfer-actions\"><button type=\"button\">取消</button><button class=\"ds-transfer-primary\" type=\"button\">确认导入</button></div></section>",
       "css": ".ds-transfer{position:relative;width:min(100%,440px);max-height:100%;overflow-y:auto;overscroll-behavior:contain;padding:24px;border-radius:8px;background:var(--shell-surface,#fff);color:var(--shell-text,#252832);box-shadow:0 18px 54px rgb(0 0 0 / .24);font-family:var(--font-sans,system-ui);letter-spacing:0;scrollbar-color:var(--shell-accent,#43846d) transparent}.ds-transfer h3{margin:0;font-size:20px;line-height:1.5;font-weight:750;overflow-wrap:anywhere}.ds-transfer p{margin:12px 0;font-size:14px;line-height:1.65;overflow-wrap:anywhere}.ds-transfer .ds-transfer-file{margin:4px 0 20px;font-size:13px;opacity:.8}.ds-transfer progress{display:block;width:100%;height:7px;margin:20px 0 10px;border:0;border-radius:4px;overflow:hidden;appearance:none;background:var(--shell-line,#e8eaee);accent-color:var(--shell-accent,#43846d)}.ds-transfer progress::-webkit-progress-bar{background:var(--shell-line,#e8eaee)}.ds-transfer progress::-webkit-progress-value{background:var(--shell-accent,#43846d)}.ds-transfer progress::-moz-progress-bar{background:var(--shell-accent,#43846d)}.ds-transfer-meta{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-variant-numeric:tabular-nums}.ds-transfer .ds-transfer-summary{padding:12px 0;border-block:1px solid var(--shell-line,#e8eaee);font-weight:600}.ds-transfer-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin-top:24px}.ds-transfer button{min-height:44px;padding:10px 16px;border:1px solid var(--shell-line,#e8eaee);border-radius:6px;color:inherit;background:var(--shell-surface,#fff);font:500 14px var(--font-sans,system-ui);cursor:pointer}.ds-transfer .ds-transfer-primary{background:var(--shell-text,#252832);border-color:var(--shell-text,#252832);color:var(--shell-surface,#fff)}.ds-transfer button:hover{filter:brightness(.94)}.ds-transfer button:active{transform:translateY(1px)}.ds-transfer button:focus-visible{outline:2px solid var(--shell-accent,#43846d);outline-offset:3px}@media(max-height:600px){.ds-transfer{padding:20px}.ds-transfer-actions{margin-top:16px}}"
     },

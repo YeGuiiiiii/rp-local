@@ -535,11 +535,17 @@
         return entry;
     };
     // Each entry gets its own read transaction: awaiting a card read cannot expire a cursor.
-    const eachStoredEntry = async (targetDb, onEntry, shouldStop) => {
+    async function* iterateStoredEntries(targetDb, expand = true, includeKey = () => true) {
         for (const key of await readStorageKeys(targetDb)) {
+            if (isPrivateCardKey(key) || key === LOCAL_MIRROR_KEY || !includeKey(key)) continue;
+            const entry = { key, value: await dbGetFrom(targetDb, key) };
+            yield expand ? await expandStorageEntry(entry) : entry;
+        }
+    }
+    const eachStoredEntry = async (targetDb, onEntry, shouldStop) => {
+        for await (const entry of iterateStoredEntries(targetDb)) {
             if (shouldStop?.()) return;
-            if (isPrivateCardKey(key) || key === LOCAL_MIRROR_KEY) continue;
-            await onEntry(await expandStorageEntry({ key, value: await dbGetFrom(targetDb, key) }));
+            await onEntry(entry);
         }
     };
 
@@ -940,6 +946,7 @@
         characterPreviewUrl: card => characterPreviews.get(Vue.toRaw(card))?.preview ?? card?.avatar ?? '',
         saveCharacterLibrary,
         eachStoredEntry,
+        iterateStoredEntries,
         deleteScopedStoredValue: (name, id, options = {}) => dbDeleteWithLegacy(scopedStorageKey(name, id), legacyScopedStorageKey(name, id), options),
         deleteStoredValue: (name, options = {}) => dbDeleteWithLegacy(storageKey(name), legacyStorageKey(name), options),
         getLegacyDb: () => legacyDb,

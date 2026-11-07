@@ -92,7 +92,7 @@ const origin = 'https://sta1n156.github.io';
     await page.evaluate(() => __qa.exportAllData());
     await page.waitForFunction(() => window.__exported);
     const exported = await page.evaluate(() => window.__exported);
-    await page.evaluate(() => { delete window.AndroidBridge; });
+    await page.evaluate(() => { delete window.AndroidBridge; __qa.streamImportPanel?.close(); });
     return JSON.parse(Buffer.from(exported.bytes,'base64').toString('utf8'));
   }
   async function importData(page, data) {
@@ -100,8 +100,8 @@ const origin = 'https://sta1n156.github.io';
       const file = new File([JSON.stringify(data)],'original-backup.json',{type:'application/json'});
       __qa.importAllData({target:{files:[file],value:'fixture'}});
     },data);
-    await page.waitForFunction(() => __qa.globalConfirmModal.show);
-    await page.evaluate(() => __qa.globalConfirmModal.onConfirm());
+    await page.waitForFunction(() => __qa.globalConfirmModal.show || __qa.streamImportPanel?.state.phase === 'ready');
+    await page.evaluate(() => __qa.streamImportPanel?.state.phase === 'ready' ? __qa.streamImportPanel.apply() : __qa.globalConfirmModal.onConfirm());
     await page.waitForEvent('load',{timeout:15000});
     await page.waitForFunction(() => window.__rpDataReady || !!document.getElementById('app')?.__vue_app__);
     await page.waitForTimeout(250);
@@ -157,7 +157,7 @@ const origin = 'https://sta1n156.github.io';
     const current=await load();
     verify(await importData(current,originalBackup));
     await current.waitForFunction(() => window.__rpDataReady);
-    await current.evaluate(() => window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState);
+    await current.evaluate(() => { window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState; });
     const currentBackup=await exportData(current);
     const currentSettings=currentBackup.entries.find(entry=>entry.key==='rp_hub_settings').value;
     assert.equal(currentSettings.retainedCompatibilityField.keep,true);

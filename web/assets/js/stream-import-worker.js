@@ -1226,7 +1226,7 @@
       parser.onValue = ({ value, stack }) => {
         if (stack.length) return;
         const bytes = utf8.encode(JSON.stringify(value)).length;
-        if (bytes > this.maxUnitBytes) throw this.failure("\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7\u8BBE\u5B9A\u4E0A\u9650\uFF0C\u5DF2\u505C\u6B62\uFF1B\u6587\u4EF6\u672A\u542F\u7528", path);
+        if (bytes > this.maxUnitBytes) throw this.failure("\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 " + this.maxUnitBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\uFF1B\u539F\u6570\u636E\u672A\u6539\u52A8", path);
         this.maxUnit = Math.max(this.maxUnit, bytes);
         active.accept(value, bytes);
         this.active = null;
@@ -1327,7 +1327,7 @@
         this.bytes += bytes.byteLength;
         const earliest = this.active?.start ?? this.lastToken;
         if (this.bytes - earliest > this.maxUnitBytes + bytes.byteLength) {
-          throw this.failure("\u5F53\u524D\u5B57\u7B26\u4E32\u6216\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 32 MB\uFF0C\u5DF2\u505C\u6B62\u8BFB\u53D6");
+          throw this.failure("\u5F53\u524D\u5B57\u7B26\u4E32\u6216\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 " + this.maxUnitBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D");
         }
       } catch (error) {
         if (error instanceof TokenizerError || error instanceof TokenParserError) {
@@ -1449,7 +1449,7 @@
       this.queue.length = 0;
     }
   };
-  async function validate(db, session, source, wait2) {
+  async function validate(db, session, source, wait2, maxCollectionBytes = 128 * 1048576) {
     const last = /* @__PURE__ */ new Map();
     await each(db, "restore_records", rangeOf(session, source), (item) => {
       last.set(item.key, item);
@@ -1478,7 +1478,7 @@
           throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61");
       });
       if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
-      if (bytes > 128 * 1048576) throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 128 MB\uFF0C\u9700\u5148\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
+      if (bytes > maxCollectionBytes) throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
       if (key === "rp_hub_characters") summary.cards = record.count;
       if (key.startsWith("rp_hub_chat_") && record.array) summary.messages += record.count;
       if (key.startsWith("rp_hub_classic_memories_")) summary.memories += record.count;
@@ -1486,6 +1486,15 @@
     for (const key of deleted) summary.memories -= last.get(key)?.count || 0;
     return { plan: [...last.values()], deleted: [...deleted], summary };
   }
+
+  // scripts/stream-import/profiles.mjs
+  var MB = 1048576;
+  var profiles = Object.freeze([
+    { id: "light", name: "\u7701\u5185\u5B58", chunkBytes: 65536, unitBytes: 16 * MB, collectionBytes: 64 * MB },
+    { id: "balanced", name: "\u5747\u8861", chunkBytes: 262144, unitBytes: 32 * MB, collectionBytes: 128 * MB },
+    { id: "fast", name: "\u9AD8\u901F", chunkBytes: MB, unitBytes: 64 * MB, collectionBytes: 256 * MB }
+  ]);
+  var profile = (id) => profiles.find((item) => item.id === id) || profiles[1];
 
   // scripts/stream-import/worker.mjs
   var paused = false;
@@ -1508,40 +1517,72 @@
     }
     if (data.type !== "import" || running) return;
     running = true;
-    const session = { id: data.id, name: data.file.name, state: "reading", bytes: data.file.size, read: 0 };
+    const limits = profile(data.profile);
+    const session = { id: data.id, name: data.file?.name || data.name, state: "reading", bytes: data.file?.size || data.bytes || 0, read: 0 };
     let db, timer, lastNotice = 0, phase = "\u5206\u5757\u8BFB\u53D6\u4E0E\u6821\u9A8C";
     const progress = (nextPhase) => {
       if (nextPhase) phase = nextPhase;
       if (performance.now() - lastNotice < 200 && !nextPhase) return;
       lastNotice = performance.now();
-      postMessage({ type: "progress", read: session.read, phase });
+      postMessage({ type: "progress", read: session.read, bytes: session.bytes, phase });
     };
     const heartbeat = setInterval(() => progress(), 1e3);
+    const readWithTimeout = (promise) => Promise.race([promise, new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("\u8BFB\u53D6\u6587\u4EF6\u8D85\u65F6\uFF0C\u8BF7\u5C06\u5907\u4EFD\u4FDD\u5B58\u5230\u8BBE\u5907\u672C\u5730\u540E\u91CD\u8BD5")), 3e4);
+    })]).finally(() => clearTimeout(timer));
     try {
       db = await database();
       await saveSession(db, session);
       const sink = new StagingSink(db, session.id);
-      const parser = new BackupStreamDecoder({ emit: (item) => sink.emit(item) });
-      for (let offset = 0; offset < session.bytes; offset += 65536) {
+      const parser = new BackupStreamDecoder({ emit: (item) => sink.emit(item), maxUnitBytes: limits.unitBytes });
+      const chunks = async function* () {
+        let file = data.file;
+        if (!file) {
+          const response = await readWithTimeout(fetch(data.url, { cache: "no-store" }));
+          if (!response.ok) throw new Error("\u8BFB\u53D6\u672C\u5730\u5907\u4EFD\u5931\u8D25\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u6587\u4EF6");
+          session.bytes = Number(response.headers.get("content-length")) || session.bytes;
+          const reader = response.body?.getReader?.();
+          if (reader) {
+            try {
+              for (; ; ) {
+                await wait();
+                const item = await readWithTimeout(reader.read());
+                if (item.done) break;
+                yield item.value;
+              }
+            } finally {
+              await reader.cancel().catch(() => {
+              });
+            }
+            return;
+          }
+          file = await readWithTimeout(response.blob());
+          session.bytes = file.size;
+        }
+        for (let offset = 0; offset < file.size; offset += limits.chunkBytes) {
+          await wait();
+          yield new Uint8Array(await readWithTimeout(file.slice(offset, offset + limits.chunkBytes).arrayBuffer()));
+        }
+      };
+      let pendingBytes = 0;
+      for await (const buffer of chunks()) {
         await wait();
-        const buffer = await Promise.race([
-          data.file.slice(offset, offset + 65536).arrayBuffer(),
-          new Promise((_, reject) => {
-            timer = setTimeout(() => reject(new Error("\u8BFB\u53D6\u6587\u4EF6\u8D85\u65F6\uFF0C\u8BF7\u5C06\u5907\u4EFD\u4FDD\u5B58\u5230\u8BBE\u5907\u672C\u5730\u540E\u91CD\u8BD5")), 3e4);
-          })
-        ]).finally(() => clearTimeout(timer));
-        parser.write(new Uint8Array(buffer));
-        await sink.flush();
-        session.read = offset + buffer.byteLength;
+        parser.write(buffer);
+        pendingBytes += buffer.byteLength;
+        if (pendingBytes >= limits.chunkBytes) {
+          await sink.flush();
+          pendingBytes = 0;
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+        session.read += buffer.byteLength;
         progress();
-        await new Promise((resolve) => setTimeout(resolve, 0));
       }
       const parsed = parser.end();
       await sink.flush();
       progress("\u6838\u5BF9\u89D2\u8272\u5361\u3001\u804A\u5929\u4E0E\u8BB0\u5FC6");
-      Object.assign(session, await validate(db, session.id, parsed.source, wait), { source: parsed.source, state: "complete" });
+      Object.assign(session, await validate(db, session.id, parsed.source, wait, limits.collectionBytes), { source: parsed.source, state: "complete" });
       await saveSession(db, session);
-      postMessage({ type: "complete", summary: session.summary });
+      postMessage({ type: "complete", summary: session.summary, bytes: session.read });
     } catch (error) {
       postMessage({ type: "failed", message: error.name === "QuotaExceededError" ? "\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8" : error.message });
     } finally {

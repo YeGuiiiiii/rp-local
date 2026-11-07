@@ -6,7 +6,7 @@ const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
 const evidence = path.join(root, 'verification');
-const transferEvidence = path.join(root, '.impeccable/review/transfer-2.9.004');
+const transferEvidence = path.join(root, '.impeccable/review/backup-2.9.005');
 fs.mkdirSync(transferEvidence, { recursive: true });
 
 (async () => {
@@ -34,7 +34,13 @@ fs.mkdirSync(transferEvidence, { recursive: true });
     if (url.pathname === '/fixture.png') return route.fulfill({ path: path.join(root, 'dist/app-icon.png'), contentType: 'image/png' });
     if (url.pathname.includes('/_files/')) {
       const name = decodeURIComponent(url.pathname.split('/_files/')[1]);
-      const file = await page.evaluate(name => window.__qaNativeFiles?.[name], name);
+      let file;
+      try {
+        file = await page.evaluate(name => window.__qaNativeFiles?.[name], name);
+      } catch (error) {
+        if (error.message.includes('Execution context was destroyed')) return route.abort();
+        throw error;
+      }
       if (!file?.binary) return route.fulfill({ status: 404, body: '' });
       return route.fulfill({ body: Buffer.from(file.binary, 'base64'), contentType: name.endsWith('.webp') ? 'image/webp' : 'image/png' });
     }

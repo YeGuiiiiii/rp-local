@@ -19,6 +19,7 @@
 
 
         <role-memory-manager v-if="managedMemoryCharacter" :key="managedMemoryCharacter.uuid" :character="managedMemoryCharacter" :busy="managedMemoryCharacter.uuid === currentCharacter?.uuid &amp;&amp; (isConversationBusy || isActiveBatchExtracting)" @close="managedMemoryCharacter=null" @saved="applyManagedMemories"></role-memory-manager>
+        <stream-import-panel ref="streamImportPanel" :prepare="prepareStreamImport" :decode="restoreRphubBinaryDeep" :task="backupTask" :profile="backupProfile"></stream-import-panel>
 
         <div class="app-main flex-1 flex flex-col h-full overflow-hidden bg-gray-50 relative" :inert="isNavigationOpen"><div v-if="['worldinfo','regex'].includes(currentView)" class="workspace-context px-4 pt-3">
                 <strong>{{currentView !== 'memory' &amp;&amp; resourceScope === 'global' ? ({worldinfo:'全局世界书',regex:'全局正则'})[currentView] || '软件内置与旧共享条目' : currentCharacter?.name || '尚未选择角色卡'}}</strong>
@@ -860,7 +861,12 @@
                                 备份管理
                             </button>
                         </div>
-                        <stream-import-panel ref="streamImportPanel" :prepare="prepareStreamImport" :decode="restoreRphubBinaryDeep" :exporting="isExportingAllData"></stream-import-panel>
+                        <label class="block mt-4">
+                            <span class="block text-sm font-semibold">备份读取档位</span>
+                            <select v-model="backupProfile" aria-label="备份读取档位" class="w-full mt-2 rounded-lg border border-gray-200 px-3 py-2">
+                                <option v-for="option in backupProfiles" :key="option.id" :value="option.id">{{ option.name }} · 单条 {{ option.unitBytes/1048576 }} MB / 集合 {{ option.collectionBytes/1048576 }} MB</option>
+                            </select>
+                        </label>
                     </div>
                     <div class="mt-4">
                         <h4 class="text-sm font-bold text-gray-700 mb-2">备份内容</h4>
@@ -3764,7 +3770,7 @@
         </div>
 
         <!-- Backup & Transfer dialog: upload on one device, download with the key on another -->
-        <modal-shell :show="!!cloudBackup.mode" :close-on-backdrop="!cloudBackup.busy" @close="closeCloudBackup" overlay-class="z-[90] p-4" panel-class="compact-modal-panel">
+        <modal-shell :show="!!cloudBackup.mode && !cloudBackup.busy" :close-on-backdrop="!cloudBackup.busy" @close="closeCloudBackup" overlay-class="z-[90] p-4" panel-class="compact-modal-panel">
             <div class="choice-modal">
                 <div class="choice-modal__head">
                     <div>

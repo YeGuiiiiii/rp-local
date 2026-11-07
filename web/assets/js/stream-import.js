@@ -80,6 +80,70 @@
       throw failure || error;
     }
   }
+  var StagingSink = class {
+    constructor(db, session) {
+      Object.assign(this, { db, session, queue: [] });
+    }
+    emit(item) {
+      this.queue.push(item);
+    }
+    async flush() {
+      if (!this.queue.length) return;
+      const tx = this.db.transaction(Object.keys(stores).slice(1), "readwrite");
+      const names = { unit: "restore_units", record: "restore_records", localStorage: "restore_web", companion: "restore_companions" };
+      for (const { kind, ...item } of this.queue) {
+        tx.objectStore(names[kind]).put({ ...item, session: this.session });
+      }
+      await completed(tx);
+      this.queue.length = 0;
+    }
+  };
+  async function validate(db, session, source, wait, maxCollectionBytes = 128 * 1048576) {
+    const last = /* @__PURE__ */ new Map();
+    await each(db, "restore_records", rangeOf(session, source), (item) => {
+      last.set(item.key, item);
+      if (last.size > 1e5) throw new Error("\u5907\u4EFD\u5B58\u50A8\u9879\u8D85\u8FC7 10 \u4E07\u9879");
+    });
+    const deleted = /* @__PURE__ */ new Set();
+    const summary = { records: last.size, cards: 0, messages: 0, memories: 0 };
+    for (const [key, record] of last) {
+      await wait();
+      if (key.startsWith("rp_hub_b1_memory_state_")) {
+        const meta = (await resultOf(db.transaction("restore_units").objectStore("restore_units").get([session, source, record.entry, 0])))?.value;
+        const scope = key.slice("rp_hub_b1_memory_state_".length);
+        if (!scope || !meta || meta.schema !== 1 || !/^[a-f0-9]{32}$/.test(meta.revision) || typeof meta.deleted !== "boolean")
+          throw new Error("\u8BB0\u5FC6\u7248\u672C\u8BB0\u5F55\u635F\u574F\uFF1A" + key);
+        const body = "rp_hub_classic_memories_" + scope;
+        if (meta.deleted) deleted.add(body);
+        else if (!last.get(body)?.array) throw new Error("\u8BB0\u5FC6\u7248\u672C\u8BB0\u5F55\u7F3A\u5C11\u6B63\u6587\uFF1A" + body);
+      }
+      if (key.startsWith("rp_hub_classic_memories_") && !record.array) throw new Error("\u8BB0\u5FC6\u6B63\u6587\u5FC5\u987B\u662F\u6570\u7EC4\uFF1A" + key);
+      if (key === "rp_hub_characters" && !record.array) throw new Error("\u89D2\u8272\u5361\u96C6\u5408\u5FC5\u987B\u662F\u6570\u7EC4");
+      let bytes = 0, count = 0;
+      await each(db, "restore_units", rangeOf(session, source, record.entry), (unit) => {
+        bytes += unit.bytes;
+        count++;
+        if (key === "rp_hub_characters" && (!unit.value || typeof unit.value !== "object" || Array.isArray(unit.value)))
+          throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61");
+      });
+      if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
+      if (bytes > maxCollectionBytes) throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
+      if (key === "rp_hub_characters") summary.cards = record.count;
+      if (key.startsWith("rp_hub_chat_") && record.array) summary.messages += record.count;
+      if (key.startsWith("rp_hub_classic_memories_")) summary.memories += record.count;
+    }
+    for (const key of deleted) summary.memories -= last.get(key)?.count || 0;
+    return { plan: [...last.values()], deleted: [...deleted], summary };
+  }
+
+  // scripts/stream-import/profiles.mjs
+  var MB = 1048576;
+  var profiles = Object.freeze([
+    { id: "light", name: "\u7701\u5185\u5B58", chunkBytes: 65536, unitBytes: 16 * MB, collectionBytes: 64 * MB },
+    { id: "balanced", name: "\u5747\u8861", chunkBytes: 262144, unitBytes: 32 * MB, collectionBytes: 128 * MB },
+    { id: "fast", name: "\u9AD8\u901F", chunkBytes: MB, unitBytes: 64 * MB, collectionBytes: 256 * MB }
+  ]);
+  var profile = (id) => profiles.find((item) => item.id === id) || profiles[1];
 
   // scripts/stream-import/client.mjs
   var readSession = (db, id) => resultOf(db.transaction("restore_sessions").objectStore("restore_sessions").get(id));
@@ -87,6 +151,36 @@
   var cancelled = (signal) => {
     if (signal?.aborted) throw new DOMException("\u5BFC\u5165\u5DF2\u53D6\u6D88", "AbortError");
   };
+  async function stageEntries(entries, { limits = profile() } = {}) {
+    const db = await window.RPHubStorage.initDB(), id = crypto.randomUUID().replaceAll("-", "");
+    const sink = new StagingSink(db, id), encoder = new TextEncoder();
+    try {
+      await saveSession(db, { id, state: "reading" });
+      let index = 0;
+      for await (const entry of entries) {
+        const array = Array.isArray(entry.value) || !!entry.value?.[Symbol.asyncIterator];
+        let part = 0;
+        const write = async (value) => {
+          const bytes = encoder.encode(JSON.stringify(value)).length;
+          if (bytes > limits.unitBytes) throw new Error("\u5355\u6761\u4E91\u7AEF\u6570\u636E\u8D85\u8FC7\u5F53\u524D\u8BFB\u53D6\u6863\u4F4D\uFF0C\u8BF7\u8C03\u6574\u540E\u91CD\u8BD5");
+          sink.emit({ kind: "unit", source: "entries", entry: index, part: part++, value, bytes });
+          await sink.flush();
+        };
+        if (array) {
+          for await (const value of entry.value) await write(value);
+        } else await write(entry.value);
+        sink.emit({ kind: "record", source: "entries", entry: index++, key: entry.key, hasValue: true, array, count: part });
+        await sink.flush();
+      }
+      const result = await validate(db, id, "entries", async () => {
+      }, limits.collectionBytes);
+      await saveSession(db, { id, ...result, source: "entries", state: "complete" });
+      return id;
+    } catch (error) {
+      await removeSession(db, id);
+      throw error;
+    }
+  }
   async function momentsDb() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open("sf_moments_db", 1);
@@ -304,5 +398,5 @@
       }
     }
   }
-  window.RPStreamImport = { upgrade, database, recover, apply, readSession, removeSession };
+  window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles };
 })();

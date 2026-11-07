@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
 const output = path.join(root, 'verification', 'stream-import-1.05');
 fs.mkdirSync(output, { recursive: true });
-const transferEvidence = path.join(root, '.impeccable/review/transfer-2.9.004');
+const transferEvidence = path.join(root, '.impeccable/review/backup-2.9.005');
 fs.mkdirSync(transferEvidence, { recursive: true });
 const revision = '0123456789abcdef0123456789abcdef';
 const fixture = () => ({
@@ -123,13 +123,21 @@ const fixture = () => ({
     });
     assert.deepEqual(await page.evaluate(() => ({ view: __qa.currentView, scope: __qa.resourceScope })), { view: 'regex', scope: 'global' });
     await backup();
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: path.join(transferEvidence, 'backup-options-390.png') });
     // Hold a real storage transaction open to exercise a slow full export.
     await page.evaluate(() => {
       window.__holdExport = true;
       const store = RPHubStorage.getMainDb().transaction('store', 'readwrite').objectStore('store');
       const keepOpen = () => { store.get('rp_hub_stream_probe').onsuccess = () => { if (__holdExport) keepOpen(); }; };
       keepOpen();
-      window.AndroidBridge = { isNativeApp: () => true, saveFile: (base64, name) => { window.__fullExport = { base64, name }; } };
+      window.__exportChunks = [];
+      window.AndroidBridge = {
+        isNativeApp: () => true, createBackupFileToDownloads: () => 'OK:test-stream',
+        writeBackupChunk: (token, base64) => { __exportChunks.push(base64); return 'OK'; },
+        finishBackupWrite: () => { window.__fullExport = true; return 'OK'; },
+        abortBackupWrite: () => {}
+      };
     });
     await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
     await page.getByRole('dialog', { name: '导出备份', exact: true }).waitFor();
@@ -139,7 +147,21 @@ const fixture = () => ({
     assert.equal(await page.evaluate(() => __qa.currentView), 'backup', '导出过程中返回不得离开等候弹窗');
     await page.evaluate(() => { __holdExport = false; });
     await page.waitForFunction(() => !__qa.isExportingAllData && window.__fullExport);
+    const fullExport = await page.evaluate(() => JSON.parse(new TextDecoder().decode(Uint8Array.from(
+      __exportChunks.map(part => atob(part)).join(''), char => char.charCodeAt(0)))));
+    assert.equal(fullExport.entries.find(entry => entry.key === 'rp_hub_characters').value[0].uuid, 'stream-old');
+    assert.equal(fullExport.databases.RPHubDB, undefined);
+    assert.equal(await page.getByLabel('备份进度', { exact: true }).getAttribute('value'), '100');
+    await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     assert.equal(await page.evaluate(() => document.getElementById('app').inert), false);
+    await page.evaluate(async () => {
+      AndroidBridge.finishBackupWrite = () => 'ERR:磁盘已满';
+      AndroidBridge.abortBackupWrite = () => { window.__abortedExport = true; };
+      await __qa.exportAllData();
+    });
+    assert.equal(await page.evaluate(() => window.__abortedExport), true, '最终完成写入失败也应中止不完整文件');
+    assert.ok((await page.evaluate(() => __qa.backupTask.error)).includes('磁盘已满'));
+    await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     await page.evaluate(() => { delete window.AndroidBridge; });
     await stage();
     await page.evaluate(() => { __qa.shellGoBack(); __qa.navigateWorkspace('characters'); });
@@ -152,6 +174,12 @@ const fixture = () => ({
     await unchanged();
     await page.getByRole('button', { name: '取消', exact: true }).click();
     await unchanged();
+    await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
+    const normalBuffer = Buffer.from(JSON.stringify(fixture()));
+    await page.locator('input[type=file][accept*=".zip"]').first().setInputFiles({ name: 'normal.json', mimeType: 'application/json', buffer: normalBuffer });
+    await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready');
+    assert.equal(await page.getByRole('dialog', { name: '导入备份', exact: true }).count(), 1, '普通JSON入口也使用受保护的逐段导入');
+    await page.getByRole('button', { name: '取消', exact: true }).click();
     await stage('{"type":"rp-hub-complete-backup","entries":[', 'failed');
     await unchanged();
     const chooser = page.waitForEvent('filechooser');
@@ -284,6 +312,23 @@ const fixture = () => ({
     assert.equal(restored.probe, 'last'); assert.equal(restored.pref, 'entry-wins');
     assert.deepEqual(restored.presetGroups, ['STA1N官方分组', '流式恢复的空组']);
     assert.deepEqual(restored.binary, [1, 2, 3]); assert.ok(restored.files > 0);
+    await backup();
+    const JSZip = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/jszip');
+    const zip = new JSZip();
+    zip.file('manifest.json', JSON.stringify({ databases: [{ name: 'RPHubDB', stores: [
+      { store: 'store', records: 1, chunks: ['data/part.jsonl'] }
+    ] }] }));
+    zip.file('data/part.jsonl', JSON.stringify({ k: 'rp_hub_zip_probe', v: 'ZIP恢复成功' }) + '\n');
+    await page.locator('input[type=file][accept*=".zip"]').first().setInputFiles({
+      name: 'backup.zip', mimeType: 'application/zip', buffer: await zip.generateAsync({ type: 'nodebuffer' })
+    });
+    await page.waitForFunction(() => !!__qa.backupTask.confirm);
+    await page.evaluate(() => { __qa.shellGoBack(); __qa.navigateWorkspace('characters'); });
+    assert.equal(await page.evaluate(() => __qa.currentView), 'backup');
+    const zipReload = page.waitForEvent('load');
+    await page.getByRole('button', { name: '确认导入', exact: true }).click();
+    await zipReload; await ready();
+    assert.equal(await page.evaluate(() => RPHubStorage.getStoredValue('zip_probe')), 'ZIP恢复成功');
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify({ navigation, cancelledAndFailedImportsPreservedData: true,
       transactionRollback: ['decode', 'quota', 'cancel'], failedRollbackRetainsRecoveryJournal: true, interruptedImportRecovered: true, restored, errors }, null, 2));
