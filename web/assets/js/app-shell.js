@@ -1,6 +1,24 @@
 (function () {
     'use strict';
     const { ref, computed, onMounted, onBeforeUnmount, watch, h, nextTick } = Vue;
+    const useCardNight = () => {
+        const cardNightEnabled = ref(window.RPCardNight.enabled), cardNightMode = ref(window.RPCardNight.mode);
+        const sync = () => { cardNightEnabled.value = window.RPCardNight.enabled; cardNightMode.value = window.RPCardNight.mode; };
+        window.addEventListener('rp-card-night-change', sync);
+        onBeforeUnmount(() => window.removeEventListener('rp-card-night-change', sync));
+        return { cardNightEnabled, cardNightMode,
+            setCardNightEnabled: event => window.RPCardNight.setEnabled(event.target.checked),
+            setCardNightMode: event => window.RPCardNight.setMode(event.target.value) };
+    };
+    const CardNightSelect = {
+        props: { disabled: Boolean },
+        setup: useCardNight,
+        template: `<label class="shell-form-row shell-card-night"><span>当前卡片夜间显示</span>
+          <select aria-label="当前卡片夜间显示" :value="cardNightMode" :disabled="disabled" @change="setCardNightMode">
+            <option value="follow">跟随外观</option><option value="auto">自动变暗</option><option value="original">保留原色</option>
+          </select>
+        </label>`
+    };
     const useThemePack = () => {
         const selected = ref(window.RPThemePacks.current);
         const night = ref(window.RPThemePacks.mode === 'night');
@@ -293,6 +311,7 @@
                     <icon :name="item.icon"/><span>{{item.name}}</span>
                   </button>
                 </div>
+                <card-night-select :disabled="!name"></card-night-select>
                 <div class="yy-menu-bottom">
                   <button type="button" @click="$emit('navigate','advanced')"><icon name="SlidersHorizontal"/><span>高级功能</span></button>
                   <button type="button" @click="toggleDayNight" :aria-label="night?'切换到日间模式':'切换到夜间模式'"
@@ -534,7 +553,7 @@
                 }
             });
             return {
-                info, error, loading, load, clear, tiltEnabled, ...themePack,
+                info, error, loading, load, clear, tiltEnabled, ...themePack, ...useCardNight(),
                 setTilt: event => window.RPGalleryMotion.set(event.target.checked),
                 selectPack: id => window.RPThemePacks.set(id),
                 version: window.RP_LOCAL_VERSION
@@ -587,6 +606,12 @@
                   <span class="settings-toggle"></span>
                 </span>
               </label>
+              <label class="shell-form-row"><span>卡片自动变暗</span>
+                <span class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" role="switch" aria-label="卡片自动变暗" class="settings-toggle-input sr-only" :checked="cardNightEnabled" @change="setCardNightEnabled">
+                  <span class="settings-toggle"></span>
+                </span>
+              </label>
             </template>
             <template v-if="section==='legacy'">
               <div class="shell-row-list">
@@ -633,5 +658,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ReleaseAnnouncement });
 })();

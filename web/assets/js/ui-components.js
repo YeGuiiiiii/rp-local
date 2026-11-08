@@ -359,7 +359,7 @@
             };
             const trapFocus = event => {
                 if (event.key !== 'Tab') return;
-                const buttons = [...panel.value.querySelectorAll('button')];
+                const buttons = [...panel.value.querySelectorAll('button:not(:disabled), select:not(:disabled)')];
                 const first = buttons[0], last = buttons[buttons.length - 1];
                 if (event.shiftKey && (document.activeElement === first || document.activeElement === panel.value)) {
                     event.preventDefault();
@@ -426,6 +426,7 @@
                                 </div>
                             </section>
                         </nav>
+                        <card-night-select v-if="currentView === 'chat'" :disabled="!characterName"></card-night-select>
                         <footer class="app-navigation-user" :style="{ '--i': footerOrder }">
                             <img v-if="user.avatar" :src="user.avatar" alt="">
                             <span v-else class="app-navigation-avatar">{{ (user.name || 'U').charAt(0).toUpperCase() }}</span>

@@ -1,5 +1,5 @@
 <!-- Generated from the user-provided RP-Hub 2.8.118 APK by scripts/prepare-classic.cjs. Shared data and local dialogs are retained. -->
-<app-navigation :current-view="currentView" :open="isNavigationOpen" :memory-processing="isActiveBatchExtracting" :ui-template-running="uiTemplateUpdateStatus.state === 'running'" :user="user" @update:current-view="navigateWorkspace($event)" @close="closeNavigation"></app-navigation>
+<app-navigation :current-view="currentView" :open="isNavigationOpen" :character-name="currentCharacter?.name || ''" :memory-processing="isActiveBatchExtracting" :ui-template-running="uiTemplateUpdateStatus.state === 'running'" :user="user" @update:current-view="navigateWorkspace($event)" @close="closeNavigation"></app-navigation>
         <component is="style" v-if="settings.fontSize">
             .markdown-body :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(small):not(sub):not(sup):not(code):not(.memory-cite) {
             font-size: inherit !important;

@@ -659,64 +659,12 @@
     return-object p0
 .end method
 
-.method static synthetic access$8(Lcom/rphub/app/MainActivity;Z)V
-    .locals 0
-
-    .line 1804
-    invoke-direct {p0, p1}, Lcom/rphub/app/MainActivity;->applyForceDark(Z)V
-
-    return-void
-.end method
-
 .method static synthetic access$9(Lcom/rphub/app/MainActivity;Z)V
     .locals 0
 
     .line 1824
     invoke-direct {p0, p1}, Lcom/rphub/app/MainActivity;->refreshDarkTheme(Z)V
 
-    return-void
-.end method
-
-.method private applyForceDark(Z)V
-    .locals 2
-
-    .line 1806
-    :try_start_0
-    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
-
-    const/16 v1, 0x21
-
-    if-lt v0, v1, :cond_0
-
-    .line 1808
-    iget-object p1, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;
-
-    invoke-virtual {p1}, Landroid/webkit/WebView;->getSettings()Landroid/webkit/WebSettings;
-
-    move-result-object p1
-
-    const/4 v0, 0x0
-
-    invoke-virtual {p1, v0}, Landroid/webkit/WebSettings;->setAlgorithmicDarkeningAllowed(Z)V
-
-    goto :goto_1
-
-    .line 1811
-    :cond_0
-    iget-object v0, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;
-
-    invoke-virtual {v0}, Landroid/webkit/WebView;->getSettings()Landroid/webkit/WebSettings;
-
-    move-result-object v0
-
-    const/4 p1, 0x0
-
-    invoke-virtual {v0, p1}, Landroid/webkit/WebSettings;->setForceDark(I)V
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
-
-    :catchall_0
-    :goto_1
     return-void
 .end method
 
@@ -5547,11 +5495,9 @@
     :cond_4
 
     .line 344
-    invoke-direct {p0}, Lcom/rphub/app/MainActivity;->isDarkPreferred()Z
+    iget-object v0, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;
 
-    move-result v0
-
-    invoke-direct {p0, v0}, Lcom/rphub/app/MainActivity;->applyForceDark(Z)V
+    invoke-static {p0, v0}, Lcom/rphub/app/CardNight;->install(Landroid/app/Activity;Landroid/webkit/WebView;)V
 
     .line 345
     iget-object v0, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;

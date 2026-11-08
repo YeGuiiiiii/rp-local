@@ -373,6 +373,9 @@
 .appearance-switch:active { transform: rotate(-24deg) scale(0.9); }
 .appearance-switch:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 
+/* Android recoloring is opt-in for the selected card; app palette tokens stay unchanged. */
+:root[data-card-auto-dark="true"] { color-scheme: light !important; }
+
 /* Novel editor paper tones written as arbitrary values. */
 :root[data-app-theme="dark"] :is([class~="bg-[#f5f5f0]"], [class~="bg-[#e8e8e3]"]) { background-color: rgb(var(--stone-50)) !important; }
 :root[data-app-theme="dark"] :is([class~="bg-[#e4e4df]"], [class~="bg-[#e0e0db]"]) { background-color: rgb(var(--stone-100)) !important; }

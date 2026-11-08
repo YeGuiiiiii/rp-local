@@ -8813,6 +8813,7 @@ const app = createApp({
         const currentCharacter = computed(() => {
             return currentCharacterIndex.value >= 0 ? characters.value[currentCharacterIndex.value] : null;
         });
+        watch(() => currentCharacter.value?.uuid, id => window.RPCardNight.select(id), { immediate: true, flush: 'sync' });
         // [rphub 2.8.92] 作用域 watcher 的正确位置：必须在 currentCharacter 声明**之后**。
         //   原位置（let chatHistorySaveTimer 那一带）在 currentCharacter 之前约 1300 行，
         //   函数型 source 会立即求值 ⇒ TDZ ReferenceError ⇒ watcher 静默不注册。
@@ -16431,6 +16432,7 @@ app.component('PersonaAvatar', window.RPAppShell.PersonaAvatar);
 app.component('PokeMascot', window.RPAppShell.PokeMascot);
 app.component('ShellDock', window.RPAppShell.Dock);
 app.component('ShellChatMenu', window.RPAppShell.ChatMenu);
+app.component('CardNightSelect', window.RPAppShell.CardNightSelect);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('ShellUtilities', window.RPAppShell.Utilities);

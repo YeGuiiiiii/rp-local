@@ -41,6 +41,7 @@ const dinerTemplate = backupPath && JSON.parse(fs.readFileSync(backupPath, 'utf8
             __qa.characters = [{ uuid: 'card-colors', name: '纸页阅读测试', first_mes: '',
                 worldInfo: [], regexScripts: [], uiTemplates: [] }];
             await __qa.selectCharacter(0);
+            RPCardNight.setMode('original');
             const host = document.createElement('div');
             host.id = 'card-color-fixture';
             host.className = 'msg-bubble-glass';

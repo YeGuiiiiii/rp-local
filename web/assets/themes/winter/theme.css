@@ -89,7 +89,7 @@
     pointer-events: none;
     opacity: .46;
 }
-:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu > :is(.yy-menu-header,.yy-menu-return,.yy-menu-section,.yy-menu-grid,.yy-menu-bottom,.yy-menu-signature) {
+:root[data-ui-skin="winter"] .chenyue-theme .shell-chat-menu > :is(.yy-menu-header,.yy-menu-return,.yy-menu-section,.yy-menu-grid,.shell-card-night,.yy-menu-bottom,.yy-menu-signature) {
     position: relative;
     z-index: 1;
 }

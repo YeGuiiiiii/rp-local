@@ -77,16 +77,6 @@
     if-lt v0, v1, :cond_1
 
     .line 368
-    iget-object v0, p0, Lcom/rphub/app/MainActivity$5$1;->this$1:Lcom/rphub/app/MainActivity$5;
-
-    invoke-static {v0}, Lcom/rphub/app/MainActivity$5;->access$0(Lcom/rphub/app/MainActivity$5;)Lcom/rphub/app/MainActivity;
-
-    move-result-object v0
-
-    iget-boolean v1, p0, Lcom/rphub/app/MainActivity$5$1;->val$dark:Z
-
-    invoke-static {v0, v1}, Lcom/rphub/app/MainActivity;->access$8(Lcom/rphub/app/MainActivity;Z)V
-
     .line 369
     iget-object v0, p0, Lcom/rphub/app/MainActivity$5$1;->this$1:Lcom/rphub/app/MainActivity$5;
 

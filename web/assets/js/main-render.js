@@ -3621,7 +3621,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_222)
                 ]),
                 _createElementVNode("div", _hoisted_223, [
-                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.011 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.012 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -10443,12 +10443,13 @@ return function render(_ctx, _cache) {
       _createVNode(_component_app_navigation, {
         "current-view": currentView,
         open: isNavigationOpen,
+        "character-name": currentCharacter?.name || '',
         "memory-processing": isActiveBatchExtracting,
         "ui-template-running": uiTemplateUpdateStatus.state === 'running',
         user: user,
         "onUpdate:currentView": $event => (navigateWorkspace($event)),
         onClose: closeNavigation
-      }, null, 8 /* PROPS */, ["current-view", "open", "memory-processing", "ui-template-running", "user", "onUpdate:currentView", "onClose"]),
+      }, null, 8 /* PROPS */, ["current-view", "open", "character-name", "memory-processing", "ui-template-running", "user", "onUpdate:currentView", "onClose"]),
       (settings.fontSize)
         ? (_openBlock(), _createBlock(_resolveDynamicComponent("style"), { key: 0 }, {
             default: _withCtx(() => [...(_cache[0] || (_cache[0] = [
@@ -18767,7 +18768,9 @@ const _hoisted_17 = {
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { createElementVNode: _createElementVNode, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, renderList: _renderList, Fragment: _Fragment, toDisplayString: _toDisplayString, normalizeStyle: _normalizeStyle, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, normalizeClass: _normalizeClass, withKeys: _withKeys, Transition: _Transition, withCtx: _withCtx, createBlock: _createBlock } = _Vue
+    const { createElementVNode: _createElementVNode, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, renderList: _renderList, Fragment: _Fragment, toDisplayString: _toDisplayString, normalizeStyle: _normalizeStyle, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, normalizeClass: _normalizeClass, resolveComponent: _resolveComponent, createBlock: _createBlock, withKeys: _withKeys, Transition: _Transition, withCtx: _withCtx } = _Vue
+
+    const _component_card_night_select = _resolveComponent("card-night-select")
 
     return (_openBlock(), _createBlock(_Transition, {
       name: "app-navigation",
@@ -18933,6 +18936,12 @@ return function render(_ctx, _cache) {
                     ]))
                   }), 128 /* KEYED_FRAGMENT */))
                 ]),
+                (currentView === 'chat')
+                  ? (_openBlock(), _createBlock(_component_card_night_select, {
+                      key: 0,
+                      disabled: !characterName
+                    }, null, 8 /* PROPS */, ["disabled"]))
+                  : _createCommentVNode("v-if", true),
                 _createElementVNode("footer", {
                   class: "app-navigation-user",
                   style: _normalizeStyle({ '--i': footerOrder })
@@ -24227,6 +24236,33 @@ return function render(_ctx, _cache) {
   }
 }
 })();
+window.RPCompiledRenders.CardNightSelect = (function () {
+const _Vue = Vue
+const { createElementVNode: _createElementVNode } = _Vue
+
+const _hoisted_1 = { class: "shell-form-row shell-card-night" }
+const _hoisted_2 = ["value", "disabled", "onChange"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock } = _Vue
+
+    return (_openBlock(), _createElementBlock("label", _hoisted_1, [
+      _cache[1] || (_cache[1] = _createElementVNode("span", null, "当前卡片夜间显示", -1 /* CACHED */)),
+      _createElementVNode("select", {
+        "aria-label": "当前卡片夜间显示",
+        value: cardNightMode,
+        disabled: disabled,
+        onChange: setCardNightMode
+      }, [...(_cache[0] || (_cache[0] = [
+        _createElementVNode("option", { value: "follow" }, "跟随外观", -1 /* CACHED */),
+        _createElementVNode("option", { value: "auto" }, "自动变暗", -1 /* CACHED */),
+        _createElementVNode("option", { value: "original" }, "保留原色", -1 /* CACHED */)
+      ]))], 40 /* PROPS, NEED_HYDRATION */, _hoisted_2)
+    ]))
+  }
+}
+})();
 window.RPCompiledRenders.ThemeMascot = (function () {
 const _Vue = Vue
 const {  } = _Vue
@@ -24519,6 +24555,7 @@ return function render(_ctx, _cache) {
 
     const _component_poke_mascot = _resolveComponent("poke-mascot")
     const _component_icon = _resolveComponent("icon")
+    const _component_card_night_select = _resolveComponent("card-night-select")
 
     return (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
       show
@@ -24574,6 +24611,7 @@ return function render(_ctx, _cache) {
                   ], 8 /* PROPS */, _hoisted_8))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
+              _createVNode(_component_card_night_select, { disabled: !name }, null, 8 /* PROPS */, ["disabled"]),
               _createElementVNode("div", _hoisted_9, [
                 _createElementVNode("button", {
                   type: "button",
@@ -25166,13 +25204,16 @@ const _hoisted_23 = ["checked", "onChange"]
 const _hoisted_24 = { class: "shell-form-row" }
 const _hoisted_25 = { class: "relative inline-flex items-center cursor-pointer" }
 const _hoisted_26 = ["checked", "onChange"]
-const _hoisted_27 = {
+const _hoisted_27 = { class: "shell-form-row" }
+const _hoisted_28 = { class: "relative inline-flex items-center cursor-pointer" }
+const _hoisted_29 = ["checked", "onChange"]
+const _hoisted_30 = {
   key: 3,
   class: "shell-row-list"
 }
-const _hoisted_28 = ["onClick"]
-const _hoisted_29 = ["onClick"]
-const _hoisted_30 = ["onClick"]
+const _hoisted_31 = ["onClick"]
+const _hoisted_32 = ["onClick"]
+const _hoisted_33 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -25343,35 +25384,49 @@ return function render(_ctx, _cache) {
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_26),
                 _cache[16] || (_cache[16] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
+            ]),
+            _createElementVNode("label", _hoisted_27, [
+              _cache[19] || (_cache[19] = _createElementVNode("span", null, "卡片自动变暗", -1 /* CACHED */)),
+              _createElementVNode("span", _hoisted_28, [
+                _createElementVNode("input", {
+                  type: "checkbox",
+                  role: "switch",
+                  "aria-label": "卡片自动变暗",
+                  class: "settings-toggle-input sr-only",
+                  checked: cardNightEnabled,
+                  onChange: setCardNightEnabled
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29),
+                _cache[18] || (_cache[18] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+              ])
             ])
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (section==='legacy')
-        ? (_openBlock(), _createElementBlock("div", _hoisted_27, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_30, [
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'worldinfo',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "BookOpen" }),
-              _cache[18] || (_cache[18] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
+              _cache[20] || (_cache[20] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_28),
+            ], 8 /* PROPS */, _hoisted_31),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'regex',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "Code2" }),
-              _cache[19] || (_cache[19] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
+              _cache[21] || (_cache[21] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_29),
+            ], 8 /* PROPS */, _hoisted_32),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'uitemplates',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "PanelsTopLeft" }),
-              _cache[20] || (_cache[20] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
+              _cache[22] || (_cache[22] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_30)
+            ], 8 /* PROPS */, _hoisted_33)
           ]))
         : _createCommentVNode("v-if", true)
     ]))

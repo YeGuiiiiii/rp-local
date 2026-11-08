@@ -1,4 +1,4 @@
-// Sync the Android window background. App skins and card authors own their colors.
+// Sync the Android window background independently of per-card night rendering.
 (function () {
     if (window.__rphubNativeThemeBound) return;
     window.__rphubNativeThemeBound = true;

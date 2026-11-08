@@ -46,7 +46,7 @@ const root = path.resolve(__dirname,'..'), web = path.join(root,'web');
       await page.setViewportSize({width,height});
       for(const mode of ['day','night']){
         await page.evaluate(mode=>RPHubThemeKit.setScheme(mode),mode);
-        await page.evaluate(()=>{__qa.currentView='chat';__qa.isNavigationOpen=true;});
+        await page.evaluate(async()=>{__qa.navigateWorkspace('chat');await Vue.nextTick();__qa.isNavigationOpen=true;});
         await menu.waitFor();
         await page.waitForTimeout(100);
         const geometry=await menu.evaluate(element=>{
