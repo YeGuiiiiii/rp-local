@@ -972,7 +972,7 @@ window.RPHubUtils = {
         imageGenBaseUrl: 'https://nai.sta1n.cn',
         defaultApiProviderId: 'sta1n',
         defaultApiConfig: Object.freeze({
-            apiUrl: 'https://cdn.sta1n.cn/v1',
+            apiUrl: 'https://sta1n.ai/v1',
             apiKey: '',
             model: '',
             qualityModel: '',
@@ -983,7 +983,7 @@ window.RPHubUtils = {
             Object.freeze({
                 id: 'sta1n',
                 name: 'STA1N API',
-                apiUrl: 'https://cdn.sta1n.cn/v1',
+                apiUrl: 'https://sta1n.ai/v1',
                 icon: 'https://img.cdn1.vip/i/6a11f4d96fa99_1779561689.webp'
             }),
             Object.freeze({
