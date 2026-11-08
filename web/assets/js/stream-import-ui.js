@@ -94,7 +94,7 @@
                 if (disposed) return;
                 const run = ++generation;
                 Object.assign(state, { phase: 'reading', name: file.name, bytes: file.size, read: 0, error: '', summary: null, paused: false, message: '准备读取文件' });
-                if (/\.zip$/i.test(file.name)) { fail('ZIP 文件请使用“导入全部数据”'); return; }
+                if (/\.zip$/i.test(file.name)) { fail('ZIP 文件请使用“导入备份”'); return; }
                 id = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
                 watchdog(10000);
                 try {

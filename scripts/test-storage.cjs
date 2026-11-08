@@ -124,14 +124,21 @@ const filesModule = source('assets/js/local-files.js');
     const failures = await page.evaluate(async () => {
       const original = RPLocalFiles.writeText;
       RPLocalFiles.writeText = () => JSON.stringify({ ok: false, error: 'Disk full fixture' });
-      let rejected = false;
-      try { await RPHubStorage.setStoredValue('test_failure', { value: 1 }); }
-      catch (_) { rejected = true; }
-      RPLocalFiles.writeText = original;
-      return rejected;
+      let writeRejected = false, flushRejected = false;
+      try {
+        try { await RPHubStorage.setStoredValue('test_failure', { value: 1 }); }
+        catch (_) { writeRejected = true; }
+        try { await RPLocalStore.flush(); }
+        catch (_) { flushRejected = true; }
+        return { writeRejected, flushRejected };
+      } finally { RPLocalFiles.writeText = original; }
     });
-    assert.equal(failures, true);
+    assert.equal(failures.writeRejected, true);
+    assert.equal(failures.flushRejected, true, 'Waiting for file saves must report unresolved write failures');
     await page.evaluate(() => RPHubStorage.setStoredValue('after_failure', 'saved later'));
+    assert.equal(await page.evaluate(async () => {
+      try { await RPLocalStore.flush(); return false; } catch (_) { return true; }
+    }), true, 'Saving another record must not clear an earlier file failure');
     await load();
     const repaired = await page.evaluate(async () => {
       await RPHubStorage.initDB();
@@ -140,7 +147,40 @@ const filesModule = source('assets/js/local-files.js');
     });
     assert.deepEqual(repaired, { value: 1 },
       'A later successful save must not hide an earlier failed mirror; reopening must repair it');
-    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, folders: initial.folders };
+    const retriedOperations = await page.evaluate(async () => {
+      const store = RPLocalStore;
+      const owner = { storageFolder: '队列测试' };
+      const cases = [
+        ['record', 'writeText', () => store.save('rp_hub_queue_probe', 'latest')],
+        ['remove', 'remove', () => store.remove('rp_hub_queue_probe')],
+        ['revision', 'writeText', () => store.saveRevision({ revision: 'queue-test' })],
+        ['image', 'writeImage', () => store.saveImage('queue-image', new Blob(['image-fixture'], { type: 'image/png' }), owner)],
+      ];
+      const results = [];
+      for (const [name, method, retry] of cases) {
+        const original = RPLocalFiles[method];
+        RPLocalFiles[method] = () => JSON.stringify({ ok: false, error: 'queue fixture ' + name });
+        try {
+          let operationRejected = false;
+          try { await retry(); } catch (_) { operationRejected = true; }
+          if (!operationRejected) throw new Error(name + ': missing operation failure');
+        } finally { RPLocalFiles[method] = original; }
+        await store.save('rp_hub_unrelated', name);
+        let flushRejected = false;
+        try { await store.flush(); } catch (_) { flushRejected = true; }
+        if (!flushRejected) throw new Error(name + ': unrelated save hid the failure');
+        await retry();
+        await store.flush();
+        results.push(name);
+      }
+      const index = store.read('个人数据/文件索引.json');
+      if (index.rp_hub_queue_probe) throw new Error('Retried removal left the record indexed');
+      if (!(await store.findImage('queue-image', owner))) throw new Error('Retried image was not saved');
+      if (store.readRevision().revision !== 'queue-test') throw new Error('Retried revision was not saved');
+      return results;
+    });
+    assert.deepEqual(retriedOperations, ['record', 'remove', 'revision', 'image']);
+    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, retriedOperations, folders: initial.folders };
     fs.writeFileSync(path.join(root, 'verification', process.argv.includes('--legacy-bridge') ? 'storage-legacy-bridge.json' : 'storage.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }

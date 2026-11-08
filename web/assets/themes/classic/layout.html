@@ -842,12 +842,9 @@
                             <button type="button" @click="chooseAppBackupFolder" class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50">选择默认文件夹</button>
                             <button type="button" @click="exportAllData" class="px-3 py-2 rounded-xl bg-primary-600 text-white text-sm font-bold hover:bg-primary-700">导出全部数据</button>
                             <label class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                导入全部数据
-                                <input type="file" accept="application/json,.json,.zip,application/zip" class="hidden" @change="importAllData">
+                                导入备份
+                                <input type="file" accept="application/json,.json,.zip,application/zip" aria-label="选择备份文件" class="hidden" @change="importAllData">
                             </label>
-                            <button type="button" @click="streamImportPanel.choose()" class="shell-button">
-                                <shell-icon name="Upload"></shell-icon>流式导入 JSON
-                            </button>
                             <button type="button" @click="openBackupManager" class="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50" title="管理备份文件夹内的备份：重命名 / 删除 / 另存">
                                 备份管理
                             </button>

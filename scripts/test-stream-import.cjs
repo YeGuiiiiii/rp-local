@@ -66,7 +66,9 @@ const fixture = () => ({
   }
   async function backup() {
     await page.evaluate(() => { __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); });
-    await page.getByRole('button', { name: '流式导入 JSON', exact: true }).waitFor();
+    await page.getByText('导入备份', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: '流式导入 JSON', exact: true }).count(), 0);
+    assert.equal(await page.getByLabel('选择备份文件').count(), 1, 'JSON and ZIP share one backup picker');
   }
   async function stage(data = fixture(), phase = 'ready') {
     if (await page.evaluate(() => __qa.streamImportPanel?.state.phase === 'ready'))
@@ -268,7 +270,12 @@ const fixture = () => ({
       await page.getByRole('button', { name: '取消', exact: true }).click();
       await page.evaluate(() => __qa.shellGoBack());
       await page.evaluate(({skin,theme}) => { RPThemePacks.set(skin); RPHubThemeKit.setScheme(theme); }, {skin,theme});
-      await backup(); await stage();
+      await backup();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: path.join(transferEvidence, `backup-options-${skin}-${theme}-390.png`), fullPage: true, animations: 'disabled' });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `backup overflow ${skin}/${theme}`);
+      await stage();
       for (const [width, height] of [[360,640],[390,844],[844,390],[1280,900]]) {
         await page.setViewportSize({ width, height });
         await page.locator('.transfer-mascot').evaluate(image => image.decode());

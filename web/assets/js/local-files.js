@@ -26,9 +26,13 @@
     let cards = [];
     let inventory = bridge ? read('个人数据/文件索引.json') || {} : {};
     let queue = Promise.resolve();
+    const pendingFailures = new Map();
     let webWritesPaused = false;
-    const ordered = task => {
-        const next = queue.then(task);
+    const ordered = (key, task) => {
+        const next = queue.then(task).then(
+            value => { pendingFailures.delete(key); return value; },
+            error => { pendingFailures.set(key, error); throw error; },
+        );
         queue = next.catch(() => {});
         return next;
     };
@@ -162,7 +166,7 @@
             reader.onerror = () => reject(reader.error);
             reader.readAsDataURL(blob);
         });
-        await ordered(() => {
+        await ordered('image:' + indexPath, () => {
             call('writeImage', file, base64);
             write(indexPath, { file, bytes: blob.size, type: blob.type, savedAt: Date.now() });
         });
@@ -172,18 +176,21 @@
         available: !!bridge, call, read, write, safeName, hash, imageUrl, assignFolders,
         initialize, ownerOf, findImage, saveImage,
         readRevision: () => read('个人数据/同步版本.json'),
-        saveRevision: revision => ordered(() => write('个人数据/同步版本.json', revision)),
-        save: (key, value) => ordered(async () => {
+        saveRevision: revision => ordered('revision', () => write('个人数据/同步版本.json', revision)),
+        save: (key, value) => ordered('record:' + key, async () => {
             await saveEntry(key, value);
             if (bridge) write('个人数据/文件索引.json', inventory);
         }),
-        remove: key => ordered(async () => {
+        remove: key => ordered('record:' + key, async () => {
             if (key.startsWith('__rp_card__:') || key.startsWith('__rp_card_image__:')) return;
             call('remove', inventory[key] || await pathOf(key));
             delete inventory[key];
             if (bridge) write('个人数据/文件索引.json', inventory);
         }),
-        flush: () => queue,
+        flush: async () => {
+            await queue;
+            if (pendingFailures.size) throw pendingFailures.values().next().value;
+        },
         setWebWritesPaused: paused => { webWritesPaused = paused; },
     });
     window.RPLocalPanel = {
