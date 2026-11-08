@@ -7,8 +7,16 @@ import os
 final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelegate,
                               WKURLSchemeHandler, WKScriptMessageHandler {
     private let origin = URL(string: "rplocal://localhost/RP-Hub/")!
-    private let files = LocalFiles(root: FileManager.default.urls(for: .applicationSupportDirectory,
-                                                                in: .userDomainMask)[0].appendingPathComponent("RPData"))
+    private let files = LocalFiles(root: RPViewController.storageRoot)
+    /// iOS 的 Application Support 本来就在应用自己的容器里；Mac 版没有沙盒，要再套一层本应用的目录，免得和别的软件混在一起。
+    private static var storageRoot: URL {
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        #if targetEnvironment(macCatalyst)
+        return support.appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.rphub.local").appendingPathComponent("RPData")
+        #else
+        return support.appendingPathComponent("RPData")
+        #endif
+    }
     private let network = NetworkBridge()
     private var web: WKWebView!
     private var backups: [String: (url: URL, stream: FileHandle, share: Bool)] = [:]
@@ -50,6 +58,7 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
                   let json = String(data: data, encoding: .utf8) else { return }
             self.web.evaluateJavaScript("window.__rpReceiveNetwork(\(json))", completionHandler: nil)
         }
+        Self.log.notice("loading \(self.origin.absoluteString, privacy: .public)")
         web.load(URLRequest(url: origin))
     }
 
@@ -143,6 +152,27 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
         }
     }
 
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        Self.log.notice("nav start \(webView.url?.absoluteString ?? "", privacy: .public)")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        Self.log.error("nav provisional failed: \(error.localizedDescription, privacy: .public)")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        Self.log.error("nav failed: \(error.localizedDescription, privacy: .public)")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        Self.log.notice("nav finished")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        Self.log.error("web content process terminated, reloading")
+        webView.reload()
+    }
+
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         if let url = navigationAction.request.url { openExternal(url) }
@@ -182,7 +212,10 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
             urlSchemeTask.didReceive(response)
             urlSchemeTask.didReceive(data)
             urlSchemeTask.didFinish()
-        } catch { urlSchemeTask.didFailWithError(error) }
+        } catch {
+            Self.log.error("local file \(urlSchemeTask.request.url?.path ?? "", privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+            urlSchemeTask.didFailWithError(error)
+        }
     }
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
