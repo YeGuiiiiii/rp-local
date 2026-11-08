@@ -7395,7 +7395,8 @@ const app = createApp({
         };
 
         const flushPendingChatHistorySave = async () => {
-            const saved = chatHistorySaveTimer ? await saveChatHistoryNow() : await chatHistorySaveQueue;
+            let saved = chatHistorySaveTimer ? await saveChatHistoryNow() : await chatHistorySaveQueue;
+            if (saved !== true) saved = await saveChatHistoryNow();
             if (saved !== true) throw Object.assign(new Error('聊天记录未保存，已停止后续操作'), { name: 'ChatSaveError' });
             return true;
         };
@@ -14862,8 +14863,9 @@ const app = createApp({
                 if (isNewImport) showAutoImageGenModal.value = true;
             }
 
-            _characterSwitchSavePromise = setStoredValue('last_active_char', index);
-            await _characterSwitchSavePromise;
+            const selectionSave = setStoredValue('last_active_char', index);
+            _characterSwitchSavePromise = selectionSave.catch(() => {});
+            await selectionSave;
             await setStoredValue('last_active_char_id', char.uuid);
             return isLatestSwitch();
             } finally {
