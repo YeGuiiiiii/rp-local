@@ -2,6 +2,7 @@ import UIKit
 import WebKit
 import SafariServices
 import CryptoKit
+import os
 
 final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelegate,
                               WKURLSchemeHandler, WKScriptMessageHandler {
@@ -21,6 +22,10 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
         config.allowsInlineMediaPlayback = true
         config.setURLSchemeHandler(self, forURLScheme: "rplocal")
         config.userContentController.add(self, name: "rpNetwork")
+        config.userContentController.add(self, name: "rpLog")
+        // 把网页里的报错转到系统日志（Console.app 里按 com.rphub.local 过滤），便于排查白屏等问题。
+        config.userContentController.addUserScript(WKUserScript(source: Self.errorReporter, injectionTime: .atDocumentStart,
+                                                               forMainFrameOnly: true))
         guard let script = Bundle.main.url(forResource: "ios-bridge", withExtension: "js"),
               let source = try? String(contentsOf: script, encoding: .utf8) else {
             fatalError("Missing ios-bridge.js")
@@ -28,6 +33,7 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
         config.userContentController.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart,
                                                                forMainFrameOnly: true))
         web = WKWebView(frame: .zero, configuration: config)
+        if #available(iOS 16.4, macCatalyst 16.4, *) { web.isInspectable = true }
         web.uiDelegate = self
         web.navigationDelegate = self
         web.scrollView.contentInsetAdjustmentBehavior = .never
@@ -47,6 +53,21 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
         web.load(URLRequest(url: origin))
     }
 
+    private static let log = Logger(subsystem: "com.rphub.local", category: "web")
+    private static let errorReporter = """
+    (function () {
+        const handler = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.rpLog;
+        if (!handler) return;
+        const send = (kind, msg) => { try { handler.postMessage({ kind, msg: String(msg).slice(0, 2000) }); } catch (e) {} };
+        addEventListener('error', e => send('error', (e.message || 'resource failed') + ' @ ' +
+            (e.filename || (e.target && (e.target.src || e.target.href)) || '') + ':' + (e.lineno || 0)), true);
+        addEventListener('unhandledrejection', e => send('rejection', (e.reason && (e.reason.stack || e.reason)) || ''));
+        const original = console.error;
+        console.error = function (...args) { send('console', args.map(String).join(' ')); return original.apply(console, args); };
+        addEventListener('load', () => send('load', 'page loaded'));
+    })();
+    """
+
     private func trusted(_ frame: WKFrameInfo) -> Bool {
         frame.isMainFrame && frame.request.url?.scheme == origin.scheme &&
             frame.request.url?.host == origin.host && frame.request.url?.path.hasPrefix("/RP-Hub/") == true
@@ -54,6 +75,11 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard trusted(message.frameInfo), let body = message.body as? [String: Any] else { return }
+        if message.name == "rpLog" {
+            let kind = body["kind"] as? String ?? "log", text = body["msg"] as? String ?? ""
+            Self.log.error("web \(kind, privacy: .public): \(text, privacy: .public)")
+            return
+        }
         network.handle(body)
     }
 
