@@ -125,7 +125,12 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
 
     private func openExternal(_ url: URL) {
         guard ["http", "https"].contains(url.scheme?.lowercased() ?? "") else { return }
+        #if targetEnvironment(macCatalyst)
+        // Mac 上没有应用内网页窗口，交给系统默认浏览器。
+        UIApplication.shared.open(url)
+        #else
         if presentedViewController == nil { present(SFSafariViewController(url: url), animated: true) }
+        #endif
     }
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {

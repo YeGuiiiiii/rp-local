@@ -1,4 +1,4 @@
-name: Build iOS prototype
+name: Build iOS and Mac prototype
 on:
   workflow_dispatch:
 
@@ -30,6 +30,13 @@ jobs:
           IOS_TEST_DESTINATION="platform=iOS Simulator,id=$device" bash ios/build.sh test
       - name: Build unsigned IPA
         run: bash ios/build.sh
+      - name: Build Mac app (Mac Catalyst, ad-hoc signed)
+        run: bash ios/build.sh mac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RP-local-Mac
+          path: ios/build/*-mac.zip
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: RP-local-iOS-unsigned

@@ -25,7 +25,14 @@ final class LocalFiles {
             throw RPError.message("Invalid path")
         }
         let base = root.standardizedFileURL.resolvingSymlinksInPath()
-        let target = base.appendingPathComponent(relative).standardizedFileURL.resolvingSymlinksInPath()
+        // resolvingSymlinksInPath() leaves a link in place when the final file does not exist yet,
+        // so check every existing component inside storage and refuse symbolic links outright.
+        var target = base
+        for part in parts {
+            target.appendPathComponent(String(part))
+            let type = (try? FileManager.default.attributesOfItem(atPath: target.path))?[.type] as? FileAttributeType
+            if type == .typeSymbolicLink { throw RPError.message("Symbolic links are not allowed") }
+        }
         guard target.path.hasPrefix(base.path + "/") else {
             throw RPError.message("Path outside storage")
         }

@@ -31,11 +31,26 @@ if [[ "${1:-}" == test ]]; then
     exit 0
 fi
 
+version="$(sed -n 's/^MARKETING_VERSION = //p' Version.xcconfig)"
+
+if [[ "${1:-}" == mac ]]; then
+    # Mac Catalyst：苹果芯片要求至少有临时签名才能启动，这里用 ad-hoc 签名（不是开发者签名，首次打开需在系统设置里允许）。
+    xcodebuild archive -project RPLocal.xcodeproj -scheme RPLocal -configuration Release \
+        -destination 'generic/platform=macOS,variant=Mac Catalyst' -archivePath build/RPLocal-mac.xcarchive \
+        CODE_SIGNING_ALLOWED=NO
+    rm -rf build/mac && mkdir -p build/mac
+    ditto build/RPLocal-mac.xcarchive/Products/Applications/RPLocal.app "build/mac/RP 本地版.app"
+    codesign --force --deep --sign - "build/mac/RP 本地版.app"
+    codesign --verify --deep --strict "build/mac/RP 本地版.app"
+    (cd build/mac && ditto -c -k --sequesterRsrc --keepParent "RP 本地版.app" "../RP-local-${version}-mac.zip")
+    echo "Created: $PWD/build/RP-local-${version}-mac.zip (ad-hoc signed)"
+    exit 0
+fi
+
 xcodebuild archive -project RPLocal.xcodeproj -scheme RPLocal -configuration Release \
     -destination 'generic/platform=iOS' -archivePath build/RPLocal.xcarchive \
     CODE_SIGNING_ALLOWED=NO
 mkdir -p build/Payload
 ditto build/RPLocal.xcarchive/Products/Applications/RPLocal.app build/Payload/RPLocal.app
-version="$(sed -n 's/^MARKETING_VERSION = //p' Version.xcconfig)"
 (cd build && ditto -c -k --keepParent Payload "RP-local-${version}-unsigned.ipa")
 echo "Created: $PWD/build/RP-local-${version}-unsigned.ipa (requires signing before installation)"
