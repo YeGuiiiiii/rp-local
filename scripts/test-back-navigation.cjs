@@ -80,7 +80,7 @@ assert.equal(JSON.stringify('true').startsWith('true'), false, 'Reproduce old st
         await page.evaluate(() => __qa.openAnnouncement());
         await back('characters');
         assert.equal(await page.evaluate(() => __qa.showAnnouncement), false);
-        for (const modal of ['showBackupManagerModal', 'showAutoBackupModal', 'showContextViewerModal', 'showMemoryBackfillModal']) {
+        for (const modal of ['showContextViewerModal', 'showMemoryBackfillModal']) {
             await page.evaluate(modal => { __qa[modal] = true; }, modal);
             await back('characters');
             assert.equal(await page.evaluate(modal => __qa[modal], modal), false);

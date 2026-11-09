@@ -348,6 +348,15 @@ const app = createApp({
         const backupTask = reactive({ active: false, locked: false, title: '', message: '', percent: 0, detail: '', error: '', confirm: null, recovery: false });
         const backupProfiles = window.RPStreamImport.profiles;
         const backupProfile = ref(window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile')).id);
+        const backupPage = ref('home'), backupSource = ref('all'), backupMenu = ref(''), backupListError = ref('');
+        const backupTrail = [];
+        const openBackupPage = async page => {
+            if (page !== backupPage.value) backupTrail.push(backupPage.value);
+            backupPage.value = page;
+            backupMenu.value = '';
+            cancelRenameBackupFile();
+            if (page === 'history') await loadBackupManagerFiles();
+        };
         watch(backupProfile, id => localStorage.setItem('rp-backup-profile', window.RPStreamImport.profile(id).id));
         const beginBackupTask = title => Object.assign(backupTask, {
             active: true, locked: true, title, message: '正在准备…', percent: 0, detail: '', error: '', confirm: null, recovery: false
@@ -434,6 +443,7 @@ const app = createApp({
                 return;
             }
             currentView.value = view;
+            if (view === 'backup') { backupPage.value = 'home'; backupTrail.length = 0; }
         };
         const openSettingsSection = section => {
             navigateWorkspace('settings-detail');
@@ -455,11 +465,17 @@ const app = createApp({
             for (const modal of [showCharacterEditor, showCharacterExportModal, showAddCharacterMenu,
                 showPresetEditor, showRegexEditor, showWorldInfoEditor, showUiTemplateEditor,
                 showModelSelector, showChatModelSelector, showStoryBranchModal, showAutoImageGenModal, showExportModal, showActiveToolEditor,
-                showContextViewerModal, showMemoryBackfillModal, showAutoBackupModal, showBackupManagerModal, showBackupSizeModal,
+                showContextViewerModal, showMemoryBackfillModal, showBackupSizeModal,
                 showPresetBatchMoveModal, showPresetGroupForm]) {
                 if (modal.value) { modal.value = false; return true; }
             }
             if (currentView.value === 'album' && galleryPage.value?.back()) return true;
+            if (currentView.value === 'backup' && backupPage.value !== 'home') {
+                if (backupRenameId.value) { cancelRenameBackupFile(); return true; }
+                if (backupMenu.value) { backupMenu.value = ''; return true; }
+                backupPage.value = backupTrail.pop() || 'home';
+                return true;
+            }
             if (currentView.value === 'characters') return false;
             if (shellRoots.includes(currentView.value)) {
                 navigateWorkspace('characters');
@@ -4797,7 +4813,6 @@ const app = createApp({
         const autoBackupHistory = ref([]);
         const isAutoBackingUp = ref(false);
         const isRestoringAutoBackup = ref(false);
-        const showAutoBackupModal = ref(false);
         // [rphub 2.8.95] 体积分析结果：theme.css 的 .toast-text 是 nowrap + 42px 定高，
         //   单行胶囊永远装不下桶表（上一版把 Top3 塞进 toast，用户只看到一串省略号）。
         //   明细改由弹窗承载，toast 只留一句结论。
@@ -5526,38 +5541,8 @@ const app = createApp({
             }
         };
 
-        // 导出物理自动备份到其他位置（重新下载）
-        const downloadAutoBackupRecord = async (record) => {
-            return exportBackupManagerFile(record);
-        };
-
-        // 删除单项物理自动备份文件
-        const deleteAutoBackupRecord = async (record) => {
-            if (!record?.id) return;
-            const confirmed = await showVueConfirmModal('删除备份', '确认删除本地文件「' + record.fileName + '」吗？', { confirmText: '确认删除' });
-            if (!confirmed) return;
-            try {
-                const bridge = window.AndroidBridge;
-                if (bridge?.isNativeApp?.() && typeof bridge.deleteBackupFile === 'function') {
-                    const ok = bridge.deleteBackupFile(record.id, record.isTreeDoc);
-                    if (!ok) throw new Error('底层删除文件未成功');
-                }
-                await loadAutoBackupHistory();
-                showToast('已删除本地备份文件', 'success');
-            } catch (e) {
-                showToast('删除失败: ' + (e.message || e), 'error');
-            }
-        };
-
-        const openAutoBackupModal = async () => {
-            await loadAutoBackupHistory();
-            showAutoBackupModal.value = true;
-        };
-
         // ---- 备份文件管理（重命名 / 删除 / 另存 备份文件夹内的备份，2.8.11）----
-        // 与「每日自动备份」的列表刻意分开：那一份只筛 rp-hub-autobackup-*.json
-        // 并参与轮转清理，绝不能把用户手动导出的备份卷进去；这里展示目录内全部 .json。
-        const showBackupManagerModal = ref(false);
+        // 历史页展示全部 JSON；每日轮转仍只处理原来的自动备份文件。
         const backupManagerFiles = ref([]);
         const backupManagerLoading = ref(false);
         const backupRenameId = ref('');
@@ -5580,6 +5565,7 @@ const app = createApp({
                 return;
             }
             backupManagerLoading.value = true;
+            backupListError.value = '';
             try {
                 const parsed = JSON.parse(String(bridge.listBackupFiles() || '[]'));
                 backupManagerFiles.value = (Array.isArray(parsed) ? parsed : [])
@@ -5594,16 +5580,11 @@ const app = createApp({
                     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             } catch (error) {
                 console.warn('读取备份文件夹失败:', error);
+                backupListError.value = '备份列表读取失败：' + error.message;
                 backupManagerFiles.value = [];
             } finally {
                 backupManagerLoading.value = false;
             }
-        };
-
-        const openBackupManager = async () => {
-            cancelRenameBackupFile();
-            await loadBackupManagerFiles();
-            showBackupManagerModal.value = true;
         };
 
         const startRenameBackupFile = (record) => {
@@ -5723,16 +5704,8 @@ const app = createApp({
             { key: 'summary', label: '总结记忆' },
             { key: 'uiRuntime', label: 'UI变量' },
             { key: 'tokenUsage', label: '用量记录' },
-            { key: 'localData', label: '本地记忆' }
+            { key: 'localData', label: '本地状态与偏好' }
         ];
-        const toggleBackupScope = (key) => {
-            if (!Object.prototype.hasOwnProperty.call(BACKUP_SCOPE_DEFAULTS, key)) return;
-            backupScope.value[key] = !backupScope.value[key];
-            // 2.7.85：给即时反馈，否则用户无法判断这次点击到底生效没有。
-            const label = (backupScopeOptions.find(option => option.key === key) || {}).label || key;
-            showToast(backupScope.value[key] ? `已开启「${label}」备份` : `已关闭「${label}」备份`,
-                backupScope.value[key] ? 'success' : 'info');
-        };
         const resetBackupScope = () => {
             backupScope.value = { ...BACKUP_SCOPE_DEFAULTS };
             showToast('备份范围已恢复全开', 'info');
@@ -6683,7 +6656,7 @@ const app = createApp({
             const mfEntry = zip.file('manifest.json');
             if (!mfEntry) throw new Error('不是有效的 ZIP 备份：缺少 manifest.json');
             const manifest = JSON.parse(await mfEntry.async('string'));
-            
+
             let entries = [];
             let extraDatabases = {};
             let webStorage = {};
@@ -16049,7 +16022,25 @@ const app = createApp({
             if (thirdPersonPreset) thirdPersonPreset.enabled = user.person === 'third';
         };
 
+        const backupUi = reactive({
+            page: backupPage, go: openBackupPage, back: shellGoBack, source: backupSource, menu: backupMenu,
+            files: computed(() => backupManagerFiles.value.filter(record => backupSource.value === 'all'
+                || /^rp-hub-autobackup-.*\.json$/i.test(record.fileName) === (backupSource.value === 'daily'))),
+            listError: backupListError, loading: backupManagerLoading, refresh: loadBackupManagerFiles,
+            renameId: backupRenameId, renameDraft: backupRenameDraft,
+            rename: startRenameBackupFile, cancelRename: cancelRenameBackupFile, commitRename: commitRenameBackupFile,
+            remove: deleteBackupManagerFile, saveAs: exportBackupManagerFile,
+            restore: record => restoreAutoBackupRecord({ ...record, name: record.fileName }),
+            time: formatBackupFileTime, size: formatDataHealthSize, restoring: isRestoringAutoBackup,
+            folder: appBackupFolder, defaultFolder: defaultBackupFolder, chooseFolder: chooseAppBackupFolder,
+            filename: backupFileName, filenamePreview: backupFileNamePreview,
+            exportJson: exportAllData, importJson: importAllData, exporting: isExportingAllData,
+            profile: backupProfile, profiles: backupProfiles, scope: backupScope, scopes: backupScopeOptions,
+            resetScope: resetBackupScope, config: autoBackupConfig, overdue: backupOverdueDays,
+            daily: performDailyAutoBackup, working: isAutoBackingUp, checking: isCheckingDataHealth
+        });
         return {
+            backupUi,
             switchProfile, createNewProfile, deleteProfile, userProfiles, activeProfileId, showProfileDropdown,
             processMainContent, replaceUserNamePlaceholder,
             currentView, showDescriptionPanel, showModelSelector, modelSelectionTarget, openModelSelector, showChatModelSelector, showCharacterEditor, showAddCharacterMenu, showPresetEditor, showUiTemplateEditor,
@@ -16134,7 +16125,7 @@ const app = createApp({
             fetchUiTemplateModels, isFetchingUiTemplateModels,
             appBackupFolder, defaultBackupFolder, chooseAppBackupFolder, isExportingAllData,
             backupFileName, backupFileNamePreview, buildBackupFileName,
-            backupScope, backupScopeOptions, toggleBackupScope, resetBackupScope,
+            backupScope, backupScopeOptions, resetBackupScope,
             dataHealthResult, dataHealthError, isCheckingDataHealth, isCleaningDataHealth,
             scanDataHealth, cleanDataHealthItem, formatDataHealthSize,
             showApiQuickSelector, quickApiProviders, toggleApiQuickSelector, selectQuickApiProvider, rphubEnterNewline, toggleRphubEnterNewline, autoResizeInput, onChatInput, flushChatInput, handleChatInputEnter, handleChatInputFocus, handleChatInputBlur, stopGeneration, clearChat, toggleChatFullscreen,
@@ -16167,7 +16158,7 @@ const app = createApp({
             memToolsPinned, memToolsRangePinned, toggleMemToolsPin,
             memToolsImport, memToolsImportLabel, clearMemToolsImport, pickMemToolsImportFile, readMemToolsImportFile,
             memToolsAuto, memToolsAutoPlan, saveMemToolsAuto, runMemToolsAuto, abortMemToolsAuto,
-            createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, showAutoBackupModal, openAutoBackupModal, performDailyAutoBackup, backupOverdueDays, maybeRemindDailyBackup, analyzeBackupSize, openBackupSizeModal, backupSizeReport, showBackupSizeModal, exportLegacyBackups, purgeLegacyBackups, restoreAutoBackupRecord, downloadAutoBackupRecord, deleteAutoBackupRecord, showBackupManagerModal, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, openBackupManager, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled, batchDeletePresets, deletePresetGroup,
+            createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, performDailyAutoBackup, backupOverdueDays, maybeRemindDailyBackup, analyzeBackupSize, openBackupSizeModal, backupSizeReport, showBackupSizeModal, exportLegacyBackups, purgeLegacyBackups, restoreAutoBackupRecord, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled, batchDeletePresets, deletePresetGroup,
             activePresetGroupName, activePresetGroup, visiblePresetGroups, openPresetGroup, showPresetGroupForm,
             presetGroupDraft, presetGroupEditing, presetGroupError, openPresetGroupForm, savePresetGroup, exportPresetGroups, importPresets,
             renderMarkdown, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
@@ -16485,6 +16476,7 @@ app.component('ShellChatMenu', window.RPAppShell.ChatMenu);
 app.component('ImageDownloadSheet', window.RPAppShell.ImageDownloadSheet);
 app.component('CardNightSelect', window.RPAppShell.CardNightSelect);
 app.component('ImageProviderSettings', window.RPAppShell.ImageProviderSettings);
+app.component('BackupPage', window.RPAppShell.BackupPage);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('ShellUtilities', window.RPAppShell.Utilities);

@@ -41,7 +41,7 @@ const rows = [
     ['补齐', '经典世界书恢复放大镜全文搜索；预设和正则保留，其他皮肤世界书保留常驻搜索。', 'web/assets/native/sakura-features.js; web/assets/js/app.js', 'test-classic-skin; test-worldbook'],
     ['保留并适配', '分块备份、命名、目录、还原与旧数据兼容；保留流式入口。', 'web/assets/js/app.js; web/assets/js/backup-format.js; native/com/rphub/app/LocalFiles.java', 'test-original-backup; test-stream-import'],
     ['对齐', '新用户默认每天提醒，保留已有自动模式；每日只问一次，取消不备份。', 'web/assets/js/app.js:normalizeAutoBackupConfig/maybeRemindDailyBackup', 'test-classic-skin; test-upstream-features'],
-    ['保留，待真机', '目录列表、重命名、删除、另存、刷新及系统目录授权。', 'web/assets/js/app.js:openBackupManager; android/smali/com/rphub/app/MainActivity$6.smali', 'test-upstream-features'],
+    ['保留，待真机', '目录列表、重命名、删除、另存、刷新及系统目录授权。', 'web/assets/js/app.js:loadBackupManagerFiles; android/smali/com/rphub/app/MainActivity$6.smali', 'test-upstream-features'],
     ['保留', 'ZIP 和流式 JSON 的兼容入口。', 'web/assets/js/app.js; web/assets/js/stream-import.js', 'test-original-backup; test-stream-import'],
     ['保留', '导入前体检与无损去重、瘦身。', 'web/assets/js/app.js:inspectImportedCharacterCard/slimFullBackupImportEntries', 'test-upstream-features'],
     ['保留', '重复模板、缓存和超量记录检查清理。', 'web/assets/js/app.js:checkDataHealth', 'test-original-backup'],

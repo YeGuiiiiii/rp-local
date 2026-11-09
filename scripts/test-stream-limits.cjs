@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const context = await browser.newContext();
+  await context.addInitScript(() => localStorage.setItem('rp-local-release-shown', '999999'));
   const page = await context.newPage();
   const errors = [];
   let fault = '';
@@ -27,7 +28,9 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     await page.waitForFunction(() => window.__rpDataReady && !document.querySelector('.entry-transition'));
     await page.evaluate(() => {
       window.__qa = document.getElementById('app').__vue_app__._container._vnode.component.setupState;
-      __qa.showUserSetupModal = false; __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
+      __qa.showUserSetupModal = false; __qa.showAnnouncement = false;
+      __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
+      __qa.backupUi.go('import');
     });
   }
   async function smallFile() {
@@ -54,6 +57,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     report.singleRecordLimit = await failed();
     assert.match(report.singleRecordLimit, /32 MB/);
     await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
+    await page.locator('.backup-details summary').click();
     await page.getByLabel('备份读取档位', { exact: true }).selectOption('fast');
     await page.evaluate(() => {
       const input = document.querySelector('[aria-label="选择流式导入文件"]'), transfer = new DataTransfer();

@@ -513,6 +513,103 @@
             <theme-mascot v-else pose="poke-happy" alt=""></theme-mascot>
           </span>`
     };
+    const BackupPage = {
+        components: { Icon },
+        props: { state: { type: Object, required: true } },
+        setup(props) {
+            const titles = {
+                home: '备份与恢复', history: '历史备份',
+                locations: '保存位置', daily: '每日备份', maintenance: '数据整理',
+                import: '导入备份', export: '创建备份'
+            };
+            const heading = ref(null);
+            watch(() => props.state.page, async () => {
+                await nextTick();
+                heading.value?.focus({ preventScroll: true });
+                heading.value?.closest('.management-view')?.scrollTo(0, 0);
+            });
+            return { s: props.state, titles, heading };
+        },
+        template: `
+          <div class="backup-page">
+            <header class="backup-header">
+              <button type="button" class="shell-icon-button" aria-label="返回" title="返回" @click="s.back"><icon name="ArrowLeft"/></button>
+              <h1 ref="heading" tabindex="-1">{{titles[s.page]}}</h1>
+            </header>
+            <div class="backup-content">
+              <template v-if="s.page==='home'">
+                <section class="backup-section">
+                  <h2>数据备份</h2><p class="backup-muted">角色卡、聊天、记忆与设置。独立保存的图片文件夹需另行保留。</p>
+                  <div class="backup-actions">
+                    <button type="button" class="backup-button backup-primary" @click="s.go('export')"><icon name="Save"/>创建备份</button>
+                    <button type="button" class="backup-button" @click="s.go('import')"><icon name="Upload"/>导入备份</button>
+                  </div>
+                  <button type="button" class="backup-row" @click="s.go('history')"><icon name="History"/><span><strong>历史备份</strong><small>手动与每日备份</small></span><icon name="ChevronRight"/></button>
+                </section>
+                <section class="backup-section"><h2>保存与维护</h2>
+                  <button type="button" class="backup-row" @click="s.go('locations')"><icon name="FolderOpen"/><span><strong>保存位置</strong><small>默认备份文件夹</small></span><icon name="ChevronRight"/></button>
+                  <button type="button" class="backup-row" @click="s.go('daily')"><icon name="Clock"/><span><strong>每日备份</strong><small>每日 JSON 备份 · {{s.config.enabled?'已开启':'已关闭'}}</small></span><icon name="ChevronRight"/></button>
+                  <button type="button" class="backup-row" @click="s.go('maintenance')"><icon name="Database"/><span><strong>数据整理</strong><small>检查占用与可清理内容</small></span><icon name="ChevronRight"/></button>
+                </section>
+              </template>
+              <template v-else-if="s.page==='locations'">
+                <section class="backup-section"><div class="backup-line"><h2>JSON 备份目录</h2><button class="backup-button" @click="s.chooseFolder"><icon name="FolderOpen"/>更改</button></div>
+                  <p class="backup-path">{{s.folder || s.defaultFolder}}</p><p class="backup-muted">用于每日 JSON 备份与历史列表；手动导出可另选位置。</p></section>
+              </template>
+              <template v-else-if="s.page==='daily'">
+                <label class="backup-line backup-switch"><span><strong>每日 JSON 备份</strong><small>{{s.config.enabled?'已开启':'已关闭'}}</small></span><span class="relative inline-flex"><input class="settings-toggle-input sr-only" type="checkbox" role="switch" aria-label="每日 JSON 备份" v-model="s.config.enabled"><span class="settings-toggle"></span></span></label>
+                <p class="backup-muted">不包含独立保存的图片文件。</p>
+                <template v-if="s.config.enabled">
+                  <label class="backup-field"><span>备份方式</span><select v-model="s.config.triggerMode"><option value="remind">每天提醒我</option><option value="auto">全自动</option></select></label>
+                  <label class="backup-field"><span>保留天数</span><select v-model.number="s.config.retentionDays"><option :value="3">3 天</option><option :value="7">7 天</option><option :value="14">14 天</option><option :value="30">30 天</option><option :value="0">永久保留</option></select></label>
+                  <label class="backup-field"><span>最多保留</span><select v-model.number="s.config.maxCopies"><option :value="3">3 份</option><option :value="5">5 份</option><option :value="10">10 份</option><option :value="20">20 份</option><option :value="0">不限份数</option></select></label>
+                </template>
+                <p class="backup-muted backup-note">{{s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份'}}</p>
+                <button class="backup-button backup-primary" :disabled="s.working || s.checking" @click="s.daily(true)"><icon name="Save"/>{{s.working?'正在备份…':'立即备份'}}</button>
+                <button class="backup-row" @click="s.go('history')"><icon name="History"/><span>查看历史备份</span><icon name="ChevronRight"/></button>
+              </template>
+              <template v-else-if="s.page==='maintenance'"><slot name="maintenance"></slot></template>
+              <template v-else-if="s.page==='import'">
+                <p class="backup-muted">选择 JSON 或兼容的插件 ZIP，读取并检查后确认恢复。</p>
+                <label class="backup-button backup-primary backup-file-picker"><icon name="Upload"/>选择备份文件<input type="file" accept=".json,.zip,application/json,application/zip" aria-label="选择备份文件" @change="s.importJson"></label>
+                <details class="backup-details"><summary>读取设置</summary><label class="backup-field"><span>备份读取档位</span><select v-model="s.profile" aria-label="备份读取档位"><option v-for="profile in s.profiles" :key="profile.id" :value="profile.id">{{profile.name}} · 单条 {{profile.unitBytes/1048576}} MB / 集合 {{profile.collectionBytes/1048576}} MB</option></select></label></details>
+              </template>
+              <template v-else-if="s.page==='export'">
+                <p class="backup-muted">基础设置、角色卡、预设、正则与世界书始终包含。</p>
+                <label class="backup-field"><span>备份文件名</span><input type="text" aria-label="备份文件名" v-model="s.filename" placeholder="留空使用日期名称"></label>
+                <p class="backup-path">{{s.filenamePreview}}</p>
+                <div class="backup-line"><span class="backup-path">{{s.folder || s.defaultFolder}}</span><button class="backup-button" @click="s.chooseFolder"><icon name="FolderOpen"/>更改</button></div>
+                <details class="backup-details"><summary>导出内容</summary>
+                  <label v-for="option in s.scopes" :key="option.key" class="backup-check"><input type="checkbox" v-model="s.scope[option.key]">{{option.label}}</label>
+                  <button type="button" class="backup-button" @click="s.resetScope"><icon name="CheckCheck"/>全部包含</button>
+                </details>
+                <button type="button" class="backup-button backup-primary backup-wide" :disabled="s.exporting" @click="s.exportJson"><icon name="Download"/>导出全部数据</button>
+              </template>
+              <template v-else-if="s.page==='history'">
+                    <div class="backup-line"><label class="backup-filter"><span>来源</span><select v-model="s.source" aria-label="备份来源"><option value="all">全部</option><option value="manual">手动</option><option value="daily">每日</option></select></label>
+                      <button class="shell-icon-button" aria-label="刷新备份列表" title="刷新备份列表" :disabled="s.loading" @click="s.refresh"><icon name="RefreshCw"/></button></div>
+                    <p v-if="s.listError" class="shell-error" role="alert">{{s.listError}}</p>
+                    <p v-else-if="s.loading" class="backup-muted" role="status">正在读取备份目录…</p>
+                    <p v-else-if="!s.files.length" class="backup-empty">此目录暂无{{s.source==='daily'?'每日':s.source==='manual'?'手动':''}} JSON 备份。</p>
+                    <article v-for="record in s.files" :key="record.id" class="backup-file">
+                      <form v-if="s.renameId===record.id" class="backup-rename" @submit.prevent="s.commitRename(record)">
+                        <input v-model="s.renameDraft" aria-label="新文件名"><button type="submit" class="backup-button">确定</button><button type="button" class="backup-button" @click="s.cancelRename">取消</button>
+                      </form>
+                      <template v-else>
+                        <div class="backup-line"><div class="backup-file-info"><strong>{{record.fileName}}</strong><small>{{s.time(record.timestamp)}} · {{s.size(record.sizeBytes)}}</small></div>
+                          <button class="shell-icon-button" :aria-label="record.fileName+' 的操作'" title="备份操作" :aria-expanded="s.menu===record.id" @click="s.menu=s.menu===record.id?'':record.id"><icon name="Ellipsis"/></button></div>
+                        <div v-if="s.menu===record.id" class="backup-file-actions">
+                          <button class="backup-button" :disabled="s.restoring" @click="s.restore(record)"><icon name="RotateCcw"/>恢复</button>
+                          <button class="backup-button" @click="s.rename(record)"><icon name="Pencil"/>重命名</button>
+                          <button class="backup-button" @click="s.saveAs(record)"><icon name="Download"/>另存</button>
+                          <button class="backup-button backup-danger" @click="s.remove(record)"><icon name="Trash2"/>删除</button>
+                        </div>
+                      </template>
+                    </article>
+              </template>
+            </div>
+          </div>`
+    };
     const Settings = {
         components: { Icon, MascotHeader, PersonaAvatar },
         props: { user: Object },
@@ -526,7 +623,7 @@
                 { label: '外观', key: 'appearance', icon: 'Palette' },
                 { label: '向量缓存', view: 'cache', icon: 'Database' },
                 { label: '数据存储', key: 'storage', icon: 'HardDrive' },
-                { label: '备份与导入导出', view: 'backup', icon: 'Download' },
+                { label: '备份与恢复', view: 'backup', icon: 'Download' },
                 { label: '用量统计', view: 'usage', icon: 'ChartNoAxesCombined' },
                 { label: '关于与鸣谢', view: 'patchlist', icon: 'Info' }
             ];
@@ -742,5 +839,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
 })();

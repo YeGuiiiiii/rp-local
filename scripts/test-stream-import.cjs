@@ -67,6 +67,7 @@ const fixture = () => ({
   async function backup() {
     await page.evaluate(() => { __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); });
     await page.getByText('导入备份', { exact: true }).waitFor();
+    await page.getByRole('button', { name: '导入备份', exact: true }).click();
     assert.equal(await page.getByRole('button', { name: '流式导入 JSON', exact: true }).count(), 0);
     assert.equal(await page.getByLabel('选择备份文件').count(), 1, 'JSON and ZIP share one backup picker');
   }
@@ -141,6 +142,7 @@ const fixture = () => ({
         abortBackupWrite: () => {}
       };
     });
+    await page.evaluate(() => __qa.backupUi.go('export'));
     await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
     await page.getByRole('dialog', { name: '导出备份', exact: true }).waitFor();
     await page.locator('.transfer-mascot').evaluate(image => image.decode());
@@ -178,6 +180,7 @@ const fixture = () => ({
     await unchanged();
     await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
     const normalBuffer = Buffer.from(JSON.stringify(fixture()));
+    await page.evaluate(() => __qa.backupUi.go('import'));
     await page.locator('input[type=file][accept*=".zip"]').first().setInputFiles({ name: 'normal.json', mimeType: 'application/json', buffer: normalBuffer });
     await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready');
     assert.equal(await page.getByRole('dialog', { name: '导入备份', exact: true }).count(), 1, '普通JSON入口也使用受保护的逐段导入');

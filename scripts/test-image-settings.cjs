@@ -125,7 +125,7 @@ fs.mkdirSync(output, { recursive: true });
         writeBackupChunk: (token, base64) => { __exported.at(-1).chunks += atob(base64); return 'OK'; },
         finishBackupWrite: () => 'OK', abortBackupWrite: () => {},
       };
-      __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
+      __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); __qa.backupUi.go('export');
     });
     await page.getByText('下载 / RP本地版 / 数据备份', { exact: true }).waitFor();
     await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
