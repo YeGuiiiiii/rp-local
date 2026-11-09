@@ -155,7 +155,9 @@ fs.mkdirSync(output, { recursive: true });
         await page.evaluate(() => __qa.openAnnouncement());
         await page.getByRole('dialog', { name: '玥玥的更新简报' }).waitFor();
         const notice = await page.locator('.release-reading').innerText();
-        assert.ok(notice.includes('设置') && notice.includes('外观') && notice.includes('皮肤'));
+        for (const section of await page.evaluate(() => RPReleaseNotes.notes.sections.filter(section => section.text))) {
+            assert.ok(notice.includes(section.text), 'Announcement must show the current release content');
+        }
         assert.ok(notice.includes('472441481') && notice.includes('132292045'));
         await capture('announcement-mobile');
         await page.getByRole('button', { name: '关闭更新公告' }).click();

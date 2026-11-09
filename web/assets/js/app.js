@@ -520,7 +520,8 @@ const app = createApp({
         const quotaValue = ref(null);
         const quotaLoading = ref(false);
         const quotaError = ref(false);
-        const quotaLabel = computed(() => !settings.imageGenKey.trim() ? '未填写密钥'
+        const quotaLabel = computed(() => imageApi.selectedId !== 'builtin' ? '此接口不提供次数查询'
+            : !settings.imageGenKey.trim() ? '未填写密钥'
             : quotaLoading.value ? '查询中…' : quotaError.value ? '查询失败'
             : quotaValue.value === null ? '待查询' : `剩余 ${quotaValue.value} 次`);
         let quotaController;
@@ -532,6 +533,7 @@ const app = createApp({
             quotaValue.value = null;
             quotaError.value = false;
             quotaLoading.value = !!imageGenToken;
+            if (imageApi.selectedId !== 'builtin') { quotaLoading.value = false; return; }
             if (!imageGenToken) return;
             const timeout = setTimeout(() => controller.abort(), 10000);
             try {
@@ -913,6 +915,16 @@ const app = createApp({
             uiTemplateKeepFloors: 3
         });
         let retainedSettingsExtras = {};
+        const imageApi = window.RPImageProviders.create(IMAGE_GEN_BASE_URL);
+        watch(() => imageApi.current.key, key => { settings.imageGenKey = key; });
+        watch(() => [imageApi.selectedId, imageApi.current.url, imageApi.current.protocol], () => {
+            fetchQuota();
+            imageGenStatus.value = 'unknown';
+        });
+        const removeImageProvider = async () => {
+            if (await showVueConfirmModal('删除生图接口', '删除「' + imageApi.current.name + '」及其本机密钥？',
+                { confirmText: '删除' })) imageApi.remove();
+        };
         const tokenUsageRetentionOptions = Object.freeze([
             { value: 500, label: '保留 500 条' },
             { value: 1000, label: '保留 1000 条' },
@@ -1401,7 +1413,6 @@ const app = createApp({
                 values[currentModelMode.value] = next;
                 settings.slotTemperatures = { ...values };
                 settings.temperature = next;
-                saveData({ saveMemories: false, saveCharacters: false });
             }
         });
         const selectChatModelSlot = (slot) => {
@@ -8149,7 +8160,9 @@ const app = createApp({
         const imageFreezeRefreshUrl = (storedUrl, requestUrl) => {
             try {
                 const out = new URL(storedUrl, window.location.href);
-                const token = new URL(requestUrl, window.location.href).searchParams.get('token');
+                const request = new URL(requestUrl, window.location.href);
+                if (out.origin !== request.origin) return out.href;
+                const token = request.searchParams.get('token');
                 if (token) out.searchParams.set('token', token);
                 return out.href;
             } catch (e) { return storedUrl; }
@@ -8185,8 +8198,7 @@ const app = createApp({
             //   （freezeExistingImagesNow 只能扫当前 DOM，没渲染过的消息扫不到）。
             //   只写 URL 成本极低，开关只该决定「命中时复不复用」。
             const table = readImageFreezeTable();
-            if (!captureImageFreezeEntry(card, requestUrl, table)) return;
-            writeImageFreezeTable(table);
+            if (captureImageFreezeEntry(card, requestUrl, table)) writeImageFreezeTable(table);
             // 顺带把原图落到本地仓库：远端 URL 一旦失效，还能靠它顶替。
             try {
                 const vault = window.RPHubImageVault;
@@ -8371,20 +8383,20 @@ const app = createApp({
         // 卡片上只放一行提示（renderGeneratedImageJob 直接写进 label.textContent），
         // 64KB 的 HTML 错误页整段塞进去等于把卡片变成日志窗口。
         const IMAGE_JOB_MESSAGE_LIMIT = 300;
-        const readImageJobBody = async (response) => {
+        const readImageJobBody = async (response, limit = IMAGE_JOB_BODY_LIMIT) => {
             if (!response.body || typeof response.body.getReader !== 'function') {
                 const raw = String((await response.text()) || '');
-                return raw.length > IMAGE_JOB_BODY_LIMIT ? raw.slice(0, IMAGE_JOB_BODY_LIMIT) : raw;
+                return raw.length > limit ? raw.slice(0, limit) : raw;
             }
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let text = '';
             let bytes = 0;
             try {
-                while (bytes < IMAGE_JOB_BODY_LIMIT) {
+                while (bytes < limit) {
                     const chunk = await reader.read();
                     if (chunk.done) { text += decoder.decode(); break; }
-                    const take = chunk.value.subarray(0, IMAGE_JOB_BODY_LIMIT - bytes);
+                    const take = chunk.value.subarray(0, limit - bytes);
                     bytes += take.byteLength;
                     text += decoder.decode(take, { stream: true });
                 }
@@ -8407,11 +8419,11 @@ const app = createApp({
             const timer = setTimeout(() => { timedOut = true; try { controller.abort(); } catch (_) { } }, timeoutMs);
             try {
                 const response = await fetch(url, { ...options, signal: controller.signal });
-                const text = await readImageJobBody(response);
+                const text = await readImageJobBody(response, options.bodyLimit);
                 let payload = {};
                 try { payload = text ? JSON.parse(text) : {}; } catch { /* 交给下方统一报错 */ }
                 if (!response.ok) {
-                    const detail = String(payload.error || text || `HTTP ${response.status}`);
+                    const detail = String(payload.error?.message || payload.error || text || `HTTP ${response.status}`);
                     throw new Error(detail.length > IMAGE_JOB_MESSAGE_LIMIT
                         ? detail.slice(0, IMAGE_JOB_MESSAGE_LIMIT) + '…'
                         : detail);
@@ -8462,6 +8474,10 @@ const app = createApp({
             }
 
             const image = card.querySelector('img');
+            if (task.protocol === 'openai') image.addEventListener('load', () => {
+                if (image.naturalWidth && image.naturalHeight)
+                    card.style.aspectRatio = image.naturalWidth + ' / ' + image.naturalHeight;
+            }, { once: true });
             image.style.height = '100%';
             image.src = imageUrl;
             card.classList.remove('is-generating', 'is-generation-error', 'is-waiting');
@@ -8472,19 +8488,45 @@ const app = createApp({
 
         const startGeneratedImageTask = (requestUrl, fresh = false) => {
             const request = new URL(requestUrl, window.location.href);
-            const token = request.searchParams.get('token') || settings.imageGenKey.trim();
+            const provider = { ...imageApi.current };
+            const token = provider.id === 'builtin'
+                ? settings.imageGenKey.trim() || request.searchParams.get('token') || '' : provider.key.trim();
             request.searchParams.set('token', token);
             // [rphub 2.8.65] 生图参数自定义：在唯一终局闸门处覆盖 query，
             //   这样 hydrate / reroll / 角色卡自带 URL 全部生效。
             try { applyImageGenParams(request.searchParams); } catch (e) { /* 参数覆盖失败不能阻断生图 */ }
-            const key = fresh ? `${request.href}#${Date.now()}-${Math.random()}` : request.href;
+            const taskIdentity = url => JSON.stringify([provider.id, provider.protocol, provider.url, provider.model, provider.size, url]);
+            const requestKey = taskIdentity(request.href);
+            const key = fresh ? `${requestKey}#${Date.now()}-${Math.random()}` : requestKey;
             if (generatedImageTasks.has(key)) return generatedImageTasks.get(key);
-            const task = { key, requestUrl: request.href, baseUrl: request.origin, token, cards: new Set(), job: null };
+            const task = { key, requestUrl: request.href, baseUrl: '', protocol: provider.protocol, token, cards: new Set(), job: null };
             const publish = (job) => {
                 task.job = job;
                 [...task.cards].forEach(card => renderGeneratedImageJob(card, task, job));
             };
             task.promise = (async () => {
+                task.baseUrl = imageApi.endpoint(provider);
+                if (provider.protocol === 'openai') {
+                    if (!provider.model.trim()) throw new Error('请在生图设置中填写此接口的模型名称');
+                    publish({ status: 'running' });
+                    const payload = await fetchImageJobJson(task.baseUrl, {
+                        method: 'POST', timeoutMs: 180000, bodyLimit: 32 * 1024 * 1024,
+                        headers: { 'content-type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+                        body: JSON.stringify({ model: provider.model.trim(), n: 1, size: provider.size.trim() || 'auto',
+                            prompt: [request.searchParams.get('tag'), request.searchParams.get('artist')].filter(Boolean).join(', ') })
+                    });
+                    const image = payload.data?.[0];
+                    let imageUrl = image?.url;
+                    if (image?.b64_json) {
+                        const mime = image.b64_json.startsWith('/9j/') ? 'image/jpeg'
+                            : image.b64_json.startsWith('UklGR') ? 'image/webp' : 'image/png';
+                        imageUrl = 'data:' + mime + ';base64,' + image.b64_json;
+                    }
+                    if (!imageUrl) throw new Error(payload.error?.message || '生图接口未返回图片，请检查接口格式和模型');
+                    const job = { status: 'done', imageUrl };
+                    publish(job);
+                    return job;
+                }
                 let job = await fetchImageJobJson(`${task.baseUrl}/api/jobs`, {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
@@ -8507,7 +8549,7 @@ const app = createApp({
                     const reusableRequest = new URL(task.requestUrl);
                     reusableRequest.searchParams.set('nocache', '0');
                     generatedImageTasks.delete(task.key);
-                    task.key = reusableRequest.href;
+                    task.key = taskIdentity(reusableRequest.href);
                     generatedImageTasks.set(task.key, task);
                 }
                 return job;
@@ -10440,8 +10482,11 @@ const app = createApp({
         };
 
         const checkImageGenStatus = async () => {
+            let address;
+            try { address = imageApi.endpoint(); }
+            catch (_) { imageGenStatus.value = 'error'; return; }
             await checkConnectionStatus(imageGenStatus, imageGenLatency, 'Image API', signal => (
-                fetch(IMAGE_GEN_BASE_URL, {
+                fetch(address, {
                     method: 'HEAD',
                     mode: 'no-cors',
                     signal
@@ -14100,7 +14145,7 @@ const app = createApp({
         };
 
         const enforceSpecialRules = () => {
-            const imageGenToken = settings.imageGenKey.trim();
+            const imageGenToken = imageApi.selectedId === 'builtin' ? settings.imageGenKey.trim() : '';
             const baseUrl = IMAGE_GEN_BASE_URL;
 
             // 1. NAI画图正则 (统一版本)
@@ -14173,7 +14218,8 @@ const app = createApp({
             //   保留 enforceSpecialRules 调用是为了新装用户也能拿到这两个条目，
             //   只是不让它在初始化期间污染存档。
             if (!_initComplete) return;
-            saveData();
+            if (imageApi.ready && imageApi.current.key !== settings.imageGenKey)
+                imageApi.update('key', settings.imageGenKey);
             fetchQuota();
         });
 
@@ -15534,6 +15580,8 @@ const app = createApp({
                 window.__rpDataError = true;
                 return;
             }
+            await imageApi.load(settings.imageGenKey);
+            if (imageApi.ready) settings.imageGenKey = imageApi.current.key;
             syncAppBackupFolderBridge();
             fetchQuota(); // Fetch quota after saved settings are loaded
 
@@ -16041,7 +16089,7 @@ const app = createApp({
             isAutoImageGenEnabled,
             apiStatus, apiLatency, imageGenStatus, imageGenLatency, checkAllStatuses, // Status Exports
             toggleAutoImageGen, setWorldInfoEnabled, handleGeneratedImageReroll,
-            quotaValue, quotaLoading, quotaError, quotaLabel, fetchQuota,
+            quotaValue, quotaLoading, quotaError, quotaLabel, fetchQuota, imageApi, removeImageProvider,
             // Memory System Exports
             classicMemoryPage, classicMemoryPageCount, memorySettings, retryingClassicMemoryId, retryClassicMemory,
             editingClassicMemoryId, editingClassicMemoryText, savingClassicMemoryId,
@@ -16436,6 +16484,7 @@ app.component('ShellDock', window.RPAppShell.Dock);
 app.component('ShellChatMenu', window.RPAppShell.ChatMenu);
 app.component('ImageDownloadSheet', window.RPAppShell.ImageDownloadSheet);
 app.component('CardNightSelect', window.RPAppShell.CardNightSelect);
+app.component('ImageProviderSettings', window.RPAppShell.ImageProviderSettings);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('ShellUtilities', window.RPAppShell.Utilities);

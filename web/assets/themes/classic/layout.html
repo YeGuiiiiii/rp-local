@@ -1658,6 +1658,7 @@
 
                                 <!-- Image Generation Settings -->
                                 <div class="pt-6 border-t border-gray-100 mt-6">
+                                    <image-provider-settings :api="imageApi" @remove="removeImageProvider"></image-provider-settings>
                                     <div class="mb-4 flex items-center justify-between gap-3">
                                         <h4 class="settings-subheading flex items-center">
                                             <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1666,7 +1667,7 @@
                                             </svg>
                                             生图设置
                                         </h4>
-                                        <a href="https://www.qianxun1688.com/links/D07F549B" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium">
+                                        <a v-if="imageApi.selectedId === 'builtin'" href="https://www.qianxun1688.com/links/D07F549B" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium">
                                             获取生图密钥
                                         </a>
                                     </div>
@@ -1678,7 +1679,7 @@
                                         </div>
 
                                         <!-- Image Model -->
-                                        <div class="min-w-0">
+                                        <div v-if="imageApi.current.protocol !== 'openai'" class="min-w-0">
                                             <label class="settings-label">生图版本</label>
                                             <custom-select v-model="settings.imageModel" :options="imageModelOptions" button-class="settings-control" menu-class="text-sm">
                                             </custom-select>
@@ -1745,7 +1746,7 @@
                                         </div>
 
                                         <!-- Image Size -->
-                                        <div class="min-w-0">
+                                        <div v-if="imageApi.current.protocol !== 'openai'" class="min-w-0">
                                             <label class="settings-label">生图比例</label>
                                             <custom-select v-model="settings.imageSize" :options="imageSizeOptions" button-class="settings-control" menu-class="text-sm">
                                             </custom-select>
@@ -1759,7 +1760,7 @@
                                         </div>
 
                                         <!-- 高级生图参数（rphub 2.8.65） -->
-                                        <details class="col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2">
+                                        <details v-if="imageApi.current.protocol !== 'openai'" class="col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2">
                                             <summary class="cursor-pointer select-none text-xs font-bold text-gray-600 dark:text-gray-300">
                                                 高级生图参数
                                                 <span class="ml-1 font-normal text-gray-400">采样器 / 步数 / 引导强度 / 噪声调度</span>
@@ -2979,8 +2980,9 @@
 
                                 <!-- Image Generation Settings -->
                                 <div class="pt-6 border-t border-gray-100 mt-6 shell-image-section">
+                                    <image-provider-settings :api="imageApi" @remove="removeImageProvider"></image-provider-settings>
                                     <div class="mb-4 flex items-center justify-end gap-3">
-                                        <a href="https://www.qianxun1688.com/links/D07F549B" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium">
+                                        <a v-if="imageApi.selectedId === 'builtin'" href="https://www.qianxun1688.com/links/D07F549B" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium">
                                             获取生图密钥
                                         </a>
                                     </div>
@@ -2988,17 +2990,17 @@
                                         <!-- Image Key -->
                                         <div class="min-w-0">
                                             <label class="settings-label">自动生图密钥</label>
-                                            <secret-input v-model="settings.imageGenKey" input-class="settings-control font-mono" placeholder="STA1N密钥/NAI官方密钥"></secret-input>
-                                            <div class="image-quota">
+                                            <secret-input v-model="settings.imageGenKey" input-class="settings-control font-mono" :placeholder="imageApi.selectedId === 'builtin' ? 'STA1N密钥/NAI官方密钥' : '此站点的密钥'"></secret-input>
+                                            <div v-if="imageApi.selectedId === 'builtin'" class="image-quota">
                                                 <span role="status" aria-live="polite">{{quotaLabel}}</span>
-                                                <button type="button" class="settings-icon-button" aria-label="刷新剩余生图次数" title="刷新剩余生图次数" :disabled="quotaLoading || !settings.imageGenKey.trim()" @click="fetchQuota">
+                                                <button type="button" class="settings-icon-button" aria-label="刷新剩余生图次数" title="刷新剩余生图次数" :disabled="imageApi.selectedId !== 'builtin' || quotaLoading || !settings.imageGenKey.trim()" @click="fetchQuota">
                                                     <shell-icon name="RefreshCw"></shell-icon>
                                                 </button>
                                             </div>
                                         </div>
 
                                         <!-- Image Model -->
-                                        <div class="min-w-0">
+                                        <div v-if="imageApi.current.protocol !== 'openai'" class="min-w-0">
                                             <label class="settings-label">生图版本</label>
                                             <custom-select v-model="settings.imageModel" :options="imageModelOptions" button-class="settings-control" menu-class="text-sm">
                                             </custom-select>
@@ -3065,7 +3067,7 @@
                                         </div>
 
                                         <!-- Image Size -->
-                                        <div class="min-w-0">
+                                        <div v-if="imageApi.current.protocol !== 'openai'" class="min-w-0">
                                             <label class="settings-label">生图比例</label>
                                             <custom-select v-model="settings.imageSize" :options="imageSizeOptions" button-class="settings-control" menu-class="text-sm">
                                             </custom-select>
@@ -3079,7 +3081,7 @@
                                         </div>
 
                                         <!-- 高级生图参数（rphub 2.8.65） -->
-                                        <details class="col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2">
+                                        <details v-if="imageApi.current.protocol !== 'openai'" class="col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2">
                                             <summary class="cursor-pointer select-none text-xs font-bold text-gray-600 dark:text-gray-300">
                                                 高级生图参数
                                                 <span class="ml-1 font-normal text-gray-400">采样器 / 步数 / 引导强度 / 噪声调度</span>

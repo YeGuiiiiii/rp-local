@@ -140,7 +140,7 @@ fs.mkdirSync(output, { recursive: true });
             if (expectedSkin !== 'classic') {
                 await page.evaluate(() => __qa.navigateWorkspace('characters'));
                 await page.waitForFunction(() => [...document.querySelectorAll('.shell-dock-art,.shell-dock-night-art')]
-                    .filter(image => image.getClientRects().length).length === 4);
+                    .filter(image => image.getClientRects().length && image.complete && image.naturalWidth > 0).length === 4);
                 assert.deepEqual(await page.locator('.shell-dock-art,.shell-dock-night-art').evaluateAll(images =>
                     images.map(image => ({ loaded: image.complete && image.naturalWidth > 0, src: new URL(image.src).pathname }))),
                 ['characters', 'album', 'advanced', 'settings'].map(view => ({

@@ -1,6 +1,47 @@
 (function () {
     'use strict';
     const { ref, computed, onMounted, onBeforeUnmount, watch, h, nextTick } = Vue;
+    const ImageProviderSettings = {
+        props: { api: Object },
+        emits: ['remove'],
+        setup: () => ({ fieldId: Vue.useId() }),
+        template: `<div class="mb-4">
+          <label class="settings-label" :for="'image-provider-' + fieldId">生图接口</label>
+          <div class="flex items-center gap-2">
+            <select :id="'image-provider-' + fieldId" class="settings-control min-w-0 flex-1" :value="api.selectedId" :disabled="!api.ready" @change="api.select($event.target.value)">
+              <option v-for="item in api.profiles" :key="item.id" :value="item.id">{{item.name}}</option>
+            </select>
+            <button type="button" class="settings-icon-button" aria-label="添加生图接口" title="添加生图接口" :disabled="!api.ready" @click="api.add()"><shell-icon name="Plus"/></button>
+            <button v-if="api.selectedId !== 'builtin'" type="button" class="settings-icon-button" aria-label="删除生图接口" title="删除生图接口" @click="$emit('remove')"><shell-icon name="Trash2"/></button>
+          </div>
+          <div v-if="api.selectedId !== 'builtin'" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="min-w-0"><span class="settings-label">接口名称</span>
+              <input class="settings-control" aria-label="接口名称" :value="api.current.name" @input="api.update('name', $event.target.value)"></label>
+            <label class="min-w-0"><span class="settings-label">接口格式</span>
+              <select class="settings-control" aria-label="接口格式" :value="api.current.protocol" @change="api.update('protocol', $event.target.value)">
+                <option value="openai">OpenAI 兼容</option><option value="jobs">原站任务格式</option>
+              </select></label>
+            <label class="min-w-0 md:col-span-2"><span class="settings-label">API 地址</span>
+              <input type="url" class="settings-control" aria-label="生图 API 地址" :placeholder="api.current.protocol === 'jobs' ? 'https://example.com' : 'https://example.com/v1/images/generations'" autocomplete="off" autocapitalize="none" spellcheck="false" :value="api.current.url" @input="api.update('url', $event.target.value)"></label>
+            <template v-if="api.current.protocol === 'openai'">
+              <div class="min-w-0">
+                <label class="settings-label" :for="'image-model-' + fieldId">生图模型</label>
+                <div class="flex items-center gap-2">
+                  <input :id="'image-model-' + fieldId" class="settings-control min-w-0 flex-1" aria-label="生图模型" placeholder="模型名称" :value="api.current.model" @input="api.update('model', $event.target.value)">
+                  <button type="button" class="settings-icon-button" aria-label="读取生图模型列表" title="读取生图模型列表" :disabled="api.modelsLoading || !api.current.url.trim()" @click="api.fetchModels()"><shell-icon name="RefreshCw"/></button>
+                </div>
+                <select v-if="api.models.length" class="settings-control mt-2" aria-label="可用生图模型" :value="api.models.includes(api.current.model) ? api.current.model : ''" @change="$event.target.value && api.update('model', $event.target.value)">
+                  <option value="" disabled>选择模型</option><option v-for="model in api.models" :key="model" :value="model">{{model}}</option>
+                </select>
+                <p v-if="api.modelsLoading || api.modelsError" class="mt-2 text-sm text-gray-500" role="status">{{api.modelsLoading ? '正在读取模型…' : api.modelsError}}</p>
+              </div>
+              <label class="min-w-0"><span class="settings-label">输出尺寸</span>
+                <input class="settings-control" aria-label="输出尺寸" placeholder="auto" :value="api.current.size" @input="api.update('size', $event.target.value)"></label>
+            </template>
+          </div>
+          <p v-if="api.error" class="mt-2 text-sm text-red-600" role="alert">{{api.error}}</p>
+        </div>`
+    };
     const useCardNight = () => {
         const cardNightEnabled = ref(window.RPCardNight.enabled), cardNightMode = ref(window.RPCardNight.mode);
         const sync = () => { cardNightEnabled.value = window.RPCardNight.enabled; cardNightMode.value = window.RPCardNight.mode; };
@@ -701,5 +742,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
 })();

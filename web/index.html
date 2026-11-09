@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>window.RP_LOCAL_VERSION = '2.9.013'; window.RP_LOCAL_RELEASE = 277;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.014'; window.RP_LOCAL_RELEASE = 278;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -1468,7 +1468,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.013 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.014 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -2467,8 +2467,9 @@
 
                                 <!-- Image Generation Settings -->
                                 <div class="pt-6 border-t border-gray-100 mt-6 shell-image-section">
+                                    <image-provider-settings :api="imageApi" @remove="removeImageProvider"></image-provider-settings>
                                     <div class="mb-4 flex items-center justify-end gap-3">
-                                        <a href="https://www.qianxun1688.com/links/D07F549B" target="_blank"
+                                        <a v-if="imageApi.selectedId === 'builtin'" href="https://www.qianxun1688.com/links/D07F549B" target="_blank"
                                             rel="noopener noreferrer"
                                             class="text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium">
                                             获取生图密钥
@@ -2482,18 +2483,18 @@
                                                 class="settings-label">自动生图密钥</label>
                                             <secret-input v-model="settings.imageGenKey"
                                                 input-class="settings-control font-mono"
-                                                placeholder="STA1N密钥/NAI官方密钥"></secret-input>
-                                            <div class="image-quota">
+                                                :placeholder="imageApi.selectedId === 'builtin' ? 'STA1N密钥/NAI官方密钥' : '此站点的密钥'"></secret-input>
+                                            <div v-if="imageApi.selectedId === 'builtin'" class="image-quota">
                                                 <span role="status" aria-live="polite">{{quotaLabel}}</span>
                                                 <button type="button" class="settings-icon-button" aria-label="刷新剩余生图次数" title="刷新剩余生图次数"
-                                                    :disabled="quotaLoading || !settings.imageGenKey.trim()" @click="fetchQuota">
+                                                    :disabled="imageApi.selectedId !== 'builtin' || quotaLoading || !settings.imageGenKey.trim()" @click="fetchQuota">
                                                     <shell-icon name="RefreshCw"></shell-icon>
                                                 </button>
                                             </div>
                                         </div>
 
                                         <!-- Image Model -->
-                                        <div class="min-w-0">
+                                        <div v-if="imageApi.current.protocol !== 'openai'" class="min-w-0">
                                             <label
                                                 class="settings-label">生图版本</label>
                                             <custom-select v-model="settings.imageModel" :options="imageModelOptions"
@@ -2583,7 +2584,7 @@
                                         </div>
 
                                         <!-- Image Size -->
-                                        <div
+                                        <div v-if="imageApi.current.protocol !== 'openai'"
                                             class="min-w-0">
                                             <label
                                                 class="settings-label">生图比例</label>
@@ -2605,7 +2606,7 @@
                                         </div>
 
                                         <!-- 高级生图参数（rphub 2.8.65） -->
-                                        <details
+                                        <details v-if="imageApi.current.protocol !== 'openai'"
                                             class="col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2">
                                             <summary
                                                 class="cursor-pointer select-none text-xs font-bold text-gray-600 dark:text-gray-300">
@@ -4378,7 +4379,7 @@
     <script>
         (function (stamp) {
             ['built-in-content', 'core-utils', 'api-utils', 'stream-import', 'data-services', 'runtime-services', 'cloud-backup', 'preset-library',
-                'ui-components', 'workspace-ui', 'shell-icons', 'competitions', 'release-notes', 'mascot-dialogue', 'app-shell', 'gallery-glass', 'gallery-page', 'backup-format', 'backup-transfer', 'stream-import-ui', 'main-render', 'app'].forEach(name => {
+                'ui-components', 'workspace-ui', 'shell-icons', 'competitions', 'release-notes', 'mascot-dialogue', 'image-providers', 'app-shell', 'gallery-glass', 'gallery-page', 'backup-format', 'backup-transfer', 'stream-import-ui', 'main-render', 'app'].forEach(name => {
                 document.write('<script src="assets/js/' + name + '.js?v=' + stamp + '"><\/script>');
             });
         })(window.RP_LOCAL_VERSION);
