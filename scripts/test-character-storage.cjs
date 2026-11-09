@@ -61,7 +61,7 @@ const web = path.resolve(__dirname, '../web');
             const put = IDBObjectStore.prototype.put;
             IDBObjectStore.prototype.put = function (value, key) {
                 const req = put.call(this, value, key);
-                if (key === '__rp_card__:atomic-a') this.transaction.abort();
+                if (String(key).startsWith('__rp_card__:') && String(key).endsWith(':atomic-a')) this.transaction.abort();
                 return req;
             };
             let aborted = false;
@@ -69,7 +69,16 @@ const web = path.resolve(__dirname, '../web');
             finally { IDBObjectStore.prototype.put = put; }
             const afterAbort = await rawGet('rp_hub_characters');
             const partial = await rawGet('__rp_card__:atomic-a');
+            let legacyPublishBodyWrites = 0;
+            const migrationWrites = new WeakMap();
+            IDBObjectStore.prototype.put = function (value, key) {
+                if (String(key).startsWith('__rp_card__:'))
+                    migrationWrites.set(this.transaction, (migrationWrites.get(this.transaction) || 0) + 1);
+                if (key === 'rp_hub_characters') legacyPublishBodyWrites = migrationWrites.get(this.transaction) || 0;
+                return put.call(this, value, key);
+            };
             let directory = await s.readCharacterDirectory();
+            IDBObjectStore.prototype.put = put;
             const complete = await s.readCharacter(directory[0]);
             const previewUrl = s.characterPreviewUrl(complete);
             const previewBitmap = await createImageBitmap(await fetch(previewUrl).then(response => response.blob()));
@@ -120,7 +129,7 @@ const web = path.resolve(__dirname, '../web');
             let bodyChars = 0;
             IDBObjectStore.prototype.put = function (value, key) {
                 if (String(key).startsWith('__rp_card_image__:')) imageWrites.push(key);
-                if (key === '__rp_card__:atomic-a') bodyChars = JSON.stringify(value).length;
+                if (String(key).startsWith('__rp_card__:') && String(key).endsWith(':atomic-a')) bodyChars = JSON.stringify(value).length;
                 return put.call(this, value, key);
             };
             try {
@@ -144,7 +153,7 @@ const web = path.resolve(__dirname, '../web');
                 request.onsuccess = resolve; request.onerror = () => reject(request.error);
             });
             return {
-                aborted, originalRetained: JSON.stringify(afterAbort) === JSON.stringify(original),
+                aborted, legacyPublishBodyWrites, originalRetained: JSON.stringify(afterAbort) === JSON.stringify(original),
                 partialAbsent: partial === undefined,
                 thumbnailChars: directory[0].avatar.length, originalChars: avatar.length,
                 previewWidth: previewBitmap.width, previewHeight: previewBitmap.height,
@@ -160,6 +169,7 @@ const web = path.resolve(__dirname, '../web');
             };
         });
         assert.equal(result.aborted, true);
+        assert.equal(result.legacyPublishBodyWrites, 0, 'Upgrading old imported cards must prepare their content before changing the directory');
         assert.equal(result.originalRetained, true, 'An aborted migration must keep the entire old collection');
         assert.equal(result.partialAbsent, true, 'An aborted migration must not leave partial card records');
         assert.ok(result.thumbnailChars < result.originalChars / 10, 'Directory images must not carry embedded card JSON');

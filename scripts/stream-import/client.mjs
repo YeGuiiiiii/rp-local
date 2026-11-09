@@ -17,7 +17,8 @@ export async function stageEntries(entries, { limits = profile() } = {}) {
             let part = 0;
             const write = async value => {
                 const bytes = encoder.encode(JSON.stringify(value)).length;
-                if (bytes > limits.unitBytes) throw new Error('单条云端数据超过当前读取档位，请调整后重试');
+                const maxBytes = entry.key === 'rp_hub_characters' ? profiles.at(-1).unitBytes : limits.unitBytes;
+                if (bytes > maxBytes) throw new Error('单条云端数据超过 ' + maxBytes / 1048576 + ' MB，原数据未改动');
                 sink.emit({ kind: 'unit', source: 'entries', entry: index, part: part++, value, bytes });
                 await sink.flush();
             };
@@ -60,6 +61,15 @@ function writeWeb(items) {
         if (localStorage.getItem(key) !== value) throw new Error('偏好设置写入失败：' + key);
     }
 }
+async function discardPreparedCards(db, session) {
+    if (!session.cardRevision) return;
+    const tx = db.transaction('store', 'readwrite'), store = tx.objectStore('store');
+    for (const prefix of ['__rp_card__:', '__rp_card_image__:']) {
+        const start = prefix + session.cardRevision + ':';
+        store.delete(IDBKeyRange.bound(start, start + '\uffff'));
+    }
+    await completed(tx);
+}
 // The journal is committed before touching another database or localStorage.
 // The formal store and the journal's final state commit in the same transaction.
 export async function recover(db) {
@@ -77,6 +87,7 @@ export async function recover(db) {
                 }
             } finally { window.RPLocalStore?.setWebWritesPaused(false); }
         }
+        if (session.state !== 'applied') await discardPreparedCards(db, session);
         await removeSession(db, session.id);
     }
 }
@@ -109,10 +120,50 @@ async function prepareExtras(db, session) {
     const priority = [...groups.keys()].sort()[0];
     return { web: [...web].map(([key, value]) => ({ key, value })), moments: groups.get(priority) };
 }
+async function prepareCharacters(db, session, restoreValue, signal, progress) {
+    const record = session.plan.find(item => item.key === 'rp_hub_characters');
+    if (!record) return null;
+    await discardPreparedCards(db, session);
+    session.cardRevision = crypto.randomUUID().replaceAll('-', '');
+    await saveSession(db, session);
+    const cards = [], ids = new Set();
+    for (let part = 0; part < record.count; part++) {
+        cancelled(signal);
+        const unit = await resultOf(db.transaction('restore_units').objectStore('restore_units')
+            .get([session.id, session.source, record.entry, part]));
+        const card = restoreValue(unit?.value);
+        if (!card || card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
+            throw new Error('备份缺少完整角色卡内容，原数据未改动');
+        const uuid = card.uuid || crypto.randomUUID();
+        if (ids.has(uuid)) throw new Error('角色卡标识重复，原数据未改动');
+        ids.add(uuid);
+        const summary = { ...await window.RPHubStorage.toCharacterStub(card), uuid,
+            rphubCardRevision: session.cardRevision };
+        cards.push(summary);
+        window.RPLocalStore?.assignFolders(cards, false);
+        Object.assign(card, { uuid, importedName: summary.importedName, storageFolder: summary.storageFolder });
+        const suffix = session.cardRevision + ':' + uuid;
+        const tx = db.transaction('store', 'readwrite'), store = tx.objectStore('store');
+        if (typeof card.avatar === 'string' && card.avatar.startsWith('data:') && card.avatar.length >= 65536) {
+            store.put({ uuid, storageFolder: card.storageFolder, avatar: card.avatar }, '__rp_card_image__:' + suffix);
+            card.avatar = { rphubCardImage: 1 };
+        }
+        store.put(card, '__rp_card__:' + suffix);
+        await completed(tx);
+        progress?.(part + 1);
+    }
+    return { rphubCardLibrary: 1, cards };
+}
 export async function apply(id, { beforeApply, restoreValue, signal, progress }) {
     const db = await window.RPHubStorage.initDB();
     const session = await readSession(db, id);
     if (session?.state !== 'complete') throw new Error('暂存数据不可用，请重新选择文件');
+    const deleted = new Set(session.deleted);
+    const records = session.plan.filter(item => !item.key.startsWith('__ls__:')
+        && item.key !== '__rp_local_mirror_revision'
+        && !item.key.startsWith('rp_hub_b1_memory_state_') && !deleted.has(item.key));
+    const cardCount = session.plan.find(item => item.key === 'rp_hub_characters')?.count || 0;
+    const totalWork = cardCount + records.length + 1;
     const extras = await prepareExtras(db, session);
     cancelled(signal);
     await beforeApply();
@@ -121,8 +172,13 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
     window.RPLocalStore?.setWebWritesPaused(true);
     let journaled = false, committed = false, recoveryRequired = false;
     try {
+        const oldCardKeys = cardCount || session.plan.some(item => item.key === 'rp_hub_characters')
+            ? (await window.RPHubStorage.readStorageKeys(db))
+            .filter(key => key.startsWith('__rp_card__:') || key.startsWith('__rp_card_image__:')) : [];
+        const characters = await prepareCharacters(db, session, restoreValue, signal,
+            done => progress?.(done, totalWork, '正在整理角色卡 ' + done + ' / ' + cardCount));
         const journal = {
-            id, state: 'applying', web: extras.web,
+            id, state: 'applying', web: extras.web, cardRevision: session.cardRevision,
             oldWeb: extras.web.map(({ key }) => ({ key, value: localStorage.getItem(key) })),
             hasMoments: extras.moments !== undefined,
         };
@@ -140,6 +196,7 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             const tx = db.transaction(['store', 'restore_units', 'restore_sessions'], 'readwrite');
             const store = tx.objectStore('store');
             store.delete('__rp_local_mirror_revision');
+            oldCardKeys.forEach(key => store.delete(key));
             let failure;
             const abort = () => { try { tx.abort(); } catch (_) {} };
             signal?.addEventListener('abort', abort, { once: true });
@@ -147,10 +204,6 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             tx.onabort = () => { signal?.removeEventListener('abort', abort); reject(failure || tx.error || new DOMException('导入已取消', 'AbortError')); };
             tx.onerror = () => {};
             const fail = error => { failure = error; abort(); };
-            const deleted = new Set(session.deleted);
-            const records = session.plan.filter(item => !item.key.startsWith('__ls__:')
-                && item.key !== '__rp_local_mirror_revision'
-                && !item.key.startsWith('rp_hub_b1_memory_state_') && !deleted.has(item.key));
             for (const key of deleted) {
                 for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
                     { key: key.replace('rp_hub_classic_memories_', 'rp_hub_b1_memory_state_'),
@@ -163,10 +216,17 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
                     cancelled(signal);
                     if (index === records.length) {
                         writeWeb(extras.web);
-                        tx.objectStore('restore_sessions').put({ id, state: 'applied', web: extras.web });
+                        tx.objectStore('restore_sessions').put({ id, state: 'applied', web: extras.web,
+                            cardRevision: session.cardRevision });
                         return;
                     }
                     const record = records[index];
+                    if (record.key === 'rp_hub_characters') {
+                        store.put(characters, record.key);
+                        progress?.(cardCount + index + 1, totalWork);
+                        next(index + 1);
+                        return;
+                    }
                     let value = record.array ? [] : undefined;
                     const req = tx.objectStore('restore_units').openCursor(rangeOf(id, session.source, record.entry));
                     req.onsuccess = () => {
@@ -181,7 +241,7 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
                                     { key: record.key, value }
                                 ])) store.put(entry.value, entry.key);
                                 value = null;
-                                progress?.(index + 1, records.length);
+                                progress?.(cardCount + index + 1, totalWork);
                                 next(index + 1);
                             }
                         } catch (error) { fail(error); }
@@ -190,9 +250,20 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             };
             next(0);
         });
+        progress?.(totalWork - 1, totalWork, '正在保存本机存档');
+        await window.RPHubStorage.syncLocalFiles?.();
+        await removeSession(db, id);
+        progress?.(totalWork, totalWork);
     } catch (error) {
-        if (journaled && !committed) {
-            try { await recover(db); }
+        if (committed) {
+            error.recoveryRequired = true;
+            error.message = '本机存档保存未完成，请重新打开软件继续恢复：' + error.message;
+        }
+        if (!committed) {
+            try {
+                if (journaled) await recover(db);
+                else await discardPreparedCards(db, session);
+            }
             catch (rollbackError) {
                 recoveryRequired = true;
                 const failure = new Error('恢复原数据未完成，请重新打开软件自动恢复：' + rollbackError.message);

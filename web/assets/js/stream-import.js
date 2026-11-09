@@ -127,7 +127,8 @@
           throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61");
       });
       if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
-      if (bytes > maxCollectionBytes) throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
+      if (key !== "rp_hub_characters" && bytes > maxCollectionBytes)
+        throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
       if (key === "rp_hub_characters") summary.cards = record.count;
       if (key.startsWith("rp_hub_chat_") && record.array) summary.messages += record.count;
       if (key.startsWith("rp_hub_classic_memories_")) summary.memories += record.count;
@@ -162,7 +163,8 @@
         let part = 0;
         const write = async (value) => {
           const bytes = encoder.encode(JSON.stringify(value)).length;
-          if (bytes > limits.unitBytes) throw new Error("\u5355\u6761\u4E91\u7AEF\u6570\u636E\u8D85\u8FC7\u5F53\u524D\u8BFB\u53D6\u6863\u4F4D\uFF0C\u8BF7\u8C03\u6574\u540E\u91CD\u8BD5");
+          const maxBytes = entry.key === "rp_hub_characters" ? profiles.at(-1).unitBytes : limits.unitBytes;
+          if (bytes > maxBytes) throw new Error("\u5355\u6761\u4E91\u7AEF\u6570\u636E\u8D85\u8FC7 " + maxBytes / 1048576 + " MB\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
           sink.emit({ kind: "unit", source: "entries", entry: index, part: part++, value, bytes });
           await sink.flush();
         };
@@ -226,6 +228,15 @@
       if (localStorage.getItem(key) !== value) throw new Error("\u504F\u597D\u8BBE\u7F6E\u5199\u5165\u5931\u8D25\uFF1A" + key);
     }
   }
+  async function discardPreparedCards(db, session) {
+    if (!session.cardRevision) return;
+    const tx = db.transaction("store", "readwrite"), store = tx.objectStore("store");
+    for (const prefix of ["__rp_card__:", "__rp_card_image__:"]) {
+      const start = prefix + session.cardRevision + ":";
+      store.delete(IDBKeyRange.bound(start, start + "\uFFFF"));
+    }
+    await completed(tx);
+  }
   async function recover(db) {
     const sessions = await resultOf(db.transaction("restore_sessions").objectStore("restore_sessions").getAll());
     for (const session of sessions) {
@@ -243,6 +254,7 @@
           window.RPLocalStore?.setWebWritesPaused(false);
         }
       }
+      if (session.state !== "applied") await discardPreparedCards(db, session);
       await removeSession(db, session.id);
     }
   }
@@ -272,10 +284,50 @@
     const priority = [...groups.keys()].sort()[0];
     return { web: [...web].map(([key, value]) => ({ key, value })), moments: groups.get(priority) };
   }
+  async function prepareCharacters(db, session, restoreValue, signal, progress) {
+    const record = session.plan.find((item) => item.key === "rp_hub_characters");
+    if (!record) return null;
+    await discardPreparedCards(db, session);
+    session.cardRevision = crypto.randomUUID().replaceAll("-", "");
+    await saveSession(db, session);
+    const cards = [], ids = /* @__PURE__ */ new Set();
+    for (let part = 0; part < record.count; part++) {
+      cancelled(signal);
+      const unit = await resultOf(db.transaction("restore_units").objectStore("restore_units").get([session.id, session.source, record.entry, part]));
+      const card = restoreValue(unit?.value);
+      if (!card || card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
+        throw new Error("\u5907\u4EFD\u7F3A\u5C11\u5B8C\u6574\u89D2\u8272\u5361\u5185\u5BB9\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
+      const uuid = card.uuid || crypto.randomUUID();
+      if (ids.has(uuid)) throw new Error("\u89D2\u8272\u5361\u6807\u8BC6\u91CD\u590D\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
+      ids.add(uuid);
+      const summary = {
+        ...await window.RPHubStorage.toCharacterStub(card),
+        uuid,
+        rphubCardRevision: session.cardRevision
+      };
+      cards.push(summary);
+      window.RPLocalStore?.assignFolders(cards, false);
+      Object.assign(card, { uuid, importedName: summary.importedName, storageFolder: summary.storageFolder });
+      const suffix = session.cardRevision + ":" + uuid;
+      const tx = db.transaction("store", "readwrite"), store = tx.objectStore("store");
+      if (typeof card.avatar === "string" && card.avatar.startsWith("data:") && card.avatar.length >= 65536) {
+        store.put({ uuid, storageFolder: card.storageFolder, avatar: card.avatar }, "__rp_card_image__:" + suffix);
+        card.avatar = { rphubCardImage: 1 };
+      }
+      store.put(card, "__rp_card__:" + suffix);
+      await completed(tx);
+      progress?.(part + 1);
+    }
+    return { rphubCardLibrary: 1, cards };
+  }
   async function apply(id, { beforeApply, restoreValue, signal, progress }) {
     const db = await window.RPHubStorage.initDB();
     const session = await readSession(db, id);
     if (session?.state !== "complete") throw new Error("\u6682\u5B58\u6570\u636E\u4E0D\u53EF\u7528\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u6587\u4EF6");
+    const deleted = new Set(session.deleted);
+    const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && item.key !== "__rp_local_mirror_revision" && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
+    const cardCount = session.plan.find((item) => item.key === "rp_hub_characters")?.count || 0;
+    const totalWork = cardCount + records.length + 1;
     const extras = await prepareExtras(db, session);
     cancelled(signal);
     await beforeApply();
@@ -284,10 +336,19 @@
     window.RPLocalStore?.setWebWritesPaused(true);
     let journaled = false, committed = false, recoveryRequired = false;
     try {
+      const oldCardKeys = cardCount || session.plan.some((item) => item.key === "rp_hub_characters") ? (await window.RPHubStorage.readStorageKeys(db)).filter((key) => key.startsWith("__rp_card__:") || key.startsWith("__rp_card_image__:")) : [];
+      const characters = await prepareCharacters(
+        db,
+        session,
+        restoreValue,
+        signal,
+        (done) => progress?.(done, totalWork, "\u6B63\u5728\u6574\u7406\u89D2\u8272\u5361 " + done + " / " + cardCount)
+      );
       const journal = {
         id,
         state: "applying",
         web: extras.web,
+        cardRevision: session.cardRevision,
         oldWeb: extras.web.map(({ key }) => ({ key, value: localStorage.getItem(key) })),
         hasMoments: extras.moments !== void 0
       };
@@ -308,6 +369,7 @@
         const tx = db.transaction(["store", "restore_units", "restore_sessions"], "readwrite");
         const store = tx.objectStore("store");
         store.delete("__rp_local_mirror_revision");
+        oldCardKeys.forEach((key) => store.delete(key));
         let failure;
         const abort = () => {
           try {
@@ -331,8 +393,6 @@
           failure = error;
           abort();
         };
-        const deleted = new Set(session.deleted);
-        const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && item.key !== "__rp_local_mirror_revision" && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
         for (const key of deleted) {
           for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
             {
@@ -347,10 +407,21 @@
             cancelled(signal);
             if (index === records.length) {
               writeWeb(extras.web);
-              tx.objectStore("restore_sessions").put({ id, state: "applied", web: extras.web });
+              tx.objectStore("restore_sessions").put({
+                id,
+                state: "applied",
+                web: extras.web,
+                cardRevision: session.cardRevision
+              });
               return;
             }
             const record = records[index];
+            if (record.key === "rp_hub_characters") {
+              store.put(characters, record.key);
+              progress?.(cardCount + index + 1, totalWork);
+              next(index + 1);
+              return;
+            }
             let value = record.array ? [] : void 0;
             const req = tx.objectStore("restore_units").openCursor(rangeOf(id, session.source, record.entry));
             req.onsuccess = () => {
@@ -366,7 +437,7 @@
                     { key: record.key, value }
                   ])) store.put(entry.value, entry.key);
                   value = null;
-                  progress?.(index + 1, records.length);
+                  progress?.(cardCount + index + 1, totalWork);
                   next(index + 1);
                 }
               } catch (error) {
@@ -379,10 +450,19 @@
         };
         next(0);
       });
+      progress?.(totalWork - 1, totalWork, "\u6B63\u5728\u4FDD\u5B58\u672C\u673A\u5B58\u6863");
+      await window.RPHubStorage.syncLocalFiles?.();
+      await removeSession(db, id);
+      progress?.(totalWork, totalWork);
     } catch (error) {
-      if (journaled && !committed) {
+      if (committed) {
+        error.recoveryRequired = true;
+        error.message = "\u672C\u673A\u5B58\u6863\u4FDD\u5B58\u672A\u5B8C\u6210\uFF0C\u8BF7\u91CD\u65B0\u6253\u5F00\u8F6F\u4EF6\u7EE7\u7EED\u6062\u590D\uFF1A" + error.message;
+      }
+      if (!committed) {
         try {
-          await recover(db);
+          if (journaled) await recover(db);
+          else await discardPreparedCards(db, session);
         } catch (rollbackError) {
           recoveryRequired = true;
           const failure = new Error("\u6062\u590D\u539F\u6570\u636E\u672A\u5B8C\u6210\uFF0C\u8BF7\u91CD\u65B0\u6253\u5F00\u8F6F\u4EF6\u81EA\u52A8\u6062\u590D\uFF1A" + rollbackError.message);

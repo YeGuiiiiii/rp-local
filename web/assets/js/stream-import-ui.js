@@ -141,7 +141,7 @@
                 try {
                     await RPStreamImport.apply(id, {
                         beforeApply: props.prepare, restoreValue: value => props.decode(value), signal: controller.signal,
-                        progress: (done, total) => { state.applied = total ? Math.floor(done / total * 100) : 0; state.message = '正在恢复数据 ' + done + ' / ' + total; },
+                        progress: (done, total, message) => { state.applied = total ? Math.floor(done / total * 100) : 0; state.message = message || '正在恢复数据 ' + done + ' / ' + total; },
                     });
                     state.phase = 'success'; state.applied = 100; state.message = '导入完成，正在重新打开';
                     setTimeout(() => {

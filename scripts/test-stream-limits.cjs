@@ -71,8 +71,12 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     const largeFile = path.resolve(root, '../RP-流式导入实验/test-data/large-340mb.json');
     await page.getByLabel('选择流式导入文件').setInputFiles(largeFile);
     report.largeFileBytes = fs.statSync(largeFile).size;
-    report.collectionLimit = await failed();
-    assert.match(report.collectionLimit, /128 MB/);
+    await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready', null, { timeout: 120000 });
+    report.largeLibraryReady = await page.evaluate(() => __qa.streamImportPanel.state.summary.cards > 0);
+    assert.equal(report.largeLibraryReady, true, 'A large library of individually bounded cards must be accepted');
+    assert.equal(await page.evaluate(() => RPHubStorage.getStoredValue('stream_limit_probe')), 'old');
+    await page.getByRole('dialog', { name: '导入备份', exact: true }).getByRole('button', { name: '取消', exact: true }).click();
+    await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
     // Actually restore a 32 MiB collection without the artificial localStorage file bridge.
     await page.evaluate(() => {
       const input = document.querySelector('[aria-label="选择流式导入文件"]'), transfer = new DataTransfer();
@@ -102,6 +106,6 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     assert.deepEqual(report.restored, { count: 16, descriptionBytes: 2 * 1048576, probe: 'committed' });
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(root, 'verification/stream-import-1.05/limits.json'), JSON.stringify({ ...report, errors }, null, 2));
-    console.log('Worker faults, 33 MiB record limit, 340 MiB collection guard and actual 32 MiB restore passed.');
+    console.log('Worker faults, 33 MiB record limit, 340 MiB streamed library and actual 32 MiB restore passed.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -7936,6 +7936,7 @@ const app = createApp({
                 return true;
             } catch (e) {
                 console.error('Failed to load saved data', e);
+                window.__rpDataErrorDetail = String(e?.message || '读取中断，请重试').slice(0, 160);
                 // 大 try 一旦在中途抛错，排在后面的键全部读不到。active_tools 排在读取序列末尾附近、
                 // 又没有独立兜底 ⇒ 每次冷启动都回默认（三个工具全关），表现为「工具设置不保存」。
                 // 这里补一次独立读取：读到非空数组就恢复；读不到就不动内存、也不标记已加载。

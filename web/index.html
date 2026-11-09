@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.018'; window.RP_LOCAL_RELEASE = 282;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.019'; window.RP_LOCAL_RELEASE = 283;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -134,6 +134,7 @@
         .entry-transition.rphub-splash-leave { animation: none !important; opacity: 0 !important; visibility: hidden !important; transition: opacity 0.16s ease, visibility 0.16s ease !important; pointer-events: none; }
         .rphub-splash-status { position: absolute; left: 0; right: 0; bottom: 42px; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; color: #64748b; pointer-events: none; }
         .rphub-splash-status button { display: none; padding: 8px 22px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-size: 14px; font-weight: 600; pointer-events: auto; }
+        .rphub-splash-status span { max-width: min(90vw, 480px); text-align: center; overflow-wrap: anywhere; }
         </style>
     <script id="rphub-splash-control-script">
     (function () {
@@ -188,7 +189,7 @@
                     failedMascot.alt = '陈玥发现存档读取失败';
                     failedMascot.classList.remove('is-loading');
                 }
-                msg.textContent = '存档读取失败，请检查可用空间后重试';
+                msg.textContent = '存档读取未完成：' + (window.__rpDataErrorDetail || '请重新加载重试');
                 retry.style.display = 'inline-block';
                 if (status) status.style.pointerEvents = 'auto';
                 return;
@@ -1469,7 +1470,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.018 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.019 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">

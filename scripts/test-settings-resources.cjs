@@ -74,6 +74,7 @@ fs.mkdirSync(output, { recursive: true });
             }
             for (const section of ['persona', 'reading']) {
                 await settings(section);
+                await page.locator('.shell-settings-detail .settings-card__title').filter({ visible: true }).first().waitFor({ state: 'hidden' });
                 assert.equal(await page.locator('.shell-settings-detail .settings-card__title').filter({ visible: true }).count(), 0);
             }
             await settings('persona');

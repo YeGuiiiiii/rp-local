@@ -106,6 +106,17 @@ const web=path.join(root,'web');
     await page.screenshot({path:path.join(root,'verification/startup-home-360.png')});
     release();blockApp=false;await smallNav;
     await page.waitForFunction(()=>!document.querySelector('.entry-transition'));
+    await page.route('**/data-services.js*', route => route.fulfill({
+      contentType: 'application/javascript', body: fs.readFileSync(path.join(web,'assets/js/data-services.js'),'utf8')
+        + '\nwindow.RPHubStorage = { ...RPHubStorage, initDB: async () => { throw new Error("测试读取暂时中断"); } };'
+    }));
+    await page.reload();
+    await page.waitForFunction(()=>window.__rpDataError);
+    assert.match(await page.getByRole('status',{name:'启动欢迎页',exact:true}).innerText(), /测试读取暂时中断/);
+    await page.unroute('**/data-services.js*');
+    await page.reload();
+    await page.waitForFunction(()=>window.__rpDataReady && !document.querySelector('.entry-transition'));
+    assert.equal(await page.evaluate(()=>document.getElementById('app').__vue_app__._container._vnode.component.setupState.currentCharacter.uuid),'startup-card');
     const report={existingPersonaStickersRendered:true,realLoadingWaitsForData:true,inactiveFormsStayUninstantiated:true,loadingMotionChanges:true,emptyUserGoesToCardDirectory:true,savedSessionResumesChat:true,backgroundVisibilityDoesNotReplay:true,onlineCloseAlignedToTrigger:true,twoRadialChoices:true,smallScreenAndReducedMotion:true};
     fs.writeFileSync(path.join(root,'verification/startup-home.json'),JSON.stringify(report,null,2));
     console.log(JSON.stringify(report,null,2));

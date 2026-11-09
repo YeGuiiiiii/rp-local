@@ -139,16 +139,18 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         await ready();
         assert.deepEqual(await loaded(), ['load-c']);
         const reads = await page.evaluate(() => __cardReads);
-        assert.ok(!reads.includes('__rp_card__:load-a') && !reads.includes('__rp_card__:load-b'),
+        assert.ok(!reads.some(key => key.endsWith(':load-a') || key.endsWith(':load-b')),
             'Reopening must not read inactive card bodies');
         assert.equal(await page.evaluate(() => __storageReads.includes('rp_hub_worldinfo')), false,
             'An existing global worldbook must not trigger a read of the unused legacy card copy');
         // A missing next card must leave the old session usable, not replace it with an empty card.
         await page.evaluate(async () => {
             const db = RPHubStorage.getMainDb();
+            const missingKeys = (await RPHubStorage.readStorageKeys(db))
+                .filter(key => key.startsWith('__rp_card__:') && key.endsWith(':load-b'));
             await new Promise((resolve, reject) => {
                 const tx = db.transaction('store', 'readwrite');
-                tx.objectStore('store').delete('__rp_card__:load-b');
+                missingKeys.forEach(key => tx.objectStore('store').delete(key));
                 tx.oncomplete = resolve; tx.onabort = () => reject(tx.error);
             });
             await __qa.selectCharacter(1);

@@ -104,7 +104,14 @@ fs.mkdirSync(evidence, { recursive: true });
         });
         assert.equal(await page.evaluate(async () => (await RPHubStorage.readCharacterDirectory())[0].name), '云端卡a');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.getScopedStoredValue('chat', 'cloud-a'))[0].content), '新聊天a');
-        assert.equal(await page.evaluate(async () => (await RPHubStorage.readMemoryState('cloud-a')).deleted), true);
+        assert.equal(await page.evaluate(async () => (await RPHubStorage.readMemoryState('cloud-a')).deleted), false);
+        assert.deepEqual(await page.evaluate(async () => (await RPHubStorage.readMemoryState('cloud-a')).list), []);
+        assert.equal(await page.evaluate(async () => {
+            await __qa.selectCharacter(0);
+            await __qa.selectCharacter(1);
+            await __qa.selectCharacter(0);
+            return __qa.currentCharacter.uuid;
+        }), 'cloud-a', 'A restored conversation with cleared summaries must still switch between characters');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.getScopedStoredValue('chat', 'cloud-a__branch__route'))[0].content), '云端分支聊天');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.getScopedStoredValue('branches', 'cloud-a')).activeBranchId), 'route');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.getScopedStoredValue('chat', 'cloud-a__branch__local')).length), 0);

@@ -57,31 +57,7 @@
             } catch (error) {
                 console.warn('Legacy DB check failed:', error);
             }
-            if (window.RPLocalStore?.available) {
-                const revision = await dbGetFrom(mainDb, LOCAL_MIRROR_KEY);
-                let synchronized = !!revision && revision === window.RPLocalStore.readRevision();
-                let entries;
-                if (synchronized) {
-                    const value = await dbGetFrom(mainDb, 'rp_hub_characters');
-                    synchronized = Array.isArray(value) || isCharacterDirectory(value);
-                    if (synchronized) entries = [{ key: 'rp_hub_characters', value }];
-                }
-                if (!synchronized) {
-                    await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false });
-                    entries = (await readStorageEntries(mainDb)).filter(entry => entry.key !== LOCAL_MIRROR_KEY);
-                }
-                await window.RPLocalStore.initialize(entries, async (key, value) => {
-                    await dbSetTo(mainDb, key, value, { mirror: false });
-                    if (key === 'rp_hub_characters') initialReads.set(key, value);
-                }, { synchronized });
-                const characters = entries.find(entry => entry.key === 'rp_hub_characters');
-                if (characters) initialReads.set(characters.key, characters.value);
-                if (!synchronized) {
-                    const next = crypto.randomUUID();
-                    await dbSetTo(mainDb, LOCAL_MIRROR_KEY, next, { mirror: false });
-                    await window.RPLocalStore.saveRevision(next);
-                }
-            }
+            await syncLocalFiles();
             return mainDb;
         })();
         try {
@@ -93,6 +69,29 @@
             throw error;
         } finally {
             initPromise = null;
+        }
+    };
+
+    const syncLocalFiles = async () => {
+        if (!window.RPLocalStore?.available) return;
+        const revision = await dbGetFrom(mainDb, LOCAL_MIRROR_KEY);
+        const value = await dbGetFrom(mainDb, 'rp_hub_characters');
+        const synchronized = !!revision && revision === window.RPLocalStore.readRevision()
+            && (Array.isArray(value) || isCharacterDirectory(value));
+        const entries = synchronized ? [{ key: 'rp_hub_characters', value }]
+            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY)
+                .map(key => key === 'rp_hub_characters' ? { key, value } : { key });
+        if (!synchronized) await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false, force: true });
+        await window.RPLocalStore.initialize(entries, async (key, restored) => {
+            await dbSetTo(mainDb, key, restored, { mirror: false, force: true });
+            if (key === 'rp_hub_characters') initialReads.set(key, restored);
+        }, { synchronized, readEntry: key => dbGetFrom(mainDb, key) });
+        const characters = entries.find(entry => entry.key === 'rp_hub_characters');
+        if (characters) initialReads.set(characters.key, characters.value);
+        if (!synchronized) {
+            const next = crypto.randomUUID();
+            await dbSetTo(mainDb, LOCAL_MIRROR_KEY, next, { mirror: false, force: true });
+            await window.RPLocalStore.saveRevision(next);
         }
     };
 
@@ -366,22 +365,9 @@
         return value;
     };
 
-    const readStorageEntries = (targetDb) => new Promise((resolve, reject) => {
-        if (!targetDb) return resolve([]);
-        const transaction = targetDb.transaction(['store'], 'readonly');
-        const request = transaction.objectStore('store').openCursor();
-        const entries = [];
-        request.onsuccess = () => {
-            const cursor = request.result;
-            if (!cursor) return resolve(entries);
-            entries.push({ key: String(cursor.key), value: cursor.value });
-            cursor.continue();
-        };
-        request.onerror = () => reject(request.error);
-    });
-
     const CARD_RECORD_PREFIX = '__rp_card__:';
     const CARD_IMAGE_PREFIX = '__rp_card_image__:';
+    const cardRecordKey = (prefix, card) => prefix + (card.rphubCardRevision ? card.rphubCardRevision + ':' : '') + card.uuid;
     const isPrivateCardKey = key => key.startsWith(CARD_RECORD_PREFIX) || key.startsWith(CARD_IMAGE_PREFIX);
     const hasLargeCardImage = card => typeof card.avatar === 'string' && card.avatar.startsWith('data:') && card.avatar.length >= 65536;
     const isCharacterDirectory = value => value?.rphubCardLibrary === 1 && Array.isArray(value.cards);
@@ -419,6 +405,7 @@
         if (isCharacterStub(card)) return cloneForStorage(card);
         return {
             ...Object.fromEntries(characterMetadata.filter(key => card[key] !== undefined).map(key => [key, card[key]])),
+            ...(characterPreviews.get(card)?.revision ? { rphubCardRevision: characterPreviews.get(card).revision } : {}),
             rphubCardStub: 1, avatar: await characterPreview(card), previewEdge: CHARACTER_PREVIEW_MAX_EDGE,
             description: card.description || '',
             worldInfoNames: (card.worldInfo || []).map(entry => entry.comment),
@@ -427,12 +414,12 @@
     };
     const readCharacter = async card => {
         if (!isCharacterStub(card)) return card;
-        const value = await dbGet(CARD_RECORD_PREFIX + card.uuid);
+        const value = await dbGet(cardRecordKey(CARD_RECORD_PREFIX, card));
         if (!value || value.uuid !== card.uuid || isCharacterStub(value))
             throw storageWriteError('StorageDataError', '角色卡内容缺失，已保留当前会话，请从备份恢复');
         const imageSaved = value.avatar?.rphubCardImage === 1;
         if (imageSaved) {
-            const image = await dbGet(CARD_IMAGE_PREFIX + card.uuid);
+            const image = await dbGet(cardRecordKey(CARD_IMAGE_PREFIX, card));
             if (image?.uuid !== card.uuid || typeof image.avatar !== 'string')
                 throw storageWriteError('StorageDataError', '角色卡封面缺失，请从备份恢复');
             value.avatar = image.avatar;
@@ -442,7 +429,8 @@
             if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
             else delete value[key];
         });
-        characterPreviews.set(value, { source: value.avatar || '', preview: card.avatar || '', imageSaved, edge: card.previewEdge || 256 });
+        characterPreviews.set(value, { source: value.avatar || '', preview: card.avatar || '', imageSaved,
+            edge: card.previewEdge || 256, revision: card.rphubCardRevision });
         return value;
     };
     const saveCharacterLibrary = (list, inputOptions = {}) => {
@@ -457,7 +445,7 @@
             const baseline = JSON.stringify(previous);
             const previousCards = isCharacterDirectory(previous) ? previous.cards : [];
             const previousKeys = isCharacterDirectory(previous)
-                ? previousCards.flatMap(card => [CARD_RECORD_PREFIX + card.uuid, CARD_IMAGE_PREFIX + card.uuid])
+                ? previousCards.flatMap(card => [cardRecordKey(CARD_RECORD_PREFIX, card), cardRecordKey(CARD_IMAGE_PREFIX, card)])
                 : (await readStorageKeys(mainDb)).filter(isPrivateCardKey);
             const ids = new Set();
             payload.forEach(card => {
@@ -474,8 +462,12 @@
                     return { ...cloneForStorage(card), avatar: saved.avatar, previewEdge: saved.previewEdge };
                 const preview = characterPreviews.get(sources[index]);
                 if (preview) characterPreviews.set(card, preview);
-                return toCharacterStub(card);
+                const summary = await toCharacterStub(card);
+                if (saved?.rphubCardRevision) summary.rphubCardRevision = saved.rphubCardRevision;
+                return summary;
             }));
+            const retainedKeys = new Set(summaries.flatMap(card =>
+                [cardRecordKey(CARD_RECORD_PREFIX, card), cardRecordKey(CARD_IMAGE_PREFIX, card)]));
             const directory = { rphubCardLibrary: 1, cards: summaries };
             const perform = () => runStorageWriteTransaction(mainDb, (store, transaction, abortWith) => {
                 const request = store.get('rp_hub_characters');
@@ -491,17 +483,16 @@
                                 const saved = characterPreviews.get(sources[index]);
                                 if (!saved?.imageSaved || saved.source !== card.avatar) {
                                     store.put({ uuid: card.uuid, storageFolder: card.storageFolder, avatar: card.avatar },
-                                        CARD_IMAGE_PREFIX + card.uuid);
+                                        cardRecordKey(CARD_IMAGE_PREFIX, summaries[index]));
                                 }
-                                store.put({ ...card, avatar: { rphubCardImage: 1 } }, CARD_RECORD_PREFIX + card.uuid);
+                                store.put({ ...card, avatar: { rphubCardImage: 1 } }, cardRecordKey(CARD_RECORD_PREFIX, summaries[index]));
                             } else {
-                                store.put(card, CARD_RECORD_PREFIX + card.uuid);
-                                store.delete(CARD_IMAGE_PREFIX + card.uuid);
+                                store.put(card, cardRecordKey(CARD_RECORD_PREFIX, summaries[index]));
+                                store.delete(cardRecordKey(CARD_IMAGE_PREFIX, summaries[index]));
                             }
                         });
                         previousKeys.forEach(key => {
-                            const prefix = key.startsWith(CARD_RECORD_PREFIX) ? CARD_RECORD_PREFIX : CARD_IMAGE_PREFIX;
-                            if (!ids.has(key.slice(prefix.length))) store.delete(key);
+                            if (!retainedKeys.has(key)) store.delete(key);
                         });
                         if (baseline !== JSON.stringify(directory))
                             store.put(directory, 'rp_hub_characters');
@@ -517,7 +508,8 @@
             sources.forEach((source, index) => {
                 if (!isCharacterStub(source)) characterPreviews.set(source, {
                     source: source.avatar || '', preview: summaries[index].avatar,
-                    imageSaved: hasLargeCardImage(payload[index]), edge: summaries[index].previewEdge
+                    imageSaved: hasLargeCardImage(payload[index]), edge: summaries[index].previewEdge,
+                    revision: summaries[index].rphubCardRevision
                 });
             });
             return summaries;
@@ -531,7 +523,22 @@
         if (value === undefined) return [];
         if (isCharacterDirectory(value)) return value.cards;
         if (!Array.isArray(value)) throw storageWriteError('StorageDataError', '角色卡目录损坏，未执行覆盖');
-        return saveCharacterLibrary(value);
+        const paused = writesPaused;
+        const session = await window.RPStreamImport.stageEntries([{ key: 'rp_hub_characters', value }],
+            { limits: window.RPStreamImport.profile('fast') });
+        let recoveryRequired = false;
+        try {
+            await window.RPStreamImport.apply(session, { beforeApply: async () => {}, restoreValue: item => item });
+        } catch (error) {
+            recoveryRequired = error.recoveryRequired;
+            throw error;
+        } finally {
+            if (!recoveryRequired) {
+                window.RPHubStorage.setWritesPaused(paused);
+                window.RPLocalStore?.setWebWritesPaused(paused);
+            }
+        }
+        return (await dbGet('rp_hub_characters')).cards;
     };
     const refreshCharacterPreview = uuid => {
         if (characterPreviewUpgrades.has(uuid)) return characterPreviewUpgrades.get(uuid);
@@ -545,9 +552,9 @@
             if (index < 0) return '';
             const stub = directory.cards[index];
             if (stub.previewEdge >= CHARACTER_PREVIEW_MAX_EDGE) return stub.avatar || '';
-            let avatar = (await dbGet(CARD_IMAGE_PREFIX + uuid))?.avatar;
+            let avatar = (await dbGet(cardRecordKey(CARD_IMAGE_PREFIX, stub)))?.avatar;
             if (typeof avatar !== 'string') {
-                const record = await dbGet(CARD_RECORD_PREFIX + uuid);
+                const record = await dbGet(cardRecordKey(CARD_RECORD_PREFIX, stub));
                 if (!record || isCharacterStub(record)) return '';
                 avatar = record.avatar?.rphubCardImage === 1 ? '' : record.avatar;
             }
@@ -1012,6 +1019,7 @@
         },
         getStorageLogicalKey,
         initDB,
+        syncLocalFiles,
         isDatabaseClosingError,
         readStorageKeys,
         setScopedStoredValue: (name, id, value, options = {}) => dbSet(scopedStorageKey(name, id), value, options),

@@ -283,7 +283,7 @@
                 const previous = await getScopedStoredValue(entry.name, entry.id);
                 if (previous !== undefined && await sha256(await encode(previous)) === entry.hash) { finish(entry); continue; }
                 yield { key: scopedStorageKeyFor(entry.name, entry.id), value: await download(entry) };
-                if (entry.name === 'chat') yield deletedMemory(entry.id);
+                if (entry.name === 'chat') yield { key: scopedStorageKeyFor('classic_memories', entry.id), value: [] };
             }
             for (const entry of removed) {
                 yield { key: scopedStorageKeyFor(entry.name, entry.id), value: entry.name === 'chat' ? [] : null };
@@ -300,7 +300,7 @@
                     const saved = await options.saveAll();
                     if (saved?.ok === false) throw saved.error || new Error('保存当前数据失败');
                 }, restoreValue: options.decode,
-                progress: (done, total) => onProgress({ label: '正在恢复备份', percent: 90 + done / total * 10, detail: `${done} / ${total} 项` })
+                progress: (done, total, label = '正在恢复备份') => onProgress({ label, percent: 90 + done / total * 10, detail: `${done} / ${total} 项` })
             });
         } catch (error) {
             recoveryRequired = error.recoveryRequired;

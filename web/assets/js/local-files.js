@@ -38,7 +38,7 @@
     };
     const ownerOf = key => cards.find(card => key.includes(card.uuid));
     const folderOf = card => card.storageFolder;
-    const assignFolders = list => {
+    const assignFolders = (list, activate = true) => {
         const used = new Set();
         list.forEach(card => {
             if (!card.uuid) card.uuid = crypto.randomUUID();
@@ -49,7 +49,7 @@
             card.storageFolder = folder;
             used.add(folder);
         });
-        cards = list.map(({ uuid, storageFolder, importedName }) => ({ uuid, storageFolder, importedName }));
+        if (activate) cards = list.map(({ uuid, storageFolder, importedName }) => ({ uuid, storageFolder, importedName }));
         return list;
     };
     const pathOf = async key => {
@@ -81,7 +81,7 @@
             inventory[key] = file;
         }
     }
-    async function initialize(entries, put, { synchronized = false } = {}) {
+    async function initialize(entries, put, { synchronized = false, readEntry } = {}) {
         if (!bridge) return;
         const existing = entries.find(entry => entry.key === 'rp_hub_characters');
         if (existing) {
@@ -113,7 +113,8 @@
             }
         }
         // The old database remains intact; copy it before enabling file writes.
-        for (const entry of entries) await saveEntry(entry.key, entry.value);
+        for (const entry of entries)
+            await saveEntry(entry.key, Object.hasOwn(entry, 'value') ? entry.value : await readEntry(entry.key));
         if (!existing) {
             const index = read('个人数据/角色卡索引.json') || [];
             const restored = index.map(card => {
