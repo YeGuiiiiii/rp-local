@@ -21,6 +21,10 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
         });
         const surface = page.locator('.backup-page:visible');
+        assert.equal(await surface.getByRole('button', { name: '云端上传', exact: true }).count(), 1);
+        await surface.getByRole('button', { name: '云端下载', exact: true }).click();
+        assert.equal(await page.getByPlaceholder('XXXX-XXXX-XXXX-XXXX').isVisible(), true);
+        await page.evaluate(() => __qa.closeCloudBackup());
         assert.equal(await surface.getByLabel('传输速度', { exact: true }).isVisible(), true,
             'Import and export speed must be available on the main backup page');
         await surface.getByLabel('传输速度', { exact: true }).selectOption('fast');

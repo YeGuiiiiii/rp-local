@@ -8439,7 +8439,7 @@ const app = createApp({
             }
 
             const image = card.querySelector('img');
-            if (task.protocol === 'openai') image.addEventListener('load', () => {
+            if (task.protocol !== 'jobs') image.addEventListener('load', () => {
                 if (image.naturalWidth && image.naturalHeight)
                     card.style.aspectRatio = image.naturalWidth + ' / ' + image.naturalHeight;
             }, { once: true });
@@ -8471,6 +8471,14 @@ const app = createApp({
             };
             task.promise = (async () => {
                 task.baseUrl = imageApi.endpoint(provider);
+                if (provider.protocol === 'novelai') {
+                    publish({ status: 'running' });
+                    const imageUrl = await window.RPImageProviders.generateNovelImage({ ...provider, endpoint: task.baseUrl },
+                        Object.fromEntries(request.searchParams.entries()));
+                    const job = { status: 'done', imageUrl };
+                    publish(job);
+                    return job;
+                }
                 if (provider.protocol === 'openai') {
                     if (!provider.model.trim()) throw new Error('请在生图设置中填写此接口的模型名称');
                     publish({ status: 'running' });
@@ -16015,6 +16023,7 @@ const app = createApp({
         };
 
         const backupUi = reactive({
+            cloud: cloudBackup, openCloud: openCloudBackup,
             create: () => exportAllData(true),
             back: shellGoBack, source: backupSource, menu: backupMenu,
             files: computed(() => backupManagerFiles.value.filter(record => backupSource.value === 'all'

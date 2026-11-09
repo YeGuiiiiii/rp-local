@@ -30,7 +30,7 @@ fs.mkdirSync(evidence, { recursive: true });
     await context.route('**/*', async route => {
         const url = new URL(route.request().url());
         const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET,POST,PUT,OPTIONS' };
-        if (url.hostname === 'cloud.test') {
+        if (url.hostname === 'rphub-presence.zeabur.app') {
             if (route.request().method() === 'OPTIONS') return route.fulfill({ headers, body: '' });
             if (url.pathname.endsWith('/v1/backup/check')) return route.fulfill({ headers, json: { missing: route.request().postDataJSON().hashes } });
             if (url.pathname.endsWith('/v1/backup') && route.request().method() === 'POST') {
@@ -54,9 +54,7 @@ fs.mkdirSync(evidence, { recursive: true });
         if (url.origin !== 'https://sta1n156.github.io') return route.abort();
         const file = path.resolve(web, url.pathname.slice('/RP-Hub/'.length) || 'index.html');
         if (!file.startsWith(web + path.sep) || !fs.existsSync(file)) return route.abort();
-        if (file.endsWith('index.html')) return route.fulfill({ contentType: 'text/html',
-            body: fs.readFileSync(file, 'utf8').replace('<head>', '<head><meta name="rphub-update-api" content="https://cloud.test">') });
-        return route.fulfill({ path: file, contentType: ({ '.js': 'application/javascript', '.css': 'text/css', '.webp': 'image/webp' })[path.extname(file)] || 'application/octet-stream' });
+        return route.fulfill({ path: file, contentType: ({ '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.webp': 'image/webp' })[path.extname(file)] || 'application/octet-stream' });
     });
     try {
         await page.goto('https://sta1n156.github.io/RP-Hub/');
@@ -79,6 +77,8 @@ fs.mkdirSync(evidence, { recursive: true });
         assert.equal(await page.evaluate(async () => (await RPHubStorage.readMemoryState('cloud-a')).list[0].summary), '原记忆');
         assert.ok((await page.evaluate(() => __qa.backupTask.error)).includes('校验失败'), '大小相同但内容损坏也必须拒绝');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.readCharacterDirectory())[0].name), '原卡a');
+        await page.evaluate(() => RPHubStorage.setStoredValue('cloud-failure-probe', '仍可保存'));
+        assert.equal(await page.evaluate(() => RPHubStorage.getStoredValue('cloud-failure-probe')), '仍可保存');
         await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
         corrupt = false;
         await page.evaluate(() => {

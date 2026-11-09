@@ -19,16 +19,16 @@
               <input class="settings-control" aria-label="接口名称" :value="api.current.name" @input="api.update('name', $event.target.value)"></label>
             <label class="min-w-0"><span class="settings-label">接口格式</span>
               <select class="settings-control" aria-label="接口格式" :value="api.current.protocol" @change="api.update('protocol', $event.target.value)">
-                <option value="openai">OpenAI 兼容</option><option value="jobs">原站任务格式</option>
+                <option value="openai">OpenAI 兼容</option><option value="novelai">NovelAI 兼容</option><option value="jobs">原站任务格式</option>
               </select></label>
             <label class="min-w-0 md:col-span-2"><span class="settings-label">API 地址</span>
-              <input type="url" class="settings-control" aria-label="生图 API 地址" :placeholder="api.current.protocol === 'jobs' ? 'https://example.com' : 'https://example.com/v1/images/generations'" autocomplete="off" autocapitalize="none" spellcheck="false" :value="api.current.url" @input="api.update('url', $event.target.value)"></label>
-            <template v-if="api.current.protocol === 'openai'">
+              <input type="url" class="settings-control" aria-label="生图 API 地址" :placeholder="api.current.protocol === 'jobs' ? 'https://example.com' : api.current.protocol === 'novelai' ? 'https://example.com/ai/generate-image' : 'https://example.com/v1/images/generations'" autocomplete="off" autocapitalize="none" spellcheck="false" :value="api.current.url" @input="api.update('url', $event.target.value)"></label>
+            <template v-if="api.current.protocol !== 'jobs'">
               <div class="min-w-0">
                 <label class="settings-label" :for="'image-model-' + fieldId">生图模型</label>
                 <div class="flex items-center gap-2">
-                  <input :id="'image-model-' + fieldId" class="settings-control min-w-0 flex-1" aria-label="生图模型" placeholder="模型名称" :value="api.current.model" @input="api.update('model', $event.target.value)">
-                  <button type="button" class="settings-icon-button" aria-label="读取生图模型列表" title="读取生图模型列表" :disabled="api.modelsLoading || !api.current.url.trim()" @click="api.fetchModels()"><shell-icon name="RefreshCw"/></button>
+                  <input :id="'image-model-' + fieldId" class="settings-control min-w-0 flex-1" aria-label="生图模型" :placeholder="api.current.protocol === 'novelai' ? 'nai-diffusion-4-5-full' : '模型名称'" :value="api.current.model" @input="api.update('model', $event.target.value)">
+                  <button v-if="api.current.protocol === 'openai'" type="button" class="settings-icon-button" aria-label="读取生图模型列表" title="读取生图模型列表" :disabled="api.modelsLoading || !api.current.url.trim()" @click="api.fetchModels()"><shell-icon name="RefreshCw"/></button>
                 </div>
                 <select v-if="api.models.length" class="settings-control mt-2" aria-label="可用生图模型" :value="api.models.includes(api.current.model) ? api.current.model : ''" @change="$event.target.value && api.update('model', $event.target.value)">
                   <option value="" disabled>选择模型</option><option v-for="model in api.models" :key="model" :value="model">{{model}}</option>
@@ -542,6 +542,14 @@
                     <button type="button" class="backup-button" @click="s.resetScope"><icon name="CheckCheck"/>全部包含</button>
                     <button v-if="s.native" type="button" class="backup-button" :disabled="s.exporting" @click="s.exportJson"><icon name="Download"/>导出 JSON</button>
                   </details>
+                </section>
+                <section v-if="s.cloud.enabled" class="backup-section" aria-label="云端备份">
+                  <h2>云端备份</h2>
+                  <p class="backup-muted">与 RP 网页共用备份码，包含角色卡和聊天，不含记忆与设置。</p>
+                  <div class="backup-actions">
+                    <button type="button" class="backup-button" :disabled="s.cloud.busy" @click="s.openCloud('upload')"><icon name="Upload"/>云端上传</button>
+                    <button type="button" class="backup-button" :disabled="s.cloud.busy" @click="s.openCloud('download')"><icon name="Download"/>云端下载</button>
+                  </div>
                 </section>
                 <section class="backup-section">
                 <label class="backup-line backup-switch"><span><strong>每日 JSON 备份</strong><small>{{s.config.enabled?'已开启':'已关闭'}}</small></span><span class="relative inline-flex"><input class="settings-toggle-input sr-only" type="checkbox" role="switch" aria-label="每日 JSON 备份" v-model="s.config.enabled"><span class="settings-toggle"></span></span></label>
