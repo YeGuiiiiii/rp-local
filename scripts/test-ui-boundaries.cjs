@@ -91,8 +91,10 @@ const evidence = path.join(root, 'verification');
       document.body.appendChild(card);
       await image.decode();
     });
-    await page.waitForFunction(() => !!document.querySelector('#generated-fixture .rphub-image-save-btn'));
-    await page.locator('#generated-fixture .rphub-image-save-btn').click();
+    await page.waitForFunction(() => document.querySelector('#generated-fixture img').tabIndex === 0);
+    assert.equal(await page.locator('#generated-fixture .rphub-image-save-btn').count(), 0);
+    await page.locator('#generated-fixture img').press('Enter');
+    await page.getByRole('button', { name: '下载图片', exact: true }).click();
     await page.waitForFunction(() => __savedImages.length === 1);
     await page.getByRole('button', { name: '聊天菜单', exact: true }).click();
     await page.waitForTimeout(100);
@@ -103,9 +105,9 @@ const evidence = path.join(root, 'verification');
       const image = document.querySelector('#generated-fixture img');
       image.setAttribute('data-rphub-no-save', '');
     });
-    await page.waitForFunction(() => !document.querySelector('#generated-fixture .rphub-image-save-btn'));
+    await page.waitForFunction(() => !document.querySelector('#generated-fixture img').hasAttribute('tabindex'));
     await page.evaluate(() => document.querySelector('#generated-fixture img').removeAttribute('data-rphub-no-save'));
-    await page.waitForFunction(() => !!document.querySelector('#generated-fixture .rphub-image-save-btn'));
+    await page.waitForFunction(() => document.querySelector('#generated-fixture img').tabIndex === 0);
     await page.evaluate(() => RPHubImageGallery.collect());
     let records = [];
     for (let attempt = 0; attempt < 60; attempt++) {
@@ -143,8 +145,8 @@ const evidence = path.join(root, 'verification');
     assert.deepEqual(errors, []);
     const report = {
       embeddedViews: ['square', 'lighthouse', 'generator', 'novel'], themedReturnClicks: true,
-      softwareArtAndAvatarsExcluded: true, narrativeAndUploadAndGeneratedSaveButtons: true,
-      smallGeneratedImageSaveExecuted: true, optOutUpdatesRemoveAndRestoreButton: true,
+      softwareArtAndAvatarsExcluded: true, narrativeAndUploadSaveButtons: true, generatedImageConfirmation: true,
+      smallGeneratedImageSaveExecuted: true, optOutUpdatesRemoveAndRestoreAction: true,
       softwareArtExcludedFromLegacyGallery: true, externalAssetsImagePreserved: true,
       widths: [360, 390, 1280], nightReturn: true, errors,
     };

@@ -74,6 +74,7 @@
     }
     window.RPImageDownload = Object.freeze({
         save,
+        request: image => window.dispatchEvent(new CustomEvent('rp:image-download', { detail: image })),
         run: (source, options) => save(source, options).catch(error => {
             notify(error.message || '图片保存失败', true);
             throw error;

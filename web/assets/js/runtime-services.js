@@ -477,7 +477,7 @@
     window.RPHubComposables = Object.freeze({ useTokenUsage });
 })();
 
-// --- Native image save (top-right button) ---
+// --- Image saving: hold generated images; retain native buttons for other content. ---
 (function () {
     const STYLE_ID = 'rphub-image-save-style';
     const BTN_CLASS = 'rphub-image-save-btn';
@@ -587,6 +587,52 @@
         return window.RPImagePolicy?.isContentImage(image)
             && image.complete && image.naturalWidth > 0;
     };
+    const generatedImage = target => {
+        const image = target?.closest?.('.generated-image-card img');
+        return image && isSaveableImage(image)
+            && !image.closest('.is-generating, .is-rerolling, .is-generation-error') ? image : null;
+    };
+    let press = null, heldImage = null;
+    const cancelHold = () => {
+        clearTimeout(press?.timer);
+        press = null;
+    };
+    document.addEventListener('pointerdown', event => {
+        cancelHold();
+        heldImage = null;
+        const image = generatedImage(event.target);
+        if (!image || event.button !== 0 || !event.isPrimary) return;
+        press = { id: event.pointerId, x: event.clientX, y: event.clientY,
+            timer: setTimeout(() => {
+                if (!image.isConnected || !generatedImage(image)) return cancelHold();
+                heldImage = image;
+                window.RPImageDownload.request(image);
+            }, 500) };
+    }, { passive: true });
+    document.addEventListener('pointermove', event => {
+        if (press && event.pointerId === press.id
+            && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) cancelHold();
+    }, { passive: true });
+    ['pointerup', 'pointercancel', 'scroll'].forEach(type => document.addEventListener(type, cancelHold, true));
+    window.addEventListener('blur', cancelHold);
+    document.addEventListener('visibilitychange', cancelHold);
+    document.addEventListener('contextmenu', event => {
+        if (generatedImage(event.target)) event.preventDefault();
+    });
+    document.addEventListener('click', event => {
+        if (heldImage && event.target === heldImage) {
+            event.preventDefault();
+            event.stopPropagation();
+            heldImage = null;
+        }
+    }, true);
+    document.addEventListener('keydown', event => {
+        const image = generatedImage(event.target);
+        if (image && ['Enter', ' '].includes(event.key)) {
+            event.preventDefault();
+            window.RPImageDownload.request(image);
+        }
+    });
 
     const pressFeedback = button => {
         button.classList.add('rphub-btn-pressed');
@@ -625,6 +671,22 @@
     };
 
     const attachButton = image => {
+        if (image.closest('.generated-image-card')) {
+            image[ATTACHED_FLAG]?.remove();
+            image[ATTACHED_FLAG] = null;
+            image.parentElement.querySelector('.' + WRAP_CLASS)?.remove();
+            image.draggable = false;
+            if (isSaveableImage(image)) {
+                image.tabIndex = 0;
+                image.setAttribute('role', 'button');
+                image.setAttribute('aria-label', '图片操作');
+                image.setAttribute('aria-haspopup', 'dialog');
+            } else {
+                ['tabindex', 'role', 'aria-label', 'aria-haspopup'].forEach(name => image.removeAttribute(name));
+            }
+            return;
+        }
+        if (!isNativeApp()) return;
         const previous = image[ATTACHED_FLAG];
         if (previous && (!isSaveableImage(image) || previous.parentElement !== image.parentElement)) {
             const anchor = previous.parentElement;
@@ -661,7 +723,6 @@
         if (root && root.tagName === 'IMG') attachButton(root);
     };
 
-    if (!isNativeApp()) return;
     injectStyle();
     const init = () => {
         scan(document);
@@ -685,7 +746,7 @@
     } else {
         init();
     }
-    console.log('[RP-Hub] image save button patch installed');
+    console.log('[RP-Hub] image save interactions installed');
 })();
 // --- Sidebar watermark (cumulative left-to-right fade in/out) ---
 (function () {

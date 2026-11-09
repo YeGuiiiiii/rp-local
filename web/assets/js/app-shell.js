@@ -622,6 +622,49 @@
             </template>
           </div>`
     };
+    const ImageDownloadSheet = {
+        components: { Icon },
+        setup() {
+            const dialog = ref(null);
+            let image = null, backdropPressed = false;
+            const close = () => dialog.value.close();
+            const request = event => {
+                if (!(event.detail instanceof HTMLImageElement) || !event.detail.isConnected) return;
+                image = event.detail;
+                backdropPressed = false;
+                dialog.value.showModal();
+            };
+            const download = () => {
+                const selected = image;
+                close();
+                if (selected?.isConnected && window.RPImagePolicy.isContentImage(selected))
+                    window.RPImageDownload.run(selected).catch(() => {});
+            };
+            const backdropDown = event => { backdropPressed = event.target === dialog.value; };
+            const backdropClick = event => {
+                if (!backdropPressed || event.target !== dialog.value) return;
+                const box = dialog.value.getBoundingClientRect();
+                if (event.clientY < box.top || event.clientY > box.bottom
+                    || event.clientX < box.left || event.clientX > box.right) close();
+                backdropPressed = false;
+            };
+            onMounted(() => window.addEventListener('rp:image-download', request));
+            onBeforeUnmount(() => {
+                window.removeEventListener('rp:image-download', request);
+                if (dialog.value.open) close();
+            });
+            return { dialog, close, download, backdropDown, backdropClick,
+                clear: () => { image = null; } };
+        },
+        template: `<teleport to="body">
+          <dialog ref="dialog" class="image-download-sheet" aria-labelledby="image-download-title"
+            @pointerdown="backdropDown" @click="backdropClick" @close="clear">
+            <h2 id="image-download-title">下载这张图片？</h2>
+            <button type="button" class="shell-button image-download-confirm" @click="download"><icon name="Download"/>下载图片</button>
+            <button type="button" class="shell-button" @click="close">取消</button>
+          </dialog>
+        </teleport>`
+    };
     const ReleaseAnnouncement = {
         components: { Icon, CompetitionList },
         props: { show: Boolean },
@@ -658,5 +701,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
 })();

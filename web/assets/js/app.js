@@ -440,6 +440,8 @@ const app = createApp({
             settingsSection.value = section;
         };
         const shellGoBack = () => {
+            const imageDownload = document.querySelector('.image-download-sheet[open]');
+            if (imageDownload) { imageDownload.close(); return true; }
             if (streamImportPanel.value?.handleBack()) return true;
             if (cloudBackup.busy) return true;
             if (cloudBackup.mode) { closeCloudBackup(); return true; }
@@ -16432,6 +16434,7 @@ app.component('PersonaAvatar', window.RPAppShell.PersonaAvatar);
 app.component('PokeMascot', window.RPAppShell.PokeMascot);
 app.component('ShellDock', window.RPAppShell.Dock);
 app.component('ShellChatMenu', window.RPAppShell.ChatMenu);
+app.component('ImageDownloadSheet', window.RPAppShell.ImageDownloadSheet);
 app.component('CardNightSelect', window.RPAppShell.CardNightSelect);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);

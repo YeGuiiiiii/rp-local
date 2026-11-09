@@ -1597,6 +1597,7 @@ return function render(_ctx, _cache) {
     const _component_settings_help = _resolveComponent("settings-help")
     const _component_pagination_controls = _resolveComponent("pagination-controls")
     const _component_memory_backfill_modal = _resolveComponent("memory-backfill-modal")
+    const _component_image_download_sheet = _resolveComponent("image-download-sheet")
     const _component_release_announcement = _resolveComponent("release-announcement")
     const _component_user_setup_modal = _resolveComponent("user-setup-modal")
     const _component_action_confirm_modal = _resolveComponent("action-confirm-modal")
@@ -3621,7 +3622,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_222)
                 ]),
                 _createElementVNode("div", _hoisted_223, [
-                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.012 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.013 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -7452,6 +7453,7 @@ return function render(_ctx, _cache) {
         onStop: abortBatchExtraction,
         onRetry: startBatchMemoryExtraction
       }, null, 8 /* PROPS */, ["show", "progress", "onClose", "onStop", "onRetry"]),
+      _createVNode(_component_image_download_sheet),
       _createVNode(_component_release_announcement, {
         show: showAnnouncement,
         onClose: closeAnnouncement,
@@ -10418,6 +10420,7 @@ return function render(_ctx, _cache) {
     const _component_shell_advanced = _resolveComponent("shell-advanced")
     const _component_competition_detail = _resolveComponent("competition-detail")
     const _component_memory_backfill_modal = _resolveComponent("memory-backfill-modal")
+    const _component_image_download_sheet = _resolveComponent("image-download-sheet")
     const _component_release_announcement = _resolveComponent("release-announcement")
     const _component_user_setup_modal = _resolveComponent("user-setup-modal")
     const _component_action_confirm_modal = _resolveComponent("action-confirm-modal")
@@ -17640,6 +17643,7 @@ return function render(_ctx, _cache) {
         onStop: abortBatchExtraction,
         onRetry: startBatchMemoryExtraction
       }, null, 8 /* PROPS */, ["show", "progress", "onClose", "onStop", "onRetry"]),
+      _createVNode(_component_image_download_sheet),
       _createVNode(_component_release_announcement, {
         show: showAnnouncement,
         onClose: closeAnnouncement,
@@ -25429,6 +25433,48 @@ return function render(_ctx, _cache) {
             ], 8 /* PROPS */, _hoisted_33)
           ]))
         : _createCommentVNode("v-if", true)
+    ]))
+  }
+}
+})();
+window.RPCompiledRenders.ImageDownloadSheet = (function () {
+const _Vue = Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createTextVNode: _createTextVNode } = _Vue
+
+const _hoisted_1 = ["onPointerdown", "onClick", "onClose"]
+const _hoisted_2 = ["onClick"]
+const _hoisted_3 = ["onClick"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { createElementVNode: _createElementVNode, resolveComponent: _resolveComponent, createVNode: _createVNode, createTextVNode: _createTextVNode, Teleport: _Teleport, openBlock: _openBlock, createBlock: _createBlock } = _Vue
+
+    const _component_icon = _resolveComponent("icon")
+
+    return (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
+      _createElementVNode("dialog", {
+        ref: "dialog",
+        class: "image-download-sheet",
+        "aria-labelledby": "image-download-title",
+        onPointerdown: backdropDown,
+        onClick: backdropClick,
+        onClose: clear
+      }, [
+        _cache[1] || (_cache[1] = _createElementVNode("h2", { id: "image-download-title" }, "下载这张图片？", -1 /* CACHED */)),
+        _createElementVNode("button", {
+          type: "button",
+          class: "shell-button image-download-confirm",
+          onClick: download
+        }, [
+          _createVNode(_component_icon, { name: "Download" }),
+          _cache[0] || (_cache[0] = _createTextVNode("下载图片", -1 /* CACHED */))
+        ], 8 /* PROPS */, _hoisted_2),
+        _createElementVNode("button", {
+          type: "button",
+          class: "shell-button",
+          onClick: close
+        }, "取消", 8 /* PROPS */, _hoisted_3)
+      ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1)
     ]))
   }
 }
