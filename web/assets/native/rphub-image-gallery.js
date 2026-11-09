@@ -641,7 +641,7 @@
     }
 
     // 2.8.118 places the gallery before backup and repairs its position after a menu rerender.
-    var NAV_ANCHOR_LABELS = ['数据备份', '灯塔', '在线时长'];
+    var NAV_ANCHOR_LABELS = ['数据与备份', '数据备份', '灯塔', '在线时长'];
 
     function mountNavItem() {
         if (window.RPThemePacks.current !== 'classic') return;

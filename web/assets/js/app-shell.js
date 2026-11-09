@@ -23,12 +23,12 @@
               </select></label>
             <label class="min-w-0 md:col-span-2"><span class="settings-label">API 地址</span>
               <input type="url" class="settings-control" aria-label="生图 API 地址" :placeholder="api.current.protocol === 'jobs' ? 'https://example.com' : api.current.protocol === 'novelai' ? 'https://example.com/ai/generate-image' : 'https://example.com/v1/images/generations'" autocomplete="off" autocapitalize="none" spellcheck="false" :value="api.current.url" @input="api.update('url', $event.target.value)"></label>
-            <template v-if="api.current.protocol !== 'jobs'">
+            <template v-if="api.current.protocol === 'openai'">
               <div class="min-w-0">
                 <label class="settings-label" :for="'image-model-' + fieldId">生图模型</label>
                 <div class="flex items-center gap-2">
-                  <input :id="'image-model-' + fieldId" class="settings-control min-w-0 flex-1" aria-label="生图模型" :placeholder="api.current.protocol === 'novelai' ? 'nai-diffusion-4-5-full' : '模型名称'" :value="api.current.model" @input="api.update('model', $event.target.value)">
-                  <button v-if="api.current.protocol === 'openai'" type="button" class="settings-icon-button" aria-label="读取生图模型列表" title="读取生图模型列表" :disabled="api.modelsLoading || !api.current.url.trim()" @click="api.fetchModels()"><shell-icon name="RefreshCw"/></button>
+                  <input :id="'image-model-' + fieldId" class="settings-control min-w-0 flex-1" aria-label="生图模型" placeholder="模型名称" :value="api.current.model" @input="api.update('model', $event.target.value)">
+                  <button type="button" class="settings-icon-button" aria-label="读取生图模型列表" title="读取生图模型列表" :disabled="api.modelsLoading || !api.current.url.trim()" @click="api.fetchModels()"><shell-icon name="RefreshCw"/></button>
                 </div>
                 <select v-if="api.models.length" class="settings-control mt-2" aria-label="可用生图模型" :value="api.models.includes(api.current.model) ? api.current.model : ''" @change="$event.target.value && api.update('model', $event.target.value)">
                   <option value="" disabled>选择模型</option><option v-for="model in api.models" :key="model" :value="model">{{model}}</option>
@@ -179,6 +179,14 @@
                 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'shell-icon' },
             (window.RPShellIcons[this.name] || window.RPShellIcons.CircleHelp).map(([tag, attrs]) => h(tag, attrs)));
         }
+    };
+    const ResourceBatchActions = {
+        components: { Icon },
+        props: { api: Object, label: String },
+        template: `<div class="resource-batch-actions">
+          <button type="button" class="settings-icon-button" :aria-label="(api.all?'全不选':'全选')+label" :title="api.all?'全不选':'全选'" :aria-pressed="api.all" :disabled="!api.total" @click="api.toggleAll()"><icon name="CheckCheck"/></button>
+          <button type="button" class="settings-icon-button" :aria-label="(api.active?'删除所选':'批量删除')+label" :title="api.active?'删除所选':'批量删除'" :disabled="api.active && !api.count" @click="api.remove()"><icon name="Trash2"/></button>
+        </div>`
     };
     const MascotHeader = {
         components: { PokeMascot },
@@ -523,7 +531,7 @@
           <div class="backup-page">
             <header class="backup-header">
               <button type="button" class="shell-icon-button" aria-label="返回" title="返回" @click="s.back"><icon name="ArrowLeft"/></button>
-              <h1>备份与恢复</h1>
+              <h1>数据与备份</h1>
             </header>
             <div class="backup-content">
                 <section class="backup-section">
@@ -563,6 +571,11 @@
                 <template v-if="s.native">
                   <div class="backup-line backup-location"><span class="backup-path">{{s.location || '完整档案自动保存目录未设置'}}</span><button class="shell-icon-button" aria-label="选择完整档案目录" title="选择完整档案目录" @click="s.archive('folder')"><icon name="FolderOpen"/></button></div>
                 </template>
+                </section>
+                <section class="backup-section">
+                  <h2>本地数据</h2>
+                  <local-files-panel compact></local-files-panel>
+                  <button v-if="s.tasks" type="button" class="backup-button" @click="s.tasks"><icon name="ListTodo"/>查看运行中的任务</button>
                 </section>
                 <details class="backup-details" @toggle="$event.target.open && s.refresh()">
                     <summary>历史备份</summary>
@@ -605,15 +618,14 @@
                 { label: '记忆系统', view: 'memory', icon: 'Brain' },
                 { label: '外观', key: 'appearance', icon: 'Palette' },
                 { label: '向量缓存', view: 'cache', icon: 'Database' },
-                { label: '数据存储', key: 'storage', icon: 'HardDrive' },
-                { label: '备份与恢复', view: 'backup', icon: 'Download' },
+                { label: '数据与备份', view: 'backup', icon: 'HardDrive' },
                 { label: '用量统计', view: 'usage', icon: 'ChartNoAxesCombined' },
                 { label: '关于与鸣谢', view: 'patchlist', icon: 'Info' }
             ];
             return { groups: [
                 { title: '对话与创作', rows: rows.slice(0, 4) },
-                { title: '空间与存档', rows: rows.slice(4, 8) },
-                { title: '记录与支持', rows: rows.slice(8) }
+                { title: '空间与存档', rows: rows.slice(4, 7) },
+                { title: '记录与支持', rows: rows.slice(7) }
             ] };
         },
         template: `
@@ -822,5 +834,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
 })();

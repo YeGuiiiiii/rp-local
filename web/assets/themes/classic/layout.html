@@ -1859,13 +1859,15 @@
             <ui-templates-view :show="currentView === 'uitemplates'" :templates="currentUiTemplates" :has-character="!!currentCharacter" :show-settings="showUiTemplateSettings" :settings="settings" :update-status="uiTemplateUpdateStatus" :help-topic="settingsHelpTopic" :analysis-depth="uiTemplateAnalysisDepthSlider" @menu="toggleNavigation" @export="openExportModal('uitemplates')" @import="importUiTemplates" @create="createUiTemplate" @update:show-settings="showUiTemplateSettings = $event" @update:help-topic="settingsHelpTopic = $event" @analyze="updateUiTemplatesFromChat()" @select-model="openModelSelector('uiTemplateModel')" @update:analysis-depth="uiTemplateAnalysisDepthSlider = $event" :is-fetching-ui-template-models="isFetchingUiTemplateModels" @fetch-models="fetchUiTemplateModels(true)" @edit="editUiTemplate" @delete="deleteUiTemplate">
             </ui-templates-view>
             <!-- Regex View -->
-            <div v-if="currentView === 'regex'" class="management-view">
+            <div v-if="currentView === 'regex'" class="management-view resource-management">
                 <settings-page-header title="正则脚本" @menu="shellGoBack">
-                    <template #icon="">
+                    <template #icon>
                         <svg class="w-6 h-6 md:w-7 md:h-7 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                         </svg>
                     </template>
+                    <resource-batch-actions :api="resourceBatch" label="正则"></resource-batch-actions>
+                    <template v-if="!resourceBatch.active">
                     <button @click="openExportModal('regex')" class="settings-icon-button" title="导出">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-export"></use></svg>
                     </button>
@@ -1878,19 +1880,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
+                    </template>
                 </settings-page-header>
-                <div id="regex-list" class="sortable-list">
-                    <div v-for="({script, index}) in managedRegexScripts" :key="getSortableItemKey(script)" :data-resource-index="index" class="sortable-list-item group" :class="{ 'is-off': script.enabled !== true }">
+                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
+                <div id="regex-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
+                    <div v-for="({script, index}) in managedRegexScripts" :key="getSortableItemKey(script)" :data-resource-index="index"
+                        class="sortable-list-item group" :class="{ 'is-off': script.enabled !== true }">
                         <div class="sortable-item-main">
-                            <div class="sortable-list-handle" title="拖动排序">
+                            <label v-if="resourceBatch.active" class="resource-select">
+                                <input type="checkbox" :aria-label="'选择正则：'+script.name" :checked="resourceBatch.selected.has(script)" @change="resourceBatch.toggle(script)">
+                            </label>
+                            <div v-else class="sortable-list-handle" title="拖动排序">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 8h16M4 16h16"></path>
                                 </svg>
                             </div>
                             <div class="min-w-0">
                                 <div class="sortable-item-heading">
-                                    <h3 class="truncate">{{ script.name }}</h3>
-                                    <span class="meta-badge meta-badge--desktop" :class="script.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
+                                    <h3 class="truncate"><button type="button" class="resource-open" :aria-label="'查看'+script.name" @click="editRegex(index)">{{ script.name }}</button></h3>
+                                    <span class="meta-badge meta-badge--desktop"
+                                        :class="script.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
                                         {{ script.scope === 'global' ? '全局' : '绑定' }}
                                     </span>
                                 </div>
@@ -1898,16 +1908,22 @@
                         </div>
                         <div class="sortable-item-actions">
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="script.enabled" class="settings-toggle-input sr-only" :true-value="true" :false-value="false">
+                                <input type="checkbox" v-model="script.enabled" class="settings-toggle-input sr-only" :true-value="true"
+                                    :false-value="false">
                                 <div class="settings-toggle"></div>
                             </label>
                             <div class="sortable-item-buttons">
-                                <button @click="editRegex(index)" class="item-action-button item-action-button--edit" title="编辑">
+                                <button @click="editRegex(index)"
+                                    class="item-action-button item-action-button--edit"
+                                    title="编辑">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-edit"></use></svg>
                                 </button>
-                                <button @click="deleteRegex(index)" class="item-action-button item-action-button--delete" title="删除">
+                                <button @click="deleteRegex(index)"
+                                    class="item-action-button item-action-button--delete"
+                                    title="删除">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                         </path>
                                     </svg>
                                 </button>
@@ -2262,13 +2278,16 @@
             </div>
 
             <!-- World Info View -->
-            <div v-if="currentView === 'worldinfo'" ref="worldInfoViewport" class="management-view worldinfo-view" @scroll.passive="onWorldInfoScroll">
+            <div v-if="currentView === 'worldinfo'" ref="worldInfoViewport" class="management-view worldinfo-view resource-management"
+                @scroll.passive="onWorldInfoScroll">
                 <settings-page-header title="世界书" @menu="shellGoBack">
-                    <template #icon="">
+                    <template #icon>
                         <svg class="w-6 h-6 md:w-7 md:h-7 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                         </svg>
                     </template>
+                    <resource-batch-actions :api="resourceBatch" label="世界书"></resource-batch-actions>
+                    <template v-if="!resourceBatch.active">
                     <button @click="openExportModal('worldinfo')" class="settings-icon-button" title="导出">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-export"></use></svg>
                     </button>
@@ -2281,26 +2300,38 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
+                    </template>
                 </settings-page-header>
+                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
                 <!-- Activation Settings -->
-                <div class="bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden">
-                    <button @click="showWorldInfoSettings = !showWorldInfoSettings" class="settings-collapse-trigger" aria-controls="worldinfo-settings-panel" :aria-expanded="showWorldInfoSettings" :class="['w-full flex justify-between items-center px-4 py-3 rounded-xl font-bold',
+                <div
+                    class="bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden">
+                    <button @click="showWorldInfoSettings = !showWorldInfoSettings"
+                        class="settings-collapse-trigger" aria-controls="worldinfo-settings-panel"
+                        :aria-expanded="showWorldInfoSettings"
+                        :class="['w-full flex justify-between items-center px-4 py-3 rounded-xl font-bold',
                                      showWorldInfoSettings ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50']">
                         <span class="flex items-center">
-                            <div :class="['p-1.5 rounded-lg mr-3 transition-colors', showWorldInfoSettings ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500']">
+                            <div
+                                :class="['p-1.5 rounded-lg mr-3 transition-colors', showWorldInfoSettings ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500']">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
                                     </path>
                                 </svg>
                             </div>
                             全局设置
                         </span>
-                        <svg :class="{'transform rotate-180': showWorldInfoSettings}" class="settings-collapse-chevron w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg :class="{'transform rotate-180': showWorldInfoSettings}"
+                            class="settings-collapse-chevron w-5 h-5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
                     </button>
-                    <div id="worldinfo-settings-panel" class="settings-collapse" :class="{ 'is-open': showWorldInfoSettings }" :aria-hidden="!showWorldInfoSettings" :inert="!showWorldInfoSettings">
+                    <div id="worldinfo-settings-panel" class="settings-collapse"
+                        :class="{ 'is-open': showWorldInfoSettings }"
+                        :aria-hidden="!showWorldInfoSettings" :inert="!showWorldInfoSettings">
                         <div class="settings-collapse__inner">
                             <div class="settings-collapse__content px-4 pb-4 pt-3 border-t border-gray-100">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
@@ -2310,7 +2341,8 @@
                                             <label for="worldinfo-scan-depth" class="font-semibold text-gray-700">扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.scanDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-scan-depth" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input id="worldinfo-scan-depth" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1"
+                                            class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                     <!-- Max Scan Depth -->
                                     <div>
@@ -2318,7 +2350,8 @@
                                             <label for="worldinfo-max-depth" class="font-semibold text-gray-700">最大扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.maxDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-max-depth" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input id="worldinfo-max-depth" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1"
+                                            class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                 </div>
                             </div>
@@ -2326,18 +2359,24 @@
                     </div>
                 </div>
 
-                <div id="worldinfo-list" class="sortable-list">
-                    <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index" class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
+                <div id="worldinfo-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
+                    <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index"
+                        class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
                         <div class="sortable-item-main">
-                            <div class="sortable-list-handle" title="拖动排序">
+                            <label v-if="resourceBatch.active" class="resource-select">
+                                <input type="checkbox" :aria-label="'选择世界书：'+(entry.comment || '未命名条目')" :checked="resourceBatch.selected.has(entry)" @change="resourceBatch.toggle(entry)">
+                            </label>
+                            <div v-else class="sortable-list-handle" title="拖动排序">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 8h16M4 16h16"></path>
                                 </svg>
                             </div>
                             <div class="min-w-0">
                                 <div class="sortable-item-heading">
-                                    <h3 class="truncate">{{ entry.comment || '未命名条目' }}</h3>
-                                    <span class="meta-badge meta-badge--desktop" :class="entry.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
+                                    <h3 class="truncate"><button type="button" class="resource-open" :aria-label="'查看'+(entry.comment || '未命名条目')" @click="editWorldInfo(index)">{{ entry.comment || '未命名条目' }}</button></h3>
+                                    <span class="meta-badge meta-badge--desktop"
+                                        :class="entry.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
                                         {{ entry.scope === 'global' ? '全局' : '绑定' }}
                                     </span>
                                 </div>
@@ -2345,16 +2384,22 @@
                         </div>
                         <div class="sortable-item-actions">
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" :checked="entry.enabled" @change="setWorldInfoEnabled(entry, $event.target.checked, $event)" class="settings-toggle-input sr-only">
+                                <input type="checkbox" :checked="entry.enabled"
+                                    @change="setWorldInfoEnabled(entry, $event.target.checked, $event)" class="settings-toggle-input sr-only">
                                 <div class="settings-toggle"></div>
                             </label>
                             <div class="sortable-item-buttons">
-                                <button @click="editWorldInfo(index)" class="item-action-button item-action-button--edit" title="编辑">
+                                <button @click="editWorldInfo(index)"
+                                    class="item-action-button item-action-button--edit"
+                                    title="编辑">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-edit"></use></svg>
                                 </button>
-                                <button @click="deleteWorldInfo(index)" class="item-action-button item-action-button--delete" title="删除">
+                                <button @click="deleteWorldInfo(index)"
+                                    class="item-action-button item-action-button--delete"
+                                    title="删除">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                         </path>
                                     </svg>
                                 </button>
@@ -2371,7 +2416,6 @@
                     </template>
                 </settings-page-header>
                 <div class="settings-stack">
-                    <local-files-panel v-if="settingsSection==='storage'"></local-files-panel>
                     <shell-utilities v-if="['appearance','legacy'].includes(settingsSection)" :section="settingsSection" @navigate="navigateWorkspace"></shell-utilities>
 
                     <!-- User Settings -->

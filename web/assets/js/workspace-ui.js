@@ -1,6 +1,42 @@
 (function () {
     'use strict';
     const { ref, reactive, onMounted, onBeforeUnmount } = Vue;
+    function createResourceBatch({ source, label, confirm, deleted }) {
+        const state = reactive({
+            active: false, selected: new Set(),
+            get count() { return source().value.filter(item => state.selected.has(item)).length; },
+            get total() { return source().value.length; },
+            get all() { return state.total > 0 && state.count === state.total; },
+            reset() { state.active = false; state.selected.clear(); },
+            toggle(item) { state.selected.has(item) ? state.selected.delete(item) : state.selected.add(item); },
+            toggleAll() {
+                state.active = true;
+                state.selected = state.all ? new Set() : new Set(source().value);
+            },
+            async remove() {
+                if (!state.active) { state.active = true; return; }
+                if (!state.count) return;
+                const target = source(), items = new Set(state.selected);
+                if (!await confirm('批量删除' + label(), '确定删除选中的 ' + state.count + ' 条' + label() + '？此操作无法撤销。')
+                    || !state.active || source() !== target) return;
+                target.value = target.value.filter(item => !items.has(item));
+                state.selected.clear();
+                deleted();
+            }
+        });
+        return state;
+    }
+    function createTapGuard() {
+        let x = 0, y = 0, moved = false;
+        return {
+            start(event) { x = event.clientX; y = event.clientY; moved = false; },
+            move(event) { if (Math.hypot(event.clientX - x, event.clientY - y) > 10) moved = true; },
+            cancel() { moved = true; },
+            click(event) {
+                if (moved && event.detail !== 0) { event.preventDefault(); event.stopImmediatePropagation(); }
+            }
+        };
+    }
     function createReaderSession({ getScope, getContainer, getHistory, getLimit, setLimit, isChat }) {
         let restoring = false;
         let timer;
@@ -160,7 +196,7 @@
               <button type="button" class="settings-action" @click="$emit('navigate','presets')">预设</button>
               <button type="button" class="settings-action" @click="$emit('navigate','tools')">工具</button>
               <button type="button" class="settings-action" @click="$emit('navigate','usage')">用量统计</button>
-              <button type="button" class="settings-action" @click="$emit('navigate','backup')">数据备份</button>
+              <button type="button" class="settings-action" @click="$emit('navigate','backup')">数据与备份</button>
               <button type="button" class="settings-action" @click="$emit('navigate','patchlist')">关于与鸣谢</button>
               <button type="button" class="settings-action" @click="$emit('navigate','novel')">小说生成</button>
             </div>
@@ -188,5 +224,5 @@
             </details>
           </section>`
     };
-    window.RPLocalWorkspace = Object.freeze({ FloatingNavigation, WorkspaceSettings, createReaderSession });
+    window.RPLocalWorkspace = Object.freeze({ FloatingNavigation, WorkspaceSettings, createReaderSession, createResourceBatch, createTapGuard });
 })();

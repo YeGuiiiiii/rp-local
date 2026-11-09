@@ -754,7 +754,8 @@
             })(def);
 
             if (wrapper) {
-                wrapper.insertBefore(btn, wrapper.firstChild);
+                var batch = wrapper.querySelector('.resource-batch-actions');
+                wrapper.insertBefore(btn, batch ? batch.nextSibling : wrapper.firstChild);
             } else {
                 // 兼容降级插入点
                 var anchor = hdr.querySelector('.settings-create-button, .settings-icon-button');

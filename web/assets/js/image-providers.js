@@ -143,12 +143,12 @@
     }
     const generateNovelImage = async (provider, params) => {
         const input = [params.tag, params.artist].filter(Boolean).join(', ');
-        const size = provider.size.trim() === 'auto' || !provider.size.trim() ? params.size : provider.size.trim();
+        const size = params.size;
         let [width, height] = /横/.test(size) ? [1216, 832] : /方/.test(size) ? [1024, 1024] : [832, 1216];
         const dimensions = /^(\d+)[x×](\d+)$/i.exec(size || '');
         if (dimensions) [width, height] = dimensions.slice(1).map(Number);
         else if (/^[24]K/i.test(size || '')) { const factor = Number(size[0]); width *= factor; height *= factor; }
-        const model = provider.model.trim() || params.model || 'nai-diffusion-4-5-full';
+        const model = params.model || 'nai-diffusion-4-5-full';
         const seed = params.seed !== '' && params.seed != null && Number(params.seed) >= 0
             ? Math.floor(Number(params.seed)) : crypto.getRandomValues(new Uint32Array(1))[0];
         const parameters = {

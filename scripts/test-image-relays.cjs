@@ -51,10 +51,12 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             'A complete NovelAI URL must not gain an OpenAI path');
         assert.equal(await page.getByLabel('接口格式', { exact: true }).inputValue(), 'novelai');
         await page.locator('.shell-image-section .secret-input input').fill('relay-fixture-key');
-        await page.getByLabel('生图模型', { exact: true }).fill('nai-diffusion-4-5-full');
-        await page.getByLabel('输出尺寸', { exact: true }).fill('1216x832');
+        assert.equal(await page.getByLabel('生图模型', { exact: true }).count(), 0);
+        assert.equal(await page.getByLabel('输出尺寸', { exact: true }).count(), 0);
         await page.evaluate(async () => {
             const api = __qa.imageApi;
+            await api.update('model', 'obsolete-model');
+            await api.update('size', '512x512');
             const endpoint = url => api.endpoint({ ...api.current, url, protocol: 'novelai' });
             if (endpoint('https://relay.test') !== 'https://relay.test/ai/generate-image'
                 || endpoint('https://relay.test/proxy/ai/generate-image/') !== 'https://relay.test/proxy/ai/generate-image')
@@ -66,6 +68,9 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         await page.reload(); await ready();
         assert.equal(await page.evaluate(() => __qa.imageApi.current.key), 'relay-fixture-key');
         assert.equal(await page.evaluate(() => __qa.imageApi.current.protocol), 'novelai');
+        await page.evaluate(() => __qa.openSettingsSection('image'));
+        await page.getByText('生图比例', { exact: true }).locator('..').getByRole('button').click();
+        await page.getByRole('option', { name: '横图', exact: true }).click();
         await page.evaluate(() => {
             window.__relayNativeRequests = [];
             if (window.RPNativeNetwork) window.RPNativeNetwork = { fetch: (url, options) => {
@@ -104,6 +109,16 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         assert.equal(create.body.parameters.v4_prompt.caption.base_caption, create.body.input);
         assert.equal(create.body.parameters.v4_negative_prompt.caption.base_caption, create.body.parameters.negative_prompt);
         assert.equal(create.body.token, undefined);
+        await page.evaluate(() => __qa.openSettingsSection('image'));
+        await page.getByText('生图版本', { exact: true }).locator('..').getByRole('button').click();
+        await page.getByRole('option', { name: 'V5 完整版（-6）', exact: true }).click();
+        await page.getByText('生图比例', { exact: true }).locator('..').getByRole('button').click();
+        await page.getByRole('option', { name: '方图', exact: true }).click();
+        await generate('novel-v5-square');
+        const switched = requests.filter(request => request.method === 'POST').at(-1).body;
+        assert.equal(switched.model, 'nai-diffusion-5-full');
+        assert.equal(switched.parameters.width, 1024);
+        assert.equal(switched.parameters.height, 1024);
         if (await page.evaluate(() => !!window.RPNativeNetwork))
             assert.ok(await page.evaluate(() => __relayNativeRequests.length > 0), 'Beta must use Android image transport');
         for (format of ['png', 'json']) await generate('novel-' + format);

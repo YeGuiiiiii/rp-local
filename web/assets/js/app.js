@@ -389,7 +389,7 @@ const app = createApp({
         const settingsSection = ref('persona');
         const settingTitles = {
             persona: '个人设定', api: 'API 连接与服务', image: '生图设置',
-            reading: '阅读与性能', appearance: '外观', storage: '数据存储',
+            reading: '阅读与性能', appearance: '外观',
             legacy: '旧版共享配置'
         };
         const shellParent = ref('characters');
@@ -438,6 +438,7 @@ const app = createApp({
             if (view === 'backup') { backupMenu.value = ''; cancelRenameBackupFile(); }
         };
         const openSettingsSection = section => {
+            if (section === 'storage') { navigateWorkspace('backup'); return; }
             navigateWorkspace('settings-detail');
             settingsSection.value = section;
         };
@@ -462,6 +463,7 @@ const app = createApp({
                 if (modal.value) { modal.value = false; return true; }
             }
             if (currentView.value === 'album' && galleryPage.value?.back()) return true;
+            if (resourceBatch.active) { resourceBatch.reset(); return true; }
             if (currentView.value === 'backup') {
                 if (backupRenameId.value) { cancelRenameBackupFile(); return true; }
                 if (backupMenu.value) { backupMenu.value = ''; return true; }
@@ -1909,6 +1911,14 @@ const app = createApp({
         });
         const managedRegexScripts = computed(() => regexScripts.value.map((script, index) => ({ script, index }))
             .sort((a, b) => globalFirst(a.script, b.script)));
+        const resourceBatch = window.RPLocalWorkspace.createResourceBatch({
+            source: () => currentView.value === 'worldinfo' ? worldInfo : regexScripts,
+            label: () => currentView.value === 'worldinfo' ? '世界书' : '正则',
+            confirm: showVueConfirmModal,
+            deleted: () => showToast('所选条目已删除', 'success')
+        });
+        const resourceTap = window.RPLocalWorkspace.createTapGuard();
+        watch([currentView, currentCharacterIndex], resourceBatch.reset);
         const globalUiTemplates = ref([]);
         const recentGenerationTimes = ref([]);
         const currentWaitTime = ref('0.0');
@@ -7113,6 +7123,7 @@ const app = createApp({
                 if (!element || typeof Sortable === 'undefined') return;
                 activeSortable?.destroy();
                 activeSortable = new Sortable(element, {
+                    disabled: resourceBatch.active,
                     handle: '.sortable-list-handle',
                     draggable: '.sortable-list-item',
                     direction: 'vertical',
@@ -7146,6 +7157,7 @@ const app = createApp({
             });
         };
 
+        watch(() => resourceBatch.active, active => activeSortable?.option('disabled', active));
         // --- 预设分组的拖拽排序 ---
         // Sortable 默认 draggable = '>*'，即「容器的直接子元素」。分组后 #presets-list 的直接
         // 子元素是分组 div，所以挂在它上面的 Sortable 报出的 oldIndex/newIndex 是分组下标，
@@ -16405,7 +16417,7 @@ const app = createApp({
             },
 
             showRegexEditor, showWorldInfoEditor, editingRegex, editingWorldInfo, worldInfoKeysText, updateEditingWorldInfoKeys,
-            visibleWorldInfo, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
+            resourceBatch, resourceTap, visibleWorldInfo, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
             worldInfoSettings, showWorldInfoSettings, showMemorySettings, settingsHelpTopic, showActiveToolSettings, showUiTemplateSettings, estimatedGenerationTime, currentWaitTime,
             globalConfirmModal,
 
@@ -16479,6 +16491,7 @@ app.component('ImageDownloadSheet', window.RPAppShell.ImageDownloadSheet);
 app.component('CardNightSelect', window.RPAppShell.CardNightSelect);
 app.component('ImageProviderSettings', window.RPAppShell.ImageProviderSettings);
 app.component('BackupPage', window.RPAppShell.BackupPage);
+app.component('ResourceBatchActions', window.RPAppShell.ResourceBatchActions);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('ShellUtilities', window.RPAppShell.Utilities);

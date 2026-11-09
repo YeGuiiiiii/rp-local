@@ -81,7 +81,7 @@ fs.mkdirSync(output, { recursive: true });
         const nav = page.getByRole('navigation', { name: '页面', exact: true });
         await nav.getByRole('button', { name: '图片管理', exact: true }).waitFor({ timeout: 3000 });
         assert.equal(await page.locator('#rphub-gallery-nav').evaluate(button =>
-            button.nextElementSibling?.innerText.trim() === '数据备份'), true);
+            button.nextElementSibling?.innerText.trim() === '数据与备份'), true);
         await capture('navigation-mobile');
         await nav.getByRole('button', { name: '补丁清单', exact: true }).click();
         assert.equal(await page.locator('.app-main ol > li').count(), 44, 'Classic keeps all 44 patch checklist entries');

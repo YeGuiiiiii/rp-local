@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.017'; window.RP_LOCAL_RELEASE = 281;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.018'; window.RP_LOCAL_RELEASE = 282;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -1469,7 +1469,7 @@
                         <h3 class="font-bold text-gray-800">关于与鸣谢</h3>
                         <span class="text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1">本地内置</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.017 · 页面与功能随安装包更新。</p>
+                    <p class="text-sm text-gray-600 mb-4">RP 本地版 2.9.018 · 页面与功能随安装包更新。</p>
                     <button type="button" class="shell-button mb-4" @click="openAnnouncement"><shell-icon name="FileText"></shell-icon>查看更新公告</button>
                     <shell-utilities section="runtime"></shell-utilities>
                     <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
@@ -1718,7 +1718,6 @@
                     </template>
                 </settings-page-header>
                 <div class="settings-stack">
-                    <local-files-panel v-if="settingsSection==='storage'"></local-files-panel>
                     <shell-utilities v-if="['appearance','legacy'].includes(settingsSection)" :section="settingsSection" @navigate="navigateWorkspace"></shell-utilities>
 
                     <!-- User Settings -->
@@ -2746,13 +2745,15 @@
                 @edit="editUiTemplate(currentUiTemplates.indexOf(managedUiTemplates[$event]))" @delete="deleteUiTemplate(currentUiTemplates.indexOf(managedUiTemplates[$event]))">
             </ui-templates-view>
             <!-- Regex View -->
-            <div v-if="currentView === 'regex'" class="management-view">
+            <div v-if="currentView === 'regex'" class="management-view resource-management">
                 <settings-page-header title="正则脚本" @menu="shellGoBack">
                     <template #icon>
                         <svg class="w-6 h-6 md:w-7 md:h-7 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                         </svg>
                     </template>
+                    <resource-batch-actions :api="resourceBatch" label="正则"></resource-batch-actions>
+                    <template v-if="!resourceBatch.active">
                     <button @click="openExportModal('regex')" class="settings-icon-button" title="导出">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-export"></use></svg>
                     </button>
@@ -2765,12 +2766,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
+                    </template>
                 </settings-page-header>
-                <div id="regex-list" class="sortable-list">
+                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
+                <div id="regex-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
                     <div v-for="({script, index}) in managedRegexScripts" :key="getSortableItemKey(script)" :data-resource-index="index"
                         class="sortable-list-item group" :class="{ 'is-off': script.enabled !== true }">
                         <div class="sortable-item-main">
-                            <div class="sortable-list-handle" title="拖动排序">
+                            <label v-if="resourceBatch.active" class="resource-select">
+                                <input type="checkbox" :aria-label="'选择正则：'+script.name" :checked="resourceBatch.selected.has(script)" @change="resourceBatch.toggle(script)">
+                            </label>
+                            <div v-else class="sortable-list-handle" title="拖动排序">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 8h16M4 16h16"></path>
@@ -2778,7 +2784,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="sortable-item-heading">
-                                    <h3 class="truncate">{{ script.name }}</h3>
+                                    <h3 class="truncate"><button type="button" class="resource-open" :aria-label="'查看'+script.name" @click="editRegex(index)">{{ script.name }}</button></h3>
                                     <span class="meta-badge meta-badge--desktop"
                                         :class="script.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
                                         {{ script.scope === 'global' ? '全局' : '绑定' }}
@@ -3271,7 +3277,7 @@
             </div>
 
             <!-- World Info View -->
-            <div v-if="currentView === 'worldinfo'" ref="worldInfoViewport" class="management-view worldinfo-view"
+            <div v-if="currentView === 'worldinfo'" ref="worldInfoViewport" class="management-view worldinfo-view resource-management"
                 @scroll.passive="onWorldInfoScroll">
                 <settings-page-header title="世界书" @menu="shellGoBack">
                     <template #icon>
@@ -3279,6 +3285,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                         </svg>
                     </template>
+                    <resource-batch-actions :api="resourceBatch" label="世界书"></resource-batch-actions>
+                    <template v-if="!resourceBatch.active">
                     <button @click="openExportModal('worldinfo')" class="settings-icon-button" title="导出">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor"><use href="#icon-export"></use></svg>
                     </button>
@@ -3291,7 +3299,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
+                    </template>
                 </settings-page-header>
+                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
                 <!-- Activation Settings -->
                 <div
                     class="bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden">
@@ -3348,11 +3358,14 @@
                     </div>
                 </div>
 
-                <div id="worldinfo-list" class="sortable-list">
+                <div id="worldinfo-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
                     <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index"
                         class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
                         <div class="sortable-item-main">
-                            <div class="sortable-list-handle" title="拖动排序">
+                            <label v-if="resourceBatch.active" class="resource-select">
+                                <input type="checkbox" :aria-label="'选择世界书：'+(entry.comment || '未命名条目')" :checked="resourceBatch.selected.has(entry)" @change="resourceBatch.toggle(entry)">
+                            </label>
+                            <div v-else class="sortable-list-handle" title="拖动排序">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 8h16M4 16h16"></path>
@@ -3360,7 +3373,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="sortable-item-heading">
-                                    <h3 class="truncate">{{ entry.comment || '未命名条目' }}</h3>
+                                    <h3 class="truncate"><button type="button" class="resource-open" :aria-label="'查看'+(entry.comment || '未命名条目')" @click="editWorldInfo(index)">{{ entry.comment || '未命名条目' }}</button></h3>
                                     <span class="meta-badge meta-badge--desktop"
                                         :class="entry.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'">
                                         {{ entry.scope === 'global' ? '全局' : '绑定' }}

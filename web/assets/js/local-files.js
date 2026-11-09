@@ -194,7 +194,7 @@
         setWebWritesPaused: paused => { webWritesPaused = paused; },
     });
     window.RPLocalPanel = {
-        props: { standalone: Boolean },
+        props: { standalone: Boolean, compact: Boolean },
         setup(props) {
             const opened = Vue.ref(false);
             const selected = Vue.ref('');
@@ -229,12 +229,12 @@
             };
         },
         template: `
-        <section v-if="available" :class="standalone ? 'local-album-page' : 'settings-card'">
-          <div v-if="!standalone" class="settings-card__header">
-            <h3 class="settings-card__title">本地数据与图片</h3>
-            <button class="settings-action" type="button" @click="show">浏览本地图片</button>
+        <section v-if="available" :class="standalone ? 'local-album-page' : compact ? '' : 'settings-card'">
+          <div v-if="!standalone" :class="compact ? 'backup-actions' : 'settings-card__header'">
+            <h3 v-if="!compact" class="settings-card__title">本地数据与图片</h3>
+            <button :class="compact ? 'backup-button' : 'settings-action'" type="button" @click="show"><shell-icon v-if="compact" name="Images"></shell-icon>浏览本地图片</button>
           </div>
-          <p v-if="!standalone" class="text-sm text-gray-500">图片按导入卡名分文件夹保存。</p>
+          <p v-if="!standalone && !compact" class="text-sm text-gray-500">图片按导入卡名分文件夹保存。</p>
           <p v-if="error" role="alert" class="text-sm text-red-600">{{error}}</p>
           <teleport to="body" :disabled="standalone">
             <div v-if="opened" :class="standalone ? 'local-files-inline' : 'local-files-overlay'" :role="standalone ? 'region' : 'dialog'" :aria-modal="standalone ? null : 'true'" aria-label="本地图片">

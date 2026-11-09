@@ -202,7 +202,7 @@ fs.mkdirSync(transferEvidence, { recursive: true });
     await page.getByRole('button', { name: '返回', exact: true }).click();
     await nav('设置').click();
     await page.screenshot({ path: path.join(evidence, 'shell-settings-390.png') });
-    for (const [label, section] of [['API 连接与服务','api'],['生图设置','image'],['阅读与性能','reading'],['外观','appearance'],['数据存储','storage']]) {
+    for (const [label, section] of [['API 连接与服务','api'],['生图设置','image'],['阅读与性能','reading'],['外观','appearance']]) {
       await page.getByRole('button', { name: label, exact: true }).click();
       assert.equal(await page.evaluate(() => __qa.settingsSection), section);
       if (section === 'image') {
