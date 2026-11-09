@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const lucide = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/lucide');
 const names = ['Users', 'Images', 'SlidersHorizontal', 'UserRound', 'Globe2', 'X', 'ChevronLeft', 'ChevronRight', 'ChevronDown', 'ChevronUp', 'ArrowLeft', 'ArrowUpRight', 'Search', 'Plus', 'Trash2', 'Download', 'Upload', 'Heart', 'BookOpen', 'Wand2', 'Settings2', 'KeyRound', 'Image', 'HardDrive', 'Database', 'Palette', 'Info', 'ChartNoAxesCombined', 'Brain', 'Code2', 'PanelsTopLeft', 'Wrench', 'Dices', 'FileSearch', 'CircleHelp', 'RefreshCw', 'MoreHorizontal', 'Expand', 'Grid2X2', 'Check', 'FolderOpen', 'NotebookPen', 'Save'];
-const icons = Object.fromEntries([...names, 'Sun', 'Moon'].map(name => {
+const icons = Object.fromEntries([...names, 'Sun', 'Moon', 'History', 'Clock', 'CheckCheck', 'Ellipsis', 'RotateCcw', 'Pencil'].map(name => {
   if (!lucide.icons[name]) throw new Error('Unknown Lucide icon: ' + name);
   return [name, lucide.icons[name]];
 }));

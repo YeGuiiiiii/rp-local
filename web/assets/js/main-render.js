@@ -3515,7 +3515,7 @@ return function render(_ctx, _cache) {
                   }, "返回", 8 /* PROPS */, _hoisted_222)
                 ]),
                 _createElementVNode("div", _hoisted_223, [
-                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.015 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP 本地版 2.9.016 · 页面与功能随安装包更新。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -24246,95 +24246,99 @@ const _hoisted_2 = { class: "backup-header" }
 const _hoisted_3 = ["onClick"]
 const _hoisted_4 = { class: "backup-content" }
 const _hoisted_5 = { class: "backup-section" }
-const _hoisted_6 = { class: "backup-actions" }
-const _hoisted_7 = ["onClick"]
-const _hoisted_8 = ["onClick"]
+const _hoisted_6 = { class: "backup-muted" }
+const _hoisted_7 = { class: "backup-actions" }
+const _hoisted_8 = ["disabled", "onClick"]
 const _hoisted_9 = ["onClick"]
-const _hoisted_10 = { class: "backup-section" }
-const _hoisted_11 = ["onClick"]
-const _hoisted_12 = ["onClick"]
-const _hoisted_13 = ["onClick"]
-const _hoisted_14 = {
+const _hoisted_10 = {
   key: 1,
-  class: "backup-section"
+  class: "backup-button backup-file-picker"
 }
-const _hoisted_15 = { class: "backup-line" }
+const _hoisted_11 = ["onChange"]
+const _hoisted_12 = { class: "backup-field" }
+const _hoisted_13 = ["onUpdate:modelValue"]
+const _hoisted_14 = { class: "backup-line backup-location" }
+const _hoisted_15 = { class: "backup-path" }
 const _hoisted_16 = ["onClick"]
-const _hoisted_17 = { class: "backup-path" }
-const _hoisted_18 = { class: "backup-line backup-switch" }
-const _hoisted_19 = { class: "relative inline-flex" }
-const _hoisted_20 = ["onUpdate:modelValue"]
-const _hoisted_21 = { class: "backup-field" }
+const _hoisted_17 = { class: "backup-field" }
+const _hoisted_18 = ["onUpdate:modelValue"]
+const _hoisted_19 = ["value"]
+const _hoisted_20 = { class: "backup-details" }
+const _hoisted_21 = {
+  key: 0,
+  class: "backup-muted"
+}
 const _hoisted_22 = ["onUpdate:modelValue"]
-const _hoisted_23 = { class: "backup-field" }
-const _hoisted_24 = ["onUpdate:modelValue"]
-const _hoisted_25 = ["value"]
-const _hoisted_26 = ["value"]
-const _hoisted_27 = ["value"]
-const _hoisted_28 = ["value"]
-const _hoisted_29 = ["value"]
-const _hoisted_30 = { class: "backup-field" }
-const _hoisted_31 = ["onUpdate:modelValue"]
-const _hoisted_32 = ["value"]
-const _hoisted_33 = ["value"]
+const _hoisted_23 = ["onClick"]
+const _hoisted_24 = ["disabled", "onClick"]
+const _hoisted_25 = { class: "backup-section" }
+const _hoisted_26 = { class: "backup-line backup-switch" }
+const _hoisted_27 = { class: "relative inline-flex" }
+const _hoisted_28 = ["onUpdate:modelValue"]
+const _hoisted_29 = { class: "backup-field" }
+const _hoisted_30 = ["onUpdate:modelValue"]
+const _hoisted_31 = { class: "backup-settings-grid" }
+const _hoisted_32 = { class: "backup-field" }
+const _hoisted_33 = ["onUpdate:modelValue"]
 const _hoisted_34 = ["value"]
 const _hoisted_35 = ["value"]
 const _hoisted_36 = ["value"]
-const _hoisted_37 = { class: "backup-muted backup-note" }
-const _hoisted_38 = ["disabled", "onClick"]
-const _hoisted_39 = ["onClick"]
-const _hoisted_40 = { class: "backup-button backup-primary backup-file-picker" }
-const _hoisted_41 = ["onChange"]
-const _hoisted_42 = { class: "backup-details" }
-const _hoisted_43 = { class: "backup-field" }
-const _hoisted_44 = ["onUpdate:modelValue"]
+const _hoisted_37 = ["value"]
+const _hoisted_38 = ["value"]
+const _hoisted_39 = { class: "backup-field" }
+const _hoisted_40 = ["onUpdate:modelValue"]
+const _hoisted_41 = ["value"]
+const _hoisted_42 = ["value"]
+const _hoisted_43 = ["value"]
+const _hoisted_44 = ["value"]
 const _hoisted_45 = ["value"]
-const _hoisted_46 = { class: "backup-field" }
-const _hoisted_47 = ["onUpdate:modelValue"]
-const _hoisted_48 = { class: "backup-path" }
-const _hoisted_49 = { class: "backup-line" }
-const _hoisted_50 = { class: "backup-path" }
-const _hoisted_51 = ["onClick"]
-const _hoisted_52 = { class: "backup-details" }
-const _hoisted_53 = ["onUpdate:modelValue"]
-const _hoisted_54 = ["onClick"]
-const _hoisted_55 = ["disabled", "onClick"]
-const _hoisted_56 = { class: "backup-line" }
-const _hoisted_57 = { class: "backup-filter" }
-const _hoisted_58 = ["onUpdate:modelValue"]
-const _hoisted_59 = ["disabled", "onClick"]
-const _hoisted_60 = {
-  key: 0,
+const _hoisted_46 = { class: "backup-muted backup-note" }
+const _hoisted_47 = ["disabled", "onClick"]
+const _hoisted_48 = {
+  key: 1,
+  class: "backup-line backup-location"
+}
+const _hoisted_49 = { class: "backup-path" }
+const _hoisted_50 = ["onClick"]
+const _hoisted_51 = ["onToggle"]
+const _hoisted_52 = ["onClick"]
+const _hoisted_53 = { class: "backup-line" }
+const _hoisted_54 = { class: "backup-filter" }
+const _hoisted_55 = ["onUpdate:modelValue"]
+const _hoisted_56 = ["disabled", "onClick"]
+const _hoisted_57 = {
+  key: 1,
   class: "shell-error",
   role: "alert"
 }
-const _hoisted_61 = {
-  key: 1,
+const _hoisted_58 = {
+  key: 2,
   class: "backup-muted",
   role: "status"
 }
-const _hoisted_62 = {
-  key: 2,
+const _hoisted_59 = {
+  key: 3,
   class: "backup-empty"
 }
-const _hoisted_63 = ["onSubmit"]
-const _hoisted_64 = ["onUpdate:modelValue"]
-const _hoisted_65 = ["onClick"]
-const _hoisted_66 = { class: "backup-line" }
-const _hoisted_67 = { class: "backup-file-info" }
-const _hoisted_68 = ["aria-label", "aria-expanded", "onClick"]
-const _hoisted_69 = {
+const _hoisted_60 = ["onSubmit"]
+const _hoisted_61 = ["onUpdate:modelValue"]
+const _hoisted_62 = ["onClick"]
+const _hoisted_63 = { class: "backup-line" }
+const _hoisted_64 = { class: "backup-file-info" }
+const _hoisted_65 = ["aria-label", "aria-expanded", "onClick"]
+const _hoisted_66 = {
   key: 0,
   class: "backup-file-actions"
 }
-const _hoisted_70 = ["disabled", "onClick"]
-const _hoisted_71 = ["onClick"]
-const _hoisted_72 = ["onClick"]
-const _hoisted_73 = ["onClick"]
+const _hoisted_67 = ["disabled", "onClick"]
+const _hoisted_68 = ["onClick"]
+const _hoisted_69 = ["onClick"]
+const _hoisted_70 = ["onClick"]
+const _hoisted_71 = { class: "backup-details" }
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, Fragment: _Fragment, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, vModelCheckbox: _vModelCheckbox, withDirectives: _withDirectives, vModelSelect: _vModelSelect, renderSlot: _renderSlot, renderList: _renderList, vModelText: _vModelText, withModifiers: _withModifiers } = _Vue
+    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, vModelText: _vModelText, withDirectives: _withDirectives, renderList: _renderList, Fragment: _Fragment, vModelSelect: _vModelSelect, vModelCheckbox: _vModelCheckbox, withModifiers: _withModifiers, renderSlot: _renderSlot } = _Vue
 
     const _component_icon = _resolveComponent("icon")
 
@@ -24349,404 +24353,349 @@ return function render(_ctx, _cache) {
         }, [
           _createVNode(_component_icon, { name: "ArrowLeft" })
         ], 8 /* PROPS */, _hoisted_3),
-        _createElementVNode("h1", {
-          ref: "heading",
-          tabindex: "-1"
-        }, _toDisplayString(titles[s.page]), 513 /* TEXT, NEED_PATCH */)
+        _cache[0] || (_cache[0] = _createElementVNode("h1", null, "备份与恢复", -1 /* CACHED */))
       ]),
       _createElementVNode("div", _hoisted_4, [
-        (s.page==='home')
-          ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-              _createElementVNode("section", _hoisted_5, [
-                _cache[3] || (_cache[3] = _createElementVNode("h2", null, "数据备份", -1 /* CACHED */)),
-                _cache[4] || (_cache[4] = _createElementVNode("p", { class: "backup-muted" }, "角色卡、聊天、记忆与设置。独立保存的图片文件夹需另行保留。", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_6, [
-                  _createElementVNode("button", {
-                    type: "button",
-                    class: "backup-button backup-primary",
-                    onClick: $event => (s.go('export'))
-                  }, [
-                    _createVNode(_component_icon, { name: "Save" }),
-                    _cache[0] || (_cache[0] = _createTextVNode("创建备份", -1 /* CACHED */))
-                  ], 8 /* PROPS */, _hoisted_7),
-                  _createElementVNode("button", {
-                    type: "button",
-                    class: "backup-button",
-                    onClick: $event => (s.go('import'))
-                  }, [
-                    _createVNode(_component_icon, { name: "Upload" }),
-                    _cache[1] || (_cache[1] = _createTextVNode("导入备份", -1 /* CACHED */))
-                  ], 8 /* PROPS */, _hoisted_8)
+        _createElementVNode("section", _hoisted_5, [
+          _createElementVNode("p", _hoisted_6, _toDisplayString(s.native?'包含本机存档与已保存的本地图片。':'包含角色卡、聊天、记忆与设置，独立图片文件夹需另行保留。'), 1 /* TEXT */),
+          _createElementVNode("div", _hoisted_7, [
+            _createElementVNode("button", {
+              type: "button",
+              class: "backup-button backup-primary",
+              disabled: s.exporting,
+              onClick: s.create
+            }, [
+              _createVNode(_component_icon, { name: "Save" }),
+              _cache[1] || (_cache[1] = _createTextVNode("创建备份", -1 /* CACHED */))
+            ], 8 /* PROPS */, _hoisted_8),
+            (s.native)
+              ? (_openBlock(), _createElementBlock("button", {
+                  key: 0,
+                  type: "button",
+                  class: "backup-button",
+                  onClick: $event => (s.archive('import'))
+                }, [
+                  _createVNode(_component_icon, { name: "Upload" }),
+                  _cache[2] || (_cache[2] = _createTextVNode("导入备份", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_9))
+              : (_openBlock(), _createElementBlock("label", _hoisted_10, [
+                  _createVNode(_component_icon, { name: "Upload" }),
+                  _cache[3] || (_cache[3] = _createTextVNode("导入备份", -1 /* CACHED */)),
+                  _createElementVNode("input", {
+                    type: "file",
+                    accept: ".json,.zip,application/json,application/zip",
+                    "aria-label": "选择备份文件",
+                    onChange: s.importJson
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_11)
+                ]))
+          ]),
+          _createElementVNode("label", _hoisted_12, [
+            _cache[4] || (_cache[4] = _createElementVNode("span", null, "备份文件名", -1 /* CACHED */)),
+            _withDirectives(_createElementVNode("input", {
+              type: "text",
+              "aria-label": "备份文件名",
+              "onUpdate:modelValue": $event => ((s.filename) = $event),
+              placeholder: "留空使用日期名称"
+            }, null, 8 /* PROPS */, _hoisted_13), [
+              [_vModelText, s.filename]
+            ])
+          ]),
+          _createElementVNode("div", _hoisted_14, [
+            _createElementVNode("span", _hoisted_15, _toDisplayString(s.folder || s.defaultFolder), 1 /* TEXT */),
+            _createElementVNode("button", {
+              class: "shell-icon-button",
+              "aria-label": "更改备份目录",
+              title: "更改备份目录",
+              onClick: s.chooseFolder
+            }, [
+              _createVNode(_component_icon, { name: "FolderOpen" })
+            ], 8 /* PROPS */, _hoisted_16)
+          ]),
+          _createElementVNode("label", _hoisted_17, [
+            _cache[5] || (_cache[5] = _createElementVNode("span", null, "传输速度", -1 /* CACHED */)),
+            _withDirectives(_createElementVNode("select", {
+              "onUpdate:modelValue": $event => ((s.profile) = $event),
+              "aria-label": "传输速度"
+            }, [
+              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.profiles, (profile) => {
+                return (_openBlock(), _createElementBlock("option", {
+                  key: profile.id,
+                  value: profile.id
+                }, _toDisplayString(profile.name), 9 /* TEXT, PROPS */, _hoisted_19))
+              }), 128 /* KEYED_FRAGMENT */))
+            ], 8 /* PROPS */, _hoisted_18), [
+              [_vModelSelect, s.profile]
+            ])
+          ]),
+          _createElementVNode("details", _hoisted_20, [
+            _cache[8] || (_cache[8] = _createElementVNode("summary", null, "备份内容", -1 /* CACHED */)),
+            (s.native)
+              ? (_openBlock(), _createElementBlock("p", _hoisted_21, "以下为 JSON 导出选项；完整档案始终包含全部内容。"))
+              : _createCommentVNode("v-if", true),
+            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.scopes, (option) => {
+              return (_openBlock(), _createElementBlock("label", {
+                key: option.key,
+                class: "backup-check"
+              }, [
+                _withDirectives(_createElementVNode("input", {
+                  type: "checkbox",
+                  "onUpdate:modelValue": $event => ((s.scope[option.key]) = $event)
+                }, null, 8 /* PROPS */, _hoisted_22), [
+                  [_vModelCheckbox, s.scope[option.key]]
                 ]),
-                _createElementVNode("button", {
-                  type: "button",
-                  class: "backup-row",
-                  onClick: $event => (s.go('history'))
-                }, [
-                  _createVNode(_component_icon, { name: "History" }),
-                  _cache[2] || (_cache[2] = _createElementVNode("span", null, [
-                    _createElementVNode("strong", null, "历史备份"),
-                    _createElementVNode("small", null, "手动与每日备份")
-                  ], -1 /* CACHED */)),
-                  _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_9)
-              ]),
-              _createElementVNode("section", _hoisted_10, [
-                _cache[8] || (_cache[8] = _createElementVNode("h2", null, "保存与维护", -1 /* CACHED */)),
-                _createElementVNode("button", {
-                  type: "button",
-                  class: "backup-row",
-                  onClick: $event => (s.go('locations'))
-                }, [
-                  _createVNode(_component_icon, { name: "FolderOpen" }),
-                  _cache[5] || (_cache[5] = _createElementVNode("span", null, [
-                    _createElementVNode("strong", null, "保存位置"),
-                    _createElementVNode("small", null, "默认备份文件夹")
-                  ], -1 /* CACHED */)),
-                  _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_11),
-                _createElementVNode("button", {
-                  type: "button",
-                  class: "backup-row",
-                  onClick: $event => (s.go('daily'))
-                }, [
-                  _createVNode(_component_icon, { name: "Clock" }),
-                  _createElementVNode("span", null, [
-                    _cache[6] || (_cache[6] = _createElementVNode("strong", null, "每日备份", -1 /* CACHED */)),
-                    _createElementVNode("small", null, "每日 JSON 备份 · " + _toDisplayString(s.config.enabled?'已开启':'已关闭'), 1 /* TEXT */)
-                  ]),
-                  _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_12),
-                _createElementVNode("button", {
-                  type: "button",
-                  class: "backup-row",
-                  onClick: $event => (s.go('maintenance'))
-                }, [
-                  _createVNode(_component_icon, { name: "Database" }),
-                  _cache[7] || (_cache[7] = _createElementVNode("span", null, [
-                    _createElementVNode("strong", null, "数据整理"),
-                    _createElementVNode("small", null, "检查占用与可清理内容")
-                  ], -1 /* CACHED */)),
-                  _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_13)
-              ])
-            ], 64 /* STABLE_FRAGMENT */))
-          : (s.page==='locations')
-            ? (_openBlock(), _createElementBlock("section", _hoisted_14, [
-                _createElementVNode("div", _hoisted_15, [
-                  _cache[10] || (_cache[10] = _createElementVNode("h2", null, "JSON 备份目录", -1 /* CACHED */)),
-                  _createElementVNode("button", {
-                    class: "backup-button",
-                    onClick: s.chooseFolder
-                  }, [
-                    _createVNode(_component_icon, { name: "FolderOpen" }),
-                    _cache[9] || (_cache[9] = _createTextVNode("更改", -1 /* CACHED */))
-                  ], 8 /* PROPS */, _hoisted_16)
-                ]),
-                _createElementVNode("p", _hoisted_17, _toDisplayString(s.folder || s.defaultFolder), 1 /* TEXT */),
-                _cache[11] || (_cache[11] = _createElementVNode("p", { class: "backup-muted" }, "用于每日 JSON 备份与历史列表；手动导出可另选位置。", -1 /* CACHED */))
+                _createTextVNode(_toDisplayString(option.label), 1 /* TEXT */)
               ]))
-            : (s.page==='daily')
-              ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
-                  _createElementVNode("label", _hoisted_18, [
-                    _createElementVNode("span", null, [
-                      _cache[12] || (_cache[12] = _createElementVNode("strong", null, "每日 JSON 备份", -1 /* CACHED */)),
-                      _createElementVNode("small", null, _toDisplayString(s.config.enabled?'已开启':'已关闭'), 1 /* TEXT */)
-                    ]),
-                    _createElementVNode("span", _hoisted_19, [
-                      _withDirectives(_createElementVNode("input", {
-                        class: "settings-toggle-input sr-only",
-                        type: "checkbox",
-                        role: "switch",
-                        "aria-label": "每日 JSON 备份",
-                        "onUpdate:modelValue": $event => ((s.config.enabled) = $event)
-                      }, null, 8 /* PROPS */, _hoisted_20), [
-                        [_vModelCheckbox, s.config.enabled]
-                      ]),
-                      _cache[13] || (_cache[13] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+            }), 128 /* KEYED_FRAGMENT */)),
+            _createElementVNode("button", {
+              type: "button",
+              class: "backup-button",
+              onClick: s.resetScope
+            }, [
+              _createVNode(_component_icon, { name: "CheckCheck" }),
+              _cache[6] || (_cache[6] = _createTextVNode("全部包含", -1 /* CACHED */))
+            ], 8 /* PROPS */, _hoisted_23),
+            (s.native)
+              ? (_openBlock(), _createElementBlock("button", {
+                  key: 1,
+                  type: "button",
+                  class: "backup-button",
+                  disabled: s.exporting,
+                  onClick: s.exportJson
+                }, [
+                  _createVNode(_component_icon, { name: "Download" }),
+                  _cache[7] || (_cache[7] = _createTextVNode("导出 JSON", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_24))
+              : _createCommentVNode("v-if", true)
+          ])
+        ]),
+        _createElementVNode("section", _hoisted_25, [
+          _createElementVNode("label", _hoisted_26, [
+            _createElementVNode("span", null, [
+              _cache[9] || (_cache[9] = _createElementVNode("strong", null, "每日 JSON 备份", -1 /* CACHED */)),
+              _createElementVNode("small", null, _toDisplayString(s.config.enabled?'已开启':'已关闭'), 1 /* TEXT */)
+            ]),
+            _createElementVNode("span", _hoisted_27, [
+              _withDirectives(_createElementVNode("input", {
+                class: "settings-toggle-input sr-only",
+                type: "checkbox",
+                role: "switch",
+                "aria-label": "每日 JSON 备份",
+                "onUpdate:modelValue": $event => ((s.config.enabled) = $event)
+              }, null, 8 /* PROPS */, _hoisted_28), [
+                [_vModelCheckbox, s.config.enabled]
+              ]),
+              _cache[10] || (_cache[10] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+            ])
+          ]),
+          (s.config.enabled)
+            ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                _createElementVNode("label", _hoisted_29, [
+                  _cache[12] || (_cache[12] = _createElementVNode("span", null, "备份方式", -1 /* CACHED */)),
+                  _withDirectives(_createElementVNode("select", {
+                    "onUpdate:modelValue": $event => ((s.config.triggerMode) = $event)
+                  }, [...(_cache[11] || (_cache[11] = [
+                    _createElementVNode("option", { value: "remind" }, "每天提醒我", -1 /* CACHED */),
+                    _createElementVNode("option", { value: "auto" }, "全自动", -1 /* CACHED */)
+                  ]))], 8 /* PROPS */, _hoisted_30), [
+                    [_vModelSelect, s.config.triggerMode]
+                  ])
+                ]),
+                _createElementVNode("div", _hoisted_31, [
+                  _createElementVNode("label", _hoisted_32, [
+                    _cache[13] || (_cache[13] = _createElementVNode("span", null, "保留天数", -1 /* CACHED */)),
+                    _withDirectives(_createElementVNode("select", {
+                      "onUpdate:modelValue": $event => ((s.config.retentionDays) = $event)
+                    }, [
+                      _createElementVNode("option", { value: 3 }, "3 天", 8 /* PROPS */, _hoisted_34),
+                      _createElementVNode("option", { value: 7 }, "7 天", 8 /* PROPS */, _hoisted_35),
+                      _createElementVNode("option", { value: 14 }, "14 天", 8 /* PROPS */, _hoisted_36),
+                      _createElementVNode("option", { value: 30 }, "30 天", 8 /* PROPS */, _hoisted_37),
+                      _createElementVNode("option", { value: 0 }, "永久保留", 8 /* PROPS */, _hoisted_38)
+                    ], 8 /* PROPS */, _hoisted_33), [
+                      [
+                        _vModelSelect,
+                        s.config.retentionDays,
+                        void 0,
+                        { number: true }
+                      ]
                     ])
                   ]),
-                  _cache[19] || (_cache[19] = _createElementVNode("p", { class: "backup-muted" }, "不包含独立保存的图片文件。", -1 /* CACHED */)),
-                  (s.config.enabled)
-                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                        _createElementVNode("label", _hoisted_21, [
-                          _cache[15] || (_cache[15] = _createElementVNode("span", null, "备份方式", -1 /* CACHED */)),
-                          _withDirectives(_createElementVNode("select", {
-                            "onUpdate:modelValue": $event => ((s.config.triggerMode) = $event)
-                          }, [...(_cache[14] || (_cache[14] = [
-                            _createElementVNode("option", { value: "remind" }, "每天提醒我", -1 /* CACHED */),
-                            _createElementVNode("option", { value: "auto" }, "全自动", -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_22), [
-                            [_vModelSelect, s.config.triggerMode]
-                          ])
-                        ]),
-                        _createElementVNode("label", _hoisted_23, [
-                          _cache[16] || (_cache[16] = _createElementVNode("span", null, "保留天数", -1 /* CACHED */)),
-                          _withDirectives(_createElementVNode("select", {
-                            "onUpdate:modelValue": $event => ((s.config.retentionDays) = $event)
-                          }, [
-                            _createElementVNode("option", { value: 3 }, "3 天", 8 /* PROPS */, _hoisted_25),
-                            _createElementVNode("option", { value: 7 }, "7 天", 8 /* PROPS */, _hoisted_26),
-                            _createElementVNode("option", { value: 14 }, "14 天", 8 /* PROPS */, _hoisted_27),
-                            _createElementVNode("option", { value: 30 }, "30 天", 8 /* PROPS */, _hoisted_28),
-                            _createElementVNode("option", { value: 0 }, "永久保留", 8 /* PROPS */, _hoisted_29)
-                          ], 8 /* PROPS */, _hoisted_24), [
-                            [
-                              _vModelSelect,
-                              s.config.retentionDays,
-                              void 0,
-                              { number: true }
-                            ]
-                          ])
-                        ]),
-                        _createElementVNode("label", _hoisted_30, [
-                          _cache[17] || (_cache[17] = _createElementVNode("span", null, "最多保留", -1 /* CACHED */)),
-                          _withDirectives(_createElementVNode("select", {
-                            "onUpdate:modelValue": $event => ((s.config.maxCopies) = $event)
-                          }, [
-                            _createElementVNode("option", { value: 3 }, "3 份", 8 /* PROPS */, _hoisted_32),
-                            _createElementVNode("option", { value: 5 }, "5 份", 8 /* PROPS */, _hoisted_33),
-                            _createElementVNode("option", { value: 10 }, "10 份", 8 /* PROPS */, _hoisted_34),
-                            _createElementVNode("option", { value: 20 }, "20 份", 8 /* PROPS */, _hoisted_35),
-                            _createElementVNode("option", { value: 0 }, "不限份数", 8 /* PROPS */, _hoisted_36)
-                          ], 8 /* PROPS */, _hoisted_31), [
-                            [
-                              _vModelSelect,
-                              s.config.maxCopies,
-                              void 0,
-                              { number: true }
-                            ]
-                          ])
-                        ])
-                      ], 64 /* STABLE_FRAGMENT */))
-                    : _createCommentVNode("v-if", true),
-                  _createElementVNode("p", _hoisted_37, _toDisplayString(s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份'), 1 /* TEXT */),
-                  _createElementVNode("button", {
-                    class: "backup-button backup-primary",
-                    disabled: s.working || s.checking,
-                    onClick: $event => (s.daily(true))
+                  _createElementVNode("label", _hoisted_39, [
+                    _cache[14] || (_cache[14] = _createElementVNode("span", null, "最多保留", -1 /* CACHED */)),
+                    _withDirectives(_createElementVNode("select", {
+                      "onUpdate:modelValue": $event => ((s.config.maxCopies) = $event)
+                    }, [
+                      _createElementVNode("option", { value: 3 }, "3 份", 8 /* PROPS */, _hoisted_41),
+                      _createElementVNode("option", { value: 5 }, "5 份", 8 /* PROPS */, _hoisted_42),
+                      _createElementVNode("option", { value: 10 }, "10 份", 8 /* PROPS */, _hoisted_43),
+                      _createElementVNode("option", { value: 20 }, "20 份", 8 /* PROPS */, _hoisted_44),
+                      _createElementVNode("option", { value: 0 }, "不限份数", 8 /* PROPS */, _hoisted_45)
+                    ], 8 /* PROPS */, _hoisted_40), [
+                      [
+                        _vModelSelect,
+                        s.config.maxCopies,
+                        void 0,
+                        { number: true }
+                      ]
+                    ])
+                  ])
+                ])
+              ], 64 /* STABLE_FRAGMENT */))
+            : _createCommentVNode("v-if", true),
+          _createElementVNode("p", _hoisted_46, _toDisplayString(s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份') + " · 不含独立图片文件", 1 /* TEXT */),
+          _createElementVNode("button", {
+            class: "backup-button backup-primary",
+            disabled: s.working || s.checking,
+            onClick: $event => (s.daily(true))
+          }, [
+            _createVNode(_component_icon, { name: "Save" }),
+            _createTextVNode(_toDisplayString(s.working?'正在备份…':'立即备份'), 1 /* TEXT */)
+          ], 8 /* PROPS */, _hoisted_47),
+          (s.native)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_48, [
+                _createElementVNode("span", _hoisted_49, _toDisplayString(s.location || '完整档案自动保存目录未设置'), 1 /* TEXT */),
+                _createElementVNode("button", {
+                  class: "shell-icon-button",
+                  "aria-label": "选择完整档案目录",
+                  title: "选择完整档案目录",
+                  onClick: $event => (s.archive('folder'))
+                }, [
+                  _createVNode(_component_icon, { name: "FolderOpen" })
+                ], 8 /* PROPS */, _hoisted_50)
+              ]))
+            : _createCommentVNode("v-if", true)
+        ]),
+        _createElementVNode("details", {
+          class: "backup-details",
+          onToggle: $event => ($event.target.open && s.refresh())
+        }, [
+          _cache[23] || (_cache[23] = _createElementVNode("summary", null, "历史备份", -1 /* CACHED */)),
+          (s.native)
+            ? (_openBlock(), _createElementBlock("button", {
+                key: 0,
+                type: "button",
+                class: "backup-button",
+                onClick: $event => (s.archive('history'))
+              }, [
+                _createVNode(_component_icon, { name: "History" }),
+                _cache[15] || (_cache[15] = _createTextVNode("恢复文件夹档案", -1 /* CACHED */))
+              ], 8 /* PROPS */, _hoisted_52))
+            : _createCommentVNode("v-if", true),
+          _createElementVNode("div", _hoisted_53, [
+            _createElementVNode("label", _hoisted_54, [
+              _cache[17] || (_cache[17] = _createElementVNode("span", null, "来源", -1 /* CACHED */)),
+              _withDirectives(_createElementVNode("select", {
+                "onUpdate:modelValue": $event => ((s.source) = $event),
+                "aria-label": "备份来源"
+              }, [...(_cache[16] || (_cache[16] = [
+                _createElementVNode("option", { value: "all" }, "全部", -1 /* CACHED */),
+                _createElementVNode("option", { value: "manual" }, "手动", -1 /* CACHED */),
+                _createElementVNode("option", { value: "daily" }, "每日", -1 /* CACHED */)
+              ]))], 8 /* PROPS */, _hoisted_55), [
+                [_vModelSelect, s.source]
+              ])
+            ]),
+            _createElementVNode("button", {
+              class: "shell-icon-button",
+              "aria-label": "刷新备份列表",
+              title: "刷新备份列表",
+              disabled: s.loading,
+              onClick: s.refresh
+            }, [
+              _createVNode(_component_icon, { name: "RefreshCw" })
+            ], 8 /* PROPS */, _hoisted_56)
+          ]),
+          (s.listError)
+            ? (_openBlock(), _createElementBlock("p", _hoisted_57, _toDisplayString(s.listError), 1 /* TEXT */))
+            : (s.loading)
+              ? (_openBlock(), _createElementBlock("p", _hoisted_58, "正在读取备份目录…"))
+              : (!s.files.length)
+                ? (_openBlock(), _createElementBlock("p", _hoisted_59, "此目录暂无" + _toDisplayString(s.source==='daily'?'每日':s.source==='manual'?'手动':'') + " JSON 备份。", 1 /* TEXT */))
+                : _createCommentVNode("v-if", true),
+          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.files, (record) => {
+            return (_openBlock(), _createElementBlock("article", {
+              key: record.id,
+              class: "backup-file"
+            }, [
+              (s.renameId===record.id)
+                ? (_openBlock(), _createElementBlock("form", {
+                    key: 0,
+                    class: "backup-rename",
+                    onSubmit: _withModifiers($event => (s.commitRename(record)), ["prevent"])
                   }, [
-                    _createVNode(_component_icon, { name: "Save" }),
-                    _createTextVNode(_toDisplayString(s.working?'正在备份…':'立即备份'), 1 /* TEXT */)
-                  ], 8 /* PROPS */, _hoisted_38),
-                  _createElementVNode("button", {
-                    class: "backup-row",
-                    onClick: $event => (s.go('history'))
-                  }, [
-                    _createVNode(_component_icon, { name: "History" }),
-                    _cache[18] || (_cache[18] = _createElementVNode("span", null, "查看历史备份", -1 /* CACHED */)),
-                    _createVNode(_component_icon, { name: "ChevronRight" })
-                  ], 8 /* PROPS */, _hoisted_39)
-                ], 64 /* STABLE_FRAGMENT */))
-              : (s.page==='maintenance')
-                ? _renderSlot($slots, "maintenance", {}, undefined, undefined, 3)
-                : (s.page==='import')
-                  ? (_openBlock(), _createElementBlock(_Fragment, { key: 4 }, [
-                      _cache[23] || (_cache[23] = _createElementVNode("p", { class: "backup-muted" }, "选择 JSON 或兼容的插件 ZIP，读取并检查后确认恢复。", -1 /* CACHED */)),
-                      _createElementVNode("label", _hoisted_40, [
-                        _createVNode(_component_icon, { name: "Upload" }),
-                        _cache[20] || (_cache[20] = _createTextVNode("选择备份文件", -1 /* CACHED */)),
-                        _createElementVNode("input", {
-                          type: "file",
-                          accept: ".json,.zip,application/json,application/zip",
-                          "aria-label": "选择备份文件",
-                          onChange: s.importJson
-                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_41)
+                    _withDirectives(_createElementVNode("input", {
+                      "onUpdate:modelValue": $event => ((s.renameDraft) = $event),
+                      "aria-label": "新文件名"
+                    }, null, 8 /* PROPS */, _hoisted_61), [
+                      [_vModelText, s.renameDraft]
+                    ]),
+                    _cache[18] || (_cache[18] = _createElementVNode("button", {
+                      type: "submit",
+                      class: "backup-button"
+                    }, "确定", -1 /* CACHED */)),
+                    _createElementVNode("button", {
+                      type: "button",
+                      class: "backup-button",
+                      onClick: s.cancelRename
+                    }, "取消", 8 /* PROPS */, _hoisted_62)
+                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_60))
+                : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
+                    _createElementVNode("div", _hoisted_63, [
+                      _createElementVNode("div", _hoisted_64, [
+                        _createElementVNode("strong", null, _toDisplayString(record.fileName), 1 /* TEXT */),
+                        _createElementVNode("small", null, _toDisplayString(s.time(record.timestamp)) + " · " + _toDisplayString(s.size(record.sizeBytes)), 1 /* TEXT */)
                       ]),
-                      _createElementVNode("details", _hoisted_42, [
-                        _cache[22] || (_cache[22] = _createElementVNode("summary", null, "读取设置", -1 /* CACHED */)),
-                        _createElementVNode("label", _hoisted_43, [
-                          _cache[21] || (_cache[21] = _createElementVNode("span", null, "备份读取档位", -1 /* CACHED */)),
-                          _withDirectives(_createElementVNode("select", {
-                            "onUpdate:modelValue": $event => ((s.profile) = $event),
-                            "aria-label": "备份读取档位"
-                          }, [
-                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.profiles, (profile) => {
-                              return (_openBlock(), _createElementBlock("option", {
-                                key: profile.id,
-                                value: profile.id
-                              }, _toDisplayString(profile.name) + " · 单条 " + _toDisplayString(profile.unitBytes/1048576) + " MB / 集合 " + _toDisplayString(profile.collectionBytes/1048576) + " MB", 9 /* TEXT, PROPS */, _hoisted_45))
-                            }), 128 /* KEYED_FRAGMENT */))
-                          ], 8 /* PROPS */, _hoisted_44), [
-                            [_vModelSelect, s.profile]
-                          ])
-                        ])
-                      ])
-                    ], 64 /* STABLE_FRAGMENT */))
-                  : (s.page==='export')
-                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                        _cache[29] || (_cache[29] = _createElementVNode("p", { class: "backup-muted" }, "基础设置、角色卡、预设、正则与世界书始终包含。", -1 /* CACHED */)),
-                        _createElementVNode("label", _hoisted_46, [
-                          _cache[24] || (_cache[24] = _createElementVNode("span", null, "备份文件名", -1 /* CACHED */)),
-                          _withDirectives(_createElementVNode("input", {
-                            type: "text",
-                            "aria-label": "备份文件名",
-                            "onUpdate:modelValue": $event => ((s.filename) = $event),
-                            placeholder: "留空使用日期名称"
-                          }, null, 8 /* PROPS */, _hoisted_47), [
-                            [_vModelText, s.filename]
-                          ])
-                        ]),
-                        _createElementVNode("p", _hoisted_48, _toDisplayString(s.filenamePreview), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_49, [
-                          _createElementVNode("span", _hoisted_50, _toDisplayString(s.folder || s.defaultFolder), 1 /* TEXT */),
+                      _createElementVNode("button", {
+                        class: "shell-icon-button",
+                        "aria-label": record.fileName+' 的操作',
+                        title: "备份操作",
+                        "aria-expanded": s.menu===record.id,
+                        onClick: $event => (s.menu=s.menu===record.id?'':record.id)
+                      }, [
+                        _createVNode(_component_icon, { name: "Ellipsis" })
+                      ], 8 /* PROPS */, _hoisted_65)
+                    ]),
+                    (s.menu===record.id)
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_66, [
                           _createElementVNode("button", {
                             class: "backup-button",
-                            onClick: s.chooseFolder
+                            disabled: s.restoring,
+                            onClick: $event => (s.restore(record))
                           }, [
-                            _createVNode(_component_icon, { name: "FolderOpen" }),
-                            _cache[25] || (_cache[25] = _createTextVNode("更改", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_51)
-                        ]),
-                        _createElementVNode("details", _hoisted_52, [
-                          _cache[27] || (_cache[27] = _createElementVNode("summary", null, "导出内容", -1 /* CACHED */)),
-                          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.scopes, (option) => {
-                            return (_openBlock(), _createElementBlock("label", {
-                              key: option.key,
-                              class: "backup-check"
-                            }, [
-                              _withDirectives(_createElementVNode("input", {
-                                type: "checkbox",
-                                "onUpdate:modelValue": $event => ((s.scope[option.key]) = $event)
-                              }, null, 8 /* PROPS */, _hoisted_53), [
-                                [_vModelCheckbox, s.scope[option.key]]
-                              ]),
-                              _createTextVNode(_toDisplayString(option.label), 1 /* TEXT */)
-                            ]))
-                          }), 128 /* KEYED_FRAGMENT */)),
+                            _createVNode(_component_icon, { name: "RotateCcw" }),
+                            _cache[19] || (_cache[19] = _createTextVNode("恢复", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_67),
                           _createElementVNode("button", {
-                            type: "button",
                             class: "backup-button",
-                            onClick: s.resetScope
+                            onClick: $event => (s.rename(record))
                           }, [
-                            _createVNode(_component_icon, { name: "CheckCheck" }),
-                            _cache[26] || (_cache[26] = _createTextVNode("全部包含", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_54)
-                        ]),
-                        _createElementVNode("button", {
-                          type: "button",
-                          class: "backup-button backup-primary backup-wide",
-                          disabled: s.exporting,
-                          onClick: s.exportJson
-                        }, [
-                          _createVNode(_component_icon, { name: "Download" }),
-                          _cache[28] || (_cache[28] = _createTextVNode("导出全部数据", -1 /* CACHED */))
-                        ], 8 /* PROPS */, _hoisted_55)
-                      ], 64 /* STABLE_FRAGMENT */))
-                    : (s.page==='history')
-                      ? (_openBlock(), _createElementBlock(_Fragment, { key: 6 }, [
-                          _createElementVNode("div", _hoisted_56, [
-                            _createElementVNode("label", _hoisted_57, [
-                              _cache[31] || (_cache[31] = _createElementVNode("span", null, "来源", -1 /* CACHED */)),
-                              _withDirectives(_createElementVNode("select", {
-                                "onUpdate:modelValue": $event => ((s.source) = $event),
-                                "aria-label": "备份来源"
-                              }, [...(_cache[30] || (_cache[30] = [
-                                _createElementVNode("option", { value: "all" }, "全部", -1 /* CACHED */),
-                                _createElementVNode("option", { value: "manual" }, "手动", -1 /* CACHED */),
-                                _createElementVNode("option", { value: "daily" }, "每日", -1 /* CACHED */)
-                              ]))], 8 /* PROPS */, _hoisted_58), [
-                                [_vModelSelect, s.source]
-                              ])
-                            ]),
-                            _createElementVNode("button", {
-                              class: "shell-icon-button",
-                              "aria-label": "刷新备份列表",
-                              title: "刷新备份列表",
-                              disabled: s.loading,
-                              onClick: s.refresh
-                            }, [
-                              _createVNode(_component_icon, { name: "RefreshCw" })
-                            ], 8 /* PROPS */, _hoisted_59)
-                          ]),
-                          (s.listError)
-                            ? (_openBlock(), _createElementBlock("p", _hoisted_60, _toDisplayString(s.listError), 1 /* TEXT */))
-                            : (s.loading)
-                              ? (_openBlock(), _createElementBlock("p", _hoisted_61, "正在读取备份目录…"))
-                              : (!s.files.length)
-                                ? (_openBlock(), _createElementBlock("p", _hoisted_62, "此目录暂无" + _toDisplayString(s.source==='daily'?'每日':s.source==='manual'?'手动':'') + " JSON 备份。", 1 /* TEXT */))
-                                : _createCommentVNode("v-if", true),
-                          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.files, (record) => {
-                            return (_openBlock(), _createElementBlock("article", {
-                              key: record.id,
-                              class: "backup-file"
-                            }, [
-                              (s.renameId===record.id)
-                                ? (_openBlock(), _createElementBlock("form", {
-                                    key: 0,
-                                    class: "backup-rename",
-                                    onSubmit: _withModifiers($event => (s.commitRename(record)), ["prevent"])
-                                  }, [
-                                    _withDirectives(_createElementVNode("input", {
-                                      "onUpdate:modelValue": $event => ((s.renameDraft) = $event),
-                                      "aria-label": "新文件名"
-                                    }, null, 8 /* PROPS */, _hoisted_64), [
-                                      [_vModelText, s.renameDraft]
-                                    ]),
-                                    _cache[32] || (_cache[32] = _createElementVNode("button", {
-                                      type: "submit",
-                                      class: "backup-button"
-                                    }, "确定", -1 /* CACHED */)),
-                                    _createElementVNode("button", {
-                                      type: "button",
-                                      class: "backup-button",
-                                      onClick: s.cancelRename
-                                    }, "取消", 8 /* PROPS */, _hoisted_65)
-                                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_63))
-                                : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                                    _createElementVNode("div", _hoisted_66, [
-                                      _createElementVNode("div", _hoisted_67, [
-                                        _createElementVNode("strong", null, _toDisplayString(record.fileName), 1 /* TEXT */),
-                                        _createElementVNode("small", null, _toDisplayString(s.time(record.timestamp)) + " · " + _toDisplayString(s.size(record.sizeBytes)), 1 /* TEXT */)
-                                      ]),
-                                      _createElementVNode("button", {
-                                        class: "shell-icon-button",
-                                        "aria-label": record.fileName+' 的操作',
-                                        title: "备份操作",
-                                        "aria-expanded": s.menu===record.id,
-                                        onClick: $event => (s.menu=s.menu===record.id?'':record.id)
-                                      }, [
-                                        _createVNode(_component_icon, { name: "Ellipsis" })
-                                      ], 8 /* PROPS */, _hoisted_68)
-                                    ]),
-                                    (s.menu===record.id)
-                                      ? (_openBlock(), _createElementBlock("div", _hoisted_69, [
-                                          _createElementVNode("button", {
-                                            class: "backup-button",
-                                            disabled: s.restoring,
-                                            onClick: $event => (s.restore(record))
-                                          }, [
-                                            _createVNode(_component_icon, { name: "RotateCcw" }),
-                                            _cache[33] || (_cache[33] = _createTextVNode("恢复", -1 /* CACHED */))
-                                          ], 8 /* PROPS */, _hoisted_70),
-                                          _createElementVNode("button", {
-                                            class: "backup-button",
-                                            onClick: $event => (s.rename(record))
-                                          }, [
-                                            _createVNode(_component_icon, { name: "Pencil" }),
-                                            _cache[34] || (_cache[34] = _createTextVNode("重命名", -1 /* CACHED */))
-                                          ], 8 /* PROPS */, _hoisted_71),
-                                          _createElementVNode("button", {
-                                            class: "backup-button",
-                                            onClick: $event => (s.saveAs(record))
-                                          }, [
-                                            _createVNode(_component_icon, { name: "Download" }),
-                                            _cache[35] || (_cache[35] = _createTextVNode("另存", -1 /* CACHED */))
-                                          ], 8 /* PROPS */, _hoisted_72),
-                                          _createElementVNode("button", {
-                                            class: "backup-button backup-danger",
-                                            onClick: $event => (s.remove(record))
-                                          }, [
-                                            _createVNode(_component_icon, { name: "Trash2" }),
-                                            _cache[36] || (_cache[36] = _createTextVNode("删除", -1 /* CACHED */))
-                                          ], 8 /* PROPS */, _hoisted_73)
-                                        ]))
-                                      : _createCommentVNode("v-if", true)
-                                  ], 64 /* STABLE_FRAGMENT */))
-                            ]))
-                          }), 128 /* KEYED_FRAGMENT */))
-                        ], 64 /* STABLE_FRAGMENT */))
+                            _createVNode(_component_icon, { name: "Pencil" }),
+                            _cache[20] || (_cache[20] = _createTextVNode("重命名", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_68),
+                          _createElementVNode("button", {
+                            class: "backup-button",
+                            onClick: $event => (s.saveAs(record))
+                          }, [
+                            _createVNode(_component_icon, { name: "Download" }),
+                            _cache[21] || (_cache[21] = _createTextVNode("另存", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_69),
+                          _createElementVNode("button", {
+                            class: "backup-button backup-danger",
+                            onClick: $event => (s.remove(record))
+                          }, [
+                            _createVNode(_component_icon, { name: "Trash2" }),
+                            _cache[22] || (_cache[22] = _createTextVNode("删除", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_70)
+                        ]))
                       : _createCommentVNode("v-if", true)
+                  ], 64 /* STABLE_FRAGMENT */))
+            ]))
+          }), 128 /* KEYED_FRAGMENT */))
+        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_51),
+        _createElementVNode("details", _hoisted_71, [
+          _cache[24] || (_cache[24] = _createElementVNode("summary", null, "数据整理", -1 /* CACHED */)),
+          _renderSlot($slots, "maintenance")
+        ])
       ])
     ]))
   }

@@ -28,25 +28,18 @@ self.onmessage = async ({ data }) => {
         const sink = new StagingSink(db, session.id);
         const parser = new BackupStreamDecoder({ emit: item => sink.emit(item), maxUnitBytes: limits.unitBytes });
         const chunks = async function* () {
-            let file = data.file;
-            if (!file) {
-                const response = await readWithTimeout(fetch(data.url, { cache: 'no-store' }));
-                if (!response.ok) throw new Error('读取本地备份失败，请重新选择文件');
-                session.bytes = Number(response.headers.get('content-length')) || session.bytes;
-                const reader = response.body?.getReader?.();
-                if (reader) {
-                    try {
-                        for (;;) {
-                            await wait();
-                            const item = await readWithTimeout(reader.read());
-                            if (item.done) break;
-                            yield item.value;
-                        }
-                    } finally { await reader.cancel().catch(() => {}); }
-                    return;
-                }
-                file = await readWithTimeout(response.blob());
-                session.bytes = file.size;
+            const file = data.file;
+            if (data.stream) {
+                const reader = data.stream.getReader();
+                try {
+                    for (;;) {
+                        await wait();
+                        const item = await readWithTimeout(reader.read());
+                        if (item.done) break;
+                        yield item.value;
+                    }
+                } finally { await reader.cancel().catch(() => {}); }
+                return;
             }
             for (let offset = 0; offset < file.size; offset += limits.chunkBytes) {
                 await wait();

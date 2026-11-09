@@ -30,9 +30,10 @@
         }
     }
     async function writeBackup({ entries, total, readCharacter, transform = item => item, write, progress = () => {},
-        companions = () => ({}), webStorage = () => ({}) }) {
+        companions = () => ({}), webStorage = () => ({}), profile = 'balanced' }) {
         const encoder = new TextEncoder();
-        let buffer = '', written = 0, done = 0, count = 0;
+        const chunkSize = ({ light: 65536, balanced: 262144, fast: 1048576 })[profile] || 262144;
+        let buffer = '', written = 0, done = 0, count = 0, yieldedAt = Date.now();
         const report = () => progress({ percent: total ? Math.min(99, done / total * 99) : 0,
             done, total, bytes: written, message: '正在导出备份' });
         const flush = async () => {
@@ -41,14 +42,17 @@
             await write(text);
             written += encoder.encode(text).byteLength;
             report();
-            await new Promise(resolve => setTimeout(resolve, 0));
+            if (Date.now() - yieldedAt >= 12) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+                yieldedAt = Date.now();
+            }
         };
         const append = async text => {
             while (text.length) {
-                const size = Math.min(65536 - buffer.length, text.length);
+                const size = Math.min(chunkSize - buffer.length, text.length);
                 buffer += text.slice(0, size);
                 text = text.slice(size);
-                if (buffer.length === 65536) {
+                if (buffer.length === chunkSize) {
                     const tail = buffer.charCodeAt(buffer.length - 1);
                     const carry = tail >= 0xd800 && tail <= 0xdbff ? buffer.slice(-1) : '';
                     if (carry) buffer = buffer.slice(0, -1);
@@ -59,7 +63,12 @@
         };
         const value = async (item, prepare = value => value) => {
             const encoded = window.RPBackupFormat.hasBinary(item) ? await window.RPBackupFormat.encodeBinary(item) : item;
-            for (const part of jsonParts(prepare(encoded))) await append(part);
+            let batch = '';
+            for (const part of jsonParts(prepare(encoded))) {
+                batch += part;
+                if (batch.length >= chunkSize) { await append(batch); batch = ''; }
+            }
+            if (batch) await append(batch);
         };
         await append('{"type":"rp-hub-complete-backup","__rphub_backup__":1,"version":8,"exportedAt":');
         await value(new Date().toISOString());

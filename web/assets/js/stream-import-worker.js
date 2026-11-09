@@ -1536,28 +1536,21 @@
       const sink = new StagingSink(db, session.id);
       const parser = new BackupStreamDecoder({ emit: (item) => sink.emit(item), maxUnitBytes: limits.unitBytes });
       const chunks = async function* () {
-        let file = data.file;
-        if (!file) {
-          const response = await readWithTimeout(fetch(data.url, { cache: "no-store" }));
-          if (!response.ok) throw new Error("\u8BFB\u53D6\u672C\u5730\u5907\u4EFD\u5931\u8D25\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u6587\u4EF6");
-          session.bytes = Number(response.headers.get("content-length")) || session.bytes;
-          const reader = response.body?.getReader?.();
-          if (reader) {
-            try {
-              for (; ; ) {
-                await wait();
-                const item = await readWithTimeout(reader.read());
-                if (item.done) break;
-                yield item.value;
-              }
-            } finally {
-              await reader.cancel().catch(() => {
-              });
+        const file = data.file;
+        if (data.stream) {
+          const reader = data.stream.getReader();
+          try {
+            for (; ; ) {
+              await wait();
+              const item = await readWithTimeout(reader.read());
+              if (item.done) break;
+              yield item.value;
             }
-            return;
+          } finally {
+            await reader.cancel().catch(() => {
+            });
           }
-          file = await readWithTimeout(response.blob());
-          session.bytes = file.size;
+          return;
         }
         for (let offset = 0; offset < file.size; offset += limits.chunkBytes) {
           await wait();

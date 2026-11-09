@@ -348,15 +348,7 @@ const app = createApp({
         const backupTask = reactive({ active: false, locked: false, title: '', message: '', percent: 0, detail: '', error: '', confirm: null, recovery: false });
         const backupProfiles = window.RPStreamImport.profiles;
         const backupProfile = ref(window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile')).id);
-        const backupPage = ref('home'), backupSource = ref('all'), backupMenu = ref(''), backupListError = ref('');
-        const backupTrail = [];
-        const openBackupPage = async page => {
-            if (page !== backupPage.value) backupTrail.push(backupPage.value);
-            backupPage.value = page;
-            backupMenu.value = '';
-            cancelRenameBackupFile();
-            if (page === 'history') await loadBackupManagerFiles();
-        };
+        const backupSource = ref('all'), backupMenu = ref(''), backupListError = ref('');
         watch(backupProfile, id => localStorage.setItem('rp-backup-profile', window.RPStreamImport.profile(id).id));
         const beginBackupTask = title => Object.assign(backupTask, {
             active: true, locked: true, title, message: '正在准备…', percent: 0, detail: '', error: '', confirm: null, recovery: false
@@ -443,7 +435,7 @@ const app = createApp({
                 return;
             }
             currentView.value = view;
-            if (view === 'backup') { backupPage.value = 'home'; backupTrail.length = 0; }
+            if (view === 'backup') { backupMenu.value = ''; cancelRenameBackupFile(); }
         };
         const openSettingsSection = section => {
             navigateWorkspace('settings-detail');
@@ -470,11 +462,9 @@ const app = createApp({
                 if (modal.value) { modal.value = false; return true; }
             }
             if (currentView.value === 'album' && galleryPage.value?.back()) return true;
-            if (currentView.value === 'backup' && backupPage.value !== 'home') {
+            if (currentView.value === 'backup') {
                 if (backupRenameId.value) { cancelRenameBackupFile(); return true; }
                 if (backupMenu.value) { backupMenu.value = ''; return true; }
-                backupPage.value = backupTrail.pop() || 'home';
-                return true;
             }
             if (currentView.value === 'characters') return false;
             if (shellRoots.includes(currentView.value)) {
@@ -6448,7 +6438,7 @@ const app = createApp({
             if (!pickedToken) throw new Error('已取消保存，原数据未改动');
             return { bridge, token: pickedToken };
         };
-        const exportAllData = async () => {
+        const exportAllData = async (pickLocation = false) => {
             if (isExportingAllData.value) {
                 showToast('正在导出，请稍候', 'info');
                 return;
@@ -6468,7 +6458,8 @@ const app = createApp({
                         ? 'folder'
                         : (typeof nativeBridge.createBackupFileToDownloads === 'function' ? 'downloads' : ''))
                     : '';
-                if (nativeExportTarget) {
+                if (pickLocation === true) session = await openBackupPicker(fileName);
+                if (!session && nativeExportTarget) {
                     session = startChunkedBackup(fileName, nativeExportTarget);
                 }
                 if (!session) session = await openBackupPicker(fileName);
@@ -6495,6 +6486,7 @@ const app = createApp({
                 const parts = [];
                 let fallbackBytes = 0;
                 const result = await window.RPBackupTransfer.writeBackup({
+                    profile: backupProfile.value,
                     entries: entries(), total: new Set(keys.flat().filter(key => !key.startsWith('__rp_')
                         && shouldIncludeBackupEntry({ key })).map(getStorageLogicalKey)).size + local.length,
                     readCharacter: window.RPHubStorage.readCharacter,
@@ -16023,7 +16015,8 @@ const app = createApp({
         };
 
         const backupUi = reactive({
-            page: backupPage, go: openBackupPage, back: shellGoBack, source: backupSource, menu: backupMenu,
+            create: () => exportAllData(true),
+            back: shellGoBack, source: backupSource, menu: backupMenu,
             files: computed(() => backupManagerFiles.value.filter(record => backupSource.value === 'all'
                 || /^rp-hub-autobackup-.*\.json$/i.test(record.fileName) === (backupSource.value === 'daily'))),
             listError: backupListError, loading: backupManagerLoading, refresh: loadBackupManagerFiles,

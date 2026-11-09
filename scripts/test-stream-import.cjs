@@ -44,10 +44,13 @@ const fixture = () => ({
     const url = new URL(route.request().url());
     if (url.origin !== 'https://sta1n156.github.io') return route.abort();
     const file = path.resolve(web, url.pathname.slice('/RP-Hub/'.length) || 'index.html');
+    if (url.pathname.endsWith('/__qa_native_backup__'))
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify(fixture()) });
     if (!file.startsWith(web + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile())
       return route.fulfill({ status: 404, body: '' });
     if (file.endsWith('stream-import-worker.js') && workerMode) {
-      const prefix = workerMode === 'crash' ? 'throw new Error("injected worker failure");\n'
+      const prefix = workerMode === 'native-url' ? 'self.fetch = () => Promise.reject(new Error("Worker cannot access Android file URLs"));\n'
+        : workerMode === 'crash' ? 'throw new Error("injected worker failure");\n'
         : workerMode === 'hang' ? 'Blob.prototype.arrayBuffer = () => new Promise(() => {});\n'
           : workerMode === 'slow' ? 'const originalRead = Blob.prototype.arrayBuffer; Blob.prototype.arrayBuffer = async function () { await new Promise(resolve => setTimeout(resolve, 25)); return originalRead.call(this); };\n' : '';
       return route.fulfill({ contentType: 'application/javascript', body: prefix + fs.readFileSync(file, 'utf8') });
@@ -67,7 +70,6 @@ const fixture = () => ({
   async function backup() {
     await page.evaluate(() => { __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); });
     await page.getByText('导入备份', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '导入备份', exact: true }).click();
     assert.equal(await page.getByRole('button', { name: '流式导入 JSON', exact: true }).count(), 0);
     assert.equal(await page.getByLabel('选择备份文件').count(), 1, 'JSON and ZIP share one backup picker');
   }
@@ -142,8 +144,7 @@ const fixture = () => ({
         abortBackupWrite: () => {}
       };
     });
-    await page.evaluate(() => __qa.backupUi.go('export'));
-    await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
+    await page.getByRole('button', { name: '创建备份', exact: true }).click();
     await page.getByRole('dialog', { name: '导出备份', exact: true }).waitFor();
     await page.locator('.transfer-mascot').evaluate(image => image.decode());
     await page.screenshot({ path: path.join(transferEvidence, 'export-wait-390.png'), animations: 'disabled' });
@@ -177,10 +178,17 @@ const fixture = () => ({
     assert.deepEqual(await page.evaluate(() => JSON.parse(JSON.stringify(__qa.streamImportPanel.state.summary))), { records: 11, cards: 1, messages: 1, memories: 1 });
     await unchanged();
     await page.getByRole('button', { name: '取消', exact: true }).click();
+    workerMode = 'native-url';
+    await page.evaluate(() => __qa.streamImportPanel.startUrl(
+      'https://sta1n156.github.io/RP-Hub/__qa_native_backup__', 'native.json', 100));
+    await page.waitForFunction(() => ['ready', 'failed'].includes(__qa.streamImportPanel.state.phase));
+    assert.equal(await page.evaluate(() => __qa.streamImportPanel.state.phase), 'ready',
+      'Native URL must be opened by the page and streamed to the worker');
+    workerMode = '';
+    await page.getByRole('button', { name: '取消', exact: true }).click();
     await unchanged();
     await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
     const normalBuffer = Buffer.from(JSON.stringify(fixture()));
-    await page.evaluate(() => __qa.backupUi.go('import'));
     await page.locator('input[type=file][accept*=".zip"]').first().setInputFiles({ name: 'normal.json', mimeType: 'application/json', buffer: normalBuffer });
     await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready');
     assert.equal(await page.getByRole('dialog', { name: '导入备份', exact: true }).count(), 1, '普通JSON入口也使用受保护的逐段导入');

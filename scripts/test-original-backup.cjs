@@ -34,11 +34,20 @@ const origin = 'https://sta1n156.github.io';
         file = path.join(originalRoot,'apk-extracted/assets/assets/vendor',map[url.hostname] || path.basename(url.pathname).toLowerCase());
       }
       if (!file || !fs.existsSync(file) || !fs.statSync(file).isFile()) return route.abort();
+      if (original && path.basename(file) === 'app.js') {
+        const source = fs.readFileSync(file, 'utf8');
+        assert.ok(source.includes('_initComplete = true;') && source.includes('return wrapped;'));
+        return route.fulfill({ contentType: 'application/javascript',
+          body: source.replace('return wrapped;', 'wrapped.pending = () => timeoutId !== null; return wrapped;')
+            .replace('_initComplete = true;', `_initComplete = true; window.__qaOriginalReady = true;
+              window.__qaOriginalIdle = () => !debouncedSave.pending() && !debouncedCharacterSave.pending();`) });
+      }
       return route.fulfill({ path: file, contentType: ({'.html':'text/html','.js':'application/javascript','.css':'text/css','.webp':'image/webp'})[path.extname(file)] || 'application/octet-stream' });
     });
     await page.goto(origin+'/RP-Hub/',{waitUntil:'load'});
     await page.waitForFunction(() => !!document.getElementById('app')?.__vue_app__);
-    if (!original) await page.waitForFunction(() => window.__rpDataReady);
+    await page.waitForFunction(original => original
+      ? window.__qaOriginalReady && window.__qaOriginalIdle() : window.__rpDataReady, original);
     await page.waitForTimeout(300);
     await page.evaluate(() => {
       window.__qa = document.getElementById('app').__vue_app__._container._vnode.component.setupState;
@@ -103,7 +112,7 @@ const origin = 'https://sta1n156.github.io';
     await page.waitForFunction(() => __qa.globalConfirmModal.show || __qa.streamImportPanel?.state.phase === 'ready');
     await page.evaluate(() => __qa.streamImportPanel?.state.phase === 'ready' ? __qa.streamImportPanel.apply() : __qa.globalConfirmModal.onConfirm());
     await page.waitForEvent('load',{timeout:15000});
-    await page.waitForFunction(() => window.__rpDataReady || !!document.getElementById('app')?.__vue_app__);
+    await page.waitForFunction(() => window.__rpDataReady || (window.__qaOriginalReady && window.__qaOriginalIdle()));
     await page.waitForTimeout(250);
     return page.evaluate(async () => {
       const s=RPHubStorage;
@@ -132,6 +141,8 @@ const origin = 'https://sta1n156.github.io';
     assert.equal(data.characters[0].worldInfo[0].content,'世界书正文');
     assert.equal(data.characters[0].regexScripts[0].name,'私有正则');
     assert.equal(data.characters[0].uiTemplates[0].htmlTemplate,'<p>卡片 UI</p>');
+    assert.ok(data.presets.some(item=>item.name==='原版自定义预设'),
+      'Restored preset missing: ' + JSON.stringify(data.presets.map(item => item.name)));
     assert.equal(data.presets.find(item=>item.name==='原版自定义预设').content,'必须保留的预设正文');
     assert.deepEqual(data.presetGroups,['STA1N官方分组','测试组','备份中的空组']);
     assert.equal(data.settings.apiKey,'FAKE_TEST_KEY');
@@ -151,6 +162,8 @@ const origin = 'https://sta1n156.github.io';
     const original=await load(true);
     await seed(original);
     const originalBackup=await exportData(original);
+    assert.ok(originalBackup.entries.find(entry => entry.key === 'rp_hub_presets').value
+      .some(item => item.name === '原版自定义预设'), 'The upstream source must finish saving before compatibility export');
     assert.equal(originalBackup.type,'rp-hub-complete-backup');
     assert.equal(originalBackup.version,8);
     if(originalVersion!=='2.8.80')assert.ok(originalBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));
@@ -159,6 +172,8 @@ const origin = 'https://sta1n156.github.io';
     await current.waitForFunction(() => window.__rpDataReady);
     await current.evaluate(() => { window.__qa=document.getElementById('app').__vue_app__._container._vnode.component.setupState; });
     const currentBackup=await exportData(current);
+    assert.ok(currentBackup.entries.find(entry => entry.key === 'rp_hub_presets').value
+      .some(item => item.name === '原版自定义预设'), 'The local export must retain the restored preset');
     const currentSettings=currentBackup.entries.find(entry=>entry.key==='rp_hub_settings').value;
     assert.equal(currentSettings.retainedCompatibilityField.keep,true);
     assert.ok(currentBackup.entries.some(entry=>entry.key.startsWith('rp_hub_b1_memory_state_')));

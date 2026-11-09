@@ -57,9 +57,10 @@
                     event.preventDefault(); first.focus();
                 }
             };
-            let worker, blobUrl, timer, id, controller, disposed = false, generation = 0;
+            let worker, blobUrl, timer, id, controller, readController, disposed = false, generation = 0;
             const stopWorker = () => {
                 clearTimeout(timer);
+                readController?.abort(); readController = null;
                 worker?.terminate(); worker = null;
                 if (blobUrl) URL.revokeObjectURL(blobUrl);
                 blobUrl = null;
@@ -102,6 +103,14 @@
                     if (!response.ok) throw new Error('导入组件加载失败，请重新打开软件');
                     const source = await response.text();
                     if (disposed || run !== generation || state.phase !== 'reading') return;
+                    let stream;
+                    if (!(file instanceof Blob)) {
+                        readController = new AbortController();
+                        const content = await fetch(file.url, { cache: 'no-store', signal: readController.signal });
+                        if (!content.ok || !content.body) throw new Error('读取本地备份失败，请重新选择文件');
+                        stream = content.body;
+                    }
+                    if (disposed || run !== generation || state.phase !== 'reading') return;
                     blobUrl = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }));
                     worker = new Worker(blobUrl);
                     worker.onerror = event => { event.preventDefault(); fail('导入组件异常，请重试；原数据未改动'); };
@@ -109,7 +118,7 @@
                     worker.onmessage = ({ data }) => {
                         watchdog();
                         if (data.type === 'ready') worker.postMessage({ type: 'import', id, profile: props.profile,
-                            ...(file instanceof Blob ? { file } : { url: file.url, name: file.name, bytes: file.size }) });
+                            ...(stream ? { stream, name: file.name, bytes: file.size } : { file }) }, stream ? [stream] : []);
                         if (data.type === 'progress') { state.read = data.read; state.bytes = data.bytes || state.bytes; state.message = data.phase; }
                         if (data.type === 'failed') fail(data.message);
                         if (data.type === 'complete') {
@@ -144,7 +153,11 @@
                     state.error = error.name === 'AbortError' ? '已取消，原数据已恢复' : error.message;
                 } finally { controller = null; }
             };
-            const beforeUnload = event => { if (busy.value || props.task?.locked) { event.preventDefault(); event.returnValue = ''; } };
+            const beforeUnload = event => {
+                if (window.AndroidBridge?.isNativeApp?.() || state.phase === 'success' ||
+                    (props.task?.active && props.task.percent === 100 && !props.task.error)) return;
+                if (busy.value || props.task?.locked) { event.preventDefault(); event.returnValue = ''; }
+            };
             window.addEventListener('beforeunload', beforeUnload);
             onBeforeUnmount(() => {
                 disposed = true; generation++; stopWorker(); controller?.abort();

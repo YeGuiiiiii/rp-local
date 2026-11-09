@@ -125,10 +125,10 @@ fs.mkdirSync(output, { recursive: true });
         writeBackupChunk: (token, base64) => { __exported.at(-1).chunks += atob(base64); return 'OK'; },
         finishBackupWrite: () => 'OK', abortBackupWrite: () => {},
       };
-      __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); __qa.backupUi.go('export');
+      __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
     });
     await page.getByText('下载 / RP本地版 / 数据备份', { exact: true }).waitFor();
-    await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
+    await page.getByRole('button', { name: '创建备份', exact: true }).click();
     await page.waitForFunction(() => __exported.length && !__qa.isExportingAllData);
     assert.match(await page.evaluate(() => __exported[0].name), /^RP本地版-数据备份-\d{4}-\d{2}-\d{2}\.json$/);
     assert.equal(await page.evaluate(() => {
@@ -142,7 +142,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('.management-view:visible').evaluate(element => { element.scrollTop = 0; });
     await page.screenshot({ path: path.join(output, 'backup-folder-390.png'), fullPage: true });
     await page.evaluate(() => { __folder = 'content://test/custom-folder'; window.rphubBackupFolderChanged(__folder); __qa.backupFileName = '我的备份'; });
-    await page.getByRole('button', { name: '导出全部数据', exact: true }).click();
+    await page.getByRole('button', { name: '创建备份', exact: true }).click();
     await page.waitForFunction(() => __exported.length === 2 && !__qa.isExportingAllData);
     await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     assert.deepEqual(await page.evaluate(() => __exported.map(({ name, target }) => ({ name, target }))), [

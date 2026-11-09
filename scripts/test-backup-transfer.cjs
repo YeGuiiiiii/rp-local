@@ -21,7 +21,7 @@ const root = path.resolve(__dirname, '..');
         yield { key: 'rp_hub_binary', value: { file: new Blob([new Uint8Array([1, 2, 3])], { type: 'image/png' }) } };
     };
     await transfer.writeBackup({
-        entries: sources(), total: 4,
+        profile: 'light', entries: sources(), total: 4,
         transform: entry => JSON.parse(JSON.stringify(entry)),
         readCharacter: async card => { cardReads++; return { ...card, description: '完整卡内世界书' }; },
         write: async text => { parts.push(text); assert.ok(text.length <= 65536, '每次输出保持有界'); },
@@ -39,6 +39,16 @@ const root = path.resolve(__dirname, '..');
     assert.ok(parts.length > 10);
     assert.equal(notices.at(-1).percent, 100);
     assert.ok(notices.every((value, index) => !index || value.percent >= notices[index - 1].percent));
+    for (const [profile, limit] of [['light', 65536], ['balanced', 262144], ['fast', 1048576]]) {
+        const chunks = [];
+        await transfer.writeBackup({
+            profile, entries: [{ key: 'large', value: 'x'.repeat(2200000) }], total: 1,
+            write: async text => chunks.push(text)
+        });
+        assert.ok(chunks.every(text => text.length <= limit));
+        assert.ok(chunks.some(text => text.length > limit / 2), profile + ' must actually use its output batch size');
+        assert.equal(JSON.parse(chunks.join('')).entries[0].value.length, 2200000);
+    }
     let writes = 0;
     await assert.rejects(transfer.writeBackup({
         entries: sources(), total: 4, readCharacter: async value => value,
