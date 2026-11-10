@@ -105,8 +105,8 @@ export async function validate(db, session, source, wait, maxCollectionBytes = 1
                 throw new Error('角色卡内容不是对象');
         });
         if (count !== record.count) throw new Error('暂存记录不完整：' + key);
-        // Character cards are committed one at a time; other collections still need one bounded value.
-        if (key !== 'rp_hub_characters' && bytes > maxCollectionBytes)
+        // Cards and chats use bounded records; other collections still need one bounded value.
+        if (key !== 'rp_hub_characters' && !key.startsWith('rp_hub_chat_') && bytes > maxCollectionBytes)
             throw new Error('单个数据集合超过 ' + maxCollectionBytes / 1048576 + ' MB，请切换读取档位或拆分备份：' + key);
         if (key === 'rp_hub_characters') summary.cards = record.count;
         if (key.startsWith('rp_hub_chat_') && record.array) summary.messages += record.count;

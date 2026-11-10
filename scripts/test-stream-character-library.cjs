@@ -92,7 +92,7 @@ const web = path.resolve(__dirname, '../web');
             const exportCards = await storage.getStoredValue('characters');
             let oversizedChatRejected = false;
             try {
-                await RPStreamImport.stageEntries([{ key: 'rp_hub_chat_guard', value: ['x'.repeat(60000), 'y'.repeat(60000)] }], { limits });
+                await RPStreamImport.stageEntries([{ key: 'rp_hub_chat_guard', value: ['x'.repeat(65000)] }], { limits });
             } catch (_) { oversizedChatRejected = true; }
             return {
                 rollback, publishRollback, monolithicWrites, publishBodyCount, directory: directory.rphubCardLibrary, count: directory.cards.length,

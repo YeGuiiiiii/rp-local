@@ -239,7 +239,7 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
                             } else {
                                 for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
                                     { key: record.key, value }
-                                ])) store.put(entry.value, entry.key);
+                                ])) window.RPHubStorage.putStoredRecord(store, entry.value, entry.key);
                                 value = null;
                                 progress?.(cardCount + index + 1, totalWork);
                                 next(index + 1);
