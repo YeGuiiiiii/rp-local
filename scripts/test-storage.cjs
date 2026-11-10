@@ -180,7 +180,23 @@ const filesModule = source('assets/js/local-files.js');
       return results;
     });
     assert.deepEqual(retriedOperations, ['record', 'remove', 'revision', 'image']);
-    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, retriedOperations, folders: initial.folders };
+    const largeTextTransfer = await page.evaluate(async () => {
+      const uuid = 'chunked-card';
+      const card = { uuid, name: '大型迁移卡', importedName: '大型迁移卡',
+        worldInfo: [{ content: '长内容🐉'.repeat(60000) }] };
+      RPLocalStore.assignFolders([card]);
+      window.__qaTextWriteChunks.length = 0;
+      await RPLocalStore.save('__rp_card__:' + uuid, card);
+      await RPLocalStore.flush();
+      const file = window.__qaNativeFiles['角色卡数据/大型迁移卡/角色卡.json'];
+      const expected = JSON.stringify(card);
+      return { chunks: window.__qaTextWriteChunks.length,
+        largestChunk: Math.max(...window.__qaTextWriteChunks), exact: file?.text === expected };
+    });
+    assert.ok(largeTextTransfer.chunks > 1, 'Large card JSON must cross the Android bridge in multiple calls');
+    assert.ok(largeTextTransfer.largestChunk <= 64 * 1024, 'No bridge call may carry an oversized card string');
+    assert.equal(largeTextTransfer.exact, true, 'Chunked transfer must preserve the complete card JSON');
+    const report = { legacyMigration: true, duplicateNamesIsolated: true, originalImportNamePreserved: true, privateKeysSeparated: true, repeatedStartup, nativeFileRestoreAfterDatabaseLoss: true, chatIsolation: true, localPreferencesRestored: true, writeFailureReported: failures, retriedOperations, largeTextTransfer, folders: initial.folders };
     fs.writeFileSync(path.join(root, 'verification', process.argv.includes('--legacy-bridge') ? 'storage-legacy-bridge.json' : 'storage.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }

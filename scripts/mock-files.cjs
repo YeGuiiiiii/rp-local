@@ -8,6 +8,8 @@ module.exports = function installFileBridge({ skin = 'journal', persistFiles = t
   const originalSet = Storage.prototype.setItem;
   const storeKey = '__qa_native_files';
   const files = window.__qaNativeFiles = JSON.parse(localStorage.getItem(storeKey) || '{}');
+  const textWrites = new Map();
+  const textWriteChunks = window.__qaTextWriteChunks = [];
   if (skin) {
     // Older UI checks are unrelated to the daily reminder; mark today's question as already shown.
     const config = { enabled: true, triggerMode: 'remind', lastRemindDate: new Date().toLocaleDateString('en-CA') };
@@ -33,6 +35,31 @@ module.exports = function installFileBridge({ skin = 'journal', persistFiles = t
       if (files[name]?.text === value) return response(false);
       // Keep the existing write hook so failure fixtures exercise both paths.
       return window.RPLocalFiles.writeText(name, value);
+    },
+    beginTextWrite(name) {
+      validate(name);
+      const token = crypto.randomUUID();
+      textWrites.set(token, { name, text: '' });
+      return response(token);
+    },
+    appendTextWrite(token, value) {
+      const session = textWrites.get(token);
+      if (!session) return JSON.stringify({ ok: false, error: 'Text write session expired' });
+      textWriteChunks.push(value.length);
+      session.text += value;
+      return response(true);
+    },
+    finishTextWrite(token) {
+      const session = textWrites.get(token);
+      if (!session) return JSON.stringify({ ok: false, error: 'Text write session expired' });
+      files[session.name] = { text: session.text };
+      textWrites.delete(token);
+      persist();
+      return response(true);
+    },
+    abortTextWrite(token) {
+      textWrites.delete(token);
+      return response(true);
     },
     runtimeInfo() {
       return response({ packageName: 'com.rphub.local', version: window.RP_LOCAL_VERSION, android: '15', webView: 'Test WebView' });

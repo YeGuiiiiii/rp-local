@@ -11,7 +11,9 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONArray;
@@ -24,6 +26,17 @@ public final class LocalFiles {
     private Context context;
     private static final ConcurrentHashMap<String, Uri> backupReads = new ConcurrentHashMap<>();
     private static final String BACKUP_READ_URL = "https://sta1n156.github.io/RP-Hub/__rphub_backup_read__";
+    private final Map<String, TextWriteSession> textWrites = new HashMap<>();
+
+    private static final class TextWriteSession {
+        final AtomicFile atomic;
+        final FileOutputStream output;
+
+        TextWriteSession(AtomicFile atomic, FileOutputStream output) {
+            this.atomic = atomic;
+            this.output = output;
+        }
+    }
 
     public LocalFiles(Context context) {
         this(new File(context.getFilesDir(), "RP数据"),
@@ -67,12 +80,85 @@ public final class LocalFiles {
         }
     }
 
+    private void writeTextFile(String relative, String text) throws IOException {
+        File target = file(relative);
+        if (!target.getParentFile().isDirectory() && !target.getParentFile().mkdirs())
+            throw new IOException("Cannot create storage directory");
+        AtomicFile atomic = new AtomicFile(target);
+        FileOutputStream stream = null;
+        try {
+            stream = atomic.startWrite();
+            TextFileIO.writeUtf8(text, stream);
+            atomic.finishWrite(stream);
+        } catch (IOException error) {
+            atomic.failWrite(stream);
+            throw error;
+        }
+    }
+
+    private boolean textMatches(String relative, String text) throws IOException {
+        File target = file(relative);
+        if (!target.isFile() && !new File(target + ".bak").isFile()) return false;
+        return TextFileIO.matches(new AtomicFile(target).openRead(), text);
+    }
+
+    @JavascriptInterface
+    public synchronized String beginTextWrite(String relative) {
+        AtomicFile atomic = null;
+        FileOutputStream output = null;
+        try {
+            File target = file(relative);
+            if (!target.getParentFile().isDirectory() && !target.getParentFile().mkdirs())
+                throw new IOException("Cannot create storage directory");
+            atomic = new AtomicFile(target);
+            output = atomic.startWrite();
+            String token = UUID.randomUUID().toString();
+            textWrites.put(token, new TextWriteSession(atomic, output));
+            return response(token, null);
+        } catch (Exception error) {
+            if (atomic != null) atomic.failWrite(output);
+            return response(null, error);
+        }
+    }
+
+    @JavascriptInterface
+    public synchronized String appendTextWrite(String token, String text) {
+        TextWriteSession session = textWrites.get(token);
+        if (session == null) return response(null, new IOException("Text write session expired"));
+        try {
+            TextFileIO.writeUtf8(text, session.output);
+            return response(true, null);
+        } catch (Exception error) {
+            abortTextWrite(token);
+            return response(null, error);
+        }
+    }
+
+    @JavascriptInterface
+    public synchronized String finishTextWrite(String token) {
+        TextWriteSession session = textWrites.remove(token);
+        if (session == null) return response(null, new IOException("Text write session expired"));
+        try {
+            session.atomic.finishWrite(session.output);
+            return response(true, null);
+        } catch (Exception error) {
+            session.atomic.failWrite(session.output);
+            return response(null, error);
+        }
+    }
+
+    @JavascriptInterface
+    public synchronized String abortTextWrite(String token) {
+        TextWriteSession session = textWrites.remove(token);
+        if (session == null) return response(false, null);
+        session.atomic.failWrite(session.output);
+        return response(true, null);
+    }
+
     @JavascriptInterface
     public synchronized String writeText(String relative, String text) {
-        try {
-            write(relative, text.getBytes(StandardCharsets.UTF_8));
-            return response(true, null);
-        } catch (Exception error) { return response(null, error); }
+        try { writeTextFile(relative, text); return response(true, null); }
+        catch (Exception error) { return response(null, error); }
     }
 
     @JavascriptInterface
@@ -106,8 +192,8 @@ public final class LocalFiles {
     @JavascriptInterface
     public synchronized String writeTextIfChanged(String relative, String text) {
         try {
-            if (text.equals(read(relative))) return response(false, null);
-            write(relative, text.getBytes(StandardCharsets.UTF_8));
+            if (textMatches(relative, text)) return response(false, null);
+            writeTextFile(relative, text);
             return response(true, null);
         } catch (Exception error) { return response(null, error); }
     }

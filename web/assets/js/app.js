@@ -10064,6 +10064,8 @@ const app = createApp({
         };
         const showToast = (message, type = 'info', duration = 2000) => {
             const id = `${Date.now()}-${toastIdSeed++}`;
+            if (type === 'error' && window.RP_LOCAL_VERSION && !String(message).includes(window.RP_LOCAL_VERSION))
+                message = `${message} · ${window.RP_LOCAL_VERSION}`;
             toasts.value.push({ id, message, type, icon: getToastIcon(message, type) });
             setTimeout(() => {
                 toasts.value = toasts.value.filter(t => t.id !== id);

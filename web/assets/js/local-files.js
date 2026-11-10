@@ -16,7 +16,22 @@
     };
     const write = (relative, value) => {
         const text = JSON.stringify(value);
-        if (typeof bridge?.writeTextIfChanged === 'function') call('writeTextIfChanged', relative, text);
+        if (text.length > 64 * 1024 && typeof bridge?.beginTextWrite === 'function') {
+            const token = call('beginTextWrite', relative);
+            try {
+                for (let offset = 0; offset < text.length;) {
+                    let end = Math.min(offset + 64 * 1024, text.length);
+                    if (end < text.length && /[\uD800-\uDBFF]/.test(text[end - 1])
+                        && /[\uDC00-\uDFFF]/.test(text[end])) end--;
+                    call('appendTextWrite', token, text.slice(offset, end));
+                    offset = end;
+                }
+                call('finishTextWrite', token);
+            } catch (error) {
+                try { call('abortTextWrite', token); } catch (_) {}
+                throw error;
+            }
+        } else if (typeof bridge?.writeTextIfChanged === 'function') call('writeTextIfChanged', relative, text);
         else if (call('readText', relative) !== text) call('writeText', relative, text);
     };
     const read = relative => {
