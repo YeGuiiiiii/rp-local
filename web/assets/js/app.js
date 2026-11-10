@@ -5386,7 +5386,7 @@ const app = createApp({
             if (entry.key.startsWith('rp_hub_b1_memory_state_') && entry.value?.deleted === true) {
                 store.delete(entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
             }
-            return store.put(restoreRphubBinaryDeep(entry.value), entry.key);
+            return window.RPHubStorage.putStoredRecord(store, restoreRphubBinaryDeep(entry.value), entry.key);
         };
         const pauseBackupWrites = async () => {
             if (isConversationBusy.value) throw new Error('请先停止当前生成再恢复数据');
@@ -11274,7 +11274,7 @@ const app = createApp({
                     console.error('Delete message commit failed:', error);
                     committed = { ok: false, error };
                 }
-                if (!committed.ok) { showToast('对话变更尚未完整保存，已停止后续操作', 'error'); return; }
+                if (!committed.ok) { showToast(`删除失败：${committed.error?.message || '对话变更尚未完整保存，请重试'}`, 'error'); return; }
                 chatHistory.value = nextHistory;
                 await saveMemorySettingsNow();
                 const deletedLabel = deletesUserTurn ? '该轮次' : 'AI 消息';

@@ -79,7 +79,7 @@
         const synchronized = !!revision && revision === window.RPLocalStore.readRevision()
             && (Array.isArray(value) || isCharacterDirectory(value));
         const entries = synchronized ? [{ key: 'rp_hub_characters', value }]
-            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY)
+            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY && !isPrivateChatKey(key))
                 .map(key => key === 'rp_hub_characters' ? { key, value } : { key });
         if (!synchronized) await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false, force: true });
         await window.RPLocalStore.initialize(entries, async (key, restored) => {
@@ -184,6 +184,50 @@
         if (epoch !== storageWriteEpoch) throw storageWriteError('StorageConflictError', '存储维护代次已变化，请重新载入后再试');
         if (options.guard && options.guard() !== true) throw storageWriteError('StorageConflictError', '写入来源已变化，未提交旧数据');
     };
+    const CHAT_PART_PREFIX = '__rp_chat__:';
+    const CHAT_PART_BYTES = 4 * 1048576;
+    const chatVersions = new WeakMap();
+    const isChatKey = key => String(key).startsWith('rp_hub_chat_');
+    const isPrivateChatKey = key => String(key).startsWith(CHAT_PART_PREFIX);
+    const isChatDirectory = value => value?.rphubChat === 1;
+    const chatPartKey = (directory, index) => CHAT_PART_PREFIX + directory.revision + ':' + index;
+    const removeChatParts = (store, key) => {
+        const request = store.get(key);
+        request.onsuccess = () => {
+            const directory = request.result;
+            if (isChatDirectory(directory)) {
+                for (let i = 0; i < directory.parts; i++) store.delete(chatPartKey(directory, i));
+            }
+        };
+    };
+    // 聊天里的历史界面可能达数百 MB；目录与全部块在同一事务提交。
+    const putStoredRecord = (store, value, key) => {
+        if (!isChatKey(key) || !Array.isArray(value)) return store.put(value, key);
+        const parts = [];
+        let part = [], bytes = 0;
+        for (const message of value) {
+            const size = JSON.stringify(message).length * 2 + 64;
+            if (part.length && bytes + size > CHAT_PART_BYTES) {
+                parts.push(part); part = []; bytes = 0;
+            }
+            part.push(message); bytes += size;
+        }
+        if (part.length) parts.push(part);
+        removeChatParts(store, key);
+        if (parts.length <= 1) return store.put(value, key);
+        const directory = { rphubChat: 1, revision: crypto.randomUUID().replace(/-/g, ''), parts: parts.length, length: value.length };
+        parts.forEach((items, index) => store.put(items, chatPartKey(directory, index)));
+        chatVersions.set(value, directory);
+        return store.put(directory, key);
+    };
+    const deleteStoredRecord = (store, key) => {
+        if (isChatKey(key)) removeChatParts(store, key);
+        return store.delete(key);
+    };
+    const storageComparisonKey = (key, value) => storageContentKey(
+        isChatKey(key) && Array.isArray(value) ? chatVersions.get(value) || value : value
+    );
+
     const runStorageWriteTransaction = (targetDb, schedule, options = {}) => new Promise((resolve, reject) => {
         let transaction = null;
         let settled = false;
@@ -249,12 +293,12 @@
                     changed(key);
                     if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                     if (mirror) mirrors.set(key, cloneForStorage(value));
-                    return store.put(value, key);
+                    return putStoredRecord(store, value, key);
                 },
                 delete: key => {
                     changed(key);
                     if (mirror) mirrors.set(key, undefined);
-                    return store.delete(key);
+                    return deleteStoredRecord(store, key);
                 }
             }, transaction, abortWith);
             if (result && typeof result.then === 'function') throw storageWriteError('InvalidStateError', '存储事务内不允许异步准备');
@@ -597,7 +641,7 @@
     // Each entry gets its own read transaction: awaiting a card read cannot expire a cursor.
     async function* iterateStoredEntries(targetDb, expand = true, includeKey = () => true) {
         for (const key of await readStorageKeys(targetDb)) {
-            if (isPrivateCardKey(key) || key === LOCAL_MIRROR_KEY || !includeKey(key)) continue;
+            if (isPrivateCardKey(key) || isPrivateChatKey(key) || key === LOCAL_MIRROR_KEY || !includeKey(key)) continue;
             const entry = { key, value: await dbGetFrom(targetDb, key) };
             yield expand ? await expandStorageEntry(entry) : entry;
         }
@@ -656,7 +700,42 @@
                 const store = transaction.objectStore('store');
                 names.forEach((key, index) => {
                     const request = store.get(key);
-                    request.onsuccess = () => { records[index] = {key, value: request.result}; };
+                    request.onsuccess = () => {
+                        const directory = request.result;
+                        if (!isChatKey(key) || !isChatDirectory(directory)) {
+                            records[index] = { key, value: directory };
+                            return;
+                        }
+                        if (!Number.isSafeInteger(directory.parts) || directory.parts < 1
+                            || !Number.isSafeInteger(directory.length) || directory.length < 1
+                            || !/^[a-f0-9]{32}$/.test(directory.revision)) {
+                            failure = storageWriteError('StorageDataError', '聊天存档目录损坏，已停止读取');
+                            transaction.abort();
+                            return;
+                        }
+                        const parts = new Array(directory.parts);
+                        let remaining = directory.parts;
+                        for (let part = 0; part < directory.parts; part++) {
+                            const chunk = store.get(chatPartKey(directory, part));
+                            chunk.onsuccess = () => {
+                                if (!Array.isArray(chunk.result)) {
+                                    failure = storageWriteError('StorageDataError', '聊天存档分块不完整，已停止读取');
+                                    transaction.abort();
+                                    return;
+                                }
+                                parts[part] = chunk.result;
+                                if (--remaining) return;
+                                const value = parts.flat();
+                                if (value.length !== directory.length) {
+                                    failure = storageWriteError('StorageDataError', '聊天存档条数不完整，已停止读取');
+                                    transaction.abort();
+                                    return;
+                                }
+                                chatVersions.set(value, directory);
+                                records[index] = { key, value };
+                            };
+                        }
+                    };
                 });
             } catch (error) {
                 failure = error;
@@ -682,7 +761,7 @@
             // Clone and fingerprint before the first await, never borrow a mutable UI reference.
             expected = command.expected.map(item => {
                 if (!item || typeof item.key !== 'string' || !item.key) throw storageWriteError('StorageDataError', '提交基线键无效');
-                return {key: item.key, fingerprint: storageContentKey(item.value)};
+                return {key: item.key, fingerprint: storageComparisonKey(item.key, item.value)};
             });
             const names = new Set(expected.map(item => item.key));
             if (names.size !== expected.length) throw storageWriteError('StorageDataError', '提交基线键重复');
@@ -695,7 +774,7 @@
                 const value = cloneForStorage(item.value);
                 if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                 if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
-                return {key: item.key, operation: 'set', value, fingerprint: storageContentKey(value)};
+                return {key: item.key, operation: 'set', value, fingerprint: isChatKey(item.key) ? null : storageContentKey(value)};
             });
             if (new Set(changes.map(item => item.key)).size !== changes.length) throw storageWriteError('StorageDataError', '变更键重复');
             if (!mainDb) await initDB();
@@ -731,7 +810,8 @@
             committed = true;
             if (!changes.length) return {status: 'unchanged', committed: false, writeEpoch};
             const actual = await readStoredValueSet(changes.map(item => item.key));
-            if (actual.some((item, i) => storageContentKey(item.value) !== changes[i].fingerprint)) {
+            if (actual.some((item, i) => storageComparisonKey(item.key, item.value) !==
+                (changes[i].fingerprint ?? storageComparisonKey(item.key, changes[i].value)))) {
                 throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');
             }
             return {status: 'committed', committed: true, writeEpoch, records: actual};
@@ -912,7 +992,7 @@
             expected = (Array.isArray(command.expected) ? command.expected : []).map(item => {
                 if (!item || typeof item.key !== 'string' || !item.key) throw storageWriteError('StorageDataError', '分组提交基线键无效');
                 if (isProtectedMemoryKey(item.key)) throw storageWriteError('MemoryProtocolError', '记忆键必须经过版本协议提交');
-                return { key: item.key, fingerprint: storageContentKey(item.value) };
+                return { key: item.key, fingerprint: storageComparisonKey(item.key, item.value) };
             });
             if (new Set(expected.map(item => item.key)).size !== expected.length) {
                 throw storageWriteError('StorageDataError', '分组提交基线键重复');
@@ -928,7 +1008,7 @@
                 const value = cloneForStorage(item.value);
                 if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                 if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
-                return { key: item.key, operation, value, fingerprint: storageContentKey(value) };
+                return { key: item.key, operation, value, fingerprint: isChatKey(item.key) ? null : storageContentKey(value) };
             });
             if (new Set(changes.map(item => item.key)).size !== changes.length) {
                 throw storageWriteError('StorageDataError', '分组提交键重复');
@@ -971,7 +1051,8 @@
             }
             committed = true;
             const actual = await readStoredValueSet(changes.map(item => item.key));
-            if (actual.some((item, index) => storageContentKey(item.value) !== changes[index].fingerprint)) {
+            if (actual.some((item, index) => storageComparisonKey(item.key, item.value) !==
+                (changes[index].fingerprint ?? storageComparisonKey(item.key, changes[index].value)))) {
                 throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');
             }
             return { status: 'committed', committed: true, writeEpoch, records: actual };
@@ -999,6 +1080,7 @@
         storageContentKey,
         readStoredValueSet,
         compareAndWriteStoredValues,
+        putStoredRecord,
         cloneForStorage,
         readCharacterDirectory,
         refreshCharacterPreview,
