@@ -1,8 +1,8 @@
-# RP 本地版 2.9.019
+# RP 本地版 2.9.022
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.019.apk`，安装包不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.022.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前本地构建版本为 **2.9.019**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.022**，Android versionCode 为 **286**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.006 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.022 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,14 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.022 导出位置修复
+
+- 默认导出目录显示为 `手机存储/Download/RP本地版/导出文件`，下载备份目录显示为 `手机存储/Download/RP本地版/数据备份`，保留系统真实目录名，避免与独立的中文“下载”文件夹混淆。
+- 保存完成后显示系统返回的实际目录和文件名；同名文件分别保留，失败时不提前提示成功。
+- 保留 2.9.020 的大文件传输、2.9.021 的长聊天分块保存，以及此前的角色卡、备份、生图与外观功能。Beta 的存储改造继续单独维护。
+
+已核对 APK 版本、原签名及全部 187 个网页文件。此前 Android API 35 隔离模拟器已验证实际文件位置、重名文件保留与导出字节；未在真我手机验证。具体改动见 [导出位置修复-2.9.022.md](导出位置修复-2.9.022.md)。
 
 ## 2.9.019 大备份恢复
 
@@ -548,7 +556,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.017`，Android versionCode `281`。
+- 版本：`2.9.022`，Android versionCode `286`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。

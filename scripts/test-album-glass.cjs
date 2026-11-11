@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
-const fixture = path.resolve(process.argv[2] || 'C:/Users/pzh/Downloads/大梦未觉.png');
+const fixture = path.resolve(process.argv[2] || path.join(root, 'dist/app-icon.png'));
 const png = fs.readFileSync(fixture);
 const sourceSize = { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
 const output = path.join(root, 'verification/album-glass-1.03');

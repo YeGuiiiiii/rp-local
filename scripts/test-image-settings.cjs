@@ -118,18 +118,23 @@ fs.mkdirSync(output, { recursive: true });
     await page.evaluate(() => {
       window.__exported = [];
       window.__folder = '';
+      window.RPLocalFiles.downloadDirectory = () => '手机存储/Download/RP本地版/数据备份';
       window.AndroidBridge = {
         isNativeApp: () => true, getBackupFolder: () => __folder, chooseBackupFolder: () => {},
         createBackupFileToDownloads: (name, mime) => { __exported.push({ name, mime, target: 'downloads', chunks: '' }); return 'OK:test'; },
         createBackupFile: (name, mime) => { __exported.push({ name, mime, target: 'custom', chunks: '' }); return 'OK:test'; },
         writeBackupChunk: (token, base64) => { __exported.at(-1).chunks += atob(base64); return 'OK'; },
-        finishBackupWrite: () => 'OK', abortBackupWrite: () => {},
+        finishBackupWrite: () => __exported.at(-1).target === 'downloads'
+          ? 'OK:手机存储/Download/RP本地版/数据备份/' + __exported.at(-1).name : 'OK',
+        abortBackupWrite: () => {},
       };
       __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup');
     });
-    await page.getByText('下载 / RP本地版 / 数据备份', { exact: true }).waitFor();
+    await page.getByText('手机存储/Download/RP本地版/数据备份', { exact: true }).waitFor();
     await page.getByRole('button', { name: '创建备份', exact: true }).click();
     await page.waitForFunction(() => __exported.length && !__qa.isExportingAllData);
+    assert.ok(await page.evaluate(() => __qa.toasts.some(toast =>
+      toast.message.includes('手机存储/Download/RP本地版/数据备份/' + __exported[0].name))));
     assert.match(await page.evaluate(() => __exported[0].name), /^RP本地版-数据备份-\d{4}-\d{2}-\d{2}\.json$/);
     assert.equal(await page.evaluate(() => {
       const pack = JSON.parse(new TextDecoder().decode(Uint8Array.from(__exported[0].chunks, char => char.charCodeAt(0))));

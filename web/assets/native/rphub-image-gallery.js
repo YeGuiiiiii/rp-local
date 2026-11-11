@@ -984,7 +984,6 @@
             var bridge = window.AndroidBridge;
             if (bridge && typeof bridge.saveFile === 'function') {
                 bridge.saveFile(base64, 'rphub-gallery-' + Date.now() + '.zip', 'application/zip');
-                toast('已导出到下载目录');
             } else {
                 toast('当前环境不支持导出');
             }

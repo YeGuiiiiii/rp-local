@@ -6,7 +6,7 @@ const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 const output = path.join(root, 'verification/glass-ui-1.09');
 fs.mkdirSync(output, { recursive: true });
-const portrait = fs.readFileSync('C:/Users/pzh/Downloads/大梦未觉.png');
+const portrait = fs.readFileSync(path.join(root, 'dist/app-icon.png'));
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const contexts = [], errors = [], missing = [];
@@ -90,7 +90,8 @@ const portrait = fs.readFileSync('C:/Users/pzh/Downloads/大梦未觉.png');
       active: __qa.galleryPage.$.props.active
     }))));
     const aperture = page.locator('.shell-album-aperture').first();
-    await page.waitForFunction(() => document.querySelector('.shell-album-cover img')?.naturalWidth === 400);
+    await page.waitForFunction(width => document.querySelector('.shell-album-cover img')?.naturalWidth === width,
+      portrait.readUInt32BE(16));
     await page.waitForTimeout(240);
     const original = await aperture.locator('img').evaluate(image => image.getBoundingClientRect().toJSON());
     await sensor(page, 0); await sensor(page, -25);

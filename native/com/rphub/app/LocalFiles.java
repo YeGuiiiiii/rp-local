@@ -283,6 +283,11 @@ public final class LocalFiles {
     }
 
     @JavascriptInterface
+    public String downloadDirectory() {
+        return DownloadFiles.directory(DownloadFiles.BACKUPS);
+    }
+
+    @JavascriptInterface
     public String locations() {
         try {
             return response(new JSONObject().put("personal", personal.getAbsolutePath())

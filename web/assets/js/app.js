@@ -3788,7 +3788,6 @@ const app = createApp({
                 try {
                     // MIME 不带 charset：MediaStore 只认标准类型，参数部分可能被拒
                     bridge.saveFile(cardUtils.encodeBase64Utf8(body), fileName, mimeType);
-                    showToast(`已保存到下载目录：${fileName}`);
                     return true;
                 } catch (error) {
                     // 桥抛错就往下走浏览器路径，别让用户什么也拿不到
@@ -5814,7 +5813,8 @@ const app = createApp({
 
         const appBackupFolder = ref('');
         const defaultBackupFolder = computed(() => window.AndroidBridge?.isNativeApp?.()
-            ? '下载 / RP本地版 / 数据备份' : '浏览器下载目录（由浏览器设置决定）');
+            ? (window.RPLocalFiles?.downloadDirectory?.() || '由系统保存接口确认位置')
+            : '浏览器下载目录（由浏览器设置决定）');
         const isExportingAllData = ref(false);
         const backupFileName = ref('');
         const buildBackupFileName = () => {
@@ -5896,13 +5896,15 @@ const app = createApp({
         const finishChunkedBackup = async (session, entryCount) => {
             try {
                 const finished = String(session.bridge.finishBackupWrite(session.token) || '');
-                if (finished !== 'OK') {
+                if (finished !== 'OK' && !finished.startsWith('OK:')) {
                     throw new Error(finished.startsWith('ERR:') ? finished.slice(4) : '完成备份写入失败');
                 }
                 // 2.8.78：按落点给不同提示。下载目录那份不在 App 的备份历史列表里
                 // （历史只扫自定义文件夹与应用专属目录），所以必须说清楚去哪儿找。
                 showToast(session.target === 'downloads'
-                    ? `已保存到 下载 / RP本地版 / 数据备份（${entryCount} 项）`
+                    ? (finished.startsWith('OK:')
+                        ? `已保存到 ${finished.slice(3)}（${entryCount} 项）`
+                        : `备份已保存（${entryCount} 项），请查看系统文件记录`)
                     : `已保存到默认备份文件夹（${entryCount} 项）`, 'success', 3000);
             } catch (error) {
                 abortChunkedBackup(session);

@@ -607,162 +607,18 @@
 .end method
 
 .method private openDownloadsWriteTarget(Ljava/lang/String;Ljava/lang/String;)Lcom/rphub/app/MainActivity$BackupWriteSession;
-    .locals 3
-    .annotation system Ldalvik/annotation/Throws;
-        value = {
-            Ljava/lang/Exception;
-        }
-    .end annotation
-
-    .line 770
-    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
-
-    const/4 v1, 0x0
-
-    const/16 v2, 0x1d
-
-    if-lt v0, v2, :cond_2
-
-    .line 771
-    new-instance v0, Landroid/content/ContentValues;
-
-    invoke-direct {v0}, Landroid/content/ContentValues;-><init>()V
-
-    const-string v2, "_display_name"
-
-    .line 772
-    invoke-virtual {v0, v2, p1}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/String;)V
-
-    const-string p1, "mime_type"
-
-    .line 773
-    invoke-virtual {v0, p1, p2}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 774
-    const-string p1, "Download/RP\u672c\u5730\u7248/\u6570\u636e\u5907\u4efd"
-
-    const-string p2, "relative_path"
-
-    invoke-virtual {v0, p2, p1}, Landroid/content/ContentValues;->put(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 775
-    iget-object p1, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
-    invoke-virtual {p1}, Lcom/rphub/app/MainActivity;->getContentResolver()Landroid/content/ContentResolver;
-
-    move-result-object p1
-
-    sget-object p2, Landroid/provider/MediaStore$Downloads;->EXTERNAL_CONTENT_URI:Landroid/net/Uri;
-
-    invoke-virtual {p1, p2, v0}, Landroid/content/ContentResolver;->insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
-
-    move-result-object p1
-
-    if-eqz p1, :cond_1
-
-    .line 777
-    iget-object p2, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
-    invoke-virtual {p2}, Lcom/rphub/app/MainActivity;->getContentResolver()Landroid/content/ContentResolver;
-
-    move-result-object p2
-
-    invoke-virtual {p2, p1}, Landroid/content/ContentResolver;->openOutputStream(Landroid/net/Uri;)Ljava/io/OutputStream;
-
-    move-result-object p2
-
-    if-eqz p2, :cond_0
-
-    .line 785
+    .locals 6
+    iget-object v0, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
+    sget-object v1, Lcom/rphub/app/DownloadFiles;->BACKUPS:Ljava/lang/String;
+    invoke-static {v0, p1, p2, v1}, Lcom/rphub/app/DownloadFiles;->open(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/rphub/app/DownloadFiles$Target;
+    move-result-object v5
     new-instance v0, Lcom/rphub/app/MainActivity$BackupWriteSession;
-
-    invoke-direct {v0, p2, v1, p1}, Lcom/rphub/app/MainActivity$BackupWriteSession;-><init>(Ljava/io/OutputStream;Ljava/io/File;Landroid/net/Uri;)V
-
+    iget-object v1, v5, Lcom/rphub/app/DownloadFiles$Target;->output:Ljava/io/OutputStream;
+    iget-object v2, v5, Lcom/rphub/app/DownloadFiles$Target;->file:Ljava/io/File;
+    iget-object v3, v5, Lcom/rphub/app/DownloadFiles$Target;->uri:Landroid/net/Uri;
+    move-object v4, p2
+    invoke-direct {v0, v1, v2, v3, v4}, Lcom/rphub/app/MainActivity$BackupWriteSession;-><init>(Ljava/io/OutputStream;Ljava/io/File;Landroid/net/Uri;Ljava/lang/String;)V
     return-object v0
-
-    .line 780
-    :cond_0
-    :try_start_0
-    iget-object p2, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
-    invoke-virtual {p2}, Lcom/rphub/app/MainActivity;->getContentResolver()Landroid/content/ContentResolver;
-
-    move-result-object p2
-
-    invoke-virtual {p2, p1, v1, v1}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
-
-    .line 783
-    :catchall_0
-    new-instance p1, Ljava/lang/IllegalStateException;
-
-    const-string p2, "\u65e0\u6cd5\u6253\u5f00\u4e0b\u8f7d\u76ee\u5f55\u6587\u4ef6"
-
-    invoke-direct {p1, p2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
-
-    throw p1
-
-    .line 776
-    :cond_1
-    new-instance p1, Ljava/lang/IllegalStateException;
-
-    const-string p2, "\u65e0\u6cd5\u5728\u4e0b\u8f7d\u76ee\u5f55\u521b\u5efa\u6587\u4ef6"
-
-    invoke-direct {p1, p2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
-
-    throw p1
-
-    .line 787
-    :cond_2
-    const-string v0, "Download/RP\u672c\u5730\u7248/\u6570\u636e\u5907\u4efd"
-
-    invoke-static {v0}, Landroid/os/Environment;->getExternalStoragePublicDirectory(Ljava/lang/String;)Ljava/io/File;
-
-    move-result-object v0
-
-    .line 788
-    invoke-virtual {v0}, Ljava/io/File;->exists()Z
-
-    move-result v2
-
-    if-nez v2, :cond_4
-
-    invoke-virtual {v0}, Ljava/io/File;->mkdirs()Z
-
-    move-result v2
-
-    if-eqz v2, :cond_3
-
-    goto :goto_0
-
-    .line 789
-    :cond_3
-    new-instance p1, Ljava/lang/IllegalStateException;
-
-    const-string p2, "\u65e0\u6cd5\u521b\u5efa\u4e0b\u8f7d\u76ee\u5f55"
-
-    invoke-direct {p1, p2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
-
-    throw p1
-
-    .line 791
-    :cond_4
-    :goto_0
-    new-instance v2, Ljava/io/File;
-
-    invoke-direct {v2, v0, p1}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
-
-    .line 792
-    new-instance p1, Lcom/rphub/app/MainActivity$BackupWriteSession;
-
-    new-instance v0, Ljava/io/FileOutputStream;
-
-    invoke-direct {v0, v2}, Ljava/io/FileOutputStream;-><init>(Ljava/io/File;)V
-
-    invoke-direct {p1, v0, v2, v1, p2}, Lcom/rphub/app/MainActivity$BackupWriteSession;-><init>(Ljava/io/OutputStream;Ljava/io/File;Landroid/net/Uri;Ljava/lang/String;)V
-
-    return-object p1
 .end method
 
 .method private readBytes(Ljava/io/InputStream;)[B
@@ -1838,177 +1694,55 @@
     .locals 5
     .annotation runtime Landroid/webkit/JavascriptInterface;
     .end annotation
-
-    .line 879
     iget-object v0, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
     invoke-static {v0}, Lcom/rphub/app/MainActivity;->access$21(Lcom/rphub/app/MainActivity;)Ljava/util/HashMap;
-
     move-result-object v0
-
     monitor-enter v0
-
-    .line 880
-    :try_start_0
-    iget-object v1, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
-    invoke-static {v1}, Lcom/rphub/app/MainActivity;->access$21(Lcom/rphub/app/MainActivity;)Ljava/util/HashMap;
-
-    move-result-object v1
-
-    invoke-virtual {v1, p1}, Ljava/util/HashMap;->remove(Ljava/lang/Object;)Ljava/lang/Object;
-
+    :lock_start
+    invoke-virtual {v0, p1}, Ljava/util/HashMap;->remove(Ljava/lang/Object;)Ljava/lang/Object;
     move-result-object p1
-
     check-cast p1, Lcom/rphub/app/MainActivity$BackupWriteSession;
-
-    .line 879
     monitor-exit v0
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_2
-
-    if-nez p1, :cond_0
-
-    const-string p1, "ERR:\u5907\u4efd\u5199\u5165\u4f1a\u8bdd\u4e0d\u5b58\u5728"
-
-    return-object p1
-
-    .line 884
-    :cond_0
-    :try_start_1
-    iget-object v0, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->output:Ljava/io/OutputStream;
-
-    invoke-virtual {v0}, Ljava/io/OutputStream;->flush()V
-
-    .line 885
-    iget-object v0, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->output:Ljava/io/OutputStream;
-
-    invoke-virtual {v0}, Ljava/io/OutputStream;->close()V
-
-    .line 888
-    iget-object v0, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->scanMime:Ljava/lang/String;
-
-    if-eqz v0, :cond_1
-
-    iget-object v0, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->targetFile:Ljava/io/File;
-    :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_1
-
-    if-eqz v0, :cond_1
-
-    .line 890
-    :try_start_2
+    :lock_end
+    .catchall {:lock_start .. :lock_end} :lock_failed
+    if-nez p1, :finish
+    const-string v0, "ERR:备份写入会话不存在"
+    return-object v0
+    :finish
+    :try_start
+    iget-object v4, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->scanMime:Ljava/lang/String;
+    if-eqz v4, :other_folder
     iget-object v0, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
-
-    const/4 v1, 0x1
-
-    new-array v2, v1, [Ljava/lang/String;
-
-    .line 891
-    iget-object v3, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->targetFile:Ljava/io/File;
-
-    invoke-virtual {v3}, Ljava/io/File;->getAbsolutePath()Ljava/lang/String;
-
-    move-result-object v3
-
-    const/4 v4, 0x0
-
-    aput-object v3, v2, v4
-
-    new-array v1, v1, [Ljava/lang/String;
-
-    .line 892
-    iget-object p1, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->scanMime:Ljava/lang/String;
-
-    aput-object p1, v1, v4
-
-    const/4 p1, 0x0
-
-    .line 890
-    invoke-static {v0, v2, v1, p1}, Landroid/media/MediaScannerConnection;->scanFile(Landroid/content/Context;[Ljava/lang/String;[Ljava/lang/String;Landroid/media/MediaScannerConnection$OnScanCompletedListener;)V
-    :try_end_2
-    .catchall {:try_start_2 .. :try_end_2} :catchall_0
-
-    goto :goto_0
-
-    :catchall_0
-    move-exception p1
-
-    :try_start_3
-    const-string v0, "RPHub"
-
-    .line 894
-    new-instance v1, Ljava/lang/StringBuilder;
-
-    const-string v2, "\u4e0b\u8f7d\u76ee\u5f55\u5907\u4efd\u626b\u63cf\u5931\u8d25: "
-
-    invoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-
-    invoke-virtual {p1}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-virtual {v1, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-static {v0, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-    :try_end_3
-    .catchall {:try_start_3 .. :try_end_3} :catchall_1
-
-    :cond_1
-    :goto_0
-    const-string p1, "OK"
-
-    return-object p1
-
-    :catchall_1
-    move-exception p1
-
-    .line 899
-    new-instance v0, Ljava/lang/StringBuilder;
-
+    iget-object v1, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->output:Ljava/io/OutputStream;
+    iget-object v2, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->targetFile:Ljava/io/File;
+    iget-object v3, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->targetUri:Landroid/net/Uri;
+    invoke-static {v0, v1, v2, v3, v4}, Lcom/rphub/app/DownloadFiles;->finish(Landroid/content/Context;Ljava/io/OutputStream;Ljava/io/File;Landroid/net/Uri;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "OK:"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v0
+    return-object v0
+    :other_folder
+    iget-object v0, p1, Lcom/rphub/app/MainActivity$BackupWriteSession;->output:Ljava/io/OutputStream;
+    invoke-virtual {v0}, Ljava/io/OutputStream;->flush()V
+    invoke-virtual {v0}, Ljava/io/OutputStream;->close()V
+    const-string v0, "OK"
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :failed
+    return-object v0
+    :failed
+    move-exception v0
+    iget-object v1, p0, Lcom/rphub/app/MainActivity$6;->this$0:Lcom/rphub/app/MainActivity;
+    invoke-static {v1, p1}, Lcom/rphub/app/MainActivity;->access$22(Lcom/rphub/app/MainActivity;Lcom/rphub/app/MainActivity$BackupWriteSession;)V
+    invoke-virtual {v0}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
+    move-result-object v0
     const-string v1, "ERR:"
-
-    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-
-    invoke-virtual {p1}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
-
-    move-result-object v1
-
-    if-nez v1, :cond_2
-
-    invoke-virtual {p1}, Ljava/lang/Throwable;->toString()Ljava/lang/String;
-
-    move-result-object p1
-
-    goto :goto_1
-
-    :cond_2
-    invoke-virtual {p1}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
-
-    move-result-object p1
-
-    :goto_1
-    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object p1
-
-    return-object p1
-
-    :catchall_2
+    invoke-virtual {v1, v0}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v0
+    return-object v0
+    :lock_failed
     move-exception p1
-
-    .line 879
-    :try_start_4
     monitor-exit v0
-    :try_end_4
-    .catchall {:try_start_4 .. :try_end_4} :catchall_2
-
     throw p1
 .end method
 
