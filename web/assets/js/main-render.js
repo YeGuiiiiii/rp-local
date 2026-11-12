@@ -968,7 +968,7 @@ const _hoisted_562 = { class: "truncate" }
 const _hoisted_563 = ["aria-label", "onClick"]
 const _hoisted_564 = { class: "sortable-item-actions" }
 const _hoisted_565 = { class: "relative inline-flex items-center cursor-pointer" }
-const _hoisted_566 = ["onUpdate:modelValue", "true-value", "false-value"]
+const _hoisted_566 = ["onUpdate:modelValue", "onChange", "true-value", "false-value"]
 const _hoisted_567 = { class: "sortable-item-buttons" }
 const _hoisted_568 = ["onClick"]
 const _hoisted_569 = ["onClick"]
@@ -1171,10 +1171,10 @@ const _hoisted_676 = { class: "settings-collapse__content px-4 pb-4 pt-3 border-
 const _hoisted_677 = { class: "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm" }
 const _hoisted_678 = { class: "flex justify-between items-center mb-2" }
 const _hoisted_679 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_680 = ["onUpdate:modelValue"]
+const _hoisted_680 = ["onChange", "onUpdate:modelValue"]
 const _hoisted_681 = { class: "flex justify-between items-center mb-2" }
 const _hoisted_682 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_683 = ["onUpdate:modelValue"]
+const _hoisted_683 = ["onChange", "onUpdate:modelValue"]
 const _hoisted_684 = ["onPointerdownCapture", "onPointermoveCapturePassive", "onPointercancelCapture", "onClickCapture"]
 const _hoisted_685 = ["data-resource-index"]
 const _hoisted_686 = { class: "sortable-item-main" }
@@ -5820,10 +5820,11 @@ return function render(_ctx, _cache) {
                         _withDirectives(_createElementVNode("input", {
                           type: "checkbox",
                           "onUpdate:modelValue": $event => ((script.enabled) = $event),
+                          onChange: $event => (saveData()),
                           class: "settings-toggle-input sr-only",
                           "true-value": true,
                           "false-value": false
-                        }, null, 8 /* PROPS */, _hoisted_566), [
+                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_566), [
                           [_vModelCheckbox, script.enabled]
                         ]),
                         _cache[194] || (_cache[194] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
@@ -6884,13 +6885,14 @@ return function render(_ctx, _cache) {
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-scan-depth",
+                            onChange: $event => (saveData()),
                             type: "range",
                             "onUpdate:modelValue": $event => ((worldInfoSettings.scanDepth) = $event),
                             min: "0",
                             max: "20",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 8 /* PROPS */, _hoisted_680), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_680), [
                             [
                               _vModelText,
                               worldInfoSettings.scanDepth,
@@ -6910,13 +6912,14 @@ return function render(_ctx, _cache) {
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-max-depth",
+                            onChange: $event => (saveData()),
                             type: "range",
                             "onUpdate:modelValue": $event => ((worldInfoSettings.maxDepth) = $event),
                             min: "0",
                             max: "50",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 8 /* PROPS */, _hoisted_683), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_683), [
                             [
                               _vModelText,
                               worldInfoSettings.maxDepth,

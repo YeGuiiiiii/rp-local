@@ -4,7 +4,7 @@
     function createUpdater(options) {
         const storage = options.storage;
         const state = (options.reactive || (value => value))({
-            automatic: storage.getItem('rp-auto-update') !== 'false', phase: 'idle',
+            automatic: storage.getItem('rp-auto-update') === 'true', phase: 'idle',
             latest: null, progress: 0, error: '', currentVersion: options.currentVersion
         });
         let pending, timer;
