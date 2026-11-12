@@ -6,10 +6,19 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const JSZip = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/jszip');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const web = path.join(root, 'web');
-const baseline = await JSZip.loadAsync(fs.readFileSync(path.join(root, 'dist', 'RP-local-0.3.apk')));
+// 基线包被 .gitignore 排除，仓库里通常没有。缺失时跳过基线比对（该比对默认不阻断退出码）。
+const baselinePath = path.join(root, 'dist', 'RP-local-0.3.apk');
+let baseline = null;
+if (fs.existsSync(baselinePath)) {
+    let JSZip = null;
+    for (const candidate of ['jszip', 'C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/jszip']) {
+        try { JSZip = require(candidate); break; } catch { /* 换下一个候选 */ }
+    }
+    if (JSZip) baseline = await JSZip.loadAsync(fs.readFileSync(baselinePath));
+    else console.error('! 存在 dist/RP-local-0.3.apk 但缺少 jszip 依赖，跳过基线比对');
+}
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const files = fs.readdirSync(web, { recursive: true }).filter(name => fs.statSync(path.join(web, name)).isFile());
 const errors = [];
@@ -24,10 +33,12 @@ for (const name of files) {
     if (name.endsWith('.js')) {
         try { new vm.Script(text, { filename: name }); scripts++; }
         catch (error) { errors.push(error.message); }
-        const old = baseline.file('assets/local-site/' + name.replaceAll('\\', '/'));
-        if (!old || hash(await old.async('nodebuffer')) !== hash(fs.readFileSync(file))) {
-            baselineDifferences.push(name);
-        } else unchangedScripts++;
+        if (baseline) {
+            const old = baseline.file('assets/local-site/' + name.replaceAll('\\', '/'));
+            if (!old || hash(await old.async('nodebuffer')) !== hash(fs.readFileSync(file))) {
+                baselineDifferences.push(name);
+            } else unchangedScripts++;
+        }
     }
     if (name.startsWith('assets' + path.sep + 'css' + path.sep) && name.endsWith('.css')) {
         for (const [, value] of text.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
@@ -43,9 +54,11 @@ for (const name of files) {
         try { new vm.Script(script, { filename: name }); scripts++; }
         catch (error) { errors.push(error.message); }
     }
-    const old = baseline.file('assets/local-site/' + name.replaceAll('\\', '/'));
-    if (!old || JSON.stringify(inlineScripts(await old.async('string'))) !== JSON.stringify(inlineScripts(text))) {
-        baselineDifferences.push(name);
+    if (baseline) {
+        const old = baseline.file('assets/local-site/' + name.replaceAll('\\', '/'));
+        if (!old || JSON.stringify(inlineScripts(await old.async('string'))) !== JSON.stringify(inlineScripts(text))) {
+            baselineDifferences.push(name);
+        }
     }
     const markup = text.replace(/(<script\b[^>]*>)[\s\S]*?<\/script\s*>/gi, '$1</script>');
     for (const match of markup.matchAll(/<(?:script|link|img)\b[^>]*?(?<![:\w-])(?:src|href)="([^"]+)"/gi)) {
