@@ -185,7 +185,6 @@
         props: { api: Object, label: String },
         template: `<div class="resource-batch-actions">
           <button type="button" class="settings-icon-button" :aria-label="(api.all?'全不选':'全选')+label" :title="api.all?'全不选':'全选'" :aria-pressed="api.all" :disabled="!api.total" @click="api.toggleAll()"><icon name="CheckCheck"/></button>
-          <button type="button" class="settings-icon-button" :aria-label="(api.active?'删除所选':'批量删除')+label" :title="api.active?'删除所选':'批量删除'" :disabled="api.active && !api.count" @click="api.remove()"><icon name="Trash2"/></button>
         </div>`
     };
     const MascotHeader = {
