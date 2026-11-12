@@ -343,6 +343,10 @@ const app = createApp({
         window.addEventListener('rp-ui-theme-change', syncUiPack);
         onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', syncUiPack));
         const shellRoots = ['characters', 'album', 'advanced', 'settings'];
+        // 内嵌网页视图：侧滑返回走系统手势，很容易误触，离开前要求再返回一次。
+        const embeddedViewLabels = { square: '万相广场', generator: '角色卡生成', novel: '小说生成' };
+        let embeddedBackArmedView = '';
+        let embeddedBackArmedAt = 0;
         const shellHistory = [];
         const streamImportPanel = ref(null);
         const backupTask = reactive({ active: false, locked: false, title: '', message: '', percent: 0, detail: '', error: '', confirm: null, recovery: false });
@@ -467,6 +471,19 @@ const app = createApp({
             if (currentView.value === 'backup') {
                 if (backupRenameId.value) { cancelRenameBackupFile(); return true; }
                 if (backupMenu.value) { backupMenu.value = ''; return true; }
+            }
+            const embeddedLabel = embeddedViewLabels[currentView.value];
+            if (embeddedLabel) {
+                const now = Date.now();
+                if (embeddedBackArmedView === currentView.value && now - embeddedBackArmedAt < 2000) {
+                    embeddedBackArmedView = '';
+                    embeddedBackArmedAt = 0;
+                } else {
+                    embeddedBackArmedView = currentView.value;
+                    embeddedBackArmedAt = now;
+                    showToast(`再返回一次离开${embeddedLabel}`, 'info', 2000);
+                    return true;
+                }
             }
             if (currentView.value === 'characters') return false;
             if (shellRoots.includes(currentView.value)) {
@@ -7208,6 +7225,10 @@ const app = createApp({
         // Watch view change to refresh embedded pages and sortable lists
         watch(currentView, (newView) => {
             if (newView === 'chat') hasOpenedChat.value = true;
+            if (embeddedBackArmedView && embeddedBackArmedView !== newView) {
+                embeddedBackArmedView = '';
+                embeddedBackArmedAt = 0;
+            }
             activeSortable?.destroy();
             activeSortable = null;
             if (newView !== 'presets' && activePresetGroupName.value) openPresetGroup(null);
