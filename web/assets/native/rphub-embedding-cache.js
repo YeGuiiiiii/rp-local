@@ -703,15 +703,11 @@
         card.className = 'settings-card';
         card.innerHTML = [
             '<div class="settings-card__header">',
-            '  <div class="settings-card__title">🧠 向量缓存</div>',
-            '</div>',
-            '<div id="rphub-emb-cache-stat" class="mt-2 text-sm font-semibold">读取中…</div>',
-            '<div class="mt-2 flex items-center gap-2">',
+            '  <div class="settings-card__title"><span class="mr-1.5 text-primary-600">❖</span>向量缓存</div>',
             '  <button type="button" id="rphub-emb-cache-clear"',
-            '    class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300">清空缓存</button>',
+            '    class="px-2.5 py-1 rounded-lg text-xs font-semibold border border-gray-200 text-gray-600 hover:text-primary-600">清空缓存</button>',
             '</div>',
-            '<p class="mt-2 text-xs opacity-60">同一段文本 + 同一向量模型 + 同一接口地址的向量会被复用，'
-                + '换 API 站、重试、切分支都不再重复计费。清空后下次补录会重新计算。数据只存在本机。</p>'
+            '<div id="rphub-emb-cache-stat" class="mt-1.5 text-xs font-semibold text-gray-600">读取中…</div>'
         ].join('');
         stack.appendChild(card);
 
@@ -742,10 +738,10 @@
         cardSig = sig;
         cardEl = el;
         if (p.off) {
-            el.textContent = '⏸ 已关闭（本次页面未启用）';
+            el.textContent = '○ 已关闭（本次页面未启用）';
             return;
         }
-        el.textContent = '🧠 ' + p.count + ' 条 · ' + fmtKB(p.bytes)
+        el.textContent = p.count + ' 条 · ' + fmtKB(p.bytes)
             + ' · 本次命中 ' + p.hits + ' / ' + total + '（' + rate + '%）';
     }
 
@@ -760,7 +756,7 @@
 
     // 低频轮询：只在设置页出现时才动 DOM，且 renderCard 有签名去重。
     try {
-        setInterval(tickCard, 2000);
+        setInterval(tickCard, 4000);
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', tickCard);
         } else {

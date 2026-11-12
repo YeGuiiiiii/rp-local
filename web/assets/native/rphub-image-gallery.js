@@ -1069,7 +1069,7 @@
         overlay.id = OVERLAY_ID;
         overlay.innerHTML = [
             '<div class="rphub-gal-head">',
-            '  <div class="rphub-gal-title">🖼 图片库</div>',
+            '  <div class="rphub-gal-title"><span style="margin-right:6px">▣</span>图片库</div>',
             '  <select class="rphub-gal-pick" aria-label="按角色卡筛选"></select>',
             '  <button type="button" class="rphub-gal-act" data-act="export">导出</button>',
             '  <button type="button" class="rphub-gal-close" data-act="close">关闭</button>',
@@ -1124,12 +1124,27 @@
         setTimeout(tick, 1500);
         setTimeout(tick, 4000);
         // 聊天页消息流高频变动：用脏标记合并，避免 observer 自己把自己拖死。
-        var observer = new MutationObserver(function () {
+        var observer = new MutationObserver(function (records) {
             if (observerTimer) return;
+            var needTick = !document.getElementById(NAV_ITEM_ID);
+            if (!needTick && records) {
+                for (var i = 0; i < records.length; i++) {
+                    var added = records[i].addedNodes;
+                    for (var j = 0; added && j < added.length; j++) {
+                        var n = added[j];
+                        if (n && n.nodeType === 1 && (n.tagName === 'IMG' || (n.querySelector && n.querySelector('img')))) {
+                            needTick = true;
+                            break;
+                        }
+                    }
+                    if (needTick) break;
+                }
+            }
+            if (!needTick) return;
             observerTimer = setTimeout(function () {
                 observerTimer = null;
                 tick();
-            }, 500);
+            }, 800);
         });
         observer.observe(document.body, { childList: true, subtree: true });
         // 定时兜底：只靠 MutationObserver 的话，聊天区稳定不动时永远采不到上传图。

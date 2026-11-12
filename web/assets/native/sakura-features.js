@@ -230,8 +230,15 @@
         sfRenderEnterButton();
     }
     function sfMountToolbar() {
+        var existingEnter = document.getElementById(SF_ENTER_BTN_ID);
+        var existingMoments = document.getElementById('sf-moments-trigger');
+        if (existingEnter && existingMoments && existingEnter.isConnected && existingMoments.isConnected) {
+            sfRenderEnterButton();
+            if (!sfEnterTimer) sfEnterTimer = setInterval(function () { try { sfMountToolbar(); } catch (e) {} }, 2500);
+            return;
+        }
         var toolbar = sfFindToolbar();
-        if (toolbar && !document.getElementById(SF_ENTER_BTN_ID)) {
+        if (toolbar && !existingEnter) {
             // 插到 ⚙ 按钮前面（不是 appendChild 到末尾，确保排序正确）—— 原留声机按钮的槽位
             var btn = document.createElement('button');
             btn.id = SF_ENTER_BTN_ID;
@@ -301,16 +308,19 @@
         card.className = 'settings-card';
         card.innerHTML = [
             '<div class="settings-card__header">',
-            '  <div class="settings-card__title">⏳ 在线时长</div>',
+            '  <div class="settings-card__title"><span class="mr-1.5 text-primary-600">⧗</span>在线时长</div>',
             '</div>',
-            '<div id="sf-presence-settings" class="mt-2 text-sm font-semibold">⏳ 今日在线 0 分钟 · 近 7 天共 0 分钟</div>',
-            '<ul id="sf-presence-days" class="mt-2 text-xs space-y-0.5"></ul>',
-            '<p class="mt-2 text-xs opacity-60">只统计应用处于前台且可见时的时长，按天累计，保留最近 7 天；数据只存在本机。</p>'
+            '<div id="sf-presence-settings" class="mt-1.5 text-xs font-semibold text-gray-600">今日在线 0 分钟 · 近 7 天共 0 分钟</div>',
+            '<details class="mt-2 text-xs text-gray-500">',
+            '  <summary class="cursor-pointer select-none text-[11px] text-gray-400 hover:text-gray-600">查看近 7 天每日明细</summary>',
+            '  <ul id="sf-presence-days" class="mt-1.5 space-y-0.5 pl-1"></ul>',
+            '</details>'
         ].join('');
         stack.appendChild(card);
     }
 
     function renderPresence() {
+        if (!document.querySelector('.settings-view')) { presenceSig = ''; presenceSigEl = null; return; }
         mountPresenceCard();
         var pi = document.getElementById('sf-presence-settings');
         if (!pi) { presenceSig = ''; presenceSigEl = null; return; }
@@ -327,7 +337,7 @@
         var sig = today + '|' + week + '|' + days.map(function (x) { return x.day + ':' + x.sec; }).join(',');
         if (sig === presenceSig && presenceSigEl === pi) return;
         presenceSig = sig; presenceSigEl = pi;
-        pi.textContent = '⏳ 今日在线 ' + fmtMin(today) + ' 分钟 · 近 7 天共 ' + fmtMin(week) + ' 分钟';
+        pi.textContent = '今日在线 ' + fmtMin(today) + ' 分钟 · 近 7 天共 ' + fmtMin(week) + ' 分钟';
         var list = document.getElementById('sf-presence-days');
         if (!list) return;
         list.innerHTML = '';
@@ -345,11 +355,9 @@
             tick++;
             var el = Math.floor((Date.now() - presenceAnchor) / 1000);
             presenceAnchor = Date.now();
-            if (el > 0 && el <= 30) { var m = presenceLoad(); var d = presenceDayKey(0); m[d] = (m[d] || 0) + el; if (tick % 5 === 0) presencePersist(); }
-            // 1s 一次（原 5s）：「在线时长」是 v-if 整页，点开时才挂到 DOM 上；
-            // 5s 轮询会让页面先显示静态默认值（0 分钟）最多 5 秒才纠正，看起来像数据丢了。
+            if (el > 0 && el <= 30) { var m = presenceLoad(); var d = presenceDayKey(0); m[d] = (m[d] || 0) + el; presencePersist(); }
             renderPresence();
-        }, 1000);
+        }, 5000);
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
                 var el = Math.floor((Date.now() - presenceAnchor) / 1000);
@@ -410,7 +418,7 @@
         var panel = document.createElement('div');
         panel.id = 'sf-moment-panel';
         panel.innerHTML = [
-            '<div class="sfm-head"><div class="sfm-panel-title">📖 名场面手记</div><button class="sfm-panel-close" id="sf-moment-close">✕</button></div>',
+            '<div class="sfm-head"><div class="sfm-panel-title"><span style="margin-right:6px">❧</span>名场面手记</div><button class="sfm-panel-close" id="sf-moment-close">✕</button></div>',
             '<div class="sfm-add-form">',
             '  <input type="text" id="sf-moment-title" placeholder="给这条名场面起个名字…" maxlength="50">',
             '  <textarea id="sf-moment-text" placeholder="粘贴或输入要收藏的内容…" rows="3"></textarea>',
@@ -917,8 +925,9 @@
                 searchPending = true;
                 setTimeout(function () {
                     searchPending = false;
+                    if (!document.querySelector('settings-page-header, .settings-page-header')) return;
                     try { injectEntrySearch(); } catch (e) { console.warn('[SF] 条目搜索注入失败:', e); }
-                }, 0);
+                }, 300);
             });
             searchObs.observe(document.body, { childList: true, subtree: true });
         } catch (e) {

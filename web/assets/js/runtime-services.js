@@ -730,11 +730,25 @@
             if (event.target.tagName === 'IMG') attachButton(event.target);
         }, true);
         try {
+            const pendingRoots = new Set();
+            let scanTimer = null;
+            const flushScan = () => {
+                scanTimer = null;
+                const roots = Array.from(pendingRoots);
+                pendingRoots.clear();
+                roots.forEach(node => { if (node && node.isConnected) scan(node); });
+            };
             const observer = new MutationObserver(records => {
-                records.forEach(record => record.addedNodes.forEach(node => {
-                    if (node.nodeType === Node.ELEMENT_NODE) scan(node);
-                }));
-                records.filter(record => record.type === 'attributes').forEach(record => scan(record.target));
+                records.forEach(record => {
+                    if (record.type === 'attributes') {
+                        if (record.target && record.target.tagName === 'IMG') pendingRoots.add(record.target);
+                        return;
+                    }
+                    record.addedNodes.forEach(node => {
+                        if (node.nodeType === Node.ELEMENT_NODE) pendingRoots.add(node);
+                    });
+                });
+                if (pendingRoots.size && !scanTimer) scanTimer = setTimeout(flushScan, 200);
             });
             observer.observe(document.body, { childList: true, subtree: true, attributes: true,
                 attributeFilter: ['src', 'srcset', 'data-rphub-no-save', 'data-rphub-save-skip'] });
@@ -846,12 +860,14 @@
     const init = () => {
         scan();
         try {
-            const observer = new MutationObserver(scan);
+            let wmTimer = null;
+            const observer = new MutationObserver(() => {
+                if (wmTimer) return;
+                wmTimer = setTimeout(() => { wmTimer = null; scan(); }, 150);
+            });
             observer.observe(document.body, {
                 childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class']
+                subtree: true
             });
         } catch (error) {
         }
