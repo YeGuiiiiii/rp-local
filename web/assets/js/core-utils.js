@@ -932,6 +932,28 @@ window.RPHubUtils = {
             reader.readAsDataURL(blob);
             return blob;
         }
+        // [互通] 非原生环境必须走 blob 下载。这里原来只有上面那个 if：非原生时函数直接结束，
+        // 不下载、不返回、不报错 ⇒ 自动备份（网页兜底分支）、立即备份、各类 JSON 导出一律静默无输出，
+        // 而调用方照旧弹「已导出」的成功提示。与桌面版 core-utils 的同名补丁保持一致。
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'download';
+        if (options.targetBlank) a.target = '_blank';
+        a.rel = 'noopener';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+
+        const cleanup = () => {
+            if (a.parentNode) a.parentNode.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+        const delay = Number(options.revokeDelay || 0);
+        // Chromium 的下载是异步取字节，立即 revoke 会让几十 MB 的备份在写入途中丢数据，
+        // 所以未显式指定 delay 时下限给到 60s（与桌面版同一处取值）。
+        setTimeout(cleanup, delay > 0 ? delay : 60000);
+        return blob;
     };
 
     window.RPHubCardUtils = {

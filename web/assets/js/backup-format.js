@@ -77,7 +77,22 @@
         const webStorage = plainObject(data.webStorage) ? data.webStorage : {};
         let isPluginFormat = false;
         if (Array.isArray(data.entries) && (data.type === 'rp-hub-complete-backup' || data.__rphub_backup__)) {
-            entries = data.entries;
+            entries = data.entries.slice();
+            // 桌面版 App 把 localStorage 单独放在 webStorage.localStorage，entries 里只有当
+            // 「备份范围含本地数据」时才有对应的 __ls__: 条目。桌面端自己导入也走这条分支且不回填，
+            // 所以本地版必须在这里补：否则 App 导出、范围又关掉了本地数据的包，localStorage 全丢。
+            if (plainObject(webStorage.localStorage)) {
+                const seenLs = new Set(entries
+                    .filter(entry => plainObject(entry) && typeof entry.key === 'string'
+                        && entry.key.startsWith(localPrefix))
+                    .map(entry => entry.key));
+                Object.entries(webStorage.localStorage).forEach(([key, value]) => {
+                    const prefixed = localPrefix + key;
+                    if (seenLs.has(prefixed)) return;
+                    seenLs.add(prefixed);
+                    entries.push({ key: prefixed, value: String(value ?? '') });
+                });
+            }
         } else if (data.__rphub_backup__ || Object.keys(extraDatabases).length) {
             isPluginFormat = true;
             const database = extraDatabases.RPHubDB || extraDatabases.main || extraDatabases.SillyTavernDB;
