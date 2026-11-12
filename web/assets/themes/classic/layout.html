@@ -1882,7 +1882,11 @@
                     </button>
                     </template>
                 </settings-page-header>
-                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
+                <div v-if="resourceBatch.active" class="resource-batch-status" role="status">
+                    <span>已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</span>
+                    <button type="button" class="resource-batch-remove" :disabled="!resourceBatch.count"
+                        @click="resourceBatch.remove()">删除所选</button>
+                </div>
                 <div id="regex-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
                     <div v-for="({script, index}) in managedRegexScripts" :key="getSortableItemKey(script)" :data-resource-index="index"
                         class="sortable-list-item group" :class="{ 'is-off': script.enabled !== true }">
@@ -2302,7 +2306,11 @@
                     </button>
                     </template>
                 </settings-page-header>
-                <p v-if="resourceBatch.active" class="resource-batch-status" role="status">已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</p>
+                <div v-if="resourceBatch.active" class="resource-batch-status" role="status">
+                    <span>已选 {{resourceBatch.count}} / {{resourceBatch.total}} 条</span>
+                    <button type="button" class="resource-batch-remove" :disabled="!resourceBatch.count"
+                        @click="resourceBatch.remove()">删除所选</button>
+                </div>
                 <!-- Activation Settings -->
                 <div
                     class="bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden">
