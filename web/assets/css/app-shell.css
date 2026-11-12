@@ -309,12 +309,18 @@
 .preset-group { border-bottom: 1px solid var(--yy-line); }
 .preset-group-row { display: flex; align-items: center; gap: 12px; padding-right: 8px; }
 .preset-group-row > label { min-width: 44px; min-height: 44px; justify-content: center; }
-.preset-group-open { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; min-height: 68px; padding: 12px 8px; text-align: left; }
+.preset-group-open { --preset-hover: #f1f4ff; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; min-height: 68px; padding: 12px 8px; text-align: left; -webkit-tap-highlight-color: transparent; }
 .preset-group-open > .shell-icon { width: 18px; height: 18px; flex: none; color: var(--yy-muted); transition: transform 160ms ease; }
 .preset-group.is-expanded .preset-group-open > .shell-icon { transform: rotate(90deg); }
 .preset-group-open strong { min-width: 0; color: var(--yy-ink); font-size: 15px; overflow-wrap: anywhere; }
 .preset-group-open small { flex: none; color: var(--yy-muted); font-size: 12px; }
-.preset-group-open:hover { background: var(--shell-tint); }
+/* 触摸设备上 :hover 会在抬手后继续粘着，分组标题点开后留下一块底色。
+   桌面用 hover，触摸只保留按住时的高亮。
+   底色刻意写死成默认外观那档淡蓝（theme.css 的 --primary-50 = 241 244 255）：
+   用 --shell-tint 的话，一旦设了强调色就会被改成该色的浅阶，粉的紫的都会冒出来。 */
+:root[data-app-theme="dark"] .preset-group-open { --preset-hover: rgba(255, 255, 255, 0.08); }
+@media (hover: hover) { .preset-group-open:hover { background: var(--preset-hover); } }
+@media (hover: none) { .preset-group-open:active { background: var(--preset-hover); } }
 .preset-group-body { padding: 0 8px 18px; }
 .preset-group-toolbar { display: flex; align-items: center; gap: 8px; padding: 2px 0 14px; }
 .preset-group-import { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }

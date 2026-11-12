@@ -937,7 +937,10 @@ const app = createApp({
             fastModel: DEFAULT_API_CONFIG.fastModel,
             tokenUsageRetentionLimit: 1000,
             chatRenderMessageLimit: 100,
-            uiTemplateKeepFloors: 3
+            uiTemplateKeepFloors: 3,
+            // 两个滑块都容易被误拖：锁住后要改必须先解锁，和记忆设置同一套交互。
+            renderLimitLocked: false,
+            uiFloorsLocked: false
         });
         let retainedSettingsExtras = {};
         const imageApi = window.RPImageProviders.create(IMAGE_GEN_BASE_URL);
@@ -1546,7 +1549,11 @@ const app = createApp({
                 if (preset.name === '第二人称' || preset.name === '第三人称') return;
                 groups.get(presetLibrary.groupOf(preset)).items.push({ index, preset });
             });
-            return [...groups.values()];
+            // 空分组不进列表，避免预设删光后留下点不开的空壳。官方分组恒在；
+            // 当前正在浏览的组豁免，否则刚新建、还没来得及放预设就会当场消失。
+            return [...groups.values()].filter(group => group.items.length
+                || group.key === presetLibrary.officialGroup
+                || group.key === activePresetGroupName.value);
         });
         const activePresetGroup = computed(() => presetGroups.value.find(group => group.key === activePresetGroupName.value));
         const visiblePresetGroups = computed(() => activePresetGroup.value ? [activePresetGroup.value] : []);
@@ -1658,6 +1665,11 @@ const app = createApp({
             const count = selectedPresetIndices.value.length;
             if (!count) return;
             const targetGroup = normalizePresetGroup(presetBatchTargetGroup.value) || presetLibrary.defaultGroup;
+            const sourceGroups = [...new Set(selectedPresetIndices.value
+                .map(index => presets.value[index])
+                .filter(Boolean)
+                .map(preset => presetLibrary.groupOf(preset))
+                .filter(name => name !== targetGroup))];
             presetGroupNames.value = [...new Set([...presetGroupNames.value, targetGroup])];
             selectedPresetIndices.value.forEach(index => {
                 const preset = presets.value[index];
@@ -1665,10 +1677,12 @@ const app = createApp({
                     preset.group = targetGroup;
                 }
             });
+            const pruned = pruneEmptyPresetGroups(sourceGroups);
             saveData();
             showPresetBatchMoveModal.value = false;
             selectedPresetIndices.value = [];
-            showToast('已将 ' + count + ' 项预设移动到「' + targetGroup + '」', 'success');
+            showToast('已将 ' + count + ' 项预设移动到「' + targetGroup + '」'
+                + (pruned.length ? `，${pruned.length} 个空分组已移除` : ''), 'success');
         };
 
         const batchTogglePresetsEnabled = (enable) => {
@@ -1687,6 +1701,26 @@ const app = createApp({
         // --- 2.8.87 预设删除：多选批量删除 / 整组删除 ---
         // 下标取自 presets 原始数组。倒序 splice，避免删掉前面一条后后面的下标整体前移，
         // 把「下一条」当成「这一条」删掉。第二人称/第三人称不在任何分组里，也一并跳过。
+        // 组内预设被删光或搬空后，分组名不该继续挂在列表里。
+        // 「还有没有预设」按 presets 全量算（含第二/第三人称）：这两种内置项不进分组列表，
+        // 若它们的 group 指向某个自定义组，宁可保守留着组名，也不要出现「删掉又自己冒回来」。
+        const pruneEmptyPresetGroups = candidates => {
+            const list = (Array.isArray(candidates) ? candidates : [])
+                .map(normalizePresetGroup).filter(Boolean);
+            if (!list.length) return [];
+            const alive = new Set(presets.value.map(preset => presetLibrary.groupOf(preset)));
+            const removed = [...new Set(list)].filter(name => name !== presetLibrary.officialGroup
+                && presetGroupNames.value.includes(name) && !alive.has(name));
+            if (!removed.length) return [];
+            presetGroupNames.value = presetGroupNames.value.filter(name => !removed.includes(name));
+            if (removed.includes(activePresetGroupName.value)) {
+                activePresetGroupName.value = null;
+                isPresetBatchManaging.value = false;
+                selectedPresetIndices.value = [];
+            }
+            return removed;
+        };
+
         const collectPresetDeletableIndices = candidates => (Array.isArray(candidates) ? candidates : [])
             .map(index => Number(index))
             .filter(index => Number.isInteger(index) && index >= 0 && index < presets.value.length)
@@ -1706,23 +1740,38 @@ const app = createApp({
         const batchDeletePresets = () => {
             const indices = collectPresetDeletableIndices(selectedPresetIndices.value);
             if (!indices.length) return;
+            const affectedGroups = [...new Set(indices.map(index => presetLibrary.groupOf(presets.value[index])))];
             confirmAction(`确定要删除选中的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
                 const removed = removePresetsAt(indices);
+                const pruned = pruneEmptyPresetGroups(affectedGroups);
                 saveData();
-                showToast('已删除 ' + removed + ' 项预设', 'success');
+                showToast(pruned.length
+                    ? `已删除 ${removed} 项预设，${pruned.length} 个空分组已移除`
+                    : '已删除 ' + removed + ' 项预设', 'success');
             });
         };
 
         const deletePresetGroup = group => {
+            const label = (group && group.label) || '该分组';
+            const key = group && group.key;
             const indices = collectPresetDeletableIndices(
                 (group && group.items ? group.items : []).map(entry => entry && entry.index)
             );
-            if (!indices.length) return;
-            const label = (group && group.label) || '该分组';
+            // 组里已经没有可删条目时，删的就是这个空分组本身。
+            if (!indices.length) {
+                if (pruneEmptyPresetGroups([key]).length) {
+                    saveData();
+                    showToast(`已删除空分组「${label}」`, 'success');
+                }
+                return;
+            }
             confirmAction(`确定要删除「${label}」分组的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
                 const removed = removePresetsAt(indices);
+                const pruned = pruneEmptyPresetGroups([key]);
                 saveData();
-                showToast(`已删除「${label}」分组的 ${removed} 项预设`, 'success');
+                showToast(pruned.length
+                    ? `已删除「${label}」分组的 ${removed} 项预设，分组已清空移除`
+                    : `已删除「${label}」分组的 ${removed} 项预设`, 'success');
             });
         };
 
@@ -5079,11 +5128,19 @@ const app = createApp({
                     if (legacyEntries.length) {
                         entries = entries.concat(legacyEntries);
                     }
+                    // [rphub 互通] 外壳必须与桌面版 App 逐字段一致。桌面端 exportAllData 写的是
+                    //   type + __rphub_backup__ + version:8 + entries + databases + webStorage。
+                    //   旧实现只写 type / version:1 / entries：桌面端仍能读到 entries（分支 A 只认 type），
+                    //   但 databases 缺失 ⇒ 名场面手记等伴随库在桌面端静默丢失，webStorage 缺失
+                    //   ⇒ 关掉「本地数据」范围导出的包在桌面端还原不出 localStorage。
                     const backupPayload = {
                         type: 'rp-hub-complete-backup',
-                        version: 1,
+                        __rphub_backup__: 1,
+                        version: 8,
                         exportedAt: new Date().toISOString(),
-                        entries: entries.map(entry => ({ key: entry.key, value: unwrapForStorage(entry.value) }))
+                        entries: entries.map(entry => ({ key: entry.key, value: unwrapForStorage(entry.value) })),
+                        databases: await collectCompanionDatabasesDump(),
+                        webStorage: { localStorage: collectLocalStorageDump() }
                     };
                     downloadJsonFile(backupPayload, fileName);
                     autoBackupConfig.value.lastBackupDate = todayStr;
@@ -5167,13 +5224,7 @@ const app = createApp({
 
                 writePart('],"databases":{');
                 const companionDbs = await collectCompanionDatabasesDump();
-                const lsDump = {};
-                try {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        if (k) lsDump[k] = localStorage.getItem(k);
-                    }
-                } catch (_) {}
+                const lsDump = collectLocalStorageDump();
                 let firstDb = true;
                 Object.keys(companionDbs).forEach(dbName => {
                     writePart((firstDb ? '' : ',') + '"' + dbName + '":' + JSON.stringify(companionDbs[dbName]));
@@ -5747,6 +5798,19 @@ const app = createApp({
                 console.warn('收集本地记忆失败:', error);
             }
             return list;
+        };
+        // [rphub 互通] webStorage.localStorage 通道：原键名、原字符串值，不套 __ls__: 前缀，
+        //   也不做 LOCAL_BACKUP_SKIP 过滤 —— 那两条是 entries 通道的约定。
+        //   桌面版 App 与本地版现在写的是同一份外壳，导入端（App 分支 A/B、本机分支二）各自加前缀。
+        const collectLocalStorageDump = () => {
+            const dump = {};
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k) dump[k] = localStorage.getItem(k);
+                }
+            } catch (_) {}
+            return dump;
         };
         // ---- 旧版遗留数据（legacy 库 SillyTavernDB）----
         // 官方对改名前的旧数据走「读时惰性迁移」：主库读不到才去 legacy 库取，取到再写回主库
@@ -15550,9 +15614,11 @@ const app = createApp({
         };
 
         const deletePreset = (index) => {
+            const groupName = presets.value[index] ? presetLibrary.groupOf(presets.value[index]) : '';
             confirmAction('确定要删除这个预设吗？此操作无法撤销。', () => {
                 presets.value.splice(index, 1);
-                showToast('预设已删除', 'success');
+                const pruned = pruneEmptyPresetGroups([groupName]);
+                showToast(pruned.length ? '预设已删除，空分组已移除' : '预设已删除', 'success');
             });
         };
 
@@ -15934,6 +16000,11 @@ const app = createApp({
         const keepFloorsSliderMax = SUMMARY_KEEP_FLOORS_MAX;
         // 2.7.82：防误触锁的交互实现。锁定后滑块 disabled，需显式点锁按钮才可再改。
         // 状态存在 memorySettings 上，由既有 watch(memorySettings,{deep:true}) 自动落盘。
+        const toggleSettingsLock = (key) => {
+            if (key !== 'renderLimitLocked' && key !== 'uiFloorsLocked') return;
+            settings[key] = !settings[key];
+            showToast(settings[key] ? '已锁定，避免误触；要改请先解锁' : '已解锁，可调整', 'info');
+        };
         const toggleMemorySettingLock = (key) => {
             if (key !== 'keepFloorsLocked' && key !== 'concurrencyLocked') return;
             memorySettings[key] = !memorySettings[key];
@@ -16130,7 +16201,7 @@ const app = createApp({
             startBatchMemoryExtraction, abortBatchExtraction: abortClassicBatchExtraction,
             activeKeepFloors, keepFloorsSlider, keepFloorsSliderMin, keepFloorsSliderMax,
             // 2.7.82：防误触锁 —— 模板里的锁按钮与失效提示要用。
-            toggleMemorySettingLock, keepFloorsNoCompressionWarning,
+            toggleMemorySettingLock, toggleSettingsLock, keepFloorsNoCompressionWarning,
             // 滑块值映射：4-10 为变量分析消息层数。
             uiTemplateAnalysisDepthSlider: computed({
                 get: () => Math.max(4, Math.min(10, Number(settings.uiTemplateAnalysisDepth) || 4)),

@@ -591,6 +591,9 @@
             'color:var(--c-text,#1f2937);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;}',
             '.rphub-gal-body{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 28px;}',
             '.rphub-gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}',
+            '.rphub-gal-pick{flex:none;max-width:46%;min-width:0;border:1px solid var(--c-border,#e5e7eb);',
+            'background:var(--c-surface,#fff);color:var(--c-text,#1f2937);border-radius:10px;',
+            'padding:6px 8px;font-size:12px;font-weight:600;cursor:pointer;}',
             '@media(min-width:640px){.rphub-gal-grid{grid-template-columns:repeat(5,1fr);}}',
             '.rphub-gal-item{position:relative;padding-top:100%;border-radius:10px;overflow:hidden;',
             'background:var(--c-surface,#fff);border:1px solid var(--c-border,#e5e7eb);cursor:pointer;}',
@@ -691,9 +694,60 @@
      * 九、图库浮层
      * ============================================================ */
 
+    // 顶栏下拉框选中的角色卡；空串 = 全部。
+    var activeCharacterId = '';
+
     function filteredRecords(list) {
-        // 只保留一个列表：上传图占比极低，单独分档意义不大，全部平铺即可。
-        return list || [];
+        // 不再按生图 / 上传分档（上传图占比极低），只按顶栏选中的角色卡过滤。
+        var all = list || [];
+        if (!activeCharacterId) return all;
+        return all.filter(function (record) {
+            return String(record.characterId || '') === activeCharacterId;
+        });
+    }
+
+    // 选项按收录张数从多到少排，常用的角色排前面。
+    function characterOptions(list) {
+        var order = [];
+        var map = Object.create(null);
+        (list || []).forEach(function (record) {
+            var key = String(record.characterId || '');
+            var bucket = map[key];
+            if (!bucket) {
+                bucket = map[key] = {
+                    key: key,
+                    name: String(record.characterName || '').trim() || '未关联角色',
+                    count: 0
+                };
+                order.push(bucket);
+            }
+            bucket.count++;
+        });
+        order.sort(function (a, b) { return b.count - a.count; });
+        return order;
+    }
+
+    function escapeHtml(text) {
+        return String(text).replace(/[&<>"']/g, function (ch) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+        });
+    }
+
+    // 每次渲染重建选项：新收录的图会带出新角色卡，被删空的角色也要从列表里退场。
+    function syncCharacterPicker(list) {
+        var pick = document.querySelector('.rphub-gal-head .rphub-gal-pick');
+        if (!pick) return;
+        var options = characterOptions(list);
+        if (activeCharacterId && !options.some(function (item) { return item.key === activeCharacterId; })) {
+            activeCharacterId = '';
+        }
+        var html = ['<option value="">全部角色（' + ((list && list.length) || 0) + ' 张）</option>'];
+        options.forEach(function (item) {
+            html.push('<option value="' + escapeHtml(item.key) + '">'
+                + escapeHtml(item.name) + '（' + item.count + ' 张）</option>');
+        });
+        pick.innerHTML = html.join('');
+        pick.value = activeCharacterId;
     }
 
     function renderGrid() {
@@ -701,6 +755,7 @@
         var empty = document.querySelector('#rphub-gal-body .rphub-gal-empty');
         if (!grid) return;
         loadRecords().then(function (list) {
+            syncCharacterPicker(list);
             var items = filteredRecords(list);
             // 先清空 DOM 再回收 URL：反过来的话正在显示的图会先变破图。
             grid.innerHTML = '';
@@ -1015,6 +1070,7 @@
         overlay.innerHTML = [
             '<div class="rphub-gal-head">',
             '  <div class="rphub-gal-title">🖼 图片库</div>',
+            '  <select class="rphub-gal-pick" aria-label="按角色卡筛选"></select>',
             '  <button type="button" class="rphub-gal-act" data-act="export">导出</button>',
             '  <button type="button" class="rphub-gal-close" data-act="close">关闭</button>',
             '</div>',
@@ -1032,6 +1088,14 @@
             if (target.dataset.act === 'close') { overlay.remove(); releaseObjectUrls(); return; }
             if (target.dataset.act === 'export') { exportSelected(); return; }
         });
+
+        var pick = overlay.querySelector('.rphub-gal-pick');
+        if (pick) {
+            pick.addEventListener('change', function () {
+                activeCharacterId = pick.value || '';
+                renderGrid();
+            });
+        }
 
         selectedIds = null;
         loadRecords().then(function (list) {

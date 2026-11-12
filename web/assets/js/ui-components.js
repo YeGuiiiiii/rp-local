@@ -479,11 +479,13 @@
             src: String,
             loading: Boolean,
             loadingText: String,
-            title: String
+            title: String,
+            // 默认外观不要顶部工具条，把可视区让给网页本身；由调用方显式打开。
+            hideHeader: { type: Boolean, default: false }
         },
         emits: ['load', 'back'],
         template: `
-            <header class="yy-online-toolbar" data-rphub-no-save>
+            <header v-if="!hideHeader" class="yy-online-toolbar" data-rphub-no-save>
                 <button type="button" @click="$emit('back')" class="yy-online-return"
                     aria-label="返回本地版" title="返回本地版"></button>
                 <strong>{{title}}</strong>

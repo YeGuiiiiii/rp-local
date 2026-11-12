@@ -733,19 +733,19 @@
 
             <!-- Generator View -->
             <div v-if="currentView === 'generator'" class="h-full overflow-hidden flex flex-col bg-gray-50 relative">
-                <embedded-view-content title="角色卡工坊" :src="generatorUrl" :loading="isGeneratorLoading" loading-text="加载角色卡工坊中..." @back="shellGoBack" @load="onGeneratorLoad">
+                <embedded-view-content hide-header title="角色卡工坊" :src="generatorUrl" :loading="isGeneratorLoading" loading-text="加载角色卡工坊中..." @back="shellGoBack" @load="onGeneratorLoad">
                 </embedded-view-content>
             </div>
 
             <!-- Square View -->
             <div v-if="currentView === 'square'" class="h-full overflow-hidden flex flex-col bg-gray-50 relative">
-                <embedded-view-content title="万相广场" :src="squareUrl" :loading="isSquareLoading" loading-text="加载万相广场中..." @back="shellGoBack" @load="onSquareLoad">
+                <embedded-view-content hide-header title="万相广场" :src="squareUrl" :loading="isSquareLoading" loading-text="加载万相广场中..." @back="shellGoBack" @load="onSquareLoad">
                 </embedded-view-content>
             </div>
 
             <!-- Novel View -->
             <div v-if="currentView === 'novel'" class="h-full overflow-hidden flex flex-col bg-gray-50 relative">
-                <embedded-view-content title="小说生成" :src="novelUrl" :loading="isNovelLoading" loading-text="加载小说生成中..." @back="shellGoBack" @load="onNovelLoad">
+                <embedded-view-content hide-header title="小说生成" :src="novelUrl" :loading="isNovelLoading" loading-text="加载小说生成中..." @back="shellGoBack" @load="onNovelLoad">
                 </embedded-view-content>
             </div>
 
@@ -858,7 +858,7 @@
     </div>
 
         <div v-if="currentView === 'lighthouse'" class="h-full overflow-hidden flex flex-col bg-gray-50 relative">
-            <embedded-view-content title="灯塔" :src="lighthouseUrl" :loading="isLighthouseLoading" loading-text="加载万象灯塔中..." @back="shellGoBack" @load="onLighthouseLoad">
+            <embedded-view-content hide-header title="灯塔" :src="lighthouseUrl" :loading="isLighthouseLoading" loading-text="加载万象灯塔中..." @back="shellGoBack" @load="onLighthouseLoad">
                 <button type="button" class="shell-icon-button" aria-label="使用独立窗口打开灯塔" title="使用独立窗口打开灯塔" @click="openLighthouseWindow"><shell-icon name="ArrowUpRight"></shell-icon></button>
             </embedded-view-content>
         </div>
@@ -1637,16 +1637,48 @@
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">聊天渲染上限</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ settings.chatRenderMessageLimit }} 条</span>
+                                            <button type="button" @click="toggleSettingsLock('renderLimitLocked')"
+                                                :class="['shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md border transition-all active:scale-95 ',
+                                                    settings.renderLimitLocked ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300']"
+                                                :aria-pressed="settings.renderLimitLocked ? 'true' : 'false'"
+                                                :title="settings.renderLimitLocked ? '已锁定，点击解锁后可以调整' : '锁定以防误触'"
+                                                aria-label="锁定聊天渲染上限">
+                                                <svg v-if="settings.renderLimitLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 018 0v4"></path>
+                                                </svg>
+                                                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 017.5-2"></path>
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <input v-model.number="settings.chatRenderMessageLimit" type="range" min="20" max="500" step="10" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input v-model.number="settings.chatRenderMessageLimit" type="range" min="20" max="500" step="10"
+                                            :disabled="settings.renderLimitLocked"
+                                            :class="['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
+                                                settings.renderLimitLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']">
                                         <p class="mt-2 text-[11px] leading-relaxed text-gray-400">最多保留多少条聊天消息在当前页面；只影响显示，完整聊天历史仍保存在本地。</p>
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">UI 模板保留楼数</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ settings.uiTemplateKeepFloors }} 楼</span>
+                                            <button type="button" @click="toggleSettingsLock('uiFloorsLocked')"
+                                                :class="['shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md border transition-all active:scale-95 ',
+                                                    settings.uiFloorsLocked ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300']"
+                                                :aria-pressed="settings.uiFloorsLocked ? 'true' : 'false'"
+                                                :title="settings.uiFloorsLocked ? '已锁定，点击解锁后可以调整' : '锁定以防误触'"
+                                                aria-label="锁定 UI 模板保留楼数">
+                                                <svg v-if="settings.uiFloorsLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 018 0v4"></path>
+                                                </svg>
+                                                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 017.5-2"></path>
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <input v-model.number="settings.uiTemplateKeepFloors" type="range" min="1" max="20" step="1" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input v-model.number="settings.uiTemplateKeepFloors" type="range" min="1" max="20" step="1"
+                                            :disabled="settings.uiFloorsLocked"
+                                            :class="['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
+                                                settings.uiFloorsLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']">
                                         <p class="mt-2 text-[11px] leading-relaxed text-gray-400">按完整对话楼计算；更早 UI 模板滚到附近时再重建，降低长聊天内存占用。</p>
                                     </div>
                                 </div>
@@ -1698,10 +1730,10 @@
                         </svg>
                     </template>
                     <button type="button" @click="exportPresetGroups()" class="settings-icon-button" title="导出全部分组" aria-label="导出全部分组">
-                        <shell-icon name="Download"></shell-icon>
+                        <shell-icon name="Upload"></shell-icon>
                     </button>
                     <label class="settings-icon-button cursor-pointer" title="导入预设或分组">
-                        <shell-icon name="Upload"></shell-icon>
+                        <shell-icon name="Download"></shell-icon>
                         <input type="file" accept=".json" @change="importPresets($event, null)" aria-label="导入预设或分组" class="sr-only">
                     </label>
                     <button type="button" @click="openPresetGroupForm()" class="settings-create-button" title="新建分组" aria-label="新建分组">
@@ -1744,7 +1776,7 @@
                                         <button type="button" @click="openExportModal('presets')"><shell-icon name="Download"></shell-icon>导出组内预设</button>
                                         <button type="button" @click="exportPresetGroups(group.key)"><shell-icon name="FolderOpen"></shell-icon>导出整个分组</button>
                                         <button v-if="group.key !== 'STA1N官方分组'" type="button" @click="openPresetGroupForm(true)"><shell-icon name="NotebookPen"></shell-icon>重命名分组</button>
-                                        <button type="button" @click="deletePresetGroup(group)" :disabled="!group.items.length"><shell-icon name="Trash2"></shell-icon>删除组内预设</button>
+                                        <button type="button" @click="deletePresetGroup(group)" :disabled="group.key === 'STA1N官方分组' && !group.items.length"><shell-icon name="Trash2"></shell-icon>{{ group.key !== 'STA1N官方分组' && !group.items.length ? '删除空分组' : '删除组内预设' }}</button>
                                     </div>
                                 </details>
                             </div>
@@ -2979,16 +3011,48 @@
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">聊天渲染上限</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ settings.chatRenderMessageLimit }} 条</span>
+                                            <button type="button" @click="toggleSettingsLock('renderLimitLocked')"
+                                                :class="['shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md border transition-all active:scale-95 ',
+                                                    settings.renderLimitLocked ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300']"
+                                                :aria-pressed="settings.renderLimitLocked ? 'true' : 'false'"
+                                                :title="settings.renderLimitLocked ? '已锁定，点击解锁后可以调整' : '锁定以防误触'"
+                                                aria-label="锁定聊天渲染上限">
+                                                <svg v-if="settings.renderLimitLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 018 0v4"></path>
+                                                </svg>
+                                                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 017.5-2"></path>
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <input v-model.number="settings.chatRenderMessageLimit" type="range" min="20" max="500" step="10" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input v-model.number="settings.chatRenderMessageLimit" type="range" min="20" max="500" step="10"
+                                            :disabled="settings.renderLimitLocked"
+                                            :class="['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
+                                                settings.renderLimitLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']">
                                         <p class="mt-2 text-[11px] leading-relaxed text-gray-400">最多保留多少条聊天消息在当前页面；只影响显示，完整聊天历史仍保存在本地。</p>
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">UI 模板保留楼数</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ settings.uiTemplateKeepFloors }} 楼</span>
+                                            <button type="button" @click="toggleSettingsLock('uiFloorsLocked')"
+                                                :class="['shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md border transition-all active:scale-95 ',
+                                                    settings.uiFloorsLocked ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300']"
+                                                :aria-pressed="settings.uiFloorsLocked ? 'true' : 'false'"
+                                                :title="settings.uiFloorsLocked ? '已锁定，点击解锁后可以调整' : '锁定以防误触'"
+                                                aria-label="锁定 UI 模板保留楼数">
+                                                <svg v-if="settings.uiFloorsLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 018 0v4"></path>
+                                                </svg>
+                                                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 017.5-2"></path>
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <input v-model.number="settings.uiTemplateKeepFloors" type="range" min="1" max="20" step="1" class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
+                                        <input v-model.number="settings.uiTemplateKeepFloors" type="range" min="1" max="20" step="1"
+                                            :disabled="settings.uiFloorsLocked"
+                                            :class="['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
+                                                settings.uiFloorsLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']">
                                         <p class="mt-2 text-[11px] leading-relaxed text-gray-400">按完整对话楼计算；更早 UI 模板滚到附近时再重建，降低长聊天内存占用。</p>
                                     </div>
                                 </div>
