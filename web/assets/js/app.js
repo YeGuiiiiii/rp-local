@@ -935,6 +935,8 @@ const app = createApp({
             qualityModel: DEFAULT_API_CONFIG.qualityModel,
             balancedModel: DEFAULT_API_CONFIG.balancedModel,
             fastModel: DEFAULT_API_CONFIG.fastModel,
+            slot4Model: '',
+            slot5Model: '',
             tokenUsageRetentionLimit: 1000,
             chatRenderMessageLimit: 100,
             uiTemplateKeepFloors: 3,
@@ -1098,7 +1100,7 @@ const app = createApp({
                     settings.apiProviderKeys[provider.id] = '';
                 }
                 if (!settings.apiProviderModels[provider.id]) {
-                    settings.apiProviderModels[provider.id] = { qualityModel: '', balancedModel: '', fastModel: '', mode: 'quality' };
+                    settings.apiProviderModels[provider.id] = { qualityModel: '', balancedModel: '', fastModel: '', slot4Model: '', slot5Model: '', mode: 'quality' };
                 }
             });
 
@@ -1285,8 +1287,9 @@ const app = createApp({
         });
 
         watch(() => [settings.apiUrl, settings.apiKey, settings.model], ([, , newModel]) => {
-            if (newModel !== settings.fastModel && newModel !== settings.balancedModel) {
-                settings.qualityModel = newModel; // 确保 qualityModel 也同步更新
+            if (newModel !== settings.fastModel && newModel !== settings.balancedModel
+                && newModel !== settings.slot4Model && newModel !== settings.slot5Model) {
+                settings.qualityModel = newModel; // 确保 qualityModel 也同步更新；slot4/5 也算已配置槽
             }
 
 
@@ -1296,6 +1299,10 @@ const app = createApp({
                 currentModelMode.value = 'fast';
             } else if (newModel === settings.balancedModel) {
                 currentModelMode.value = 'balanced';
+            } else if (newModel === settings.slot4Model) {
+                currentModelMode.value = 'slot4';
+            } else if (newModel === settings.slot5Model) {
+                currentModelMode.value = 'slot5';
             } else {
                 currentModelMode.value = 'quality';
             }
@@ -1304,7 +1311,7 @@ const app = createApp({
         });
 
         // Watch image gen and model settings for sync
-        watch(() => [settings.imageGenKey, settings.imageModel, settings.imageStyle, settings.customImageArtists, settings.imageGenCount, settings.qualityModel, settings.balancedModel, settings.fastModel, settings.uiTemplateModel], () => {
+        watch(() => [settings.imageGenKey, settings.imageModel, settings.imageStyle, settings.customImageArtists, settings.imageGenCount, settings.qualityModel, settings.balancedModel, settings.fastModel, settings.slot4Model, settings.slot5Model, settings.uiTemplateModel], () => {
             syncSettingsToGenerator();
         });
 
@@ -1325,7 +1332,7 @@ const app = createApp({
             currentModelMode.value = mode;
             // settings.model 是「当前生效的模型」，必须跟着一起切，否则上面那个
             // [apiUrl, apiKey, model] 的 watcher 会把 qualityModel 又改回旧模型。
-            const activeModel = { quality, balanced, fast }[mode] || quality || balanced || fast;
+            const activeModel = { quality, balanced, fast, slot4, slot5 }[mode] || quality || balanced || fast || slot4 || slot5;
             if (activeModel) settings.model = activeModel;
             applyModelSlotTemperature(mode);
         };
@@ -1338,12 +1345,14 @@ const app = createApp({
                 qualityModel: settings.qualityModel || '',
                 balancedModel: settings.balancedModel || '',
                 fastModel: settings.fastModel || '',
+                slot4Model: settings.slot4Model || '',
+                slot5Model: settings.slot5Model || '',
                 mode: currentModelMode.value || 'quality'
             };
         };
         window.__rphubSaveProviderModelMemory = saveCurrentProviderModelMemory;
         saveCurrentProviderModelMemory();
-        watch(() => [settings.apiProviderId, settings.qualityModel, settings.balancedModel, settings.fastModel, currentModelMode.value], saveCurrentProviderModelMemory);
+        watch(() => [settings.apiProviderId, settings.qualityModel, settings.balancedModel, settings.fastModel, settings.slot4Model, settings.slot5Model, currentModelMode.value], saveCurrentProviderModelMemory);
         const rphubEnterNewline = ref(false);
         try { rphubEnterNewline.value = localStorage.getItem('rphub-enter-newline') === '1'; } catch (error) {}
         const toggleRphubEnterNewline = () => {
@@ -1387,6 +1396,10 @@ const app = createApp({
                     settings.model = settings.fastModel;
                 } else if (val === 'balanced') {
                     settings.model = settings.balancedModel;
+                } else if (val === 'slot4') {
+                    settings.model = settings.slot4Model;
+                } else if (val === 'slot5') {
+                    settings.model = settings.slot5Model;
                 } else {
                     settings.model = settings.qualityModel;
                 }
@@ -1410,7 +1423,9 @@ const app = createApp({
         const chatModelSlots = computed(() => [
             { mode: 'quality', model: settings.qualityModel },
             { mode: 'balanced', model: settings.balancedModel },
-            { mode: 'fast', model: settings.fastModel }
+            { mode: 'fast', model: settings.fastModel },
+            { mode: 'slot4', model: settings.slot4Model },
+            { mode: 'slot5', model: settings.slot5Model }
         ]);
         const readSlotTemperatures = () => {
             const source = settings.slotTemperatures && typeof settings.slotTemperatures === 'object' ? settings.slotTemperatures : {};
@@ -1418,12 +1433,15 @@ const app = createApp({
             const quality = Number.isFinite(Number(source.quality)) ? Number(source.quality) : fallback;
             const balanced = Number.isFinite(Number(source.balanced)) ? Number(source.balanced) : fallback;
             const fast = Number.isFinite(Number(source.fast)) ? Number(source.fast) : fallback;
-            return { quality, balanced, fast };
+            const slot4 = Number.isFinite(Number(source.slot4)) ? Number(source.slot4) : fallback;
+            const slot5 = Number.isFinite(Number(source.slot5)) ? Number(source.slot5) : fallback;
+            return { quality, balanced, fast, slot4, slot5 };
         };
         const ensureSlotTemperatures = () => {
             const source = settings.slotTemperatures;
             const values = readSlotTemperatures();
-            if (!source || source.quality !== values.quality || source.balanced !== values.balanced || source.fast !== values.fast) {
+            if (!source || source.quality !== values.quality || source.balanced !== values.balanced || source.fast !== values.fast
+                || source.slot4 !== values.slot4 || source.slot5 !== values.slot5) {
                 settings.slotTemperatures = values;
             }
             return settings.slotTemperatures;
@@ -6342,6 +6360,21 @@ const app = createApp({
                     restoreSource: restoreBudget.source,
                     restorePerByte: restoreBudget.perByte,
                     restoreLevel,
+                    // [2.9.027] 流式导入口径：.json 备份与云端恢复不走堆闸门，真正卡线的是
+                    //   stream-import 的档位上限（单集合 / 单条）。最大数据桶超档位时提示换档。
+                    streamProfile: (function () {
+                        try {
+                            const p = window.RPStreamImport.profile(backupProfile.value);
+                            return {
+                                id: p.id,
+                                name: p.name,
+                                collectionBytes: p.collectionBytes,
+                                unitBytes: p.unitBytes,
+                                charBytes: window.RPStreamImport.profiles.at(-1).unitBytes
+                            };
+                        } catch (_) { return null; }
+                    })(),
+                    largestBucketBytes: Math.max(0, ...[...bucketStat.values()].map((s) => s.bytes || 0)),
                     characters: topCharacters,
                     legacyBackupCount,
                     legacyBackupBytes,
@@ -6730,7 +6763,7 @@ const app = createApp({
                 // 辅助：从 ZIP 中解析所有 chunk 数据
         const parseUniversalZipPackage = async (file) => {
             if (!window.JSZip) throw new Error('ZIP 组件尚未加载完成，请稍候重试');
-            const data = await new Promise((resolve, reject) => {
+            let data = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onprogress = event => { if (event.lengthComputable) backupTask.percent = event.loaded / event.total * 15; };
                 reader.onload = () => resolve(reader.result);
@@ -6738,9 +6771,13 @@ const app = createApp({
                 reader.readAsArrayBuffer(file);
             });
             const zip = await window.JSZip.loadAsync(data);
+            // [2.9.027] loadAsync 已把压缩字节复制进自己的模型，外层这份原始 ArrayBuffer
+            //   及时放手，别陪跑整个解析流程。
+            data = null;
             const mfEntry = zip.file('manifest.json');
             if (!mfEntry) throw new Error('不是有效的 ZIP 备份：缺少 manifest.json');
             const manifest = JSON.parse(await mfEntry.async('string'));
+            zip.remove('manifest.json');
 
             let entries = [];
             let extraDatabases = {};
@@ -6755,6 +6792,8 @@ const app = createApp({
                     Object.keys(lsData).forEach(k => {
                         entries.push({ key: LOCAL_BACKUP_PREFIX + k, value: lsData[k] });
                     });
+                    // [2.9.027] 解压缓存用完即弃，峰值只留解析结果
+                    zip.remove('storage/localStorage.json');
                 } catch (e) {
                     console.warn('[ZIP Import] 解析 localStorage.json 失败:', e);
                 }
@@ -6780,6 +6819,10 @@ const app = createApp({
                                 try { records.push(JSON.parse(line)); } catch (_) {}
                             }
                         });
+                        // [2.9.027] 读一条、删一条：JSZip 会把 async('string') 的解压结果缓存在
+                        //   条目上，几百个 chunk 全解析完还挂在内存里，正是旧峰值 ×4 的主因。
+                        //   逐条 remove 后缓存随解析完成即释放，压缩字节也在 remove 时一并丢掉。
+                        zip.remove(path);
                         backupTask.percent = 15 + ++readChunks / Math.max(1, totalChunks) * 40;
                         backupTask.message = '正在解压与校验';
                         backupTask.detail = readChunks + ' / ' + totalChunks + ' 块';
@@ -7004,7 +7047,10 @@ const app = createApp({
                         const restoredEntries = window.RPHubStorage.prepareRestoredMemoryEntries(preflight.idbEntries);
                         const transaction = getMainDb().transaction(['store'], 'readwrite');
                         const store = transaction.objectStore('store');
-                        backupTask.message = '正在写入备份';
+                        // [2.9.028] 单事务写库，巨型 value 每条几十秒，全程只有 7 个跳格。
+                        //   把预期写进文案，避免被当成卡死。
+                        backupTask.message = '正在写入备份（大包需数分钟，请勿离开本页）';
+                        backupTask.detail = '单事务整体提交，进度按条跳动属正常';
                         let written = 0;
                         restoredEntries.forEach(entry => {
                             // [rphub 2.8.98] 同自动备份还原那条：去掉多余 clone。
@@ -7066,9 +7112,11 @@ const app = createApp({
             if (fileName.endsWith('.zip')) {
                 // 2.8.78：ZIP 路径此前完全没有体积闸门。JSZip 的 loadAsync 会把整包读进内存，
                 // 且每个条目 async('string') 的解压结果会被缓存，峰值远高于压缩包本身。
-                // 这里按压缩包体积 × 4 折算成等效 JSON 字节，走与 JSON 路径同一套判据：
-                // 文本类数据 ZIP 一般压到 1/3~1/4，解压后还要再 JSON.parse 成对象图。
-                const ZIP_PEAK_FACTOR = 4;
+                // [2.9.027] parseUniversalZipPackage 已改为「读一条、用完删一条」：解压缓存
+                //   不再随条目累积，峰值 ≈ 压缩包(×1) + 解析出的对象图(≈2.2) ≈ 3.2× 压缩包。
+                //   系数从 ×4 降到 ×2（×2×还原系数 2 = 4× 压缩包，与 JSON 路径 ×2/实测 ×1.51
+                //   的余量同一档），等效闸门抬高约 2 倍。文本类数据 ZIP 一般压到 1/3~1/4。
+                const ZIP_PEAK_FACTOR = 2;
                 const zipBytes = file.size * ZIP_PEAK_FACTOR;
                 const startZipRead = () => parseUniversalZipPackage(file).then(handleSuccess).catch(handleError);
                 const zipVerdict = checkRestoreSize(zipBytes, file.name || '');
@@ -7924,21 +7972,31 @@ const app = createApp({
                 presetGroupNames.value = presetLibrary.names(presets.value,
                     Array.isArray(savedPresetGroups) ? savedPresetGroups : []);
 
+                // [互操作 2.9.027] 空数组不算「global 已启用」。
+                //   启动时 init 完成后的 saveData 会把内存默认的空 global_worldinfo /
+                //   global_regex 落库（桌面版实测：库里没有该键，一次启动后即出现空数组）。
+                //   原逻辑空数组为 truthy，loadData 用空 global 表覆盖角色级表，随后
+                //   的 saveData 把空值写回 regex / worldinfo ⇒ 导入备份落在角色级键
+                //   下的数据在重启后丢失（桌面版哨兵实测：regex 1→0、worldinfo 1→0；
+                //   prompts 无 global 分支所以幸免）。仅当 global 有实际条目时才启用
+                //   覆盖；用户主动清空 global 时两表本就同为空，行为不变。
                 const savedGlobalRegex = await getStoredValue('global_regex');
-                if (savedGlobalRegex) globalRegexScripts.value = savedGlobalRegex.map(script => normalizeRegexScript(script, 'global'));
+                const hasGlobalRegex = Array.isArray(savedGlobalRegex) && savedGlobalRegex.length > 0;
+                if (hasGlobalRegex) globalRegexScripts.value = savedGlobalRegex.map(script => normalizeRegexScript(script, 'global'));
 
-                const savedRegex = savedGlobalRegex ? null : await getStoredValue('regex');
-                if (savedGlobalRegex) {
+                const savedRegex = hasGlobalRegex ? null : await getStoredValue('regex');
+                if (hasGlobalRegex) {
                     regexScripts.value = JSON.parse(JSON.stringify(globalRegexScripts.value)).map(script => normalizeRegexScript(script, 'global'));
                 } else if (savedRegex) {
                     regexScripts.value = savedRegex.map(script => normalizeRegexScript(script, 'character'));
                 }
 
                 const savedGlobalWI = await getStoredValue('global_worldinfo');
-                if (savedGlobalWI) globalWorldInfo.value = savedGlobalWI.map(entry => normalizeWorldInfoEntry({ ...entry, scope: 'global' }));
+                const hasGlobalWI = Array.isArray(savedGlobalWI) && savedGlobalWI.length > 0;
+                if (hasGlobalWI) globalWorldInfo.value = savedGlobalWI.map(entry => normalizeWorldInfoEntry({ ...entry, scope: 'global' }));
 
-                const savedWI = savedGlobalWI ? null : await getStoredValue('worldinfo');
-                if (savedGlobalWI) {
+                const savedWI = hasGlobalWI ? null : await getStoredValue('worldinfo');
+                if (hasGlobalWI) {
                     worldInfo.value = JSON.parse(JSON.stringify(globalWorldInfo.value)).map(entry => normalizeWorldInfoEntry({ ...entry, scope: 'global' }));
                 } else if (savedWI) {
                     worldInfo.value = savedWI.map(normalizeWorldInfoEntry);
@@ -10490,10 +10548,12 @@ const app = createApp({
 
         const selectQuickModels = (models) => {
             const previousModel = settings.model;
-            const [qualityModel, balancedModel, fastModel] = models;
+            const [qualityModel, balancedModel, fastModel, slot4Model, slot5Model] = models;
             settings.qualityModel = qualityModel || '';
             settings.balancedModel = balancedModel || '';
             settings.fastModel = fastModel || '';
+            settings.slot4Model = slot4Model || '';
+            settings.slot5Model = slot5Model || '';
             const activeSlot = chatModelSlots.value.find(slot => slot.mode === currentModelMode.value && slot.model)
                 || chatModelSlots.value.find(slot => slot.model);
             if (activeSlot) {
@@ -10521,7 +10581,9 @@ const app = createApp({
             if (
                 (modelSelectionTarget.value === 'qualityModel' && currentModelMode.value === 'quality') ||
                 (modelSelectionTarget.value === 'balancedModel' && currentModelMode.value === 'balanced') ||
-                (modelSelectionTarget.value === 'fastModel' && currentModelMode.value === 'fast')
+                (modelSelectionTarget.value === 'fastModel' && currentModelMode.value === 'fast') ||
+                (modelSelectionTarget.value === 'slot4Model' && currentModelMode.value === 'slot4') ||
+                (modelSelectionTarget.value === 'slot5Model' && currentModelMode.value === 'slot5')
             ) {
                 settings.model = modelId;
             }

@@ -844,7 +844,7 @@
         data() {
             return {
                 activeSlot: 0,
-                draftSlotModels: ['', '', '']
+                draftSlotModels: ['', '', '', '', '']
             };
         },
         computed: {
@@ -856,7 +856,7 @@
             show(visible) {
                 if (visible && this.target === 'quickModels') {
                     this.activeSlot = 0;
-                    this.draftSlotModels = [0, 1, 2].map(index => this.slotModels[index] || '');
+                    this.draftSlotModels = [0, 1, 2, 3, 4].map(index => this.slotModels[index] || '');
                 }
             }
         },

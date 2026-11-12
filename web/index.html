@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.026'; window.RP_LOCAL_RELEASE = 290;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.029'; window.RP_LOCAL_RELEASE = 293;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -245,7 +245,7 @@
             splash.appendChild(status);
             version = document.getElementById('app-version-marker');
             watch();
-            setTimeout(function () { if (!done && !isReady() && msg) { msg.textContent = '仍在加载，请稍候…'; } }, SOFT_MS);
+            setTimeout(function () { if (!done && !isReady() && msg) { msg.textContent = '仍在加载…数据较多时启动需要一两分钟，请勿关闭'; } }, SOFT_MS);
             setTimeout(function () {
                 if (done || isReady() || !retry) { return; }
                 if (msg) { msg.textContent = '加载时间较长，可能网络或脚本异常'; }
@@ -1112,7 +1112,8 @@
     </div>
 </transition>
                                                 </div>
-                                    <div class="chat-model-slots relative grid auto-rows-fr gap-1.5 rounded-xl bg-gray-100/70 p-1">
+                                    <div class="max-h-32 overflow-y-auto overscroll-contain rounded-xl bg-gray-100/70 p-1">
+                                    <div class="chat-model-slots relative grid auto-rows-fr gap-1.5">
                                         <div class="segmented-switch__indicator flex items-center justify-end px-2.5 text-primary-600" aria-hidden="true"
                                             v-show="chatModelSlots.some(slot => slot.mode === modelMode && slot.model)"
                                             :style="{ '--slot-index': chatModelSlots.findIndex(slot => slot.mode === modelMode) }">
@@ -1128,6 +1129,7 @@
                                             <span class="min-w-0 flex-1 truncate text-[13px] font-medium" :title="slot.model">{{ slot.model || '未配置' }}</span>
                                             <span class="w-4 flex-none" aria-hidden="true"></span>
                                         </button>
+                                    </div>
                                     </div>
                                     <div class="flex flex-col gap-2 rounded-xl bg-gray-50 px-3 py-2.5">
                                         <div class="min-w-0">
@@ -1491,7 +1493,7 @@
                         <li>向量缓存：同文本 + 同模型 + 同接口地址的向量只请求一次，命中即复用本机结果；设置页可查看已缓存条数与命中率，并可一键清空，数据只存本机。</li>
                         <li>支持多个自定义 API 站，每站独立保存地址与密钥。</li>
                         <li>快捷面板内可快速切换 API 站。</li>
-                        <li>三个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li>
+                        <li>五个模型槽位按 API 站各自记忆：切站自动换到该站的模型，切回自动恢复。</li>
                         <li>UI 模板副模型支持独立 API 站；留空时跟随聊天 API。</li>
                         <li>输入法高度适配，输入栏自动避开软键盘。</li>
                         <li>回车行为可切换：聊天工具栏按钮一键在「Enter 发送」与「Enter 换行」之间切换，按钮带状态高亮。</li>
@@ -2160,7 +2162,7 @@
                                             <button type="button" @click="openModelSelector('quickModels')" aria-label="选择聊天模型"
                                                 class="settings-control settings-control--icon flex items-center justify-between text-left">
                                                 <span class="truncate mr-2 text-sm">已配置 {{ [settings.qualityModel,
-                                                    settings.balancedModel, settings.fastModel].filter(Boolean).length }} / 3 个槽位</span>
+                                                    settings.balancedModel, settings.fastModel, settings.slot4Model, settings.slot5Model].filter(Boolean).length }} / 5 个槽位</span>
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -3479,7 +3481,7 @@
         <model-selector-modal :show="showModelSelector" :target="modelSelectionTarget"
             :search-query="modelSearchQuery" :active-tag="activeModelTag" :tags="modelTags"
             :models="filteredModels"
-            :slot-models="[settings.qualityModel, settings.balancedModel, settings.fastModel]"
+            :slot-models="[settings.qualityModel, settings.balancedModel, settings.fastModel, settings.slot4Model, settings.slot5Model]"
             :current-model="modelSelectionTarget === 'memoryEmbeddingModel' ? memorySettings.embeddingModel : (modelSelectionTarget === 'memoryClassicModel' ? memorySettings.classicModel : settings[modelSelectionTarget])"
             @close="showModelSelector = false" @select="selectModel" @select-slots="selectQuickModels"
             @update:search-query="modelSearchQuery = $event"

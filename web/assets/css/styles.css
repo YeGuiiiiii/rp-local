@@ -1687,10 +1687,11 @@ button.sortable-item-main:focus-visible { outline: 2px solid rgb(var(--primary-4
 }
 .chat-quick-panel .settings-toggle--compact { position: relative; }
 .chat-quick-panel .compact-range { height: 20px; margin: 0; background: linear-gradient(rgb(var(--gray-300)), rgb(var(--gray-300))) center / 100% 3px no-repeat; }
+/* 5 行布局：4 个 gap(1.5rem) + p-1 上下(0.5rem) = 2rem */
 .chat-model-slots > .segmented-switch__indicator {
     inset-block-end: auto;
     width: calc(100% - 0.5rem);
-    height: calc((100% - 1.25rem) / 3);
+    height: calc((100% - 2rem) / 5);
     transform: translateY(calc(var(--slot-index, 0) * (100% + 0.375rem)));
 }
 
