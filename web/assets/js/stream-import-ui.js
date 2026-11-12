@@ -8,7 +8,7 @@
             const art = ref(window.RPThemePacks.asset('transfer'));
             const syncArt = () => { art.value = window.RPThemePacks.asset('transfer'); };
             window.addEventListener('rp-ui-theme-change', syncArt);
-            const state = reactive({ phase: 'idle', name: '', bytes: 0, read: 0, message: '', error: '', summary: null, paused: false, applied: 0 });
+            const state = reactive({ phase: 'idle', name: '', bytes: 0, read: 0, message: '', error: '', errorPath: '', errorLimit: 0, summary: null, paused: false, applied: 0, legacy: [], cleanLegacy: false, unitLimit: 0 });
             const busy = computed(() => ['reading', 'ready', 'applying', 'success', 'recovery'].includes(state.phase));
             const isApplying = computed(() => ['applying', 'success', 'recovery'].includes(state.phase));
             const external = computed(() => props.task?.active);
@@ -18,6 +18,30 @@
             const percent = computed(() => external.value ? props.task.percent : isApplying.value ? state.applied
                 : state.bytes ? Math.min(100, Math.floor(state.read / state.bytes * 100)) : 0);
             const format = bytes => bytes < 1048576 ? (bytes / 1024).toFixed(1) + ' KB' : (bytes / 1048576).toFixed(1) + ' MB';
+            // [rphub 2.9.035] 导入前的体检：用与数据体检同一套「堆上限 × 0.85 − 已用」口径，
+            //   反解出这一台机器能安全处理的单条体积。单条峰值 ≈ 值本体 + stringify 副本 +
+            //   tokenizer 缓冲，按 2.5 倍估；硬上限 128MB，档位基准是下限（不因堆波动而缩水）。
+            const UNIT_CAP = 128 * 1048576;
+            const measureTransferLimits = base => {
+                let limit = 0, used = 0;
+                try {
+                    const mem = performance.memory;
+                    if (mem && Number(mem.jsHeapSizeLimit) > 0) {
+                        limit = Number(mem.jsHeapSizeLimit);
+                        used = Number(mem.usedJSHeapSize) || 0;
+                    }
+                } catch (_) {}
+                if (!limit) {
+                    const ram = Number(navigator.deviceMemory) || 0;
+                    limit = (ram >= 8 ? 512 : ram >= 4 ? 384 : ram >= 2 ? 256 : 128) * 1048576;
+                }
+                const affordable = Math.floor(Math.max(0, limit * 0.85 - used) / 2.5);
+                const unitBytes = Math.min(UNIT_CAP, Math.max(base.unitBytes, affordable));
+                const chunkBytes = Math.max(base.chunkBytes, limit >= 384 * 1048576 ? 1048576
+                    : limit >= 256 * 1048576 ? 524288 : 262144);
+                return Object.assign({}, base, { unitBytes, chunkBytes });
+            };
+            const legacyBytes = computed(() => (state.legacy || []).reduce((sum, item) => sum + (Number(item.bytes) || 0), 0));
             let previousFocus, previousOverflow, previousInert;
             const restorePage = () => {
                 const app = document.getElementById('app');
@@ -70,9 +94,10 @@
                 const db = await RPStreamImport.database();
                 try { await RPStreamImport.removeSession(db, sessionId); } finally { db.close(); }
             };
-            const fail = message => {
+            const fail = (message, detail) => {
                 stopWorker();
                 state.phase = 'failed'; state.paused = false; state.error = message; state.message = '导入未完成，原数据未改动';
+                state.errorPath = detail?.path || ''; state.errorLimit = detail?.unitLimit || 0;
                 cleanup(id).catch(error => console.warn('清理导入暂存失败:', error));
             };
             const watchdog = (delay = 45000) => {
@@ -118,12 +143,16 @@
                     worker.onmessage = ({ data }) => {
                         watchdog();
                         if (data.type === 'ready') worker.postMessage({ type: 'import', id, profile: props.profile,
+                            limits: measureTransferLimits(RPStreamImport.profile(props.profile)),
                             ...(stream ? { stream, name: file.name, bytes: file.size } : { file }) }, stream ? [stream] : []);
                         if (data.type === 'progress') { state.read = data.read; state.bytes = data.bytes || state.bytes; state.message = data.phase; }
-                        if (data.type === 'failed') fail(data.message);
+                        if (data.type === 'failed') fail(data.message, data);
                         if (data.type === 'complete') {
                             stopWorker();
                             state.phase = 'ready'; state.bytes = data.bytes || state.bytes; state.read = state.bytes; state.summary = data.summary;
+                            state.legacy = Array.isArray(data.skipped) ? data.skipped.filter(item => item && item.key) : [];
+                            state.cleanLegacy = false;
+                            state.unitLimit = Number(data.unitLimit) || 0;
                             state.paused = false; state.message = '校验完成，等待确认';
                         }
                     };
@@ -143,6 +172,10 @@
                         beforeApply: props.prepare, restoreValue: value => props.decode(value), signal: controller.signal,
                         progress: (done, total, message) => { state.applied = total ? Math.floor(done / total * 100) : 0; state.message = message || '正在恢复数据 ' + done + ' / ' + total; },
                     });
+                    if (state.cleanLegacy && state.legacy.length) {
+                        state.message = '正在清理旧版备份快照';
+                        await purgeLegacyKeys(state.legacy.map(item => item.key));
+                    }
                     state.phase = 'success'; state.applied = 100; state.message = '导入完成，正在重新打开';
                     setTimeout(() => {
                         try { window.AndroidBridge?.clearPatchCacheBeforeReload?.(); } catch (_) {}
@@ -152,6 +185,20 @@
                     state.phase = error.recoveryRequired ? 'recovery' : 'failed';
                     state.error = error.name === 'AbortError' ? '已取消，原数据已恢复' : error.message;
                 } finally { controller = null; }
+            };
+            // 旧版自动备份快照：当前版本不读取，删掉只是回收空间。走存储层统一入口，
+            //   逻辑键（剥掉 rp_hub_ 前缀）由它自己补前缀并连带清历史前缀。
+            const purgeLegacyKeys = async keys => {
+                const api = window.RPHubStorage;
+                if (!api || typeof api.deleteStoredValue !== 'function') return 0;
+                let done = 0;
+                for (const key of keys) {
+                    const logical = String(key || '').replace(/^rp_hub_/, '');
+                    if (!logical) continue;
+                    try { await api.deleteStoredValue(logical); done++; }
+                    catch (error) { console.warn('清理旧版快照失败:', key, error); }
+                }
+                return done;
             };
             const beforeUnload = event => {
                 if (window.AndroidBridge?.isNativeApp?.() || state.phase === 'success' ||
@@ -190,7 +237,16 @@
                         </div>
                         <p role="status">{{ external ? task.message : state.paused ? '已暂停，随时可以继续。' : state.message }}</p>
                         <p v-if="external ? task.error : state.error" role="alert" class="transfer-error">{{ external ? task.error : state.error }}</p>
+                        <p v-if="!external && state.errorPath" class="transfer-error transfer-error-path">出错位置：{{ state.errorPath }}<span v-if="state.errorLimit">（当前档位单条上限 {{ Math.round(state.errorLimit / 1048576) }} MB）</span></p>
                         <p v-if="!external && state.summary" class="transfer-summary">角色卡 {{ state.summary.cards }} 张 · 聊天 {{ state.summary.messages }} 条 · 记忆 {{ state.summary.memories }} 条</p>
+                        <div v-if="!external && state.phase === 'ready' && state.legacy.length" style="margin:8px 0;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;text-align:left">
+                            <p style="font-size:12px;font-weight:600;color:#374151;margin:0 0 4px">检测到 {{ state.legacy.length }} 条旧版备份快照，共 {{ format(legacyBytes) }}</p>
+                            <p style="font-size:11px;color:#6b7280;line-height:1.5;margin:0 0 6px">当前版本既不读取、也不参与还原，只是占着空间。导入会自动跳过它们。</p>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151">
+                                <input type="checkbox" v-model="state.cleanLegacy"> 导入后一并删除这些旧快照
+                            </label>
+                            <p style="font-size:11px;color:#9ca3af;margin:6px 0 0">删除后无法从应用内找回；不确定就先别勾，可稍后在「数据体检」里导出再清理。</p>
+                        </div>
                         <p v-if="!external && state.phase === 'ready'" class="transfer-warning">导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。</p>
                         <div v-if="external && task.confirm" class="transfer-actions">
                             <button class="shell-button" type="button" @click="task.confirm(false)">取消</button>

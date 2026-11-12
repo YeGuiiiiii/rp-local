@@ -1148,6 +1148,13 @@
 
   // scripts/stream-import/decoder.mjs
   var modernKey = (key) => key.startsWith("silly_tavern_") ? "rp_hub_" + key.slice("silly_tavern_".length) : key;
+  var shouldSkipEntryKey = (key) => {
+    const raw = String(key || "");
+    const logical = raw.startsWith("__ls__:") ? raw.slice("__ls__:".length) : raw;
+    const modern = modernKey(logical);
+    if (modern === "rp_hub_auto_backup_config") return false;
+    return modern.startsWith("rp_hub_auto_backup_");
+  };
   var scalarTokens = /* @__PURE__ */ new Set([tokenType_default.STRING, tokenType_default.NUMBER, tokenType_default.TRUE, tokenType_default.FALSE, tokenType_default.NULL]);
   var openTokens = /* @__PURE__ */ new Set([tokenType_default.LEFT_BRACE, tokenType_default.LEFT_BRACKET]);
   var closeTokens = /* @__PURE__ */ new Set([tokenType_default.RIGHT_BRACE, tokenType_default.RIGHT_BRACKET]);
@@ -1167,6 +1174,7 @@
       this.maxUnit = 0;
       this.rootClosed = false;
       this.sawEntries = false;
+      this.skippedEntries = [];
       this.tokenizer = new Tokenizer({ stringBufferSize: 64 * 1024, numberBufferSize: 128 });
       this.textDecoder = new TextDecoder("utf-8", { fatal: true });
       this.validator = new TokenParser({ paths: [], keepStack: false });
@@ -1208,9 +1216,17 @@
       }
       return record;
     }
-    completeRecord(location) {
+    completeRecord(location, offset = this.lastToken) {
       const identity = JSON.stringify([location.source, location.id]);
       const record = this.records.get(identity);
+      if (record && record.skipped) {
+        this.skippedEntries.push({
+          key: record.key,
+          bytes: Math.max(0, offset - (record.skipStart || offset))
+        });
+        this.records.delete(identity);
+        return;
+      }
       if (!record || typeof record.key !== "string" || !record.key || !record.hasValue) {
         throw this.failure("\u5907\u4EFD\u6761\u76EE\u7F3A\u5C11\u6709\u6548\u7684\u5B58\u50A8\u952E\u6216 value");
       }
@@ -1258,6 +1274,12 @@
         if (relative.length === 1 && ["value", "v"].includes(relative[0])) {
           record.hasValue = true;
           record.array = token === tokenType_default.LEFT_BRACKET;
+          if (shouldSkipEntryKey(record.key)) {
+            record.skipped = true;
+            record.count = 0;
+            record.skipStart = typeof info.offset === "number" ? info.offset : this.bytes;
+            return;
+          }
           if (!record.array) {
             this.capture(path, info, (value, bytes) => {
               this.emit({ kind: "unit", source: record.source, entry: record.entry, part: 0, value, bytes });
@@ -1268,6 +1290,7 @@
           return;
         }
         if (relative.length === 2 && ["value", "v"].includes(relative[0]) && typeof relative[1] === "number" && record.array) {
+          if (record.skipped) return;
           this.capture(path, info, (value, bytes) => {
             this.emit({ kind: "unit", source: record.source, entry: record.entry, part: relative[1], value, bytes });
             record.count++;
@@ -1315,8 +1338,8 @@
       } else if (closeTokens.has(token)) {
         const closed = this.frames.pop();
         const location = this.locate(closed.path);
-        if (location && !location.relative.length) this.completeRecord(location);
-        if (location?.mapKey && location.relative.length === 1 && location.relative[0] === "value" && closed.kind === "array") this.completeRecord(location);
+        if (location && !location.relative.length) this.completeRecord(location, info.offset);
+        if (location?.mapKey && location.relative.length === 1 && location.relative[0] === "value" && closed.kind === "array") this.completeRecord(location, info.offset);
         if (!this.frames.length) this.rootClosed = true;
       }
     }
@@ -1352,7 +1375,7 @@
       }
       const source = this.sawEntries ? "entries" : ["database:RPHubDB", "database:main", "database:SillyTavernDB"].find((key) => this.entryCounts[key] > 0);
       if (!source || !this.entryCounts[source]) throw this.failure("\u5907\u4EFD\u6CA1\u6709\u53EF\u7528\u7684\u4E3B\u5E93\u6761\u76EE");
-      return { source, metadata: this.metadata, counts: this.entryCounts, maxUnitBytes: this.maxUnit };
+      return { source, metadata: this.metadata, counts: this.entryCounts, maxUnitBytes: this.maxUnit, skipped: this.skippedEntries };
     }
   };
 
@@ -1518,7 +1541,16 @@
     }
     if (data.type !== "import" || running) return;
     running = true;
-    const limits = profile(data.profile);
+    const MB2 = 1048576;
+    const UNIT_CAP = 128 * MB2;
+    const base = profile(data.profile);
+    const asked = data.limits || {};
+    const limits = {
+      ...base,
+      unitBytes: Math.min(UNIT_CAP, Math.max(base.unitBytes, Number(asked.unitBytes) || 0)),
+      chunkBytes: Math.max(base.chunkBytes, Math.min(4 * MB2, Number(asked.chunkBytes) || 0)),
+      collectionBytes: Math.max(base.collectionBytes, Number(asked.collectionBytes) || 0)
+    };
     const session = { id: data.id, name: data.file?.name || data.name, state: "reading", bytes: data.file?.size || data.bytes || 0, read: 0 };
     let db, timer, lastNotice = 0, phase = "\u5206\u5757\u8BFB\u53D6\u4E0E\u6821\u9A8C";
     const progress = (nextPhase) => {
@@ -1576,9 +1608,15 @@
       progress("\u6838\u5BF9\u89D2\u8272\u5361\u3001\u804A\u5929\u4E0E\u8BB0\u5FC6");
       Object.assign(session, await validate(db, session.id, parsed.source, wait, limits.collectionBytes), { source: parsed.source, state: "complete" });
       await saveSession(db, session);
-      postMessage({ type: "complete", summary: session.summary, bytes: session.read });
+      postMessage({ type: "complete", summary: session.summary, bytes: session.read, skipped: parsed.skipped || [], unitLimit: limits.unitBytes });
     } catch (error) {
-      postMessage({ type: "failed", message: error.name === "QuotaExceededError" ? "\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8" : error.message });
+      postMessage({
+        type: "failed",
+        message: error.name === "QuotaExceededError" ? "\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8" : error.message,
+        path: typeof error.path === "string" ? error.path : "",
+        offset: typeof error.offset === "number" ? error.offset : 0,
+        unitLimit: limits.unitBytes
+      });
     } finally {
       clearInterval(heartbeat);
       db?.close();

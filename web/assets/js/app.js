@@ -1999,7 +1999,11 @@ const app = createApp({
             source: () => currentView.value === 'worldinfo' ? worldInfo : regexScripts,
             label: () => currentView.value === 'worldinfo' ? '世界书' : '正则',
             confirm: showVueConfirmModal,
-            deleted: () => showToast('所选条目已删除', 'success')
+            deleted: () => {
+                // [编辑保存 2.9.032] 批量删除后立即落库，避免 1s 防抖窗口内退出回档。
+                saveData();
+                showToast('所选条目已删除', 'success');
+            }
         });
         const resourceTap = window.RPLocalWorkspace.createTapGuard();
         watch([currentView, currentCharacterIndex], resourceBatch.reset);
@@ -5899,6 +5903,11 @@ const app = createApp({
         ].includes(logicalKey);
         const shouldIncludeBackupEntry = (entry) => {
             const logicalKey = getStorageLogicalKey(entry.key);
+            // [rphub 2.9.034] 旧版自动备份快照（auto_backup_<日期>_<ts>）不再进新备份。
+            //   它是整份旧包的副本，当前版本既不读取也不参与还原，但会让备份体积翻倍：
+            //   实测一份 307MB 的手动备份里有 164MB 就是这一条，且它是单一巨型字符串，
+            //   导入时必然撞「单条记录超上限」。
+            if (logicalKey.indexOf('auto_backup_') === 0 && logicalKey !== 'auto_backup_config') return false;
             if (logicalKey.startsWith('b1_memory_state_')) return backupScope.value.summary;
             if (isCoreBackupKey(logicalKey)) return true;
             if (logicalKey.startsWith('chat_')) return backupScope.value.chat;
@@ -6360,7 +6369,7 @@ const app = createApp({
                     restoreSource: restoreBudget.source,
                     restorePerByte: restoreBudget.perByte,
                     restoreLevel,
-                    // [2.9.027] 流式导入口径：.json 备份与云端恢复不走堆闸门，真正卡线的是
+                    // [2.9.029] 流式导入口径：.json 备份与云端恢复不走堆闸门，真正卡线的是
                     //   stream-import 的档位上限（单集合 / 单条）。最大数据桶超档位时提示换档。
                     streamProfile: (function () {
                         try {
@@ -6771,7 +6780,7 @@ const app = createApp({
                 reader.readAsArrayBuffer(file);
             });
             const zip = await window.JSZip.loadAsync(data);
-            // [2.9.027] loadAsync 已把压缩字节复制进自己的模型，外层这份原始 ArrayBuffer
+            // [2.9.029] loadAsync 已把压缩字节复制进自己的模型，外层这份原始 ArrayBuffer
             //   及时放手，别陪跑整个解析流程。
             data = null;
             const mfEntry = zip.file('manifest.json');
@@ -6792,7 +6801,7 @@ const app = createApp({
                     Object.keys(lsData).forEach(k => {
                         entries.push({ key: LOCAL_BACKUP_PREFIX + k, value: lsData[k] });
                     });
-                    // [2.9.027] 解压缓存用完即弃，峰值只留解析结果
+                    // [2.9.029] 解压缓存用完即弃，峰值只留解析结果
                     zip.remove('storage/localStorage.json');
                 } catch (e) {
                     console.warn('[ZIP Import] 解析 localStorage.json 失败:', e);
@@ -6819,7 +6828,7 @@ const app = createApp({
                                 try { records.push(JSON.parse(line)); } catch (_) {}
                             }
                         });
-                        // [2.9.027] 读一条、删一条：JSZip 会把 async('string') 的解压结果缓存在
+                        // [2.9.029] 读一条、删一条：JSZip 会把 async('string') 的解压结果缓存在
                         //   条目上，几百个 chunk 全解析完还挂在内存里，正是旧峰值 ×4 的主因。
                         //   逐条 remove 后缓存随解析完成即释放，压缩字节也在 remove 时一并丢掉。
                         zip.remove(path);
@@ -7047,7 +7056,7 @@ const app = createApp({
                         const restoredEntries = window.RPHubStorage.prepareRestoredMemoryEntries(preflight.idbEntries);
                         const transaction = getMainDb().transaction(['store'], 'readwrite');
                         const store = transaction.objectStore('store');
-                        // [2.9.028] 单事务写库，巨型 value 每条几十秒，全程只有 7 个跳格。
+                        // [2.9.030] 单事务写库，巨型 value 每条几十秒，全程只有 7 个跳格。
                         //   把预期写进文案，避免被当成卡死。
                         backupTask.message = '正在写入备份（大包需数分钟，请勿离开本页）';
                         backupTask.detail = '单事务整体提交，进度按条跳动属正常';
@@ -7112,7 +7121,7 @@ const app = createApp({
             if (fileName.endsWith('.zip')) {
                 // 2.8.78：ZIP 路径此前完全没有体积闸门。JSZip 的 loadAsync 会把整包读进内存，
                 // 且每个条目 async('string') 的解压结果会被缓存，峰值远高于压缩包本身。
-                // [2.9.027] parseUniversalZipPackage 已改为「读一条、用完删一条」：解压缓存
+                // [2.9.029] parseUniversalZipPackage 已改为「读一条、用完删一条」：解压缓存
                 //   不再随条目累积，峰值 ≈ 压缩包(×1) + 解析出的对象图(≈2.2) ≈ 3.2× 压缩包。
                 //   系数从 ×4 降到 ×2（×2×还原系数 2 = 4× 压缩包，与 JSON 路径 ×2/实测 ×1.51
                 //   的余量同一档），等效闸门抬高约 2 倍。文本类数据 ZIP 一般压到 1/3~1/4。
@@ -8182,10 +8191,14 @@ const app = createApp({
             if (entry?.comment === '自动生图') {
                 const changed = setAutoImageGenEnabled(enabled);
                 if (!changed && event?.target) event.target.checked = isAutoImageGenEnabled.value;
+        // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+                saveData();
                 return;
             }
 
             if (entry) entry.enabled = enabled;
+        // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+            if (entry) saveData();
         };
 
         const generatedImageTasks = new Map();
@@ -8972,7 +8985,8 @@ const app = createApp({
         ]), () => {
             if (_initComplete && !suspendCharacterAutoSave && !_isApplyingCharacterScopedData) debouncedCharacterSave();
         });
-        watch([settings, presets, presetGroupNames, regexScripts, globalRegexScripts, worldInfo, globalWorldInfo, globalUiTemplates, activeTools, user, recentGenerationTimes], () => {
+        // [编辑保存 2.9.032] worldInfoSettings 纳入自动保存 watcher，扫描深度/最大扫描深度改动不再漏存。
+        watch([settings, worldInfoSettings, presets, presetGroupNames, regexScripts, globalRegexScripts, worldInfo, globalWorldInfo, globalUiTemplates, activeTools, user, recentGenerationTimes], () => {
             if (!_initComplete) return;
             debouncedSave();
         }, { deep: true });
@@ -16446,12 +16460,16 @@ const app = createApp({
                 } else {
                     regexScripts.value.push(data);
                 }
+                // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+                saveData();
                 showRegexEditor.value = false;
                 resourceScope.value = data.scope;
             },
             deleteRegex: (index) => {
                 confirmAction('确定要删除这个正则脚本吗？此操作无法撤销。', () => {
                     regexScripts.value.splice(index, 1);
+                    // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+                    saveData();
                     showToast('正则脚本已删除', 'success');
                 });
             },
@@ -16565,6 +16583,8 @@ const app = createApp({
                 }
                 syncWorldInfoToCurrentCharacter();
                 resourceScope.value = data.scope;
+                // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+                saveData();
                 showWorldInfoEditor.value = false;
 
             },
@@ -16572,6 +16592,8 @@ const app = createApp({
                 confirmAction('确定要删除这个世界书条目吗？此操作无法撤销。', () => {
                     worldInfo.value.splice(index, 1);
                     syncWorldInfoToCurrentCharacter();
+                    // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
+                    saveData();
                     showToast('世界书条目已删除', 'success');
                 });
             },

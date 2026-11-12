@@ -1,6 +1,16 @@
 import { Tokenizer, TokenParser, TokenType, TokenizerError, TokenParserError } from '@streamparser/json';
 
 export const modernKey = key => key.startsWith('silly_tavern_') ? 'rp_hub_' + key.slice('silly_tavern_'.length) : key;
+// [rphub 2.9.034] 旧版自动备份快照：一条就是整份旧包（实测 164MB 的单一字符串），
+//   当前版本既不读取也不参与还原。旧备份包里带它时整条跳过 —— 不解析、不入库、也不占内存，
+//   否则必然撞单条上限，让整包都导不进来。auto_backup_config 是当前仍在用的配置，必须保留。
+export const shouldSkipEntryKey = key => {
+    const raw = String(key || '');
+    const logical = raw.startsWith('__ls__:') ? raw.slice('__ls__:'.length) : raw;
+    const modern = modernKey(logical);
+    if (modern === 'rp_hub_auto_backup_config') return false;
+    return modern.startsWith('rp_hub_auto_backup_');
+};
 const scalarTokens = new Set([TokenType.STRING, TokenType.NUMBER, TokenType.TRUE, TokenType.FALSE, TokenType.NULL]);
 const openTokens = new Set([TokenType.LEFT_BRACE, TokenType.LEFT_BRACKET]);
 const closeTokens = new Set([TokenType.RIGHT_BRACE, TokenType.RIGHT_BRACKET]);
@@ -21,6 +31,8 @@ export class BackupStreamDecoder {
         this.maxUnit = 0;
         this.rootClosed = false;
         this.sawEntries = false;
+        // [rphub 2.9.035] 被跳过的旧版快照，导入完成后交给界面决定是否清理
+        this.skippedEntries = [];
         this.tokenizer = new Tokenizer({ stringBufferSize: 64 * 1024, numberBufferSize: 128 });
         this.textDecoder = new TextDecoder('utf-8', { fatal: true });
         this.validator = new TokenParser({ paths: [], keepStack: false });
@@ -65,9 +77,17 @@ export class BackupStreamDecoder {
         return record;
     }
 
-    completeRecord(location) {
+    completeRecord(location, offset = this.lastToken) {
         const identity = JSON.stringify([location.source, location.id]);
         const record = this.records.get(identity);
+        if (record && record.skipped) {
+            this.skippedEntries.push({
+                key: record.key,
+                bytes: Math.max(0, offset - (record.skipStart || offset)),
+            });
+            this.records.delete(identity);
+            return;
+        }
         if (!record || typeof record.key !== 'string' || !record.key || !record.hasValue) {
             throw this.failure('备份条目缺少有效的存储键或 value');
         }
@@ -117,6 +137,12 @@ export class BackupStreamDecoder {
             if (relative.length === 1 && ['value', 'v'].includes(relative[0])) {
                 record.hasValue = true;
                 record.array = token === TokenType.LEFT_BRACKET;
+                if (shouldSkipEntryKey(record.key)) {
+                    record.skipped = true;
+                    record.count = 0;
+                    record.skipStart = typeof info.offset === 'number' ? info.offset : this.bytes;
+                    return;
+                }
                 if (!record.array) {
                     this.capture(path, info, (value, bytes) => {
                         this.emit({ kind: 'unit', source: record.source, entry: record.entry, part: 0, value, bytes });
@@ -127,6 +153,7 @@ export class BackupStreamDecoder {
                 return;
             }
             if (relative.length === 2 && ['value', 'v'].includes(relative[0]) && typeof relative[1] === 'number' && record.array) {
+                if (record.skipped) return;
                 this.capture(path, info, (value, bytes) => {
                     this.emit({ kind: 'unit', source: record.source, entry: record.entry, part: relative[1], value, bytes });
                     record.count++;
@@ -177,9 +204,9 @@ export class BackupStreamDecoder {
         } else if (closeTokens.has(token)) {
             const closed = this.frames.pop();
             const location = this.locate(closed.path);
-            if (location && !location.relative.length) this.completeRecord(location);
+            if (location && !location.relative.length) this.completeRecord(location, info.offset);
             if (location?.mapKey && location.relative.length === 1 && location.relative[0] === 'value'
-                && closed.kind === 'array') this.completeRecord(location);
+                && closed.kind === 'array') this.completeRecord(location, info.offset);
             if (!this.frames.length) this.rootClosed = true;
         }
     }
@@ -217,6 +244,6 @@ export class BackupStreamDecoder {
         const source = this.sawEntries ? 'entries' : ['database:RPHubDB', 'database:main', 'database:SillyTavernDB']
             .find(key => this.entryCounts[key] > 0);
         if (!source || !this.entryCounts[source]) throw this.failure('备份没有可用的主库条目');
-        return { source, metadata: this.metadata, counts: this.entryCounts, maxUnitBytes: this.maxUnit };
+        return { source, metadata: this.metadata, counts: this.entryCounts, maxUnitBytes: this.maxUnit, skipped: this.skippedEntries };
     }
 }

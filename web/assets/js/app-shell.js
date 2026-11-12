@@ -542,7 +542,8 @@
                   </div>
                   <label class="backup-field"><span>备份文件名</span><input type="text" aria-label="备份文件名" v-model="s.filename" placeholder="留空使用日期名称"></label>
                   <div class="backup-line backup-location"><span class="backup-path">{{s.folder || s.defaultFolder}}</span><button class="shell-icon-button" aria-label="更改备份目录" title="更改备份目录" @click="s.chooseFolder"><icon name="FolderOpen"/></button></div>
-                  <label class="backup-field"><span>传输速度</span><select v-model="s.profile" aria-label="传输速度"><option v-for="profile in s.profiles" :key="profile.id" :value="profile.id">{{profile.name}}</option></select></label>
+                  <label class="backup-field"><span>读取档位</span><select v-model="s.profile" aria-label="读取档位"><option v-for="profile in s.profiles" :key="profile.id" :value="profile.id">{{profile.name}} · 单条≤{{Math.round(profile.unitBytes / 1048576)}}MB</option></select></label>
+                  <p class="backup-muted">导入时会按本机可用内存自动放宽单条上限（最高 128MB）并调整分块大小；档位决定基准值与分块下限。</p>
                   <details class="backup-details">
                     <summary>备份内容</summary><p v-if="s.native" class="backup-muted">以下为 JSON 导出选项；完整档案始终包含全部内容。</p>
                     <label v-for="option in s.scopes" :key="option.key" class="backup-check"><input type="checkbox" v-model="s.scope[option.key]">{{option.label}}</label>

@@ -921,28 +921,29 @@
                         </div>
                         <div class="flex items-start justify-between gap-3 px-3 py-2 border-t border-gray-100">
                             <span class="text-gray-500 flex-shrink-0">ZIP 导入上限</span>
-                            <span class="text-right text-gray-700">
+                            <div class="text-right text-gray-700">
                                 {{ formatDataHealthSize(backupSizeReport.restoreMaxBytes) }}
                                 <span class="block text-gray-400">
-                                    整包读内存的口径，只约束 ZIP 导入；.json 备份走流式导入，不看这个数
+                                    仅约束 ZIP 整包导入；.json 走流式导入不看此项
                                 </span>
-                                <span class="block text-gray-400">
-                                    堆 {{ formatDataHealthSize(backupSizeReport.restoreLimit) }}
-                                    · 已用 {{ formatDataHealthSize(backupSizeReport.restoreUsed) }}
-                                    · 系数 ×{{ backupSizeReport.restorePerByte }}
-                                    · {{ backupSizeReport.restoreSource }}
+                                <details class="mt-1 text-gray-400">
+                                    <summary class="cursor-pointer select-none hover:text-gray-600">展开堆计算明细</summary>
+                                    <span class="block mt-1">
+                                        堆 {{ formatDataHealthSize(backupSizeReport.restoreLimit) }}
+                                        · 已用 {{ formatDataHealthSize(backupSizeReport.restoreUsed) }}
+                                        · 系数 ×{{ backupSizeReport.restorePerByte }}
+                                        · {{ backupSizeReport.restoreSource }}
+                                    </span>
+                                    <span class="block">
+                                        按加载完成时
+                                        {{ formatDataHealthSize(backupSizeReport.restoreUsedBaselineBytes) }}
+                                        算：{{ formatDataHealthSize(backupSizeReport.restoreMaxBytesOptimistic) }}
+                                    </span>
+                                </details>
+                                <span v-if="backupSizeReport.restoreUsedPolluted" class="block text-amber-600 mt-1">
+                                    本次已用偏高，等一两分钟再分析更准
                                 </span>
-                                <span class="block text-gray-400">
-                                    按加载完成时
-                                    {{ formatDataHealthSize(backupSizeReport.restoreUsedBaselineBytes) }}
-                                    算：{{ formatDataHealthSize(backupSizeReport.restoreMaxBytesOptimistic) }}
-                                </span>
-                                <span v-if="backupSizeReport.restoreUsedPolluted" class="block text-amber-600">
-                                    本次已用比加载完成时高出一大截（多半是刚跑完备份、
-                                    或上一次分析还没被回收），上限偏保守；
-                                    等一两分钟再分析更准
-                                </span>
-                            </span>
+                            </div>
                         </div>
                         <div class="flex items-start justify-between gap-3 px-3 py-2 border-t border-gray-100">
                             <span class="text-gray-500 flex-shrink-0">流式导入档位</span>
@@ -1406,7 +1407,15 @@
                                 <!-- Model Configuration Inputs -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div class="group md:col-span-2">
-                                        <label class="settings-label">聊天模型</label>
+                                        <div class="flex items-center justify-between mb-1.5">
+                                            <label class="settings-label !mb-0">聊天模型</label>
+                                            <button type="button" @click="fetchModels(true)" class="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700 active:scale-95 transition-all" title="刷新可用模型列表">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                </svg>
+                                                刷新模型列表
+                                            </button>
+                                        </div>
                                         <div class="relative group">
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-500 transition-colors pointer-events-none z-10">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1421,15 +1430,6 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                    </div>
-                                    <div class="col-span-1 md:col-span-2">
-                                        <button @click="fetchModels(true)" class="settings-action w-full text-primary-600" title="刷新列表">
-                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                                </path>
-                                            </svg>
-                                            刷新可用模型列表
-                                        </button>
                                     </div>
                                 </div>
 
@@ -1513,11 +1513,8 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                            <button type="button" class="settings-control mt-3 flex items-center justify-between gap-3 text-left" :aria-pressed="settings.freezeGeneratedImages ? 'true' : 'false'" @click="toggleFreezeGeneratedImages()">
-                                                <span class="min-w-0 flex-1">
-                                                    <span class="block text-sm font-bold text-gray-700">固定已生成的图片</span>
-                                                    <span class="mt-0.5 block text-[11px] leading-snug text-gray-400">开启后，切换画师串 / 生图风格时已生成的旧图保持不变；reroll 仍可单独重新生成</span>
-                                                </span>
+                                            <button type="button" class="settings-control mt-2.5 !py-2 flex items-center justify-between gap-3 text-left" :aria-pressed="settings.freezeGeneratedImages ? 'true' : 'false'" title="开启后，切换画师串 / 生图风格时已生成的旧图保持不变；reroll 仍可单独重新生成" @click="toggleFreezeGeneratedImages()">
+                                                <span class="min-w-0 flex-1 text-xs font-semibold text-gray-700">固定已生成图片<span class="ml-1.5 font-normal text-[11px] text-gray-400">切风格不重绘旧图</span></span>
                                                 <span class="flex-none text-xs font-bold" :style="settings.freezeGeneratedImages ? 'color:#0f766e' : 'color:#9ca3af'">{{ settings.freezeGeneratedImages ? '已开启' : '已关闭' }}</span>
                                             </button>
                                         </div>
@@ -1628,34 +1625,20 @@
                                 </button>
                             </div>
 
-                            <!-- Font Settings -->
-                            <div class="pt-6 border-t border-gray-100 mt-6">
-                                <h4 class="settings-subheading flex items-center mb-4">
+                            <!-- Chat Rendering & Display Parameters -->
+                            <div class="pt-5 border-t border-gray-100 mt-5">
+                                <h4 class="settings-subheading flex items-center mb-3">
                                     <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
-                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"></path>
                                     </svg>
-                                    高级参数
+                                    显示与聊天渲染
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Font Size Setting -->
-                                    <div class="min-w-0">
+                                    <div class="min-w-0 md:col-span-2">
                                         <label class="settings-label">对话字体大小</label>
                                         <custom-select v-model="settings.fontSize" :options="fontSizeOptions" button-class="settings-control" menu-class="text-sm">
                                         </custom-select>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Chat Rendering Performance -->
-                            <div class="pt-6 border-t border-gray-100 mt-6">
-                                <h4 class="settings-subheading flex items-center mb-4">
-                                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"></path>
-                                    </svg>
-                                    聊天渲染与 UI 模板
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="min-w-0">
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">聊天渲染上限</label>
@@ -1710,36 +1693,33 @@
                         </div>
                     </div>
 
-                    <!-- Runtime Environment (read-only) -->
-                    <div class="settings-card">
-                        <div class="settings-card__header">
+                    <!-- Runtime Environment (read-only, collapsible) -->
+                    <details class="settings-card group">
+                        <summary class="settings-card__header cursor-pointer select-none list-none">
                             <div class="settings-card__title">
-                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><use href="#icon-settings"></use></svg>
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><use href="#icon-settings"></use></svg>
                                 运行环境
                             </div>
-                            <button type="button" class="settings-action" @click="refreshRuntimeEnv()">重新读取</button>
-                        </div>
+                            <span class="text-xs text-gray-400 font-mono truncate max-w-[55%]" v-if="runtimeEnv">{{ runtimeEnv.chrome }} · 堆 {{ runtimeEnv.heapUsed }}/{{ runtimeEnv.heapLimit }}</span>
+                            <span class="text-xs text-gray-400" v-else>展开诊断</span>
+                        </summary>
 
-                        <div class="settings-card__body space-y-3">
-                            <p class="text-xs text-gray-500 leading-relaxed">
-                                只读信息，不参与任何计算。兼容性问题先看这里：内核版本决定脚本能不能解析，堆上限决定能处理多大的数据。
-                            </p>
+                        <div class="settings-card__body space-y-3 mt-3 pt-3 border-t border-gray-100">
                             <template v-if="runtimeEnv">
-                                <div class="text-xs space-y-2">
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">WebView 内核</span><span class="flex-1 break-all font-mono">{{ runtimeEnv.chrome }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">判定</span><span class="flex-1">{{ runtimeEnv.engineVerdict }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">设备内存</span><span class="flex-1">{{ runtimeEnv.deviceRam }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">JS 堆上限</span><span class="flex-1">{{ runtimeEnv.heapLimit }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">JS 堆已用</span><span class="flex-1">{{ runtimeEnv.heapUsed }}（{{ runtimeEnv.heapRatio }}）</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">聊天渲染</span><span class="flex-1">{{ runtimeEnv.renderWindow }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">角色列表</span><span class="flex-1">{{ runtimeEnv.charPage }}</span></div>
-                                    <div class="flex gap-2"><span class="w-28 flex-none text-gray-500">UA 原文</span><span class="flex-1 break-all font-mono text-gray-400">{{ runtimeEnv.ua }}</span></div>
+                                <div class="text-xs space-y-1.5">
+                                    <div class="flex gap-2"><span class="w-24 flex-none text-gray-500">WebView 内核</span><span class="flex-1 break-all font-mono">{{ runtimeEnv.chrome }}（{{ runtimeEnv.engineVerdict }}）</span></div>
+                                    <div class="flex gap-2"><span class="w-24 flex-none text-gray-500">设备与堆</span><span class="flex-1">RAM {{ runtimeEnv.deviceRam }} · 堆 {{ runtimeEnv.heapUsed }} / {{ runtimeEnv.heapLimit }}（{{ runtimeEnv.heapRatio }}）</span></div>
+                                    <div class="flex gap-2"><span class="w-24 flex-none text-gray-500">分页窗口</span><span class="flex-1">聊天 {{ runtimeEnv.renderWindow }} · 角色 {{ runtimeEnv.charPage }}</span></div>
+                                    <div class="flex gap-2"><span class="w-24 flex-none text-gray-500">UA 原文</span><span class="flex-1 break-all font-mono text-gray-400">{{ runtimeEnv.ua }}</span></div>
                                 </div>
-                                <button type="button" class="settings-action" @click="copyRuntimeEnv()">复制诊断信息</button>
+                                <div class="flex items-center gap-2 pt-1">
+                                    <button type="button" class="settings-action" @click="refreshRuntimeEnv()">重新读取</button>
+                                    <button type="button" class="settings-action" @click="copyRuntimeEnv()">复制诊断信息</button>
+                                </div>
                             </template>
                             <p v-else="" class="text-xs text-gray-400">尚未读取。</p>
                         </div>
-                    </div>
+                    </details>
 
                 </div>
             </div>
@@ -1967,7 +1947,7 @@
                         </div>
                         <div class="sortable-item-actions">
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="script.enabled" class="settings-toggle-input sr-only" :true-value="true"
+                                <input type="checkbox" v-model="script.enabled" @change="saveData()" class="settings-toggle-input sr-only" :true-value="true"
                                     :false-value="false">
                                 <div class="settings-toggle"></div>
                             </label>
@@ -2404,7 +2384,7 @@
                                             <label for="worldinfo-scan-depth" class="font-semibold text-gray-700">扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.scanDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-scan-depth" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1"
+                                        <input id="worldinfo-scan-depth" @change="saveData()" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1"
                                             class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                     <!-- Max Scan Depth -->
@@ -2413,7 +2393,7 @@
                                             <label for="worldinfo-max-depth" class="font-semibold text-gray-700">最大扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.maxDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-max-depth" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1"
+                                        <input id="worldinfo-max-depth" @change="saveData()" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1"
                                             class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                 </div>
@@ -2793,7 +2773,15 @@
                                 <!-- Model Configuration Inputs -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div class="group md:col-span-2">
-                                        <label class="settings-label">聊天模型</label>
+                                        <div class="flex items-center justify-between mb-1.5">
+                                            <label class="settings-label !mb-0">聊天模型</label>
+                                            <button type="button" @click="fetchModels(true)" class="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700 active:scale-95 transition-all" title="刷新可用模型列表">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                </svg>
+                                                刷新模型列表
+                                            </button>
+                                        </div>
                                         <div class="relative group">
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-500 transition-colors pointer-events-none z-10">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2808,15 +2796,6 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                    </div>
-                                    <div class="col-span-1 md:col-span-2">
-                                        <button @click="fetchModels(true)" class="settings-action w-full text-primary-600" title="刷新列表">
-                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                                </path>
-                                            </svg>
-                                            刷新可用模型列表
-                                        </button>
                                     </div>
                                 </div>
 
@@ -3002,34 +2981,20 @@
                                 </label>
                             </div>
 
-                            <!-- Font Settings -->
-                            <div class="pt-6 border-t border-gray-100 mt-6">
-                                <h4 class="settings-subheading flex items-center mb-4">
+                            <!-- Chat Rendering & Display Parameters -->
+                            <div class="pt-5 border-t border-gray-100 mt-5">
+                                <h4 class="settings-subheading flex items-center mb-3">
                                     <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
-                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"></path>
                                     </svg>
-                                    高级参数
+                                    显示与聊天渲染
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Font Size Setting -->
-                                    <div class="min-w-0">
+                                    <div class="min-w-0 md:col-span-2">
                                         <label class="settings-label">对话字体大小</label>
                                         <custom-select v-model="settings.fontSize" :options="fontSizeOptions" button-class="settings-control" menu-class="text-sm">
                                         </custom-select>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Chat Rendering Performance -->
-                            <div class="pt-6 border-t border-gray-100 mt-6">
-                                <h4 class="settings-subheading flex items-center mb-4">
-                                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"></path>
-                                    </svg>
-                                    聊天渲染与 UI 模板
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="min-w-0">
                                         <div class="flex justify-between items-center mb-2">
                                             <label class="settings-label !mb-0">聊天渲染上限</label>

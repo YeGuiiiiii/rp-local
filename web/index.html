@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.031'; window.RP_LOCAL_RELEASE = 293;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.035'; window.RP_LOCAL_RELEASE = 297;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -2833,7 +2833,7 @@
                         </div>
                         <div class="sortable-item-actions">
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="script.enabled" class="settings-toggle-input sr-only" :true-value="true"
+                                <input type="checkbox" v-model="script.enabled" @change="saveData()" class="settings-toggle-input sr-only" :true-value="true"
                                     :false-value="false">
                                 <div class="settings-toggle"></div>
                             </label>
@@ -3383,7 +3383,7 @@
                                             <label for="worldinfo-scan-depth" class="font-semibold text-gray-700">扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.scanDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-scan-depth" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1"
+                                        <input id="worldinfo-scan-depth" @change="saveData()" type="range" v-model.number="worldInfoSettings.scanDepth" min="0" max="20" step="1"
                                             class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                     <!-- Max Scan Depth -->
@@ -3392,7 +3392,7 @@
                                             <label for="worldinfo-max-depth" class="font-semibold text-gray-700">最大扫描深度</label>
                                             <span class="text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap">{{ worldInfoSettings.maxDepth }}</span>
                                         </div>
-                                        <input id="worldinfo-max-depth" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1"
+                                        <input id="worldinfo-max-depth" @change="saveData()" type="range" v-model.number="worldInfoSettings.maxDepth" min="0" max="50" step="1"
                                             class="compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500">
                                     </div>
                                 </div>

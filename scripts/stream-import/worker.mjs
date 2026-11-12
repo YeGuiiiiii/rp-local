@@ -9,7 +9,18 @@ self.onmessage = async ({ data }) => {
     if (data.type === 'resume') { paused = false; resume?.(); return; }
     if (data.type !== 'import' || running) return;
     running = true;
-    const limits = profile(data.profile);
+    // [rphub 2.9.035] 主线程按本机堆实测下发 limits：单条上限最高 128MB，分块大小随
+    //   设备能力自适应。缺失时退回档位默认值，行为与旧版一致。
+    const MB = 1048576;
+    const UNIT_CAP = 128 * MB;
+    const base = profile(data.profile);
+    const asked = data.limits || {};
+    const limits = {
+        ...base,
+        unitBytes: Math.min(UNIT_CAP, Math.max(base.unitBytes, Number(asked.unitBytes) || 0)),
+        chunkBytes: Math.max(base.chunkBytes, Math.min(4 * MB, Number(asked.chunkBytes) || 0)),
+        collectionBytes: Math.max(base.collectionBytes, Number(asked.collectionBytes) || 0),
+    };
     const session = { id: data.id, name: data.file?.name || data.name, state: 'reading', bytes: data.file?.size || data.bytes || 0, read: 0 };
     let db, timer, lastNotice = 0, phase = '分块读取与校验';
     const progress = nextPhase => {
@@ -63,9 +74,17 @@ self.onmessage = async ({ data }) => {
         progress('核对角色卡、聊天与记忆');
         Object.assign(session, await validate(db, session.id, parsed.source, wait, limits.collectionBytes), { source: parsed.source, state: 'complete' });
         await saveSession(db, session);
-        postMessage({ type: 'complete', summary: session.summary, bytes: session.read });
+        postMessage({ type: 'complete', summary: session.summary, bytes: session.read, skipped: parsed.skipped || [], unitLimit: limits.unitBytes });
     } catch (error) {
-        postMessage({ type: 'failed', message: error.name === 'QuotaExceededError' ? '设备存储空间不足，原数据未改动' : error.message });
+        // [rphub 2.9.034] 一起回传超限位置：只给一句「请切换读取档位」用户无从下手，
+        //   而 path 已经能精确指到 $.entries[3].value 这种位置。
+        postMessage({
+            type: 'failed',
+            message: error.name === 'QuotaExceededError' ? '设备存储空间不足，原数据未改动' : error.message,
+            path: typeof error.path === 'string' ? error.path : '',
+            offset: typeof error.offset === 'number' ? error.offset : 0,
+            unitLimit: limits.unitBytes,
+        });
     } finally {
         clearInterval(heartbeat);
         db?.close();
