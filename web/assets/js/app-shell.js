@@ -206,7 +206,7 @@
             const trigger = ref(null), highlighted = ref(''), origin = ref({ x: 0, y: 0 });
             const destinations = [
                 { view: 'lighthouse', name: '灯塔', icon: 'Lighthouse', dx: -22, dy: -116 },
-                { view: 'square', name: '万象广场', icon: 'Globe2', dx: -108, dy: -54 }
+                { view: 'square', name: '万相广场', icon: 'Globe2', dx: -108, dy: -54 }
             ];
             const choices = computed(() => destinations.map(item => ({
                 ...item,

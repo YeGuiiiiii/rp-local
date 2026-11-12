@@ -1,6 +1,6 @@
 /* RP-Hub 下载钩子（2.8.56）
  *
- * 问题：万象广场（rphforum）的下载实现是
+ * 问题：万相广场（rphforum）的下载实现是
  *   fetch('/api/cards/{id}/download', {method:'POST'}) → blob
  *   → URL.createObjectURL(blob) → 造 <a download href="blob:…"> → a.click()
  * → 站点随后自己弹「已发起下载，请查看浏览器下载列表」。

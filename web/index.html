@@ -1450,8 +1450,8 @@
 
             <!-- Square View -->
             <div v-if="currentView === 'square'" class="h-full overflow-hidden flex flex-col bg-gray-50 relative">
-                <embedded-view-content title="万象广场" :src="squareUrl" :loading="isSquareLoading"
-                    loading-text="加载万象广场中..." @back="shellGoBack" @load="onSquareLoad">
+                <embedded-view-content title="万相广场" :src="squareUrl" :loading="isSquareLoading"
+                    loading-text="加载万相广场中..." @back="shellGoBack" @load="onSquareLoad">
                 </embedded-view-content>
             </div>
 
@@ -1523,7 +1523,7 @@
                         <li>聊天记录导出可选：导出时自行勾选是否附带 UI 变量记录与记忆系统（逐轮总结），聊天记录本体始终导出。</li>
                         <li>导入还原记忆：导入带记忆的聊天文件时，按分支写回逐轮总结，导入完成后即时生效。</li>
                         <li>向量缓存：同一段文本 + 同一向量模型 + 同一接口地址的向量只向服务端请求一次，命中后直接复用本机结果，零请求、零计费；换 API 站、重试、切分支都不再重复扣费。设置页有独立卡片显示已缓存条数与本次命中率，可一键清空，数据只存本机。</li>
-                        <li>万象广场下载：广场里的角色卡在 App 内点下载会真正存到手机，不再只弹一句「已发起下载」而文件其实没落地。</li>
+                        <li>万相广场下载：广场里的角色卡在 App 内点下载会真正存到手机，不再只弹一句「已发起下载」而文件其实没落地。</li>
                         <li>深色适配：跟随系统深色模式压暗网页背景，同时保留你自己设定的深色正文容器与封面背景，不会把整页反相成负片。</li>
                         <li>后台保持连接：通知栏常驻提示，切到其他应用或锁屏时对话与生成不中断。</li>
                     </ol>
