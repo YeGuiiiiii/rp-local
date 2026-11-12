@@ -605,8 +605,49 @@
             </div>
           </div>`
     };
+    const UpdatePanel = {
+        components: { Icon },
+        setup() {
+            const updates = window.RPUpdates;
+            return { updates, state: updates.state,
+                busy: computed(() => ['checking', 'downloading', 'verifying'].includes(updates.state.phase)),
+                status: computed(() => ({
+                    idle: '', checking: '正在检查更新...', current: '已是最新版本',
+                    available: '发现新版本 ' + (updates.state.latest?.versionName || ''),
+                    downloading: '正在下载 ' + updates.state.progress + '%',
+                    verifying: '正在校验安装包...', ready: '更新已下载，可以安装',
+                    permission: '请允许安装更新，返回后点击安装。'
+                })[updates.state.phase] || '')
+            };
+        },
+        template: `<section class="app-update-controls" aria-label="软件更新">
+          <div class="app-update-line">
+            <label class="app-update-toggle">
+              <span>自动更新</span>
+              <span class="relative inline-flex flex-none items-center">
+                <input type="checkbox" role="switch" aria-label="自动更新" class="settings-toggle-input sr-only"
+                  :checked="state.automatic" @change="updates.setAutomatic($event.target.checked)">
+                <span class="settings-toggle"></span>
+              </span>
+            </label>
+            <button type="button" class="shell-button" :disabled="busy" @click="updates.check()">
+              <icon name="RefreshCw"/>检查更新
+            </button>
+          </div>
+          <p class="app-update-hint">Wi-Fi 下自动下载，安装前确认。</p>
+          <p v-if="status" class="app-update-status" role="status">{{status}}</p>
+          <progress v-if="state.phase==='downloading'" :value="state.progress" max="100" aria-label="更新下载进度"></progress>
+          <p v-if="state.error" class="shell-error" role="alert">{{state.error}}</p>
+          <div v-if="state.latest" class="app-update-result">
+            <details v-if="state.latest.notes"><summary>更新内容 · {{state.latest.versionName}}</summary><p>{{state.latest.notes}}</p></details>
+            <button v-if="['ready','permission'].includes(state.phase)" type="button" class="shell-button" @click="updates.install()"><icon name="PackageCheck"/>安装更新</button>
+            <button v-else-if="!busy && updates.native" type="button" class="shell-button" @click="updates.download()"><icon name="Download"/>下载更新</button>
+            <a v-else-if="!busy" class="shell-button" :href="state.latest.url" target="_blank" rel="noopener"><icon name="Download"/>下载安装包</a>
+          </div>
+        </section>`
+    };
     const Settings = {
-        components: { Icon, MascotHeader, PersonaAvatar },
+        components: { Icon, MascotHeader, PersonaAvatar, UpdatePanel },
         props: { user: Object },
         emits: ['section', 'navigate'],
         setup() {
@@ -642,6 +683,7 @@
               </button>
             </div>
             </section>
+            <update-panel></update-panel>
             <details class="shell-compat"><summary>其他功能</summary><div class="shell-row-list">
               <button type="button" @click="$emit('navigate','generator')"><icon name="Wand2"/><span>角色卡生成</span><icon name="ChevronRight"/></button>
               <button type="button" @click="$emit('navigate','novel')"><icon name="BookOpen"/><span>小说生成</span><icon name="ChevronRight"/></button>
@@ -833,5 +875,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, UpdatePanel, ImageDownloadSheet, ReleaseAnnouncement });
 })();

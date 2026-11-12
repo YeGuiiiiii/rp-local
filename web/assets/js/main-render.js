@@ -10009,6 +10009,7 @@ return function render(_ctx, _cache) {
     const _component_secret_input = _resolveComponent("secret-input")
     const _component_image_provider_settings = _resolveComponent("image-provider-settings")
     const _component_custom_select = _resolveComponent("custom-select")
+    const _component_update_panel = _resolveComponent("update-panel")
     const _component_ui_templates_view = _resolveComponent("ui-templates-view")
     const _component_resource_batch_actions = _resolveComponent("resource-batch-actions")
     const _component_token_usage_view = _resolveComponent("token-usage-view")
@@ -13426,6 +13427,7 @@ return function render(_ctx, _cache) {
                           _cache[155] || (_cache[155] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                         ])
                       ]),
+                      _createVNode(_component_update_panel, { class: "md:col-span-2" }),
                       _createElementVNode("button", {
                         type: "button",
                         class: "settings-toggle-row group md:col-span-2 text-left",
@@ -25092,6 +25094,132 @@ return function render(_ctx, _cache) {
   }
 }
 })();
+window.RPCompiledRenders.UpdatePanel = (function () {
+const _Vue = Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
+
+const _hoisted_1 = {
+  class: "app-update-controls",
+  "aria-label": "软件更新"
+}
+const _hoisted_2 = { class: "app-update-line" }
+const _hoisted_3 = { class: "app-update-toggle" }
+const _hoisted_4 = { class: "relative inline-flex flex-none items-center" }
+const _hoisted_5 = ["checked", "onChange"]
+const _hoisted_6 = ["disabled", "onClick"]
+const _hoisted_7 = {
+  key: 0,
+  class: "app-update-status",
+  role: "status"
+}
+const _hoisted_8 = ["value"]
+const _hoisted_9 = {
+  key: 2,
+  class: "shell-error",
+  role: "alert"
+}
+const _hoisted_10 = {
+  key: 3,
+  class: "app-update-result"
+}
+const _hoisted_11 = { key: 0 }
+const _hoisted_12 = ["onClick"]
+const _hoisted_13 = ["onClick"]
+const _hoisted_14 = ["href"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { createElementVNode: _createElementVNode, resolveComponent: _resolveComponent, createVNode: _createVNode, createTextVNode: _createTextVNode, toDisplayString: _toDisplayString, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode } = _Vue
+
+    const _component_icon = _resolveComponent("icon")
+
+    return (_openBlock(), _createElementBlock("section", _hoisted_1, [
+      _createElementVNode("div", _hoisted_2, [
+        _createElementVNode("label", _hoisted_3, [
+          _cache[1] || (_cache[1] = _createElementVNode("span", null, "自动更新", -1 /* CACHED */)),
+          _createElementVNode("span", _hoisted_4, [
+            _createElementVNode("input", {
+              type: "checkbox",
+              role: "switch",
+              "aria-label": "自动更新",
+              class: "settings-toggle-input sr-only",
+              checked: state.automatic,
+              onChange: $event => (updates.setAutomatic($event.target.checked))
+            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_5),
+            _cache[0] || (_cache[0] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+          ])
+        ]),
+        _createElementVNode("button", {
+          type: "button",
+          class: "shell-button",
+          disabled: busy,
+          onClick: $event => (updates.check())
+        }, [
+          _createVNode(_component_icon, { name: "RefreshCw" }),
+          _cache[2] || (_cache[2] = _createTextVNode("检查更新 ", -1 /* CACHED */))
+        ], 8 /* PROPS */, _hoisted_6)
+      ]),
+      _cache[6] || (_cache[6] = _createElementVNode("p", { class: "app-update-hint" }, "Wi-Fi 下自动下载，安装前确认。", -1 /* CACHED */)),
+      status
+        ? (_openBlock(), _createElementBlock("p", _hoisted_7, _toDisplayString(status), 1 /* TEXT */))
+        : _createCommentVNode("v-if", true),
+      (state.phase==='downloading')
+        ? (_openBlock(), _createElementBlock("progress", {
+            key: 1,
+            value: state.progress,
+            max: "100",
+            "aria-label": "更新下载进度"
+          }, null, 8 /* PROPS */, _hoisted_8))
+        : _createCommentVNode("v-if", true),
+      (state.error)
+        ? (_openBlock(), _createElementBlock("p", _hoisted_9, _toDisplayString(state.error), 1 /* TEXT */))
+        : _createCommentVNode("v-if", true),
+      (state.latest)
+        ? (_openBlock(), _createElementBlock("div", _hoisted_10, [
+            (state.latest.notes)
+              ? (_openBlock(), _createElementBlock("details", _hoisted_11, [
+                  _createElementVNode("summary", null, "更新内容 · " + _toDisplayString(state.latest.versionName), 1 /* TEXT */),
+                  _createElementVNode("p", null, _toDisplayString(state.latest.notes), 1 /* TEXT */)
+                ]))
+              : _createCommentVNode("v-if", true),
+            (['ready','permission'].includes(state.phase))
+              ? (_openBlock(), _createElementBlock("button", {
+                  key: 1,
+                  type: "button",
+                  class: "shell-button",
+                  onClick: $event => (updates.install())
+                }, [
+                  _createVNode(_component_icon, { name: "PackageCheck" }),
+                  _cache[3] || (_cache[3] = _createTextVNode("安装更新", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_12))
+              : (!busy && updates.native)
+                ? (_openBlock(), _createElementBlock("button", {
+                    key: 2,
+                    type: "button",
+                    class: "shell-button",
+                    onClick: $event => (updates.download())
+                  }, [
+                    _createVNode(_component_icon, { name: "Download" }),
+                    _cache[4] || (_cache[4] = _createTextVNode("下载更新", -1 /* CACHED */))
+                  ], 8 /* PROPS */, _hoisted_13))
+                : (!busy)
+                  ? (_openBlock(), _createElementBlock("a", {
+                      key: 3,
+                      class: "shell-button",
+                      href: state.latest.url,
+                      target: "_blank",
+                      rel: "noopener"
+                    }, [
+                      _createVNode(_component_icon, { name: "Download" }),
+                      _cache[5] || (_cache[5] = _createTextVNode("下载安装包", -1 /* CACHED */))
+                    ], 8 /* PROPS */, _hoisted_14))
+                  : _createCommentVNode("v-if", true)
+          ]))
+        : _createCommentVNode("v-if", true)
+    ]))
+  }
+}
+})();
 window.RPCompiledRenders.Settings = (function () {
 const _Vue = Vue
 const { createVNode: _createVNode, createElementVNode: _createElementVNode } = _Vue
@@ -25115,6 +25243,7 @@ return function render(_ctx, _cache) {
     const _component_mascot_header = _resolveComponent("mascot-header")
     const _component_persona_avatar = _resolveComponent("persona-avatar")
     const _component_icon = _resolveComponent("icon")
+    const _component_update_panel = _resolveComponent("update-panel")
 
     return (_openBlock(), _createElementBlock("main", _hoisted_1, [
       _createVNode(_component_mascot_header, {
@@ -25158,6 +25287,7 @@ return function render(_ctx, _cache) {
           ])
         ]))
       }), 128 /* KEYED_FRAGMENT */)),
+      _createVNode(_component_update_panel),
       _createElementVNode("details", _hoisted_7, [
         _cache[4] || (_cache[4] = _createElementVNode("summary", null, "其他功能", -1 /* CACHED */)),
         _createElementVNode("div", _hoisted_8, [

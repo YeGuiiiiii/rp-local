@@ -1,0 +1,17 @@
+[Unit]
+Description=Mirror published RP Local updates
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=12min
+User=rp-updates
+Environment=TMPDIR=/srv/rp-updates/tmp
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -B /opt/rp-updates/sync.py
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/srv/rp-updates

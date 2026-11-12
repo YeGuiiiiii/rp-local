@@ -1,0 +1,11 @@
+[Unit]
+Description=Maintain RP update HTTPS certificate
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=12h
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
