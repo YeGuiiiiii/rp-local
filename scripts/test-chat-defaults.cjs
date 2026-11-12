@@ -29,6 +29,25 @@ fs.mkdirSync(output, { recursive: true });
         });
     }
     const names = () => page.locator('.centered-message-shell .msg-name-tag:visible');
+    async function checkVersionMarker() {
+        const geometry = await page.locator('#app-version-marker').evaluate(el => {
+            const box = el.getBoundingClientRect();
+            const overlapsInput = [...document.querySelectorAll('.island-input,.island-toolbar button')]
+                .filter(control => control.getClientRects().length).some(control => {
+                    const other = control.getBoundingClientRect();
+                    return box.left < other.right && box.right > other.left
+                        && box.top < other.bottom && box.bottom > other.top;
+                });
+            return { width: box.width, height: box.height, rightGap: innerWidth - box.right,
+                bottomGap: innerHeight - box.bottom, top: box.top, pointerEvents: getComputedStyle(el).pointerEvents,
+                overlapsInput };
+        });
+        assert.ok(geometry.height > geometry.width * 3 && geometry.width <= 14, 'Version runs vertically along the edge');
+        assert.ok(geometry.rightGap >= 0 && geometry.rightGap <= 8, 'Version stays at the right edge');
+        assert.ok(geometry.top >= 0 && geometry.bottomGap >= 8 && geometry.bottomGap <= 12, 'Version stays in the bottom corner');
+        assert.equal(geometry.overlapsInput, false, 'Version must clear the input and toolbar buttons');
+        assert.equal(geometry.pointerEvents, 'none', 'Version must never intercept a tap');
+    }
     async function toggleImmersive() {
         await page.getByRole('button', { name: '快捷面板', exact: true }).click();
         await page.locator('#chat-quick-panel label').filter({ hasText: '沉浸模式' }).click();
@@ -88,8 +107,22 @@ fs.mkdirSync(output, { recursive: true });
             assert.match(geometry.background, /ribbon.webp/);
             assert.equal(geometry.pointerEvents, 'none');
             assert.ok(geometry.box.bottom <= 844 && geometry.box.x >= 0 && geometry.box.right <= width);
+            await checkVersionMarker();
             await page.screenshot({ path: path.join(output, `night-chat-${width}.png`) });
         }
+        for (const skin of ['classic', 'chenyue', 'winter']) {
+            for (const mode of ['day', 'night']) {
+                await page.evaluate(({ skin, mode }) => { RPThemePacks.set(skin); RPThemePacks.setMode(mode); }, { skin, mode });
+                for (const width of [390, 1280]) {
+                    await page.setViewportSize({ width, height: 844 });
+                    await checkVersionMarker();
+                    await page.screenshot({ path: path.join(output, `version-${skin}-${mode}-${width}.png`), animations: 'disabled' });
+                }
+            }
+        }
+        await page.setViewportSize({ width: 390, height: 520 });
+        await page.locator('.island-input').focus();
+        await checkVersionMarker();
         await page.setViewportSize({ width: 390, height: 844 });
         await page.evaluate(() => __qa.openAnnouncement());
         const reading = page.getByRole('region', { name: '更新内容', exact: true });

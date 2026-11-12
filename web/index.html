@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.029'; window.RP_LOCAL_RELEASE = 293;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.031'; window.RP_LOCAL_RELEASE = 293;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -135,8 +135,7 @@
         .rphub-splash-status { position: absolute; left: 0; right: 0; bottom: 42px; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; color: #64748b; pointer-events: none; }
         .rphub-splash-status button { display: none; padding: 8px 22px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-size: 14px; font-weight: 600; pointer-events: auto; }
         .rphub-splash-status span { max-width: min(90vw, 480px); text-align: center; overflow-wrap: anywhere; }
-        .app-version-marker { position: fixed; z-index: 100000; right: 10px; bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px)); color: var(--shell-muted, #64748b); font: 10px/1.4 sans-serif; opacity: .78; pointer-events: none; }
-        .app-version-marker:not(.app-version-marker--app) { bottom: max(10px, env(safe-area-inset-bottom)); }
+        .app-version-marker { position: fixed; z-index: 100000; right: max(1px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; color: var(--shell-muted, #64748b); font: 10px/1 sans-serif; opacity: .78; pointer-events: none; }
         </style>
     <script id="rphub-splash-control-script">
     (function () {
@@ -151,7 +150,6 @@
         var msg = null;
         var retry = null;
         var status = null;
-        var version = null;
         var scheduled = false;
         function isReady() {
             var el = document.getElementById('app');
@@ -170,7 +168,6 @@
             if (done || !splash) { return; }
             done = true;
             stopWatch();
-            if (version) version.classList.add('app-version-marker--app');
             window.dispatchEvent(new Event('rp:startup-finished'));
             splash.classList.remove('rphub-splash-hold');
             splash.classList.add('rphub-splash-leave');
@@ -243,7 +240,6 @@
             status.appendChild(msg);
             status.appendChild(retry);
             splash.appendChild(status);
-            version = document.getElementById('app-version-marker');
             watch();
             setTimeout(function () { if (!done && !isReady() && msg) { msg.textContent = '仍在加载…数据较多时启动需要一两分钟，请勿关闭'; } }, SOFT_MS);
             setTimeout(function () {
@@ -4131,7 +4127,7 @@
     <script>
         (function (stamp) {
             ['built-in-content', 'core-utils', 'api-utils', 'stream-import', 'data-services', 'runtime-services', 'cloud-backup', 'preset-library',
-                'ui-components', 'workspace-ui', 'shell-icons', 'competitions', 'release-notes', 'mascot-dialogue', 'image-providers', 'app-shell', 'gallery-glass', 'gallery-page', 'backup-format', 'backup-transfer', 'stream-import-ui', 'main-render', 'app'].forEach(name => {
+                'ui-components', 'workspace-ui', 'shell-icons', 'competitions', 'release-notes', 'mascot-dialogue', 'image-providers', 'app-updates', 'app-shell', 'gallery-glass', 'gallery-page', 'backup-format', 'backup-transfer', 'stream-import-ui', 'main-render', 'app'].forEach(name => {
                 document.write('<script src="assets/js/' + name + '.js?v=' + stamp + '"><\/script>');
             });
         })(window.RP_LOCAL_VERSION);

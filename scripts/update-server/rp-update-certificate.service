@@ -1,0 +1,10 @@
+[Unit]
+Description=Renew RP update HTTPS certificate
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/rp-updates/lego run --accept-tos --domains 121.40.147.125 --profile shortlived --http --http.webroot /srv/rp-updates --path /opt/rp-updates/acme --http-timeout 30 --deploy-hook "/usr/bin/systemctl reload nginx"
+TimeoutStartSec=180
+UMask=0077

@@ -8,7 +8,7 @@ sdkInfo:
   targetSdkVersion: 33
 versionInfo:
   versionCode: 293
-  versionName: '2.9.029'
+  versionName: '2.9.031'
 resourcesInfo:
   packageId: 127
   keepRawValues: true

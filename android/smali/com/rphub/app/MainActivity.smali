@@ -5264,6 +5264,7 @@
     iget-object v0, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;
 
     invoke-static {p0, v0}, Lcom/rphub/app/CardNight;->install(Landroid/app/Activity;Landroid/webkit/WebView;)V
+    invoke-static {p0, v0}, Lcom/rphub/app/AppUpdates;->install(Landroid/app/Activity;Landroid/webkit/WebView;)V
 
     .line 345
     iget-object v0, p0, Lcom/rphub/app/MainActivity;->webView:Landroid/webkit/WebView;

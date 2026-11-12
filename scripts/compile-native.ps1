@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$buildAlias = Join-Path $env:USERPROFILE '.cache\rphub-local-build'
+$buildAlias = if ($env:RP_BUILD_ALIAS) { $env:RP_BUILD_ALIAS } else { Join-Path $env:USERPROFILE '.cache\rphub-local-build' }
 $java = (Get-ChildItem "$buildAlias\.tools\java" -Directory | Select-Object -First 1).FullName
 $javaExe = Join-Path $java 'bin\java.exe'
 $classes = "$buildAlias\.tools\native-classes"

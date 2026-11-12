@@ -15904,6 +15904,7 @@ const app = createApp({
             window.addEventListener('rp:startup-finished', finishStartup, { once: true });
             window.__rpHasSavedChat = !!(currentCharacter.value && chatHistory.value.length);
             window.__rpDataReady = true;
+            window.RPUpdates.start();
 
             fetchModels();
 
@@ -16653,6 +16654,7 @@ app.component('BackupPage', window.RPAppShell.BackupPage);
 app.component('ResourceBatchActions', window.RPAppShell.ResourceBatchActions);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
+app.component('UpdatePanel', window.RPAppShell.UpdatePanel);
 app.component('ShellUtilities', window.RPAppShell.Utilities);
 app.component('CompetitionDetail', window.RPAppShell.CompetitionDetail);
 app.component('GalleryPage', window.RPGalleryPage);
