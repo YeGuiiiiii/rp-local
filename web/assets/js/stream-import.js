@@ -83,22 +83,41 @@
   var StagingSink = class {
     constructor(db, session) {
       Object.assign(this, { db, session, queue: [] });
+      this.tally = /* @__PURE__ */ new Map();
     }
     emit(item) {
       this.queue.push(item);
     }
     async flush() {
       if (!this.queue.length) return;
+      const id = (item) => JSON.stringify([item.source, item.entry]);
+      const prepared = [];
+      for (const { kind, ...item } of this.queue) {
+        if (kind === "unit") {
+          const key = id(item);
+          const tally = this.tally.get(key) || { count: 0, bytes: 0 };
+          tally.count += 1;
+          tally.bytes += Number(item.bytes) || 0;
+          this.tally.set(key, tally);
+        } else if (kind === "record") {
+          const tally = this.tally.get(id(item)) || { count: 0, bytes: 0 };
+          this.tally.delete(id(item));
+          if (tally.count !== item.count)
+            throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + item.key);
+          item.bytes = tally.bytes;
+        }
+        prepared.push([kind, item]);
+      }
       const tx = this.db.transaction(Object.keys(stores).slice(1), "readwrite");
       const names = { unit: "restore_units", record: "restore_records", localStorage: "restore_web", companion: "restore_companions" };
-      for (const { kind, ...item } of this.queue) {
+      for (const [kind, item] of prepared) {
         tx.objectStore(names[kind]).put({ ...item, session: this.session });
       }
       await completed(tx);
       this.queue.length = 0;
     }
   };
-  async function validate(db, session, source, wait, maxCollectionBytes = 128 * 1048576) {
+  async function validate(db, session, source, wait, maxCollectionBytes = 128 * 1048576, onStep) {
     const last = /* @__PURE__ */ new Map();
     await each(db, "restore_records", rangeOf(session, source), (item) => {
       last.set(item.key, item);
@@ -106,8 +125,10 @@
     });
     const deleted = /* @__PURE__ */ new Set();
     const summary = { records: last.size, cards: 0, messages: 0, memories: 0 };
+    let done = 0;
     for (const [key, record] of last) {
       await wait();
+      onStep?.(++done, last.size);
       if (key.startsWith("rp_hub_b1_memory_state_")) {
         const meta = (await resultOf(db.transaction("restore_units").objectStore("restore_units").get([session, source, record.entry, 0])))?.value;
         const scope = key.slice("rp_hub_b1_memory_state_".length);
@@ -119,14 +140,16 @@
       }
       if (key.startsWith("rp_hub_classic_memories_") && !record.array) throw new Error("\u8BB0\u5FC6\u6B63\u6587\u5FC5\u987B\u662F\u6570\u7EC4\uFF1A" + key);
       if (key === "rp_hub_characters" && !record.array) throw new Error("\u89D2\u8272\u5361\u96C6\u5408\u5FC5\u987B\u662F\u6570\u7EC4");
-      let bytes = 0, count = 0;
-      await each(db, "restore_units", rangeOf(session, source, record.entry), (unit) => {
-        bytes += unit.bytes;
-        count++;
-        if (key === "rp_hub_characters" && (!unit.value || typeof unit.value !== "object" || Array.isArray(unit.value)))
-          throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61");
-      });
-      if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
+      let bytes = Number(record.bytes);
+      if (!Number.isFinite(bytes)) {
+        bytes = 0;
+        let count = 0;
+        await each(db, "restore_units", rangeOf(session, source, record.entry), (unit) => {
+          bytes += Number(unit.bytes) || 0;
+          count++;
+        });
+        if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
+      }
       if (key !== "rp_hub_characters" && !key.startsWith("rp_hub_chat_") && bytes > maxCollectionBytes)
         throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
       if (key === "rp_hub_characters") summary.cards = record.count;
@@ -295,7 +318,9 @@
       cancelled(signal);
       const unit = await resultOf(db.transaction("restore_units").objectStore("restore_units").get([session.id, session.source, record.entry, part]));
       const card = restoreValue(unit?.value);
-      if (!card || card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
+      if (!card || typeof card !== "object" || Array.isArray(card))
+        throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
+      if (card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
         throw new Error("\u5907\u4EFD\u7F3A\u5C11\u5B8C\u6574\u89D2\u8272\u5361\u5185\u5BB9\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
       const uuid = card.uuid || crypto.randomUUID();
       if (ids.has(uuid)) throw new Error("\u89D2\u8272\u5361\u6807\u8BC6\u91CD\u590D\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
@@ -450,9 +475,11 @@
         };
         next(0);
       });
-      progress?.(totalWork - 1, totalWork, "\u6B63\u5728\u4FDD\u5B58\u672C\u673A\u5B58\u6863");
-      await window.RPHubStorage.syncLocalFiles?.();
-      await removeSession(db, id);
+      progress?.(totalWork - 1, totalWork, "\u6B63\u5728\u5199\u5165\u672C\u673A\u5B58\u6863\uFF08\u53EA\u9700\u4E00\u6B21\uFF0C\u4E4B\u540E\u542F\u52A8\u66F4\u5FEB\uFF09");
+      await Promise.all([
+        window.RPHubStorage.syncLocalFiles?.() ?? null,
+        removeSession(db, id)
+      ]);
       progress?.(totalWork, totalWork);
     } catch (error) {
       if (committed) {

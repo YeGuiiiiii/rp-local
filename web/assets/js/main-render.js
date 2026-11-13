@@ -24591,88 +24591,96 @@ const _hoisted_16 = ["onClick"]
 const _hoisted_17 = { class: "backup-field" }
 const _hoisted_18 = ["onUpdate:modelValue"]
 const _hoisted_19 = ["value"]
-const _hoisted_20 = { class: "backup-details" }
-const _hoisted_21 = {
+const _hoisted_20 = { class: "backup-muted" }
+const _hoisted_21 = { class: "backup-details" }
+const _hoisted_22 = {
   key: 0,
   class: "backup-muted"
 }
-const _hoisted_22 = ["onUpdate:modelValue"]
-const _hoisted_23 = ["onClick"]
-const _hoisted_24 = ["disabled", "onClick"]
-const _hoisted_25 = {
+const _hoisted_23 = ["onUpdate:modelValue"]
+const _hoisted_24 = ["onClick"]
+const _hoisted_25 = ["disabled", "onClick"]
+const _hoisted_26 = {
   key: 0,
   class: "backup-section",
   "aria-label": "云端备份"
 }
-const _hoisted_26 = { class: "backup-actions" }
-const _hoisted_27 = ["disabled", "onClick"]
+const _hoisted_27 = { class: "backup-actions" }
 const _hoisted_28 = ["disabled", "onClick"]
-const _hoisted_29 = { class: "backup-section" }
-const _hoisted_30 = { class: "backup-line backup-switch" }
-const _hoisted_31 = { class: "relative inline-flex" }
-const _hoisted_32 = ["onUpdate:modelValue"]
-const _hoisted_33 = { class: "backup-field" }
-const _hoisted_34 = ["onUpdate:modelValue"]
-const _hoisted_35 = { class: "backup-settings-grid" }
-const _hoisted_36 = { class: "backup-field" }
-const _hoisted_37 = ["onUpdate:modelValue"]
-const _hoisted_38 = ["value"]
+const _hoisted_29 = ["disabled", "onClick"]
+const _hoisted_30 = { class: "backup-section" }
+const _hoisted_31 = { class: "backup-line backup-switch" }
+const _hoisted_32 = { class: "relative inline-flex" }
+const _hoisted_33 = ["onUpdate:modelValue"]
+const _hoisted_34 = { class: "backup-field" }
+const _hoisted_35 = ["onUpdate:modelValue"]
+const _hoisted_36 = { class: "backup-settings-grid" }
+const _hoisted_37 = { class: "backup-field" }
+const _hoisted_38 = ["onUpdate:modelValue"]
 const _hoisted_39 = ["value"]
 const _hoisted_40 = ["value"]
 const _hoisted_41 = ["value"]
 const _hoisted_42 = ["value"]
-const _hoisted_43 = { class: "backup-field" }
-const _hoisted_44 = ["onUpdate:modelValue"]
-const _hoisted_45 = ["value"]
+const _hoisted_43 = ["value"]
+const _hoisted_44 = { class: "backup-field" }
+const _hoisted_45 = ["onUpdate:modelValue"]
 const _hoisted_46 = ["value"]
 const _hoisted_47 = ["value"]
 const _hoisted_48 = ["value"]
 const _hoisted_49 = ["value"]
-const _hoisted_50 = { class: "backup-muted backup-note" }
-const _hoisted_51 = ["disabled", "onClick"]
-const _hoisted_52 = {
+const _hoisted_50 = ["value"]
+const _hoisted_51 = ["value"]
+const _hoisted_52 = { class: "backup-muted backup-note" }
+const _hoisted_53 = ["disabled", "onClick"]
+const _hoisted_54 = {
   key: 1,
   class: "backup-line backup-location"
 }
-const _hoisted_53 = { class: "backup-path" }
-const _hoisted_54 = ["onClick"]
-const _hoisted_55 = { class: "backup-section" }
+const _hoisted_55 = { class: "backup-path" }
 const _hoisted_56 = ["onClick"]
-const _hoisted_57 = ["onToggle"]
-const _hoisted_58 = ["onClick"]
-const _hoisted_59 = { class: "backup-line" }
-const _hoisted_60 = { class: "backup-filter" }
-const _hoisted_61 = ["onUpdate:modelValue"]
-const _hoisted_62 = ["disabled", "onClick"]
-const _hoisted_63 = {
+const _hoisted_57 = {
+  key: 2,
+  class: "backup-line backup-usage"
+}
+const _hoisted_58 = { class: "backup-muted" }
+const _hoisted_59 = ["disabled", "onClick"]
+const _hoisted_60 = { class: "backup-section" }
+const _hoisted_61 = ["onClick"]
+const _hoisted_62 = ["onToggle"]
+const _hoisted_63 = ["onClick"]
+const _hoisted_64 = { class: "backup-line" }
+const _hoisted_65 = { class: "backup-filter" }
+const _hoisted_66 = ["onUpdate:modelValue"]
+const _hoisted_67 = ["disabled", "onClick"]
+const _hoisted_68 = {
   key: 1,
   class: "shell-error",
   role: "alert"
 }
-const _hoisted_64 = {
+const _hoisted_69 = {
   key: 2,
   class: "backup-muted",
   role: "status"
 }
-const _hoisted_65 = {
+const _hoisted_70 = {
   key: 3,
   class: "backup-empty"
 }
-const _hoisted_66 = ["onSubmit"]
-const _hoisted_67 = ["onUpdate:modelValue"]
-const _hoisted_68 = ["onClick"]
-const _hoisted_69 = { class: "backup-line" }
-const _hoisted_70 = { class: "backup-file-info" }
-const _hoisted_71 = ["aria-label", "aria-expanded", "onClick"]
-const _hoisted_72 = {
+const _hoisted_71 = ["onSubmit"]
+const _hoisted_72 = ["onUpdate:modelValue"]
+const _hoisted_73 = ["onClick"]
+const _hoisted_74 = { class: "backup-line" }
+const _hoisted_75 = { class: "backup-file-info" }
+const _hoisted_76 = ["aria-label", "aria-expanded", "onClick"]
+const _hoisted_77 = {
   key: 0,
   class: "backup-file-actions"
 }
-const _hoisted_73 = ["disabled", "onClick"]
-const _hoisted_74 = ["onClick"]
-const _hoisted_75 = ["onClick"]
-const _hoisted_76 = ["onClick"]
-const _hoisted_77 = { class: "backup-details" }
+const _hoisted_78 = ["disabled", "onClick"]
+const _hoisted_79 = ["onClick"]
+const _hoisted_80 = ["onClick"]
+const _hoisted_81 = ["onClick"]
+const _hoisted_82 = { class: "backup-details" }
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -24751,26 +24759,30 @@ return function render(_ctx, _cache) {
             ], 8 /* PROPS */, _hoisted_16)
           ]),
           _createElementVNode("label", _hoisted_17, [
-            _cache[5] || (_cache[5] = _createElementVNode("span", null, "读取档位", -1 /* CACHED */)),
+            _cache[5] || (_cache[5] = _createElementVNode("span", null, "导入档位", -1 /* CACHED */)),
             _withDirectives(_createElementVNode("select", {
               "onUpdate:modelValue": $event => ((s.profile) = $event),
-              "aria-label": "读取档位"
+              "aria-label": "导入档位"
             }, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.profiles, (profile) => {
                 return (_openBlock(), _createElementBlock("option", {
                   key: profile.id,
                   value: profile.id
-                }, _toDisplayString(profile.name) + " · 单条≤" + _toDisplayString(Math.round(profile.unitBytes / 1048576)) + "MB", 9 /* TEXT, PROPS */, _hoisted_19))
+                }, _toDisplayString(profile.name) + " · 下限 " + _toDisplayString(Math.round(profile.unitBytes / 1048576)) + "MB", 9 /* TEXT, PROPS */, _hoisted_19))
               }), 128 /* KEYED_FRAGMENT */))
             ], 8 /* PROPS */, _hoisted_18), [
               [_vModelSelect, s.profile]
             ])
           ]),
-          _cache[9] || (_cache[9] = _createElementVNode("p", { class: "backup-muted" }, "导入时会按本机可用内存自动放宽单条上限（最高 128MB）并调整分块大小；档位决定基准值与分块下限。", -1 /* CACHED */)),
-          _createElementVNode("details", _hoisted_20, [
-            _cache[8] || (_cache[8] = _createElementVNode("summary", null, "备份内容", -1 /* CACHED */)),
+          _createElementVNode("p", _hoisted_20, [
+            _cache[6] || (_cache[6] = _createTextVNode("实际单条上限取", -1 /* CACHED */)),
+            _createElementVNode("b", null, "本机实测 " + _toDisplayString(s.importCapText || '—'), 1 /* TEXT */),
+            _cache[7] || (_cache[7] = _createTextVNode("与档位下限的较大者（最高 128MB），分块大小也随可用内存自适应。档位只是下限：选「省内存」更稳，选「高速」更快。", -1 /* CACHED */))
+          ]),
+          _createElementVNode("details", _hoisted_21, [
+            _cache[10] || (_cache[10] = _createElementVNode("summary", null, "备份内容", -1 /* CACHED */)),
             (s.native)
-              ? (_openBlock(), _createElementBlock("p", _hoisted_21, "以下为 JSON 导出选项；完整档案始终包含全部内容。"))
+              ? (_openBlock(), _createElementBlock("p", _hoisted_22, "以下为 JSON 导出选项；完整档案始终包含全部内容。"))
               : _createCommentVNode("v-if", true),
             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.scopes, (option) => {
               return (_openBlock(), _createElementBlock("label", {
@@ -24780,7 +24792,7 @@ return function render(_ctx, _cache) {
                 _withDirectives(_createElementVNode("input", {
                   type: "checkbox",
                   "onUpdate:modelValue": $event => ((s.scope[option.key]) = $event)
-                }, null, 8 /* PROPS */, _hoisted_22), [
+                }, null, 8 /* PROPS */, _hoisted_23), [
                   [_vModelCheckbox, s.scope[option.key]]
                 ]),
                 _createTextVNode(_toDisplayString(option.label), 1 /* TEXT */)
@@ -24792,8 +24804,8 @@ return function render(_ctx, _cache) {
               onClick: s.resetScope
             }, [
               _createVNode(_component_icon, { name: "CheckCheck" }),
-              _cache[6] || (_cache[6] = _createTextVNode("全部包含", -1 /* CACHED */))
-            ], 8 /* PROPS */, _hoisted_23),
+              _cache[8] || (_cache[8] = _createTextVNode("全部包含", -1 /* CACHED */))
+            ], 8 /* PROPS */, _hoisted_24),
             (s.native)
               ? (_openBlock(), _createElementBlock("button", {
                   key: 1,
@@ -24803,16 +24815,16 @@ return function render(_ctx, _cache) {
                   onClick: s.exportJson
                 }, [
                   _createVNode(_component_icon, { name: "Download" }),
-                  _cache[7] || (_cache[7] = _createTextVNode("导出 JSON", -1 /* CACHED */))
-                ], 8 /* PROPS */, _hoisted_24))
+                  _cache[9] || (_cache[9] = _createTextVNode("导出 JSON", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_25))
               : _createCommentVNode("v-if", true)
           ])
         ]),
         (s.cloud.enabled)
-          ? (_openBlock(), _createElementBlock("section", _hoisted_25, [
-              _cache[12] || (_cache[12] = _createElementVNode("h2", null, "云端备份", -1 /* CACHED */)),
-              _cache[13] || (_cache[13] = _createElementVNode("p", { class: "backup-muted" }, "与 RP 网页共用备份码，包含角色卡和聊天，不含记忆与设置。", -1 /* CACHED */)),
-              _createElementVNode("div", _hoisted_26, [
+          ? (_openBlock(), _createElementBlock("section", _hoisted_26, [
+              _cache[13] || (_cache[13] = _createElementVNode("h2", null, "云端备份", -1 /* CACHED */)),
+              _cache[14] || (_cache[14] = _createElementVNode("p", { class: "backup-muted" }, "与 RP 网页共用备份码，包含角色卡和聊天，不含记忆与设置。", -1 /* CACHED */)),
+              _createElementVNode("div", _hoisted_27, [
                 _createElementVNode("button", {
                   type: "button",
                   class: "backup-button",
@@ -24820,8 +24832,8 @@ return function render(_ctx, _cache) {
                   onClick: $event => (s.openCloud('upload'))
                 }, [
                   _createVNode(_component_icon, { name: "Upload" }),
-                  _cache[10] || (_cache[10] = _createTextVNode("云端上传", -1 /* CACHED */))
-                ], 8 /* PROPS */, _hoisted_27),
+                  _cache[11] || (_cache[11] = _createTextVNode("云端上传", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_28),
                 _createElementVNode("button", {
                   type: "button",
                   class: "backup-button",
@@ -24829,55 +24841,55 @@ return function render(_ctx, _cache) {
                   onClick: $event => (s.openCloud('download'))
                 }, [
                   _createVNode(_component_icon, { name: "Download" }),
-                  _cache[11] || (_cache[11] = _createTextVNode("云端下载", -1 /* CACHED */))
-                ], 8 /* PROPS */, _hoisted_28)
+                  _cache[12] || (_cache[12] = _createTextVNode("云端下载", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_29)
               ])
             ]))
           : _createCommentVNode("v-if", true),
-        _createElementVNode("section", _hoisted_29, [
-          _createElementVNode("label", _hoisted_30, [
+        _createElementVNode("section", _hoisted_30, [
+          _createElementVNode("label", _hoisted_31, [
             _createElementVNode("span", null, [
-              _cache[14] || (_cache[14] = _createElementVNode("strong", null, "每日 JSON 备份", -1 /* CACHED */)),
+              _cache[15] || (_cache[15] = _createElementVNode("strong", null, "每日 JSON 备份", -1 /* CACHED */)),
               _createElementVNode("small", null, _toDisplayString(s.config.enabled?'已开启':'已关闭'), 1 /* TEXT */)
             ]),
-            _createElementVNode("span", _hoisted_31, [
+            _createElementVNode("span", _hoisted_32, [
               _withDirectives(_createElementVNode("input", {
                 class: "settings-toggle-input sr-only",
                 type: "checkbox",
                 role: "switch",
                 "aria-label": "每日 JSON 备份",
                 "onUpdate:modelValue": $event => ((s.config.enabled) = $event)
-              }, null, 8 /* PROPS */, _hoisted_32), [
+              }, null, 8 /* PROPS */, _hoisted_33), [
                 [_vModelCheckbox, s.config.enabled]
               ]),
-              _cache[15] || (_cache[15] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+              _cache[16] || (_cache[16] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
             ])
           ]),
           (s.config.enabled)
             ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                _createElementVNode("label", _hoisted_33, [
-                  _cache[17] || (_cache[17] = _createElementVNode("span", null, "备份方式", -1 /* CACHED */)),
+                _createElementVNode("label", _hoisted_34, [
+                  _cache[18] || (_cache[18] = _createElementVNode("span", null, "备份方式", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("select", {
                     "onUpdate:modelValue": $event => ((s.config.triggerMode) = $event)
-                  }, [...(_cache[16] || (_cache[16] = [
+                  }, [...(_cache[17] || (_cache[17] = [
                     _createElementVNode("option", { value: "remind" }, "每天提醒我", -1 /* CACHED */),
                     _createElementVNode("option", { value: "auto" }, "全自动", -1 /* CACHED */)
-                  ]))], 8 /* PROPS */, _hoisted_34), [
+                  ]))], 8 /* PROPS */, _hoisted_35), [
                     [_vModelSelect, s.config.triggerMode]
                   ])
                 ]),
-                _createElementVNode("div", _hoisted_35, [
-                  _createElementVNode("label", _hoisted_36, [
-                    _cache[18] || (_cache[18] = _createElementVNode("span", null, "保留天数", -1 /* CACHED */)),
+                _createElementVNode("div", _hoisted_36, [
+                  _createElementVNode("label", _hoisted_37, [
+                    _cache[19] || (_cache[19] = _createElementVNode("span", null, "保留天数", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("select", {
                       "onUpdate:modelValue": $event => ((s.config.retentionDays) = $event)
                     }, [
-                      _createElementVNode("option", { value: 3 }, "3 天", 8 /* PROPS */, _hoisted_38),
-                      _createElementVNode("option", { value: 7 }, "7 天", 8 /* PROPS */, _hoisted_39),
-                      _createElementVNode("option", { value: 14 }, "14 天", 8 /* PROPS */, _hoisted_40),
-                      _createElementVNode("option", { value: 30 }, "30 天", 8 /* PROPS */, _hoisted_41),
-                      _createElementVNode("option", { value: 0 }, "永久保留", 8 /* PROPS */, _hoisted_42)
-                    ], 8 /* PROPS */, _hoisted_37), [
+                      _createElementVNode("option", { value: 3 }, "3 天", 8 /* PROPS */, _hoisted_39),
+                      _createElementVNode("option", { value: 7 }, "7 天", 8 /* PROPS */, _hoisted_40),
+                      _createElementVNode("option", { value: 14 }, "14 天", 8 /* PROPS */, _hoisted_41),
+                      _createElementVNode("option", { value: 30 }, "30 天", 8 /* PROPS */, _hoisted_42),
+                      _createElementVNode("option", { value: 0 }, "永久保留", 8 /* PROPS */, _hoisted_43)
+                    ], 8 /* PROPS */, _hoisted_38), [
                       [
                         _vModelSelect,
                         s.config.retentionDays,
@@ -24886,17 +24898,18 @@ return function render(_ctx, _cache) {
                       ]
                     ])
                   ]),
-                  _createElementVNode("label", _hoisted_43, [
-                    _cache[19] || (_cache[19] = _createElementVNode("span", null, "最多保留", -1 /* CACHED */)),
+                  _createElementVNode("label", _hoisted_44, [
+                    _cache[20] || (_cache[20] = _createElementVNode("span", null, "最多保留", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("select", {
                       "onUpdate:modelValue": $event => ((s.config.maxCopies) = $event)
                     }, [
-                      _createElementVNode("option", { value: 3 }, "3 份", 8 /* PROPS */, _hoisted_45),
-                      _createElementVNode("option", { value: 5 }, "5 份", 8 /* PROPS */, _hoisted_46),
-                      _createElementVNode("option", { value: 10 }, "10 份", 8 /* PROPS */, _hoisted_47),
-                      _createElementVNode("option", { value: 20 }, "20 份", 8 /* PROPS */, _hoisted_48),
-                      _createElementVNode("option", { value: 0 }, "不限份数", 8 /* PROPS */, _hoisted_49)
-                    ], 8 /* PROPS */, _hoisted_44), [
+                      _createElementVNode("option", { value: 2 }, "2 份", 8 /* PROPS */, _hoisted_46),
+                      _createElementVNode("option", { value: 3 }, "3 份", 8 /* PROPS */, _hoisted_47),
+                      _createElementVNode("option", { value: 5 }, "5 份", 8 /* PROPS */, _hoisted_48),
+                      _createElementVNode("option", { value: 10 }, "10 份", 8 /* PROPS */, _hoisted_49),
+                      _createElementVNode("option", { value: 20 }, "20 份", 8 /* PROPS */, _hoisted_50),
+                      _createElementVNode("option", { value: 0 }, "不限份数", 8 /* PROPS */, _hoisted_51)
+                    ], 8 /* PROPS */, _hoisted_45), [
                       [
                         _vModelSelect,
                         s.config.maxCopies,
@@ -24908,7 +24921,7 @@ return function render(_ctx, _cache) {
                 ])
               ], 64 /* STABLE_FRAGMENT */))
             : _createCommentVNode("v-if", true),
-          _createElementVNode("p", _hoisted_50, _toDisplayString(s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份') + " · 不含独立图片文件", 1 /* TEXT */),
+          _createElementVNode("p", _hoisted_52, _toDisplayString(s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份') + " · 不含独立图片文件", 1 /* TEXT */),
           _createElementVNode("button", {
             class: "backup-button backup-primary",
             disabled: s.working || s.checking,
@@ -24916,10 +24929,10 @@ return function render(_ctx, _cache) {
           }, [
             _createVNode(_component_icon, { name: "Save" }),
             _createTextVNode(_toDisplayString(s.working?'正在备份…':'立即备份'), 1 /* TEXT */)
-          ], 8 /* PROPS */, _hoisted_51),
+          ], 8 /* PROPS */, _hoisted_53),
           (s.native)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_52, [
-                _createElementVNode("span", _hoisted_53, _toDisplayString(s.location || '完整档案自动保存目录未设置'), 1 /* TEXT */),
+            ? (_openBlock(), _createElementBlock("div", _hoisted_54, [
+                _createElementVNode("span", _hoisted_55, _toDisplayString(s.location || '完整档案自动保存目录未设置'), 1 /* TEXT */),
                 _createElementVNode("button", {
                   class: "shell-icon-button",
                   "aria-label": "选择完整档案目录",
@@ -24927,12 +24940,32 @@ return function render(_ctx, _cache) {
                   onClick: $event => (s.archive('folder'))
                 }, [
                   _createVNode(_component_icon, { name: "FolderOpen" })
-                ], 8 /* PROPS */, _hoisted_54)
+                ], 8 /* PROPS */, _hoisted_56)
+              ]))
+            : _createCommentVNode("v-if", true),
+          (s.usage.count)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_57, [
+                _createElementVNode("span", _hoisted_58, [
+                  _cache[21] || (_cache[21] = _createTextVNode("备份文件夹已占 ", -1 /* CACHED */)),
+                  _createElementVNode("strong", null, _toDisplayString(s.usage.size), 1 /* TEXT */),
+                  _createTextVNode("：每日 " + _toDisplayString(s.usage.daily) + " 份 · " + _toDisplayString(s.usage.dailySize), 1 /* TEXT */),
+                  (s.usage.manual)
+                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                        _createTextVNode("，手动导出 " + _toDisplayString(s.usage.manual) + " 份 · " + _toDisplayString(s.usage.manualSize), 1 /* TEXT */)
+                      ], 64 /* STABLE_FRAGMENT */))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                _createElementVNode("button", {
+                  type: "button",
+                  class: "backup-button",
+                  disabled: s.working || s.cleaning,
+                  onClick: s.clean
+                }, _toDisplayString(s.cleaning ? '清理中…' : '清理旧备份'), 9 /* TEXT, PROPS */, _hoisted_59)
               ]))
             : _createCommentVNode("v-if", true)
         ]),
-        _createElementVNode("section", _hoisted_55, [
-          _cache[21] || (_cache[21] = _createElementVNode("h2", null, "本地数据", -1 /* CACHED */)),
+        _createElementVNode("section", _hoisted_60, [
+          _cache[23] || (_cache[23] = _createElementVNode("h2", null, "本地数据", -1 /* CACHED */)),
           _createVNode(_component_local_files_panel, { compact: "" }),
           (s.tasks)
             ? (_openBlock(), _createElementBlock("button", {
@@ -24942,15 +24975,15 @@ return function render(_ctx, _cache) {
                 onClick: s.tasks
               }, [
                 _createVNode(_component_icon, { name: "ListTodo" }),
-                _cache[20] || (_cache[20] = _createTextVNode("查看运行中的任务", -1 /* CACHED */))
-              ], 8 /* PROPS */, _hoisted_56))
+                _cache[22] || (_cache[22] = _createTextVNode("查看运行中的任务", -1 /* CACHED */))
+              ], 8 /* PROPS */, _hoisted_61))
             : _createCommentVNode("v-if", true)
         ]),
         _createElementVNode("details", {
           class: "backup-details",
           onToggle: $event => ($event.target.open && s.refresh())
         }, [
-          _cache[30] || (_cache[30] = _createElementVNode("summary", null, "历史备份", -1 /* CACHED */)),
+          _cache[32] || (_cache[32] = _createElementVNode("summary", null, "历史备份", -1 /* CACHED */)),
           (s.native)
             ? (_openBlock(), _createElementBlock("button", {
                 key: 0,
@@ -24959,20 +24992,20 @@ return function render(_ctx, _cache) {
                 onClick: $event => (s.archive('history'))
               }, [
                 _createVNode(_component_icon, { name: "History" }),
-                _cache[22] || (_cache[22] = _createTextVNode("恢复文件夹档案", -1 /* CACHED */))
-              ], 8 /* PROPS */, _hoisted_58))
+                _cache[24] || (_cache[24] = _createTextVNode("恢复文件夹档案", -1 /* CACHED */))
+              ], 8 /* PROPS */, _hoisted_63))
             : _createCommentVNode("v-if", true),
-          _createElementVNode("div", _hoisted_59, [
-            _createElementVNode("label", _hoisted_60, [
-              _cache[24] || (_cache[24] = _createElementVNode("span", null, "来源", -1 /* CACHED */)),
+          _createElementVNode("div", _hoisted_64, [
+            _createElementVNode("label", _hoisted_65, [
+              _cache[26] || (_cache[26] = _createElementVNode("span", null, "来源", -1 /* CACHED */)),
               _withDirectives(_createElementVNode("select", {
                 "onUpdate:modelValue": $event => ((s.source) = $event),
                 "aria-label": "备份来源"
-              }, [...(_cache[23] || (_cache[23] = [
+              }, [...(_cache[25] || (_cache[25] = [
                 _createElementVNode("option", { value: "all" }, "全部", -1 /* CACHED */),
                 _createElementVNode("option", { value: "manual" }, "手动", -1 /* CACHED */),
                 _createElementVNode("option", { value: "daily" }, "每日", -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_61), [
+              ]))], 8 /* PROPS */, _hoisted_66), [
                 [_vModelSelect, s.source]
               ])
             ]),
@@ -24984,14 +25017,14 @@ return function render(_ctx, _cache) {
               onClick: s.refresh
             }, [
               _createVNode(_component_icon, { name: "RefreshCw" })
-            ], 8 /* PROPS */, _hoisted_62)
+            ], 8 /* PROPS */, _hoisted_67)
           ]),
           (s.listError)
-            ? (_openBlock(), _createElementBlock("p", _hoisted_63, _toDisplayString(s.listError), 1 /* TEXT */))
+            ? (_openBlock(), _createElementBlock("p", _hoisted_68, _toDisplayString(s.listError), 1 /* TEXT */))
             : (s.loading)
-              ? (_openBlock(), _createElementBlock("p", _hoisted_64, "正在读取备份目录…"))
+              ? (_openBlock(), _createElementBlock("p", _hoisted_69, "正在读取备份目录…"))
               : (!s.files.length)
-                ? (_openBlock(), _createElementBlock("p", _hoisted_65, "此目录暂无" + _toDisplayString(s.source==='daily'?'每日':s.source==='manual'?'手动':'') + " JSON 备份。", 1 /* TEXT */))
+                ? (_openBlock(), _createElementBlock("p", _hoisted_70, "此目录暂无" + _toDisplayString(s.source==='daily'?'每日':s.source==='manual'?'手动':'') + " JSON 备份。", 1 /* TEXT */))
                 : _createCommentVNode("v-if", true),
           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(s.files, (record) => {
             return (_openBlock(), _createElementBlock("article", {
@@ -25007,10 +25040,10 @@ return function render(_ctx, _cache) {
                     _withDirectives(_createElementVNode("input", {
                       "onUpdate:modelValue": $event => ((s.renameDraft) = $event),
                       "aria-label": "新文件名"
-                    }, null, 8 /* PROPS */, _hoisted_67), [
+                    }, null, 8 /* PROPS */, _hoisted_72), [
                       [_vModelText, s.renameDraft]
                     ]),
-                    _cache[25] || (_cache[25] = _createElementVNode("button", {
+                    _cache[27] || (_cache[27] = _createElementVNode("button", {
                       type: "submit",
                       class: "backup-button"
                     }, "确定", -1 /* CACHED */)),
@@ -25018,11 +25051,11 @@ return function render(_ctx, _cache) {
                       type: "button",
                       class: "backup-button",
                       onClick: s.cancelRename
-                    }, "取消", 8 /* PROPS */, _hoisted_68)
-                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_66))
+                    }, "取消", 8 /* PROPS */, _hoisted_73)
+                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_71))
                 : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                    _createElementVNode("div", _hoisted_69, [
-                      _createElementVNode("div", _hoisted_70, [
+                    _createElementVNode("div", _hoisted_74, [
+                      _createElementVNode("div", _hoisted_75, [
                         _createElementVNode("strong", null, _toDisplayString(record.fileName), 1 /* TEXT */),
                         _createElementVNode("small", null, _toDisplayString(s.time(record.timestamp)) + " · " + _toDisplayString(s.size(record.sizeBytes)), 1 /* TEXT */)
                       ]),
@@ -25034,47 +25067,47 @@ return function render(_ctx, _cache) {
                         onClick: $event => (s.menu=s.menu===record.id?'':record.id)
                       }, [
                         _createVNode(_component_icon, { name: "Ellipsis" })
-                      ], 8 /* PROPS */, _hoisted_71)
+                      ], 8 /* PROPS */, _hoisted_76)
                     ]),
                     (s.menu===record.id)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_72, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_77, [
                           _createElementVNode("button", {
                             class: "backup-button",
                             disabled: s.restoring,
                             onClick: $event => (s.restore(record))
                           }, [
                             _createVNode(_component_icon, { name: "RotateCcw" }),
-                            _cache[26] || (_cache[26] = _createTextVNode("恢复", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_73),
+                            _cache[28] || (_cache[28] = _createTextVNode("恢复", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_78),
                           _createElementVNode("button", {
                             class: "backup-button",
                             onClick: $event => (s.rename(record))
                           }, [
                             _createVNode(_component_icon, { name: "Pencil" }),
-                            _cache[27] || (_cache[27] = _createTextVNode("重命名", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_74),
+                            _cache[29] || (_cache[29] = _createTextVNode("重命名", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_79),
                           _createElementVNode("button", {
                             class: "backup-button",
                             onClick: $event => (s.saveAs(record))
                           }, [
                             _createVNode(_component_icon, { name: "Download" }),
-                            _cache[28] || (_cache[28] = _createTextVNode("另存", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_75),
+                            _cache[30] || (_cache[30] = _createTextVNode("另存", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_80),
                           _createElementVNode("button", {
                             class: "backup-button backup-danger",
                             onClick: $event => (s.remove(record))
                           }, [
                             _createVNode(_component_icon, { name: "Trash2" }),
-                            _cache[29] || (_cache[29] = _createTextVNode("删除", -1 /* CACHED */))
-                          ], 8 /* PROPS */, _hoisted_76)
+                            _cache[31] || (_cache[31] = _createTextVNode("删除", -1 /* CACHED */))
+                          ], 8 /* PROPS */, _hoisted_81)
                         ]))
                       : _createCommentVNode("v-if", true)
                   ], 64 /* STABLE_FRAGMENT */))
             ]))
           }), 128 /* KEYED_FRAGMENT */))
-        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_57),
-        _createElementVNode("details", _hoisted_77, [
-          _cache[31] || (_cache[31] = _createElementVNode("summary", null, "数据整理", -1 /* CACHED */)),
+        ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_62),
+        _createElementVNode("details", _hoisted_82, [
+          _cache[33] || (_cache[33] = _createElementVNode("summary", null, "数据整理", -1 /* CACHED */)),
           _renderSlot($slots, "maintenance")
         ])
       ])
@@ -26033,66 +26066,101 @@ const _hoisted_6 = {
   key: 1,
   class: "transfer-filename"
 }
-const _hoisted_7 = ["value", "aria-label"]
-const _hoisted_8 = {
-  key: 3,
-  class: "transfer-progress-meta"
+const _hoisted_7 = {
+  key: 2,
+  style: {"margin":"8px 0 12px","padding":"10px 12px","border-radius":"10px","border":"1px solid #f0c2a8","background":"#fff7f1","text-align":"left"}
 }
-const _hoisted_9 = {
+const _hoisted_8 = { style: {"font-size":"12px","color":"#7c2d12","line-height":"1.6","margin":"0","word-break":"break-all"} }
+const _hoisted_9 = ["value", "aria-label"]
+const _hoisted_10 = {
   key: 4,
   class: "transfer-progress-meta"
 }
-const _hoisted_10 = { role: "status" }
 const _hoisted_11 = {
   key: 5,
-  role: "alert",
-  class: "transfer-error"
+  class: "transfer-progress-meta"
 }
 const _hoisted_12 = {
   key: 6,
-  class: "transfer-error transfer-error-path"
+  role: "status"
 }
-const _hoisted_13 = { key: 0 }
+const _hoisted_13 = {
+  key: 0,
+  style: {"color":"#9ca3af"}
+}
 const _hoisted_14 = {
   key: 7,
-  class: "transfer-summary"
+  role: "alert",
+  class: "transfer-error"
 }
 const _hoisted_15 = {
   key: 8,
-  style: {"margin":"8px 0","padding":"10px 12px","border":"1px solid #e5e7eb","border-radius":"10px","background":"#f9fafb","text-align":"left"}
+  class: "transfer-error transfer-error-path"
 }
-const _hoisted_16 = { style: {"font-size":"12px","font-weight":"600","color":"#374151","margin":"0 0 4px"} }
-const _hoisted_17 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#374151"} }
-const _hoisted_18 = ["onUpdate:modelValue"]
-const _hoisted_19 = {
+const _hoisted_16 = { key: 0 }
+const _hoisted_17 = {
   key: 9,
-  class: "transfer-warning"
+  class: "transfer-summary"
 }
-const _hoisted_20 = {
+const _hoisted_18 = {
   key: 10,
-  class: "transfer-actions"
+  style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #e5e7eb","background":"#f9fafb","text-align":"left"}
 }
+const _hoisted_19 = { style: {"font-size":"12px","color":"#374151","cursor":"pointer","line-height":"1.6"} }
+const _hoisted_20 = { style: {"display":"flex","gap":"6px","margin":"8px 0 6px"} }
 const _hoisted_21 = ["onClick"]
 const _hoisted_22 = ["onClick"]
-const _hoisted_23 = {
+const _hoisted_23 = { style: {"max-height":"36vh","overflow":"auto","border":"1px solid #e5e7eb","border-radius":"8px","background":"#ffffff"} }
+const _hoisted_24 = ["value", "onUpdate:modelValue"]
+const _hoisted_25 = { style: {"flex":"1","min-width":"0","overflow":"hidden","text-overflow":"ellipsis","white-space":"nowrap"} }
+const _hoisted_26 = { style: {"flex":"none","color":"#6b7280"} }
+const _hoisted_27 = {
+  key: 0,
+  style: {"font-size":"11px","color":"#1d4ed8","line-height":"1.5","margin":"6px 0 0"}
+}
+const _hoisted_28 = {
   key: 11,
-  class: "transfer-actions"
+  style: {"margin":"8px 0","padding":"10px 12px","border":"1px solid #e5e7eb","border-radius":"10px","background":"#f9fafb","text-align":"left"}
 }
-const _hoisted_24 = ["onClick"]
-const _hoisted_25 = {
+const _hoisted_29 = { style: {"font-size":"12px","font-weight":"600","color":"#374151","margin":"0 0 4px"} }
+const _hoisted_30 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#374151"} }
+const _hoisted_31 = ["onUpdate:modelValue"]
+const _hoisted_32 = {
   key: 12,
+  style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #d7e3f4","background":"#f4f8ff","text-align":"left"}
+}
+const _hoisted_33 = { style: {"font-size":"12px","color":"#1e3a8a","line-height":"1.6","margin":"0"} }
+const _hoisted_34 = {
+  key: 13,
+  class: "transfer-warning"
+}
+const _hoisted_35 = {
+  key: 14,
   class: "transfer-actions"
 }
-const _hoisted_26 = ["onClick"]
-const _hoisted_27 = ["onClick"]
-const _hoisted_28 = ["onClick"]
-const _hoisted_29 = ["onClick"]
-const _hoisted_30 = ["onClick"]
-const _hoisted_31 = ["onClick"]
+const _hoisted_36 = ["onClick"]
+const _hoisted_37 = ["onClick"]
+const _hoisted_38 = {
+  key: 15,
+  class: "transfer-actions"
+}
+const _hoisted_39 = ["onClick"]
+const _hoisted_40 = {
+  key: 16,
+  class: "transfer-actions"
+}
+const _hoisted_41 = ["onClick"]
+const _hoisted_42 = ["onClick"]
+const _hoisted_43 = ["disabled", "onClick"]
+const _hoisted_44 = ["onClick"]
+const _hoisted_45 = ["onClick"]
+const _hoisted_46 = ["onClick"]
+const _hoisted_47 = ["onClick"]
+const _hoisted_48 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { createElementVNode: _createElementVNode, resolveComponent: _resolveComponent, createVNode: _createVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, vModelCheckbox: _vModelCheckbox, withDirectives: _withDirectives, Teleport: _Teleport, createBlock: _createBlock, Fragment: _Fragment } = _Vue
+    const { createElementVNode: _createElementVNode, resolveComponent: _resolveComponent, createVNode: _createVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, withModifiers: _withModifiers, renderList: _renderList, Fragment: _Fragment, vModelCheckbox: _vModelCheckbox, withDirectives: _withDirectives, Teleport: _Teleport, createBlock: _createBlock } = _Vue
 
     const _component_shell_icon = _resolveComponent("shell-icon")
 
@@ -26138,135 +26206,215 @@ return function render(_ctx, _cache) {
                   "aria-hidden": "true",
                   draggable: "false"
                 }, null, 8 /* PROPS */, _hoisted_5),
-                _createElementVNode("h3", null, _toDisplayString(external ? task.title : state.phase === 'recovery' ? '需要恢复原数据' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
+                _createElementVNode("h3", null, _toDisplayString(external ? task.title : state.phase === 'recovery' ? '需要恢复原数据' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'select' ? '选择要导入的内容' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
                 (!external)
                   ? (_openBlock(), _createElementBlock("p", _hoisted_6, _toDisplayString(state.name), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
+                (!external && state.recap)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_7, [
+                      _cache[0] || (_cache[0] = _createElementVNode("p", { style: {"font-size":"12px","font-weight":"600","color":"#9a3412","margin":"0 0 4px"} }, "上次导入没有正常结束", -1 /* CACHED */)),
+                      _createElementVNode("p", _hoisted_8, _toDisplayString(state.recap), 1 /* TEXT */),
+                      _cache[1] || (_cache[1] = _createElementVNode("p", { style: {"font-size":"11px","color":"#b45309","margin":"6px 0 0"} }, "这行字用于反馈问题，可以截图。", -1 /* CACHED */))
+                    ]))
+                  : _createCommentVNode("v-if", true),
                 (external || ['reading','ready','applying','success'].includes(state.phase))
                   ? (_openBlock(), _createElementBlock("progress", {
-                      key: 2,
+                      key: 3,
                       value: percent,
                       max: "100",
                       "aria-label": external ? '备份进度' : '文件读取进度'
-                    }, null, 8 /* PROPS */, _hoisted_7))
+                    }, null, 8 /* PROPS */, _hoisted_9))
                   : _createCommentVNode("v-if", true),
                 external
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_8, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_10, [
                       _createElementVNode("span", null, _toDisplayString(task.detail), 1 /* TEXT */),
                       _createElementVNode("span", null, _toDisplayString(Math.floor(percent)) + "%", 1 /* TEXT */)
                     ]))
                   : (['reading','ready'].includes(state.phase))
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_9, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_11, [
                         _createElementVNode("span", null, _toDisplayString(format(state.read)) + " / " + _toDisplayString(format(state.bytes)), 1 /* TEXT */),
                         _createElementVNode("span", null, _toDisplayString(percent) + "%", 1 /* TEXT */)
                       ]))
                     : _createCommentVNode("v-if", true),
-                _createElementVNode("p", _hoisted_10, _toDisplayString(external ? task.message : state.paused ? '已暂停，随时可以继续。' : state.message), 1 /* TEXT */),
+                (external || state.message)
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_12, [
+                      _createTextVNode(_toDisplayString(external ? task.message : state.paused ? '已暂停，随时可以继续。' : state.message), 1 /* TEXT */),
+                      (!external && state.phase === 'reading')
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_13, " · " + _toDisplayString(state.clock), 1 /* TEXT */))
+                        : _createCommentVNode("v-if", true)
+                    ]))
+                  : _createCommentVNode("v-if", true),
                 (external ? task.error : state.error)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_11, _toDisplayString(external ? task.error : state.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_14, _toDisplayString(external ? task.error : state.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (!external && state.errorPath)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_12, [
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_15, [
                       _createTextVNode("出错位置：" + _toDisplayString(state.errorPath), 1 /* TEXT */),
                       (state.errorLimit)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_13, "（当前档位单条上限 " + _toDisplayString(Math.round(state.errorLimit / 1048576)) + " MB）", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_16, "（当前档位单条上限 " + _toDisplayString(Math.round(state.errorLimit / 1048576)) + " MB）", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external && state.summary)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_14, "角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条", 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_17, "角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条", 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                (!external && state.phase === 'select')
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_18, [
+                      _createElementVNode("details", null, [
+                        _createElementVNode("summary", _hoisted_19, [
+                          _createTextVNode("共 " + _toDisplayString(state.items.length) + " 项 · 已选 " + _toDisplayString(state.picked.length) + " 项 · " + _toDisplayString(format(pickedBytes)), 1 /* TEXT */),
+                          _cache[2] || (_cache[2] = _createElementVNode("span", { style: {"color":"#9ca3af"} }, "（点开可逐项取消）", -1 /* CACHED */))
+                        ]),
+                        _createElementVNode("div", _hoisted_20, [
+                          _createElementVNode("button", {
+                            class: "shell-button",
+                            type: "button",
+                            onClick: _withModifiers($event => (pickAll(true)), ["prevent"])
+                          }, "全选", 8 /* PROPS */, _hoisted_21),
+                          _createElementVNode("button", {
+                            class: "shell-button",
+                            type: "button",
+                            onClick: _withModifiers($event => (pickAll(false)), ["prevent"])
+                          }, "全不选", 8 /* PROPS */, _hoisted_22)
+                        ]),
+                        _createElementVNode("div", _hoisted_23, [
+                          (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(state.items, (row) => {
+                            return (_openBlock(), _createElementBlock("label", {
+                              key: row.group,
+                              style: {"display":"flex","align-items":"center","gap":"8px","padding":"7px 10px","border-bottom":"1px solid #f3f4f6","font-size":"12px","color":"#374151"}
+                            }, [
+                              _withDirectives(_createElementVNode("input", {
+                                type: "checkbox",
+                                value: row.group,
+                                "onUpdate:modelValue": $event => ((state.picked) = $event)
+                              }, null, 8 /* PROPS */, _hoisted_24), [
+                                [_vModelCheckbox, state.picked]
+                              ]),
+                              _createElementVNode("span", _hoisted_25, _toDisplayString(row.label), 1 /* TEXT */),
+                              _createElementVNode("span", _hoisted_26, _toDisplayString(format(row.bytes)), 1 /* TEXT */)
+                            ]))
+                          }), 128 /* KEYED_FRAGMENT */))
+                        ])
+                      ]),
+                      (state.legacyCount)
+                        ? (_openBlock(), _createElementBlock("p", _hoisted_27, "另有 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "）已自动跳过，不在这里列。", 1 /* TEXT */))
+                        : _createCommentVNode("v-if", true),
+                      _cache[3] || (_cache[3] = _createElementVNode("p", { style: {"font-size":"11px","color":"#9ca3af","line-height":"1.5","margin":"6px 0 0"} }, "导入只会写入选中的项，没选的保持原样。体积大的项建议单独导一次；同名的项以最后一次导入为准。", -1 /* CACHED */))
+                    ]))
                   : _createCommentVNode("v-if", true),
                 (!external && state.phase === 'ready' && state.legacy.length)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_15, [
-                      _createElementVNode("p", _hoisted_16, "检测到 " + _toDisplayString(state.legacy.length) + " 条旧版备份快照，共 " + _toDisplayString(format(legacyBytes)), 1 /* TEXT */),
-                      _cache[1] || (_cache[1] = _createElementVNode("p", { style: {"font-size":"11px","color":"#6b7280","line-height":"1.5","margin":"0 0 6px"} }, "当前版本既不读取、也不参与还原，只是占着空间。导入会自动跳过它们。", -1 /* CACHED */)),
-                      _createElementVNode("label", _hoisted_17, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_28, [
+                      _createElementVNode("p", _hoisted_29, "检测到 " + _toDisplayString(state.legacy.length) + " 条旧版备份快照，共 " + _toDisplayString(format(legacyBytes)), 1 /* TEXT */),
+                      _cache[5] || (_cache[5] = _createElementVNode("p", { style: {"font-size":"11px","color":"#6b7280","line-height":"1.5","margin":"0 0 6px"} }, "当前版本既不读取、也不参与还原，只是占着空间。导入会自动跳过它们。", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_30, [
                         _withDirectives(_createElementVNode("input", {
                           type: "checkbox",
                           "onUpdate:modelValue": $event => ((state.cleanLegacy) = $event)
-                        }, null, 8 /* PROPS */, _hoisted_18), [
+                        }, null, 8 /* PROPS */, _hoisted_31), [
                           [_vModelCheckbox, state.cleanLegacy]
                         ]),
-                        _cache[0] || (_cache[0] = _createTextVNode(" 导入后一并删除这些旧快照 ", -1 /* CACHED */))
+                        _cache[4] || (_cache[4] = _createTextVNode(" 导入后一并删除这些旧快照 ", -1 /* CACHED */))
                       ]),
-                      _cache[2] || (_cache[2] = _createElementVNode("p", { style: {"font-size":"11px","color":"#9ca3af","margin":"6px 0 0"} }, "删除后无法从应用内找回；不确定就先别勾，可稍后在「数据体检」里导出再清理。", -1 /* CACHED */))
+                      _cache[6] || (_cache[6] = _createElementVNode("p", { style: {"font-size":"11px","color":"#9ca3af","margin":"6px 0 0"} }, "删除后无法从应用内找回；不确定就先别勾，可稍后在「数据体检」里导出再清理。", -1 /* CACHED */))
+                    ]))
+                  : _createCommentVNode("v-if", true),
+                (!external && state.phase === 'ready' && state.legacyCount)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_32, [
+                      _createElementVNode("p", _hoisted_33, "已跳过 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "），不参与这次导入。原文件里这些数据还在，需要时从原文件取即可。", 1 /* TEXT */)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external && state.phase === 'ready')
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_19, "导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。"))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_34, "导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。"))
                   : _createCommentVNode("v-if", true),
                 (external && task.confirm)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_20, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_35, [
                       _createElementVNode("button", {
                         class: "shell-button",
                         type: "button",
                         onClick: $event => (task.confirm(false))
-                      }, "取消", 8 /* PROPS */, _hoisted_21),
+                      }, "取消", 8 /* PROPS */, _hoisted_36),
                       _createElementVNode("button", {
                         class: "shell-button transfer-primary",
                         type: "button",
                         onClick: $event => (task.confirm(true))
-                      }, "确认导入", 8 /* PROPS */, _hoisted_22)
+                      }, "确认导入", 8 /* PROPS */, _hoisted_37)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (external && task.recovery)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_23, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_38, [
                       _createElementVNode("button", {
                         class: "shell-button transfer-primary",
                         type: "button",
                         onClick: reload
-                      }, "重新打开并恢复", 8 /* PROPS */, _hoisted_24)
+                      }, "重新打开并恢复", 8 /* PROPS */, _hoisted_39)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_25, [
-                      (state.phase === 'reading')
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_40, [
+                      (state.recap && state.phase === 'idle')
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 0,
-                            class: "shell-button",
+                            class: "shell-button transfer-primary",
                             type: "button",
-                            onClick: pause
-                          }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_26))
+                            onClick: resume
+                          }, "重新选择备份", 8 /* PROPS */, _hoisted_41))
                         : _createCommentVNode("v-if", true),
-                      (['reading','ready'].includes(state.phase))
+                      (state.phase === 'reading')
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 1,
                             class: "shell-button",
                             type: "button",
-                            onClick: cancel
-                          }, "取消", 8 /* PROPS */, _hoisted_27))
+                            onClick: pause
+                          }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_42))
                         : _createCommentVNode("v-if", true),
-                      (state.phase === 'ready')
+                      (state.phase === 'select')
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 2,
                             class: "shell-button transfer-primary",
                             type: "button",
-                            onClick: apply
-                          }, "确认导入", 8 /* PROPS */, _hoisted_28))
+                            disabled: !state.picked.length,
+                            onClick: startImport
+                          }, "导入选中项", 8 /* PROPS */, _hoisted_43))
                         : _createCommentVNode("v-if", true),
-                      (['failed','cancelled'].includes(state.phase))
+                      (['reading','ready','select'].includes(state.phase))
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 3,
-                            class: "shell-button transfer-primary",
-                            type: "button",
-                            onClick: choose
-                          }, "重新选择", 8 /* PROPS */, _hoisted_29))
-                        : _createCommentVNode("v-if", true),
-                      (state.phase === 'applying')
-                        ? (_openBlock(), _createElementBlock("button", {
-                            key: 4,
                             class: "shell-button",
                             type: "button",
                             onClick: cancel
-                          }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_30))
+                          }, "取消", 8 /* PROPS */, _hoisted_44))
                         : _createCommentVNode("v-if", true),
-                      (state.phase === 'recovery')
+                      (state.phase === 'ready')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 4,
+                            class: "shell-button transfer-primary",
+                            type: "button",
+                            onClick: apply
+                          }, "确认导入", 8 /* PROPS */, _hoisted_45))
+                        : _createCommentVNode("v-if", true),
+                      (['failed','cancelled'].includes(state.phase))
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 5,
                             class: "shell-button transfer-primary",
                             type: "button",
+                            onClick: choose
+                          }, "重新选择", 8 /* PROPS */, _hoisted_46))
+                        : _createCommentVNode("v-if", true),
+                      (state.phase === 'applying')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 6,
+                            class: "shell-button",
+                            type: "button",
+                            onClick: cancel
+                          }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_47))
+                        : _createCommentVNode("v-if", true),
+                      (state.phase === 'recovery')
+                        ? (_openBlock(), _createElementBlock("button", {
+                            key: 7,
+                            class: "shell-button transfer-primary",
+                            type: "button",
                             onClick: reload
-                          }, "重新打开并恢复", 8 /* PROPS */, _hoisted_31))
+                          }, "重新打开并恢复", 8 /* PROPS */, _hoisted_48))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true)

@@ -132,7 +132,10 @@ async function prepareCharacters(db, session, restoreValue, signal, progress) {
         const unit = await resultOf(db.transaction('restore_units').objectStore('restore_units')
             .get([session.id, session.source, record.entry, part]));
         const card = restoreValue(unit?.value);
-        if (!card || card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
+        // [rphub 2.9.036] 原先这条在 validate() 里靠回扫 62MB 分片来查，现在挪到真正用到的地方。
+        if (!card || typeof card !== 'object' || Array.isArray(card))
+            throw new Error('角色卡内容不是对象，原数据未改动');
+        if (card.rphubCardStub === 1 || card.avatar?.rphubCardImage === 1)
             throw new Error('备份缺少完整角色卡内容，原数据未改动');
         const uuid = card.uuid || crypto.randomUUID();
         if (ids.has(uuid)) throw new Error('角色卡标识重复，原数据未改动');
@@ -250,9 +253,16 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             };
             next(0);
         });
-        progress?.(totalWork - 1, totalWork, '正在保存本机存档');
-        await window.RPHubStorage.syncLocalFiles?.();
-        await removeSession(db, id);
+        // [rphub 2.9.043] 收尾有两件事：① 把导入结果写成手机上的本地文件副本；② 删掉这次用的
+        //   暂存库（300MB 级备份的暂存库可能几十兆）。两者互不相干，原先排队做，用户就盯着
+        //   「正在保存本机存档」多等一份时间。这里并行发起，并把文案说清「只需一次」。
+        //   这一步不能省：写入本机文件是让下次冷启动直接可用的前提，省掉它只是把同一份等待
+        //   挪到重载之后，用户会以为「启动变慢了」。
+        progress?.(totalWork - 1, totalWork, '正在写入本机存档（只需一次，之后启动更快）');
+        await Promise.all([
+            window.RPHubStorage.syncLocalFiles?.() ?? null,
+            removeSession(db, id),
+        ]);
         progress?.(totalWork, totalWork);
     } catch (error) {
         if (committed) {

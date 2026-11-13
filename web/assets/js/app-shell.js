@@ -526,6 +526,9 @@
         setup(props) {
             return { s: props.state };
         },
+        // [rphub 2.9.044] 占用统计与「历史备份」共用同一份目录清单。原来只在展开
+        //   「历史备份」时才读，于是刚清完再进页面看到的还是旧数字（甚至根本不显示）。
+        mounted() { this.s.refreshPage?.(); },
         template: `
           <div class="backup-page">
             <header class="backup-header">
@@ -542,8 +545,8 @@
                   </div>
                   <label class="backup-field"><span>备份文件名</span><input type="text" aria-label="备份文件名" v-model="s.filename" placeholder="留空使用日期名称"></label>
                   <div class="backup-line backup-location"><span class="backup-path">{{s.folder || s.defaultFolder}}</span><button class="shell-icon-button" aria-label="更改备份目录" title="更改备份目录" @click="s.chooseFolder"><icon name="FolderOpen"/></button></div>
-                  <label class="backup-field"><span>读取档位</span><select v-model="s.profile" aria-label="读取档位"><option v-for="profile in s.profiles" :key="profile.id" :value="profile.id">{{profile.name}} · 单条≤{{Math.round(profile.unitBytes / 1048576)}}MB</option></select></label>
-                  <p class="backup-muted">导入时会按本机可用内存自动放宽单条上限（最高 128MB）并调整分块大小；档位决定基准值与分块下限。</p>
+                  <label class="backup-field"><span>导入档位</span><select v-model="s.profile" aria-label="导入档位"><option v-for="profile in s.profiles" :key="profile.id" :value="profile.id">{{profile.name}} · 下限 {{Math.round(profile.unitBytes / 1048576)}}MB</option></select></label>
+                  <p class="backup-muted">实际单条上限取<b>本机实测 {{s.importCapText || '—'}}</b>与档位下限的较大者（最高 128MB），分块大小也随可用内存自适应。档位只是下限：选「省内存」更稳，选「高速」更快。</p>
                   <details class="backup-details">
                     <summary>备份内容</summary><p v-if="s.native" class="backup-muted">以下为 JSON 导出选项；完整档案始终包含全部内容。</p>
                     <label v-for="option in s.scopes" :key="option.key" class="backup-check"><input type="checkbox" v-model="s.scope[option.key]">{{option.label}}</label>
@@ -564,13 +567,17 @@
                 <template v-if="s.config.enabled">
                   <label class="backup-field"><span>备份方式</span><select v-model="s.config.triggerMode"><option value="remind">每天提醒我</option><option value="auto">全自动</option></select></label>
                   <div class="backup-settings-grid"><label class="backup-field"><span>保留天数</span><select v-model.number="s.config.retentionDays"><option :value="3">3 天</option><option :value="7">7 天</option><option :value="14">14 天</option><option :value="30">30 天</option><option :value="0">永久保留</option></select></label>
-                  <label class="backup-field"><span>最多保留</span><select v-model.number="s.config.maxCopies"><option :value="3">3 份</option><option :value="5">5 份</option><option :value="10">10 份</option><option :value="20">20 份</option><option :value="0">不限份数</option></select></label></div>
+                  <label class="backup-field"><span>最多保留</span><select v-model.number="s.config.maxCopies"><option :value="2">2 份</option><option :value="3">3 份</option><option :value="5">5 份</option><option :value="10">10 份</option><option :value="20">20 份</option><option :value="0">不限份数</option></select></label></div>
                 </template>
                 <p class="backup-muted backup-note">{{s.overdue<0?'尚未完成每日备份':s.overdue===0?'今天已完成每日备份':'已 '+s.overdue+' 天未完成每日备份'}} · 不含独立图片文件</p>
                 <button class="backup-button backup-primary" :disabled="s.working || s.checking" @click="s.daily(true)"><icon name="Save"/>{{s.working?'正在备份…':'立即备份'}}</button>
                 <template v-if="s.native">
                   <div class="backup-line backup-location"><span class="backup-path">{{s.location || '完整档案自动保存目录未设置'}}</span><button class="shell-icon-button" aria-label="选择完整档案目录" title="选择完整档案目录" @click="s.archive('folder')"><icon name="FolderOpen"/></button></div>
                 </template>
+                <div v-if="s.usage.count" class="backup-line backup-usage">
+                  <span class="backup-muted">备份文件夹已占 <strong>{{s.usage.size}}</strong>：每日 {{s.usage.daily}} 份 · {{s.usage.dailySize}}<template v-if="s.usage.manual">，手动导出 {{s.usage.manual}} 份 · {{s.usage.manualSize}}</template></span>
+                  <button type="button" class="backup-button" :disabled="s.working || s.cleaning" @click="s.clean">{{s.cleaning ? '清理中…' : '清理旧备份'}}</button>
+                </div>
                 </section>
                 <section class="backup-section">
                   <h2>本地数据</h2>

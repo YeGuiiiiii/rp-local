@@ -4891,7 +4891,10 @@ const app = createApp({
             enabled: true,
             triggerMode: 'remind',
             retentionDays: 7, // 保留天数: 3, 7, 14, 30, 0(不限)
-            maxCopies: 5,     // 历史保留份数: 3, 5, 10, 20, 0(不限)
+            // [rphub 2.9.044] 5 -> 2。一份备份 ≈ 整个数据库的体积，默认留 5 份就等于把整库
+            //   复制五遍 —— 这是「存储占用 2.37GB 还在涨」的主因（导出才 400MB）。
+            //   老用户已存的 5 不在 normalize 里强改，由备份页新增的占用显示 + 一键清理自己降。
+            maxCopies: 2,     // 历史保留份数: 2, 3, 5, 10, 20, 0(不限)
             lastBackupDate: '',
             lastRemindDate: '', // [rphub 2.8.102] 最近一次弹窗提醒的日期（YYYY-MM-DD）
             lastSkipAt: 0,    // 2.8.14：最近一次因体积超限跳过的 Unix ms
@@ -4913,7 +4916,7 @@ const app = createApp({
                 enabled: cfg.enabled !== false,
                 triggerMode: cfg.triggerMode === 'auto' ? 'auto' : 'remind',
                 retentionDays: typeof cfg.retentionDays === 'number' ? cfg.retentionDays : 7,
-                maxCopies: typeof cfg.maxCopies === 'number' ? cfg.maxCopies : 5,
+                maxCopies: typeof cfg.maxCopies === 'number' ? cfg.maxCopies : 2,
                 lastBackupDate: typeof cfg.lastBackupDate === 'string' ? cfg.lastBackupDate : '',
                 lastRemindDate: typeof cfg.lastRemindDate === 'string' ? cfg.lastRemindDate : '',
                 lastSkipAt: typeof cfg.lastSkipAt === 'number' ? cfg.lastSkipAt : 0,
@@ -4980,46 +4983,30 @@ const app = createApp({
         };
 
         // 物理清理轮转逻辑 (按保留天数与最大份数删除过期物理文件)
+        // [rphub 2.9.044] 返回值从 void 改成 { removed, bytes }：原来备份页只能说「清理完了」，
+        //   说不出释放了多少 —— 用户对着 2.37GB 没法判断该不该点这一下。
+        //   挑选判据挪到 selectExpiredDailyBackups()，预览与实际删除共用同一份，免得
+        //   「预览说 3 个、实际删 2 个」。
         const cleanupExpiredAutoBackups = async () => {
             const bridge = window.AndroidBridge;
-            if (!bridge?.isNativeApp?.() || typeof bridge.deleteBackupFile !== 'function') return;
+            if (!bridge?.isNativeApp?.() || typeof bridge.deleteBackupFile !== 'function') return { removed: 0, bytes: 0 };
             await loadAutoBackupHistory();
-            const retentionDays = Number(autoBackupConfig.value.retentionDays) || 0;
-            const maxCopies = Number(autoBackupConfig.value.maxCopies) || 0;
-            const now = Date.now();
-            const list = autoBackupHistory.value; // 已按时间降序
-            const toDelete = [];
-
-            for (let i = 0; i < list.length; i++) {
-                const item = list[i];
-                let isExpired = false;
-                // 1. 超出最大保留份数 (若不为 0)
-                if (maxCopies > 0 && i >= maxCopies) {
-                    isExpired = true;
-                }
-                // 2. 超出保留天数 (若不为 0)
-                if (!isExpired && retentionDays > 0) {
-                    const ageDays = (now - item.timestamp) / (1000 * 60 * 60 * 24);
-                    if (ageDays > retentionDays) {
-                        isExpired = true;
-                    }
-                }
-                if (isExpired) {
-                    toDelete.push(item);
-                }
-            }
-
+            const toDelete = selectExpiredDailyBackups(autoBackupHistory.value, autoBackupConfig.value, Date.now());
+            let removed = 0, bytes = 0;
             for (const item of toDelete) {
                 try {
                     bridge.deleteBackupFile(item.id, item.isTreeDoc);
+                    removed += 1;
+                    bytes += Number(item.sizeBytes) || 0;
                     console.log('[AutoBackup] 轮转清理过期备份文件:', item.fileName);
                 } catch (e) {
                     console.warn('[AutoBackup] 清理文件异常:', e);
                 }
             }
-            if (toDelete.length > 0) {
+            if (removed > 0) {
                 await loadAutoBackupHistory();
             }
+            return { removed, bytes };
         };
 
         // Backup readers reconstruct full cards on demand and omit private storage records.
@@ -5164,7 +5151,7 @@ const app = createApp({
                         databases: await collectCompanionDatabasesDump(),
                         webStorage: { localStorage: collectLocalStorageDump() }
                     };
-                    downloadJsonFile(backupPayload, fileName);
+                    await downloadJsonFile(backupPayload, fileName);
                     autoBackupConfig.value.lastBackupDate = todayStr;
                     await saveAutoBackupConfig();
                     if (isManualTrigger) {
@@ -5396,8 +5383,8 @@ const app = createApp({
                     payload[key] = await getStoredValue(key);
                 }
                 const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-                downloadJsonFile(payload, '遗留备份-' + stamp + '.json');
-                showToast('已导出 ' + keys.length + ' 条遗留备份', 'success');
+                const verdict = await downloadJsonFile(payload, '遗留备份-' + stamp + '.json');
+                exportFeedback(verdict, '遗留备份', '已导出 ' + keys.length + ' 条遗留备份');
             } catch (error) {
                 console.error('[LegacyBackup] 导出失败:', error);
                 showToast('导出失败: ' + (error.message || error), 'error', 5000);
@@ -5676,6 +5663,97 @@ const app = createApp({
             }
         };
 
+        // [rphub 2.9.044] 备份页要能看见「占了多大」和「一键降下来」。
+        //   用户反馈存储占用 2.37GB 还在涨，而他自己的导出只有 400MB —— 差的那 2GB 全在这个
+        //   文件夹里：每日备份默认留 5 份，一份≈整库。这里把清单按「每日 / 手动」拆开统计。
+        const isDailyBackupFile = (name) => /^rp-hub-autobackup-.*\.json$/i.test(String(name || ''));
+        const formatBackupSize = (bytes) => {
+            const size = Math.max(0, Number(bytes) || 0);
+            return size >= 1073741824 ? (size / 1073741824).toFixed(2) + ' GB' : formatDataHealthSize(size);
+        };
+        const backupFolderUsage = computed(() => {
+            let daily = 0, dailyBytes = 0, manual = 0, manualBytes = 0;
+            for (const item of backupManagerFiles.value || []) {
+                const bytes = Number(item.sizeBytes) || 0;
+                if (isDailyBackupFile(item.fileName)) { daily += 1; dailyBytes += bytes; }
+                else { manual += 1; manualBytes += bytes; }
+            }
+            return {
+                daily, manual, count: daily + manual, bytes: dailyBytes + manualBytes,
+                size: formatBackupSize(dailyBytes + manualBytes),
+                dailySize: formatBackupSize(dailyBytes),
+                manualSize: formatBackupSize(manualBytes)
+            };
+        });
+        // 一份判据，两个调用方（预览 + 实际删除）。超份数与超天数取「或」，与旧实现一致。
+        const selectExpiredDailyBackups = (list, cfg, now) => {
+            const retentionDays = Number(cfg?.retentionDays) || 0;
+            const maxCopies = Number(cfg?.maxCopies) || 0;
+            return (list || [])
+                .filter(item => isDailyBackupFile(item.fileName))
+                .sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0))
+                .filter((item, index) => (maxCopies > 0 && index >= maxCopies)
+                    || (retentionDays > 0 && (now - (Number(item.timestamp) || 0)) / 86400000 > retentionDays));
+        };
+        const backupCleanupRunning = ref(false);
+        // 只删每日备份。同一文件夹里的手动导出是用户亲手留的包，按「最多保留 N 份」把它们
+        // 删掉不合适 —— 确认框里写清楚这一点，别让人以为点了就清空整个目录。
+        const cleanupBackupFolder = async () => {
+            if (backupCleanupRunning.value) return;
+            const bridge = window.AndroidBridge;
+            if (!bridge?.isNativeApp?.() || typeof bridge.deleteBackupFile !== 'function') {
+                showToast('当前环境不支持删除本地备份', 'error');
+                return;
+            }
+            const cfg = autoBackupConfig.value;
+            const maxCopies = Number(cfg.maxCopies) || 0;
+            const retentionDays = Number(cfg.retentionDays) || 0;
+            if (!maxCopies && !retentionDays) {
+                showToast('当前是「永久保留 / 不限份数」，没有可清理的规则；先把「最多保留」改成有限份数', 'info', 4000);
+                return;
+            }
+            backupCleanupRunning.value = true;
+            try {
+                await loadBackupManagerFiles();
+                const expired = selectExpiredDailyBackups(backupManagerFiles.value, cfg, Date.now());
+                if (!expired.length) {
+                    showToast('按当前规则没有需要清理的每日备份', 'info', 3000);
+                    return;
+                }
+                const bytes = expired.reduce((sum, item) => sum + (Number(item.sizeBytes) || 0), 0);
+                const rule = '保留最近 ' + (maxCopies || '不限') + ' 份'
+                    + (retentionDays ? ' / ' + retentionDays + ' 天内' : '');
+                const confirmed = await showVueConfirmModal('清理旧备份',
+                    '将删除 ' + expired.length + ' 个每日备份，释放约 ' + formatBackupSize(bytes)
+                    + '（规则：' + rule + '）。同一文件夹里手动导出的备份不会被删除。',
+                    { confirmText: '确认清理' });
+                if (!confirmed) return;
+                const result = await cleanupExpiredAutoBackups();
+                await loadBackupManagerFiles();
+                showToast(result.removed > 0
+                    ? '已清理 ' + result.removed + ' 个每日备份，释放 ' + formatBackupSize(result.bytes)
+                    : '没有文件被删除，请稍后重试', result.removed > 0 ? 'success' : 'error', 4000);
+            } finally {
+                backupCleanupRunning.value = false;
+            }
+        };
+        // 档位下拉里写死 16/32/64MB 会让人以为没自适应。这里显示本机实测的单条上限，
+        // 数值来自导入面板同一个量体函数（window.RPStreamImportLimits），不是另写一套公式。
+        const backupImportCapText = ref('');
+        const refreshBackupImportCap = () => {
+            try {
+                const measure = window.RPStreamImportLimits;
+                const info = window.RPStreamImport;
+                if (typeof measure !== 'function' || typeof info?.profile !== 'function') { backupImportCapText.value = ''; return; }
+                const limits = measure(info.profile(backupProfile.value));
+                const mb = Math.round((Number(limits?.unitBytes) || 0) / 1048576);
+                backupImportCapText.value = mb > 0 ? '≈' + mb + 'MB' : '';
+            } catch (_) { backupImportCapText.value = ''; }
+        };
+        const refreshBackupPageData = () => {
+            refreshBackupImportCap();
+            return loadBackupManagerFiles();
+        };
         const startRenameBackupFile = (record) => {
             if (!record || !record.id) return;
             backupRenameId.value = record.id;
@@ -5748,7 +5826,7 @@ const app = createApp({
                 if (!session) {
                     if (Number(record.sizeBytes) > LOCAL_BACKUP_READ_SAFE_BYTES) throw new Error('当前环境不支持大文件另存，请使用本地版');
                     const data = await readLocalBackupJson(bridge, record);
-                    downloadJsonFile(data, fileName);
+                    await downloadJsonFile(data, fileName);
                 } else if (typeof reader?.prepareBackupFileRead === 'function') {
                     const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
                     if (!token || token.startsWith('ERR:')) throw new Error(token.slice(4) || '读取备份失败');
@@ -6640,19 +6718,24 @@ const app = createApp({
                         }
                     }
                 });
-                if (session) await finishChunkedBackup(session, result.count);
+                // 原生通道（分块 / saveFile）自己会弹带真实路径的 Toast，JS 不再叠一条。
+                let nativeReported = false;
+                if (session) { await finishChunkedBackup(session, result.count); nativeReported = true; }
                 else if (browserWriter) await browserWriter.close();
                 else {
                     const blob = new Blob(parts, { type: 'application/json' });
-                    if (nativeBridge?.isNativeApp?.()) cardUtils.downloadBlob(blob, fileName);
-                    else {
+                    if (nativeBridge?.isNativeApp?.()) {
+                        const verdict = await cardUtils.downloadBlob(blob, fileName);
+                        exportFeedback(verdict, '全量备份');
+                        nativeReported = verdict?.channel === 'native' && verdict.ok !== false;
+                    } else {
                         const url = URL.createObjectURL(blob), link = document.createElement('a');
                         link.href = url; link.download = fileName; link.click();
                         setTimeout(() => URL.revokeObjectURL(url), 3000);
                     }
                 }
                 Object.assign(backupTask, { percent: 100, locked: false, message: '备份已导出' });
-                showToast(`已导出全部软件数据（${result.count} 项）`, 'success');
+                if (!nativeReported) showToast(`已导出全部软件数据（${result.count} 项）`, 'success');
             } catch (error) {
                 console.error('Full backup failed:', error);
                 abortChunkedBackup(session);
@@ -6866,7 +6949,9 @@ const app = createApp({
             const input = event.target;
             const file = input.files?.[0];
             if (!file) return;
-            if (streamImportPanel.value?.isOpen) return;
+            // [rphub 2.9.038] 原来按 isOpen 早退，而上次没走完留下的提示会让面板一直算「开着」，
+            //   于是「导入全部数据」从此静默失效。只拦真正在跑的任务与正在进行的外部任务。
+            if (streamImportPanel.value?.busy || streamImportPanel.value?.external) return;
             if (!/\.zip$/i.test(file.name)) return streamImportPanel.value.start(event);
             beginBackupTask('导入备份');
 
@@ -14062,9 +14147,22 @@ const app = createApp({
             });
         };
 
-        const downloadJsonFile = (data, fileName) => {
+        const downloadJsonFile = async (data, fileName) => {
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
-            cardUtils.downloadBlob(blob, fileName);
+            return cardUtils.downloadBlob(blob, fileName);
+        };
+
+        // [rphub 2.9.048] 导出的统一收尾：按通道决定说不说话。
+        //   原生通道成功时保持沉默 —— Java 侧那条「已保存到 <真实路径>」才是真凭据，
+        //   JS 再补一条「导出成功」既重复又可能在失败时撒谎。
+        const exportFeedback = (verdict, label, summary) => {
+            if (!verdict) return;
+            if (verdict.ok === false) {
+                showToast('导出失败：' + (verdict.error || '未知原因'), 'error', 4000);
+                return;
+            }
+            if (verdict.channel === 'native') return;
+            showToast(summary || ('已开始下载：' + (label || '文件')), 'success');
         };
 
         const readJsonFileInput = (event, handleData, handleError) => {
@@ -15422,8 +15520,8 @@ const app = createApp({
                 char = await window.RPHubStorage.readCharacter(char);
                 const v2Data = buildCharacterExportData(char);
                 const blob = new Blob([JSON.stringify(v2Data, null, 2)], { type: 'application/json' });
-                cardUtils.downloadBlob(blob, (char.name || 'character') + '.json');
-                showToast('角色卡 JSON 导出成功', 'success');
+                const verdict = await cardUtils.downloadBlob(blob, (char.name || 'character') + '.json');
+                exportFeedback(verdict, '角色卡 JSON');
             } catch (e) {
                 console.error('JSON export error:', e);
                 showToast('JSON 导出失败: ' + e.message, 'error');
@@ -15617,8 +15715,8 @@ const app = createApp({
                 };
                 const chatLines = [manifest, ...branchChats].map(record => JSON.stringify(record)).join('\n');
                 const chatBlob = new Blob([chatLines], { type: 'application/x-ndjson;charset=utf-8' });
-                cardUtils.downloadBlob(chatBlob, (char.name || 'character') + '_全部分支_chat.jsonl');
-                showToast(`已导出 ${branches.length} 个分支，共 ${totalMessages} 条聊天记录`, 'success');
+                const verdict = await cardUtils.downloadBlob(chatBlob, (char.name || 'character') + '_全部分支_chat.jsonl');
+                exportFeedback(verdict, '聊天记录', `已导出 ${branches.length} 个分支，共 ${totalMessages} 条聊天记录`);
             } catch (chatExpError) {
                 console.error('Chat export error:', chatExpError);
                 showToast('聊天记录导出失败: ' + chatExpError.message, 'error');
@@ -15638,8 +15736,8 @@ const app = createApp({
                     'chara',
                     cardUtils.encodeBase64Utf8(JSON.stringify(v2Data))
                 );
-                cardUtils.downloadBlob(new Blob([finalPng], { type: 'image/png' }), (char.name || 'character') + '.png');
-                showToast('角色卡 PNG 导出成功', 'success');
+                const verdict = await cardUtils.downloadBlob(new Blob([finalPng], { type: 'image/png' }), (char.name || 'character') + '.png');
+                exportFeedback(verdict, '角色卡 PNG');
             } catch (e) {
                 console.error('PNG export error:', e);
                 showToast('PNG 导出失败: ' + e.message, 'error');
@@ -15672,11 +15770,11 @@ const app = createApp({
             }
             showPresetEditor.value = false;
         };
-        const exportPresetGroups = (groupName) => {
+        const exportPresetGroups = async (groupName) => {
             const groups = typeof groupName === 'string' ? [groupName] : presetGroups.value.map(group => group.key);
             const label = groups.length === 1 ? '预设分组-' + window.RPLocalStore.safeName(groups[0]) : '全部预设分组';
-            downloadJsonFile(presetLibrary.exportGroups(presets.value, groups), 'RP本地版-' + label + '.json');
-            showToast(`成功导出 ${groups.length} 个分组`, 'success');
+            const verdict = await downloadJsonFile(presetLibrary.exportGroups(presets.value, groups), 'RP本地版-' + label + '.json');
+            exportFeedback(verdict, '预设分组', `成功导出 ${groups.length} 个分组`);
         };
         const importPresets = (event, targetGroup = activePresetGroupName.value) => {
             return readJsonFileInput(event, data => {
@@ -16225,7 +16323,9 @@ const app = createApp({
             exportJson: exportAllData, importJson: importAllData, exporting: isExportingAllData,
             profile: backupProfile, profiles: backupProfiles, scope: backupScope, scopes: backupScopeOptions,
             resetScope: resetBackupScope, config: autoBackupConfig, overdue: backupOverdueDays,
-            daily: performDailyAutoBackup, working: isAutoBackingUp, checking: isCheckingDataHealth
+            daily: performDailyAutoBackup, working: isAutoBackingUp, checking: isCheckingDataHealth,
+            usage: backupFolderUsage, clean: cleanupBackupFolder, cleaning: backupCleanupRunning,
+            importCapText: backupImportCapText, refreshPage: refreshBackupPageData
         });
         return {
             backupUi,
@@ -16379,7 +16479,7 @@ const app = createApp({
             deselectAllExportItems: () => {
                 selectedExportIndices.value.clear();
             },
-            confirmExport: () => {
+            confirmExport: async () => {
                 const indices = Array.from(selectedExportIndices.value).sort((a, b) => a - b);
                 const items = indices.map(i => exportItems.value[i]);
 
@@ -16406,10 +16506,9 @@ const app = createApp({
                     };
                 }
 
-                downloadJsonFile(dataToExport, fileName);
-
+                const verdict = await downloadJsonFile(dataToExport, fileName);
                 showExportModal.value = false;
-                showToast(`成功导出 ${items.length} 个项目`, 'success');
+                exportFeedback(verdict, '导出项目', `成功导出 ${items.length} 个项目`);
             },
 
             // Regex Methods

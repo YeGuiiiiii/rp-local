@@ -918,19 +918,38 @@ window.RPHubUtils = {
         img.src = src;
     });
 
-    const downloadBlob = (blob, filename, options = {}) => {
+    // [rphub 2.9.048] 改成「分通道回执」，不再让调用方无条件弹「导出成功」。
+    //   原生 saveFile 是 void：真正落没落盘由 Java 侧自己弹 Toast（「已保存到 <真实路径>」
+    //   /「保存失败：…」），JS 拿不到返回值 —— 原来每个调用点都在调用后立刻报成功，
+    //   保存失败时屏幕上会同时出现一红一绿两条互相打脸的提示。
+    //   这里只回报「走的哪条通道、JS 这一侧有没有出错」，要不要再说话交给调用方；
+    //   原生成功时调用方应当沉默，让原生那条带真实路径的提示单独存在。
+    //   返回值从 blob 换成对象（旧调用点都没用返回值，已逐个确认）。
+    const downloadBlob = async (blob, filename, options = {}) => {
+        const name = filename || 'export.json';
         if (window.AndroidBridge
             && typeof window.AndroidBridge.isNativeApp === 'function'
             && window.AndroidBridge.isNativeApp()
             && typeof window.AndroidBridge.saveFile === 'function') {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const dataUrl = String(reader.result || '');
-                window.AndroidBridge.saveFile(dataUrl.split(',')[1] || '', filename || 'export.json', blob.type || 'application/octet-stream');
-            };
-            reader.onerror = () => alert('export failed');
-            reader.readAsDataURL(blob);
-            return blob;
+            try {
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
+                    reader.onerror = () => reject(reader.error || new Error('读取待保存内容失败'));
+                    reader.readAsDataURL(blob);
+                });
+                const receipt = window.AndroidBridge.saveFile(base64, name, blob.type || 'application/octet-stream');
+                // 本版原生仍返回 undefined；哪天改成回传 OK:/ERR: 这里自动生效，不用再动调用方。
+                if (typeof receipt === 'string' && receipt) {
+                    if (receipt.indexOf('OK') === 0) {
+                        return { channel: 'native', ok: true, path: receipt.indexOf('OK:') === 0 ? receipt.slice(3) : '' };
+                    }
+                    return { channel: 'native', ok: false, error: receipt.indexOf('ERR:') === 0 ? receipt.slice(4) : receipt };
+                }
+                return { channel: 'native', ok: null, path: '' };
+            } catch (error) {
+                return { channel: 'native', ok: false, error: (error && error.message) || String(error) };
+            }
         }
         // [互通] 非原生环境必须走 blob 下载。这里原来只有上面那个 if：非原生时函数直接结束，
         // 不下载、不返回、不报错 ⇒ 自动备份（网页兜底分支）、立即备份、各类 JSON 导出一律静默无输出，
@@ -953,7 +972,8 @@ window.RPHubUtils = {
         // Chromium 的下载是异步取字节，立即 revoke 会让几十 MB 的备份在写入途中丢数据，
         // 所以未显式指定 delay 时下限给到 60s（与桌面版同一处取值）。
         setTimeout(cleanup, delay > 0 ? delay : 60000);
-        return blob;
+        // 浏览器这条路同样拿不到「写完了没」的回执，只能说明已经交给浏览器下载器。
+        return { channel: 'browser', ok: true, path: '' };
     };
 
     window.RPHubCardUtils = {

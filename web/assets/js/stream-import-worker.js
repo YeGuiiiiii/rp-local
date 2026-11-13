@@ -1155,13 +1155,80 @@
     if (modern === "rp_hub_auto_backup_config") return false;
     return modern.startsWith("rp_hub_auto_backup_");
   };
+  var legacyEntryPrefix = new TextEncoder().encode('{"key":"');
+  var legacyKeyPrefix = new TextEncoder().encode("rp_hub_auto_backup_");
+  var keptBackupKey = new TextEncoder().encode("rp_hub_auto_backup_config");
+  var localStorageNeedles = [
+    new TextEncoder().encode('"rp_hub_auto_backup_'),
+    new TextEncoder().encode('"silly_tavern_auto_backup_')
+  ];
+  var isSpaceByte = (c) => c === 32 || c === 9 || c === 10 || c === 13;
+  var NULL_BYTES = Uint8Array.from([110, 117, 108, 108]);
+  var nextStructuralCodes = [123, 125, 91, 93];
+  var trailingBackslashes = (bytes) => {
+    let count = 0;
+    for (let k = bytes.length - 1; k >= 0 && bytes[k] === BACKSLASH; k--) count++;
+    return count;
+  };
+  var QUOTE = 34;
+  var BACKSLASH = 92;
+  var scanStringEnd = (bytes, from) => {
+    for (let i = from; i < bytes.length; i++) {
+      const c = bytes[i];
+      if (c === BACKSLASH) {
+        i++;
+        continue;
+      }
+      if (c === QUOTE) return i;
+    }
+    return -1;
+  };
+  var decodeKeyBytes = (bytes, start, end) => {
+    const raw = new TextDecoder().decode(bytes.subarray(start, end));
+    if (raw.indexOf("\\") < 0) return raw;
+    try {
+      return JSON.parse('"' + raw + '"');
+    } catch (_) {
+      return raw;
+    }
+  };
+  var equalsAt = (hay, at, needle) => {
+    if (at + needle.length > hay.length) return false;
+    for (let j = 0; j < needle.length; j++) if (hay[at + j] !== needle[j]) return false;
+    return true;
+  };
+  var indexOfBytes = (hay, needle, from) => {
+    const first = needle[0];
+    let at = hay.indexOf(first, Math.max(0, from));
+    while (at >= 0) {
+      if (equalsAt(hay, at, needle)) return at;
+      at = hay.indexOf(first, at + 1);
+    }
+    return -1;
+  };
   var scalarTokens = /* @__PURE__ */ new Set([tokenType_default.STRING, tokenType_default.NUMBER, tokenType_default.TRUE, tokenType_default.FALSE, tokenType_default.NULL]);
   var openTokens = /* @__PURE__ */ new Set([tokenType_default.LEFT_BRACE, tokenType_default.LEFT_BRACKET]);
   var closeTokens = /* @__PURE__ */ new Set([tokenType_default.RIGHT_BRACE, tokenType_default.RIGHT_BRACKET]);
   var utf8 = new TextEncoder();
+  var ASCII_RUN = /^[\x00-\x7f]*$/;
+  var stringByteLength = (value) => {
+    const length = value.length;
+    if (length > 4096 && ASCII_RUN.test(value)) return length + 2;
+    let bytes = 2;
+    for (let i = 0; i < length; i++) {
+      const code = value.charCodeAt(i);
+      bytes += code < 128 ? 1 : code < 2048 ? 2 : code >= 55296 && code <= 57343 ? 2 : 3;
+    }
+    return bytes;
+  };
   var BackupStreamDecoder = class {
-    constructor({ emit, maxUnitBytes = 32 * 1024 * 1024 } = {}) {
-      this.emit = emit;
+    constructor(options = {}) {
+      const { emit, maxUnitBytes = 32 * 1024 * 1024 } = options;
+      this.emit = typeof emit === "function" ? emit : () => {
+      };
+      this.pick = options && Array.isArray(options.pick) && options.pick.length ? new Set(options.pick) : null;
+      this.survey = !!(options && options.survey);
+      this.stringSkip = null;
       this.maxUnitBytes = maxUnitBytes;
       this.frames = [];
       this.records = /* @__PURE__ */ new Map();
@@ -1175,6 +1242,14 @@
       this.rootClosed = false;
       this.sawEntries = false;
       this.skippedEntries = [];
+      this.spans = [];
+      this.entrySkips = 0;
+      this.entriesOpen = -1;
+      this.entriesClose = -1;
+      this.muted = null;
+      this.pendingSkip = null;
+      this.skipState = null;
+      this.offsetAdjust = 0;
       this.tokenizer = new Tokenizer({ stringBufferSize: 64 * 1024, numberBufferSize: 128 });
       this.textDecoder = new TextDecoder("utf-8", { fatal: true });
       this.validator = new TokenParser({ paths: [], keepStack: false });
@@ -1237,11 +1312,13 @@
     }
     capture(path, info, accept) {
       const parser = new TokenParser({ paths: ["$"], keepStack: true });
-      const active = { path, parser, start: info.offset, accept };
+      const active = { path, parser, start: info.offset + this.offsetAdjust, accept };
       this.active = active;
       parser.onValue = ({ value, stack }) => {
         if (stack.length) return;
-        const bytes = utf8.encode(JSON.stringify(value)).length;
+        if (typeof value === "string" && value.length > this.maxUnitBytes)
+          throw this.failure("\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 " + this.maxUnitBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\uFF1B\u539F\u6570\u636E\u672A\u6539\u52A8", path);
+        const bytes = typeof value === "string" ? stringByteLength(value) : utf8.encode(JSON.stringify(value)).length;
         if (bytes > this.maxUnitBytes) throw this.failure("\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 " + this.maxUnitBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\uFF1B\u539F\u6570\u636E\u672A\u6539\u52A8", path);
         this.maxUnit = Math.max(this.maxUnit, bytes);
         active.accept(value, bytes);
@@ -1257,10 +1334,12 @@
       if (path.length === 1 && path[0] === "entries") {
         if (token !== tokenType_default.LEFT_BRACKET) throw this.failure("entries \u5FC5\u987B\u662F\u6570\u7EC4", path);
         this.sawEntries = true;
+        this.entriesOpen = info.offset + this.offsetAdjust + 1;
       }
       const location = this.locate(path);
       if (location) {
         const relative = location.relative;
+        if (!relative.length && token === tokenType_default.NULL) return;
         const record = this.record(location);
         if (!relative.length) {
           if (token !== tokenType_default.LEFT_BRACE) throw this.failure("\u5907\u4EFD\u6761\u76EE\u5FC5\u987B\u662F\u5BF9\u8C61", path);
@@ -1274,10 +1353,10 @@
         if (relative.length === 1 && ["value", "v"].includes(relative[0])) {
           record.hasValue = true;
           record.array = token === tokenType_default.LEFT_BRACKET;
-          if (shouldSkipEntryKey(record.key)) {
+          if (this.shouldSkipKey(record.key)) {
             record.skipped = true;
             record.count = 0;
-            record.skipStart = typeof info.offset === "number" ? info.offset : this.bytes;
+            record.skipStart = typeof info.offset === "number" ? info.offset + this.offsetAdjust : this.bytes;
             return;
           }
           if (!record.array) {
@@ -1299,6 +1378,10 @@
         }
       }
       if (path.length === 3 && path[0] === "webStorage" && path[1] === "localStorage") {
+        if (this.shouldSkipKey(path[2])) {
+          if (token !== tokenType_default.NULL) this.mute(info, path[2]);
+          return;
+        }
         this.capture(path, info, (value, bytes) => {
           this.emit({ kind: "localStorage", key: path[2], value, bytes });
         });
@@ -1309,6 +1392,40 @@
         });
       }
     }
+    // [rphub 2.9.038] 旧版自动备份快照还有第二个落脚点：webStorage.localStorage。
+    //   导出端（app.js 的 collectLocalStorageDump）把整份 localStorage 原样写进这里，
+    //   旧快照就是一条上百 MB 的字符串值。entries 里的旧快照 2.9.034/036 已经按字节跳过，
+    //   但这条路径压根没走 shouldSkipEntryKey —— 整份旧包会被 TokenParser 组装出来，
+    //   再 stringify + utf8 编码各复制一份，三份同时活着。带旧备份的外来包就是死在这里。
+    //   这里只吞 token、不构造值：validator 照常校验结构，其余一概不落地。
+    mute(info, key) {
+      this.muted = { depth: 0, opened: false, key: String(key || ""), start: info.offset + this.offsetAdjust };
+    }
+    trackMuted(info) {
+      const state = this.muted;
+      const token = info.token;
+      if (openTokens.has(token)) {
+        state.depth++;
+        state.opened = true;
+        return;
+      }
+      if (closeTokens.has(token)) {
+        state.depth--;
+        if (state.opened && state.depth === 0) this.endMute();
+        return;
+      }
+      if (!state.opened && state.depth === 0 && scalarTokens.has(token) && !info.partial) this.endMute();
+    }
+    endMute() {
+      this.pendingSkip = { key: this.muted.key, start: this.muted.start };
+      this.muted = null;
+    }
+    settleSkip() {
+      if (!this.pendingSkip) return;
+      const item = this.pendingSkip;
+      this.pendingSkip = null;
+      this.skippedEntries.push({ key: item.key, bytes: Math.max(0, this.lastToken - item.start) });
+    }
     token(info) {
       const frame = this.frames.at(-1);
       const token = info.token;
@@ -1317,7 +1434,8 @@
         throw this.failure("\u5907\u4EFD\u5305\u542B\u4E0D\u5B89\u5168\u7684\u5BF9\u8C61\u5C5E\u6027\u540D\uFF1A" + info.value);
       }
       this.validator.write(info);
-      this.lastToken = info.offset;
+      this.lastToken = info.offset + this.offsetAdjust;
+      this.settleSkip();
       const wasActive = !!this.active;
       if (wasActive) this.active.parser.write(info);
       if (keyToken) {
@@ -1329,7 +1447,7 @@
         if (frame.kind === "array") frame.index++;
         else frame.expectKey = true;
         return;
-      } else if (!wasActive && !closeTokens.has(token)) this.route(this.currentPath(), info);
+      } else if (!wasActive && !this.muted && !closeTokens.has(token)) this.route(this.currentPath(), info);
       if (openTokens.has(token)) {
         const path = this.currentPath();
         if (!this.frames.length && token !== tokenType_default.LEFT_BRACE) throw this.failure("\u5907\u4EFD\u6839\u8282\u70B9\u5FC5\u987B\u662F\u5BF9\u8C61", path);
@@ -1337,19 +1455,235 @@
         this.frames.push({ path, kind: token === tokenType_default.LEFT_BRACE ? "object" : "array", index: 0, key: void 0, expectKey: true });
       } else if (closeTokens.has(token)) {
         const closed = this.frames.pop();
+        if (closed && closed.kind === "array" && closed.path.length === 1 && closed.path[0] === "entries")
+          this.entriesClose = info.offset + this.offsetAdjust;
         const location = this.locate(closed.path);
-        if (location && !location.relative.length) this.completeRecord(location, info.offset);
-        if (location?.mapKey && location.relative.length === 1 && location.relative[0] === "value" && closed.kind === "array") this.completeRecord(location, info.offset);
+        if (location && !location.relative.length) this.completeRecord(location, info.offset + this.offsetAdjust);
+        if (location?.mapKey && location.relative.length === 1 && location.relative[0] === "value" && closed.kind === "array") this.completeRecord(location, info.offset + this.offsetAdjust);
         if (!this.frames.length) this.rootClosed = true;
       }
+      if (this.muted) this.trackMuted(info);
+    }
+    // [rphub 2.9.036] 分片喂 tokenizer：遇到旧版快照条目就在这里把整段字节吞掉，
+    //   只补一个 null 占位。整段不产生任何 token，也不会长出一个 164MB 的对象。
+    feedSlice(bytes, start, end) {
+      if (end <= start) return;
+      const text = this.textDecoder.decode(bytes.subarray(start, end), { stream: true });
+      if (text) this.tokenizer.write(text);
+    }
+    atEntriesElement() {
+      const frames = this.frames;
+      const array = frames[1];
+      return frames.length === 2 && array.kind === "array" && array.path.length === 1 && array.path[0] === "entries";
+    }
+    legacyKeyAt(bytes, hit) {
+      const start = hit + legacyEntryPrefix.length;
+      const stop = Math.min(bytes.length, start + 512);
+      const end = scanStringEnd(bytes.subarray(0, stop), start);
+      if (end < 0) return "";
+      return decodeKeyBytes(bytes, start, end);
+    }
+    // 从条目对象的 '{' 起按字节找配对的 '}'，全程不构造字符串。
+    // 下一个结构字节：引号 / 花括号 / 方括号，取最早的一个。全部走原生 indexOf。
+    nextStructural(bytes, from) {
+      let next = bytes.indexOf(QUOTE, from);
+      if (next < 0) next = bytes.length;
+      for (const code of nextStructuralCodes) {
+        const at = bytes.indexOf(code, from);
+        if (at >= 0 && at < next) next = at;
+      }
+      return next;
+    }
+    // [rphub 2.9.039] 导出端把整份 localStorage 原样写进 webStorage.localStorage，旧快照就是那里的
+    //   一个「值是一整份旧包」的字符串成员。这条分支原先只有 mute（不构造值），可 tokenizer 会把
+    //   大字符串整条建出来（实测 5MB 也只有一个 token），那一次分配躲不掉。所以改成和 entries
+    //   一样：喂 tokenizer 之前按字节整段吞掉，只补 null 占位。
+    inLocalStorageContainer() {
+      const frames = this.frames;
+      if (frames.length !== 3) return false;
+      const local = frames[2];
+      return local.kind === "object" && local.path.length === 2 && local.path[0] === "webStorage" && local.path[1] === "localStorage";
+    }
+    findLocalStorageSkip(bytes, from) {
+      for (const needle of localStorageNeedles) {
+        let at = indexOfBytes(bytes, needle, from);
+        while (at >= 0) {
+          let i = at - 1;
+          while (i >= 0 && isSpaceByte(bytes[i])) i--;
+          if (i < 0 || bytes[i] !== 123 && bytes[i] !== 44) {
+            at = indexOfBytes(bytes, needle, at + 1);
+            continue;
+          }
+          const keyStart = at + 1;
+          const keyEnd = scanStringEnd(bytes, keyStart);
+          if (keyEnd < 0) return null;
+          let j = keyEnd + 1;
+          while (j < bytes.length && isSpaceByte(bytes[j])) j++;
+          if (bytes[j] !== 58) {
+            at = indexOfBytes(bytes, needle, at + 1);
+            continue;
+          }
+          j++;
+          while (j < bytes.length && isSpaceByte(bytes[j])) j++;
+          if (bytes[j] !== QUOTE) {
+            at = indexOfBytes(bytes, needle, at + 1);
+            continue;
+          }
+          const key = decodeKeyBytes(bytes, keyStart, keyEnd);
+          if (!this.shouldSkipKey(key)) {
+            at = indexOfBytes(bytes, needle, at + 1);
+            continue;
+          }
+          return { hit: at, key, valueStart: j };
+        }
+      }
+      return null;
+    }
+    // 该不该整段跳过：旧快照永远跳；auto_backup_config 永远留；
+    //   survey 全跳（只清点体积）；有 pick 时未选中的也跳。
+    shouldSkipKey(key) {
+      const raw = String(key || "");
+      if (shouldSkipEntryKey(raw)) return true;
+      if (this.survey) return true;
+      if (!this.pick) return false;
+      const logical = modernKey(raw);
+      if (logical === "rp_hub_auto_backup_config") return false;
+      return !(this.pick.has(raw) || this.pick.has(logical));
+    }
+    skipLegacyString(bytes, from) {
+      const state = this.stringSkip;
+      const total = bytes.length;
+      let i = state.started ? from : from + 1;
+      state.started = true;
+      while (i < total) {
+        const q = bytes.indexOf(QUOTE, i);
+        if (q < 0) {
+          state.tail = trailingBackslashes(bytes);
+          return total;
+        }
+        let backslashes = 0;
+        for (let k = q - 1; k >= 0 && bytes[k] === BACKSLASH; k--) backslashes++;
+        if (q === backslashes) backslashes += state.tail;
+        state.tail = 0;
+        i = q + 1;
+        if ((backslashes & 1) === 0) {
+          const skipped = this.bytes + q + 1 - state.start;
+          this.skippedEntries.push({ key: state.key, bytes: skipped });
+          this.offsetAdjust += skipped - 4;
+          this.stringSkip = null;
+          this.feedSlice(NULL_BYTES, 0, 4);
+          return i;
+        }
+      }
+      return total;
+    }
+    skipLegacyEntry(bytes, from) {
+      const state = this.skipState;
+      const total = bytes.length;
+      let i = from;
+      while (i < total) {
+        if (state.inStr) {
+          const q = bytes.indexOf(QUOTE, i);
+          if (q < 0) {
+            state.tail = trailingBackslashes(bytes);
+            return total;
+          }
+          let backslashes = 0;
+          for (let k = q - 1; k >= 0 && bytes[k] === BACKSLASH; k--) backslashes++;
+          if (q === backslashes) backslashes += state.tail;
+          state.tail = 0;
+          i = q + 1;
+          if ((backslashes & 1) === 0) state.inStr = false;
+          continue;
+        }
+        const c = bytes[i];
+        if (c === QUOTE) {
+          state.inStr = true;
+          i++;
+          continue;
+        }
+        if (c === 123 || c === 91) {
+          state.depth++;
+          i++;
+          continue;
+        }
+        if (c === 125 || c === 93) {
+          state.depth--;
+          i++;
+          if (state.depth === 0) {
+            const end = this.bytes + i;
+            const skipped = end - state.start;
+            if (this.survey) {
+              this.spans.push({ key: state.key, start: state.start, end });
+              this.entrySkips += 1;
+            }
+            this.skippedEntries.push({ key: state.key, bytes: skipped });
+            this.offsetAdjust += skipped - 4;
+            this.skipState = null;
+            this.feedSlice(NULL_BYTES, 0, 4);
+            return i;
+          }
+          continue;
+        }
+        const next = this.nextStructural(bytes, i);
+        if (next >= total) {
+          state.tail = 0;
+          return total;
+        }
+        i = next;
+      }
+      return total;
     }
     write(bytes) {
       try {
-        const text = this.textDecoder.decode(bytes, { stream: true });
-        if (text) this.tokenizer.write(text);
-        this.bytes += bytes.byteLength;
-        const earliest = this.active?.start ?? this.lastToken;
-        if (this.bytes - earliest > this.maxUnitBytes + bytes.byteLength) {
+        const total = bytes.byteLength;
+        let from = 0;
+        while (from < total) {
+          if (this.skipState) {
+            from = this.skipLegacyEntry(bytes, from);
+            continue;
+          }
+          if (this.stringSkip) {
+            from = this.skipLegacyString(bytes, from);
+            continue;
+          }
+          let hit = indexOfBytes(bytes, legacyEntryPrefix, from);
+          if (!this.pick && !this.survey) {
+            while (hit >= 0) {
+              const at = hit + legacyEntryPrefix.length;
+              if (equalsAt(bytes, at, legacyKeyPrefix) && !equalsAt(bytes, at, keptBackupKey)) break;
+              hit = indexOfBytes(bytes, legacyEntryPrefix, hit + 1);
+            }
+          }
+          const local = this.findLocalStorageSkip(bytes, from);
+          if (local && (hit < 0 || local.hit < hit)) {
+            this.feedSlice(bytes, from, local.valueStart);
+            this.stringSkip = { key: local.key, start: this.bytes + local.valueStart, tail: 0, started: false };
+            from = this.skipLegacyString(bytes, local.valueStart);
+            continue;
+          }
+          if (hit < 0) {
+            this.feedSlice(bytes, from, total);
+            break;
+          }
+          this.feedSlice(bytes, from, hit);
+          if (!this.atEntriesElement()) {
+            this.feedSlice(bytes, hit, hit + 1);
+            from = hit + 1;
+            continue;
+          }
+          const entryKey = this.legacyKeyAt(bytes, hit);
+          if (!entryKey || !this.shouldSkipKey(entryKey)) {
+            this.feedSlice(bytes, hit, hit + 1);
+            from = hit + 1;
+            continue;
+          }
+          this.skipState = { depth: 0, inStr: false, tail: 0, start: this.bytes + hit, key: entryKey };
+          from = this.skipLegacyEntry(bytes, hit);
+        }
+        this.bytes += total;
+        const earliest = this.active?.start ?? (this.skipState || this.stringSkip ? this.bytes : this.lastToken);
+        if (this.bytes - earliest > this.maxUnitBytes + total) {
           throw this.failure("\u5F53\u524D\u5B57\u7B26\u4E32\u6216\u5355\u6761\u8BB0\u5F55\u8D85\u8FC7 " + this.maxUnitBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D");
         }
       } catch (error) {
@@ -1362,6 +1696,7 @@
       }
     }
     end() {
+      this.settleSkip();
       try {
         const tail = this.textDecoder.decode();
         if (tail) this.tokenizer.write(tail);
@@ -1369,13 +1704,42 @@
       } catch (_) {
         throw this.failure("\u6587\u4EF6\u7ED3\u5C3E\u4E0D\u5B8C\u6574\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
       }
-      if (!this.rootClosed || this.active || this.records.size) throw this.failure("\u5907\u4EFD\u4E0D\u5B8C\u6574\uFF0C\u4E0D\u80FD\u542F\u7528");
+      if (!this.rootClosed || this.active || this.records.size || this.skipState || this.muted || this.stringSkip)
+        throw this.failure("\u5907\u4EFD\u4E0D\u5B8C\u6574\uFF0C\u4E0D\u80FD\u542F\u7528");
       if (this.metadata.type !== "rp-hub-complete-backup" && !this.metadata.__rphub_backup__ && !Object.keys(this.entryCounts).some((key) => key.startsWith("database:"))) {
         throw this.failure("\u672A\u8BC6\u522B\u4E3A RP-Hub \u5168\u91CF\u5907\u4EFD");
       }
       const source = this.sawEntries ? "entries" : ["database:RPHubDB", "database:main", "database:SillyTavernDB"].find((key) => this.entryCounts[key] > 0);
-      if (!source || !this.entryCounts[source]) throw this.failure("\u5907\u4EFD\u6CA1\u6709\u53EF\u7528\u7684\u4E3B\u5E93\u6761\u76EE");
-      return { source, metadata: this.metadata, counts: this.entryCounts, maxUnitBytes: this.maxUnit, skipped: this.skippedEntries };
+      if ((!source || !this.entryCounts[source]) && !this.survey && !this.pick)
+        throw this.failure("\u5907\u4EFD\u6CA1\u6709\u53EF\u7528\u7684\u4E3B\u5E93\u6761\u76EE");
+      const grouped = /* @__PURE__ */ new Map();
+      for (const item of this.skippedEntries) {
+        const key = String(item.key || "");
+        if (!key) continue;
+        const row = grouped.get(key) || { key, bytes: 0, count: 0 };
+        row.bytes += Math.max(0, Number(item.bytes) || 0);
+        row.count += 1;
+        grouped.set(key, row);
+      }
+      const items = [...grouped.values()].sort((a, b) => b.bytes - a.bytes);
+      let contiguous = this.survey && this.spans.length > 0;
+      if (contiguous && this.entriesOpen >= 0 && this.entriesClose >= 0) {
+        contiguous = this.spans[0].start === this.entriesOpen && this.spans[this.spans.length - 1].end === this.entriesClose;
+        for (let i = 1; contiguous && i < this.spans.length; i++)
+          if (this.spans[i].start - this.spans[i - 1].end !== 1) contiguous = false;
+      } else contiguous = false;
+      return {
+        source,
+        metadata: this.metadata,
+        counts: this.entryCounts,
+        maxUnitBytes: this.maxUnit,
+        skipped: this.skippedEntries,
+        items,
+        spans: contiguous ? this.spans : [],
+        entriesOpen: this.entriesOpen,
+        entriesClose: this.entriesClose,
+        indexed: contiguous
+      };
     }
   };
 
@@ -1457,22 +1821,41 @@
   var StagingSink = class {
     constructor(db, session) {
       Object.assign(this, { db, session, queue: [] });
+      this.tally = /* @__PURE__ */ new Map();
     }
     emit(item) {
       this.queue.push(item);
     }
     async flush() {
       if (!this.queue.length) return;
+      const id = (item) => JSON.stringify([item.source, item.entry]);
+      const prepared = [];
+      for (const { kind, ...item } of this.queue) {
+        if (kind === "unit") {
+          const key = id(item);
+          const tally = this.tally.get(key) || { count: 0, bytes: 0 };
+          tally.count += 1;
+          tally.bytes += Number(item.bytes) || 0;
+          this.tally.set(key, tally);
+        } else if (kind === "record") {
+          const tally = this.tally.get(id(item)) || { count: 0, bytes: 0 };
+          this.tally.delete(id(item));
+          if (tally.count !== item.count)
+            throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + item.key);
+          item.bytes = tally.bytes;
+        }
+        prepared.push([kind, item]);
+      }
       const tx = this.db.transaction(Object.keys(stores).slice(1), "readwrite");
       const names = { unit: "restore_units", record: "restore_records", localStorage: "restore_web", companion: "restore_companions" };
-      for (const { kind, ...item } of this.queue) {
+      for (const [kind, item] of prepared) {
         tx.objectStore(names[kind]).put({ ...item, session: this.session });
       }
       await completed(tx);
       this.queue.length = 0;
     }
   };
-  async function validate(db, session, source, wait2, maxCollectionBytes = 128 * 1048576) {
+  async function validate(db, session, source, wait2, maxCollectionBytes = 128 * 1048576, onStep) {
     const last = /* @__PURE__ */ new Map();
     await each(db, "restore_records", rangeOf(session, source), (item) => {
       last.set(item.key, item);
@@ -1480,8 +1863,10 @@
     });
     const deleted = /* @__PURE__ */ new Set();
     const summary = { records: last.size, cards: 0, messages: 0, memories: 0 };
+    let done = 0;
     for (const [key, record] of last) {
       await wait2();
+      onStep?.(++done, last.size);
       if (key.startsWith("rp_hub_b1_memory_state_")) {
         const meta = (await resultOf(db.transaction("restore_units").objectStore("restore_units").get([session, source, record.entry, 0])))?.value;
         const scope = key.slice("rp_hub_b1_memory_state_".length);
@@ -1493,14 +1878,16 @@
       }
       if (key.startsWith("rp_hub_classic_memories_") && !record.array) throw new Error("\u8BB0\u5FC6\u6B63\u6587\u5FC5\u987B\u662F\u6570\u7EC4\uFF1A" + key);
       if (key === "rp_hub_characters" && !record.array) throw new Error("\u89D2\u8272\u5361\u96C6\u5408\u5FC5\u987B\u662F\u6570\u7EC4");
-      let bytes = 0, count = 0;
-      await each(db, "restore_units", rangeOf(session, source, record.entry), (unit) => {
-        bytes += unit.bytes;
-        count++;
-        if (key === "rp_hub_characters" && (!unit.value || typeof unit.value !== "object" || Array.isArray(unit.value)))
-          throw new Error("\u89D2\u8272\u5361\u5185\u5BB9\u4E0D\u662F\u5BF9\u8C61");
-      });
-      if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
+      let bytes = Number(record.bytes);
+      if (!Number.isFinite(bytes)) {
+        bytes = 0;
+        let count = 0;
+        await each(db, "restore_units", rangeOf(session, source, record.entry), (unit) => {
+          bytes += Number(unit.bytes) || 0;
+          count++;
+        });
+        if (count !== record.count) throw new Error("\u6682\u5B58\u8BB0\u5F55\u4E0D\u5B8C\u6574\uFF1A" + key);
+      }
       if (key !== "rp_hub_characters" && !key.startsWith("rp_hub_chat_") && bytes > maxCollectionBytes)
         throw new Error("\u5355\u4E2A\u6570\u636E\u96C6\u5408\u8D85\u8FC7 " + maxCollectionBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD\uFF1A" + key);
       if (key === "rp_hub_characters") summary.cards = record.count;
@@ -1551,25 +1938,63 @@
       chunkBytes: Math.max(base.chunkBytes, Math.min(4 * MB2, Number(asked.chunkBytes) || 0)),
       collectionBytes: Math.max(base.collectionBytes, Number(asked.collectionBytes) || 0)
     };
-    const session = { id: data.id, name: data.file?.name || data.name, state: "reading", bytes: data.file?.size || data.bytes || 0, read: 0 };
-    let db, timer, lastNotice = 0, phase = "\u5206\u5757\u8BFB\u53D6\u4E0E\u6821\u9A8C";
+    const survey = !!data.survey;
+    const pick = Array.isArray(data.pick) && data.pick.length ? data.pick.map(String) : null;
+    const ranges = !survey && Array.isArray(data.ranges) && data.ranges.length && data.file ? data.ranges : null;
+    const rangeBytes = ranges ? ranges.reduce((sum, item) => sum + (item.end - item.start), 0) : 0;
+    const session = {
+      id: data.id,
+      name: data.file?.name || data.name,
+      state: "reading",
+      bytes: ranges ? rangeBytes : data.file?.size || data.bytes || 0,
+      read: 0
+    };
+    let db, timer, lastNotice = 0, phase = survey ? "\u6E05\u70B9\u5BFC\u5165\u5185\u5BB9" : "\u5206\u5757\u8BFB\u53D6\u4E0E\u6821\u9A8C";
+    let postedStamp = "";
     const progress = (nextPhase) => {
       if (nextPhase) phase = nextPhase;
-      if (performance.now() - lastNotice < 200 && !nextPhase) return;
+      if (!nextPhase && performance.now() - lastNotice < 200) return;
       lastNotice = performance.now();
+      const stamp = session.read + "|" + phase;
+      if (!nextPhase && stamp === postedStamp) return;
+      postedStamp = stamp;
       postMessage({ type: "progress", read: session.read, bytes: session.bytes, phase });
     };
     const heartbeat = setInterval(() => progress(), 1e3);
     const readWithTimeout = (promise) => Promise.race([promise, new Promise((_, reject) => {
       timer = setTimeout(() => reject(new Error("\u8BFB\u53D6\u6587\u4EF6\u8D85\u65F6\uFF0C\u8BF7\u5C06\u5907\u4EFD\u4FDD\u5B58\u5230\u8BBE\u5907\u672C\u5730\u540E\u91CD\u8BD5")), 3e4);
     })]).finally(() => clearTimeout(timer));
+    const withTimeout = (promise, ms, message) => {
+      let handle;
+      return Promise.race([promise, new Promise((_, reject) => {
+        handle = setTimeout(() => reject(new Error(message)), ms);
+      })]).finally(() => clearTimeout(handle));
+    };
     try {
-      db = await database();
-      await saveSession(db, session);
-      const sink = new StagingSink(db, session.id);
-      const parser = new BackupStreamDecoder({ emit: (item) => sink.emit(item), maxUnitBytes: limits.unitBytes });
+      if (!survey) {
+        db = await database();
+        await saveSession(db, session);
+      }
+      const sink = survey ? null : new StagingSink(db, session.id);
+      const parser = new BackupStreamDecoder({
+        emit: sink ? (item) => sink.emit(item) : () => {
+        },
+        maxUnitBytes: limits.unitBytes,
+        pick,
+        survey
+      });
       const chunks = async function* () {
         const file = data.file;
+        if (ranges) {
+          for (const range of ranges) {
+            for (let at = range.start; at < range.end; at += limits.chunkBytes) {
+              await wait();
+              const end = Math.min(range.end, at + limits.chunkBytes);
+              yield new Uint8Array(await readWithTimeout(file.slice(at, end).arrayBuffer()));
+            }
+          }
+          return;
+        }
         if (data.stream) {
           const reader = data.stream.getReader();
           try {
@@ -1596,19 +2021,76 @@
         parser.write(buffer);
         pendingBytes += buffer.byteLength;
         if (pendingBytes >= limits.chunkBytes) {
-          await sink.flush();
+          if (sink) await sink.flush();
           pendingBytes = 0;
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
         session.read += buffer.byteLength;
         progress();
       }
+      progress("\u89E3\u6790\u6536\u5C3E");
       const parsed = parser.end();
-      await sink.flush();
+      if (survey) {
+        const old = (parsed.skipped || []).filter((item) => shouldSkipEntryKey(item.key));
+        let oldBytes = 0;
+        for (const item of old) oldBytes += Math.max(0, Number(item.bytes) || 0);
+        postMessage({
+          type: "survey",
+          bytes: session.read,
+          items: parsed.items || [],
+          unitLimit: limits.unitBytes,
+          legacyCount: old.length,
+          legacyBytes: oldBytes,
+          // [rphub 2.9.042] 把每条的字节区间一并交回去，下一趟就能只读勾选的那几条。
+          spans: parsed.spans || [],
+          entriesOpen: parsed.entriesOpen,
+          entriesClose: parsed.entriesClose,
+          indexed: !!parsed.indexed
+        });
+        return;
+      }
+      progress("\u6682\u5B58\u6536\u5C3E");
+      await withTimeout(sink.flush(), 45e3, "\u5199\u5165\u6682\u5B58\u5E93\u8D85\u65F6\uFF08\u53EF\u80FD\u662F\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF09\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
       progress("\u6838\u5BF9\u89D2\u8272\u5361\u3001\u804A\u5929\u4E0E\u8BB0\u5FC6");
-      Object.assign(session, await validate(db, session.id, parsed.source, wait, limits.collectionBytes), { source: parsed.source, state: "complete" });
+      const ticker = setInterval(() => progress(), 1e3);
+      let stepNotice = 0;
+      const stepProgress = (done, total) => {
+        const now = performance.now();
+        if (done !== total && now - stepNotice < 200) return;
+        stepNotice = now;
+        progress("\u6838\u5BF9\u6570\u636E " + done + " / " + total);
+      };
+      try {
+        Object.assign(
+          session,
+          await validate(db, session.id, parsed.source, wait, limits.collectionBytes, stepProgress),
+          { source: parsed.source, state: "complete" }
+        );
+      } finally {
+        clearInterval(ticker);
+      }
+      if (ranges) {
+        const expect = ranges.filter((item) => item.entry).length;
+        const got = (session.plan || []).filter((item) => item.source === "entries").length;
+        if (expect && got !== expect)
+          throw new Error("\u6309\u533A\u95F4\u8BFB\u53D6\u53EA\u5F97\u5230 " + got + " / " + expect + " \u6761\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8\uFF0C\u8BF7\u91CD\u65B0\u5BFC\u5165");
+      }
       await saveSession(db, session);
-      postMessage({ type: "complete", summary: session.summary, bytes: session.read, skipped: parsed.skipped || [], unitLimit: limits.unitBytes });
+      const legacy = (parsed.skipped || []).filter((item) => shouldSkipEntryKey(item.key));
+      let legacyBytes = 0;
+      for (const item of legacy) legacyBytes += Math.max(0, Number(item.bytes) || 0);
+      postMessage({
+        type: "complete",
+        summary: session.summary,
+        bytes: data.file?.size || session.read,
+        read: session.read,
+        ranged: !!ranges,
+        skipped: parsed.skipped || [],
+        legacy,
+        legacyCount: legacy.length,
+        legacyBytes,
+        unitLimit: limits.unitBytes
+      });
     } catch (error) {
       postMessage({
         type: "failed",
