@@ -1,4 +1,4 @@
-param([string]$Version = '2.9.035')
+param([string]$Version = '2.9.048')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
@@ -46,20 +46,12 @@ $unsigned = Join-Path $buildAlias ".tools\rp-local-$Version.apk"
 & $javaExe '-Dfile.encoding=UTF-8' -jar "$buildAlias\.tools\apktool.jar" b -f "$buildAlias\android" -o $unsigned
 if ($LASTEXITCODE -ne 0) { throw 'APK build failed.' }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$archive = [IO.Compression.ZipFile]::Open($unsigned, [IO.Compression.ZipArchiveMode]::Update)
-try {
-    $obsolete = @($archive.Entries | Where-Object {
-        $_.FullName.StartsWith('assets/') -and
-        !($_.FullName.StartsWith('assets/local-site/') -or
-          $_.FullName -eq 'assets/RP-Hub-LICENSE.txt' -or
-          $_.FullName -eq 'assets/LUCIDE-LICENSE.txt' -or
-          $_.FullName -eq 'assets/LOCAL-NOTICE.txt')
-    })
-    foreach ($entry in $obsolete) { $entry.Delete() }
-    $old = $archive.GetEntry('classes2.dex')
-    if ($old) { $old.Delete() }
-    [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, "$buildAlias\.tools\native-dex\classes.dex", 'classes2.dex') | Out-Null
-} finally { $archive.Dispose() }
+# [2026-11-13 闪退事故] 旧实现用 .NET ZipArchive Update 模式改 zip：一旦 System.IO.Compression
+# 被显式 Add-Type，.NET 会把整个包重新编码（flags 变 0x8、声明 bit3 却不写 descriptor），
+# Android 原生 zip 解析器读到即 abort —— 2.9.044/045/046 三包装机即死，均由此装配差异造成。
+# 现改用 finalize-apk.py：apktool 条目按原始字节搬运，只追加 classes2.dex，与 2.9.043 同构。
+& python "$PSScriptRoot\finalize-apk.py" $unsigned "$buildAlias\.tools\native-dex\classes.dex" $unsigned
+if ($LASTEXITCODE -ne 0) { throw 'APK finalize failed.' }
 & $javaExe '-Dfile.encoding=UTF-8' -jar "$buildAlias\.tools\signer.jar" --apks $unsigned --ks $keystore --ksAlias $signing.alias --ksPass $signing.password --ksKeyPass $signing.password --overwrite
 if ($LASTEXITCODE -ne 0) { throw 'APK signing failed.' }
 $final = Join-Path $projectRoot "dist\RP-local-$Version.apk"
