@@ -2511,3 +2511,17 @@ button.sortable-item-main:focus-visible { outline: 2px solid rgb(var(--primary-4
     }
     .island-button { width: 2.25rem; height: 2.25rem; }
 }
+
+/* ── [rphub 2.9.075] 键盘弹出时弹层上收 ─────────────────────────────────────
+   编辑世界书 / 正则这类弹层用的是 max-h-[94vh]，而 vh 基于布局视口，输入法
+   弹出时它不会变，面板下半截就被挡住了。--keyboard-inset 由 app.js 在
+   visualViewport 变化时维护（聊天输入栏已经在用），这里直接消费同一个值。
+   只在窄屏（手机）生效，桌面端键盘不会压缩视口。 */
+@media (max-width: 820px) {
+    .app-modal-overlay {
+        padding-bottom: calc(var(--keyboard-inset, 0px) + 8px);
+    }
+    .app-modal-overlay > .app-modal-panel {
+        max-height: calc(100vh - var(--keyboard-inset, 0px) - 40px);
+    }
+}
