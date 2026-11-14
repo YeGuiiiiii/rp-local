@@ -6083,14 +6083,14 @@ const app = createApp({
         // 其余（含不传）走原来的默认备份文件夹。两个接口的流式协议完全一致
         // （create → writeBackupChunk → finishBackupWrite / abortBackupWrite），
         // 所以只在创建这一步分流，后续写入与收尾代码不用分叉。
-        const startChunkedBackup = (fileName, target) => {
+        const startChunkedBackup = (fileName, target, mime = 'application/json') => {
             const bridge = window.AndroidBridge;
             const toDownloads = target === 'downloads';
             const creatorName = toDownloads ? 'createBackupFileToDownloads' : 'createBackupFile';
             if (!bridge?.isNativeApp?.() || typeof bridge[creatorName] !== 'function' || typeof bridge.writeBackupChunk !== 'function' || typeof bridge.finishBackupWrite !== 'function') {
                 return null;
             }
-            const created = String(bridge[creatorName](fileName, 'application/json') || '');
+            const created = String(bridge[creatorName](fileName, mime) || '');
             if (!created.startsWith('OK:')) {
                 throw new Error(created.startsWith('ERR:') ? created.slice(4) : '创建备份文件失败');
             }
@@ -7889,15 +7889,19 @@ const app = createApp({
                 // 先让排在队列里的旧聊天写失效，否则它稍后仍会按自己的 guard 把旧文本盖回来
                 chatWriteIntents.set(storyScopeId, (chatWriteIntents.get(storyScopeId) || 0) + 1);
                 const chatKey = 'rp_hub_chat_' + storyScopeId;
-                const chatRecords = await window.RPHubStorage.readStoredValueSet([chatKey]);
+                // [rphub 2.9.051] 只取目录，不展开分块。
+                //   这里原来调 readStoredValueSet([chatKey])，把整份历史（实测 242MB / 3099 条）
+                //   连同 parts.flat() 读回内存，为的只是算一个 keptCount 和给 CAS 一个基线值。
+                //   目录对象本身带着 length 与 revision，两样都够用，省下的 242MB 正是删一条
+                //   消息就把渲染进程顶死的那部分。
+                const chatBaseline = await window.RPHubStorage.readChatBaseline(chatKey);
                 const chatPayload = cloneForStorage(history);
                 // [rphub 2.8.106] 同一个不变量在事务路径上再拦一次：空数组不许覆盖非空。
                 //   4 个调用点共用这里，其中「重新生成第 1 条」必然传 []（chatHistory.slice(0, 0)）。
                 //   返回 ok:false 之后调用方会在 chatHistory.value = nextHistory 之前 return，
                 //   于是内存和库都停在原值 —— 这是唯一能做到「零改动退出」的位置。
                 if (Array.isArray(chatPayload) && chatPayload.length === 0) {
-                    const existingChat = chatRecords[0] ? chatRecords[0].value : undefined;
-                    const keptCount = Array.isArray(existingChat) ? existingChat.length : 0;
+                    const keptCount = chatBaseline.length;
                     if (keptCount > 0) {
                         console.warn('[ChatScope] 拒绝提交空聊天（事务路径） | key=' + chatKey + ' | 现有=' + keptCount + ' 条');
                         showToast('第 1 条消息前面没有内容，重建会让整段记录变空，已取消。若要重来请先新建分支再操作', 'warning', 8000);
@@ -7905,8 +7909,9 @@ const app = createApp({
                     }
                 }
                 const result = await commitMemoryTransform(intent, () => memories, {
-                    expected: [{ key: chatKey, value: chatRecords[0].value }],
-                    changes: [{ key: chatKey, operation: 'set', value: chatPayload }]
+                    expected: [{ key: chatKey, value: chatBaseline.value }],
+                    // plain:true：chatPayload 是本模块刚 unwrap 出来的纯数组，提交层不必再深拷一遍
+                    changes: [{ key: chatKey, operation: 'set', value: chatPayload, plain: true }]
                 });
                 if (!result.published) return { ok: false, published: false };
                 if (saveTemplateRuntime) {
@@ -15667,28 +15672,52 @@ const app = createApp({
                 const text = [manifest, ...branchChats].map(record => JSON.stringify(record)).join('\n');
                 return cardUtils.downloadBlob(new Blob([text], { type: 'application/x-ndjson;charset=utf-8' }), fileName);
             }
+            const mime = 'application/x-ndjson';
             let session = null;
             try {
-                session = await openBackupPicker(fileName, 'application/x-ndjson');
+                // 先走默认落点，别再每次都弹系统选择器：
+                //   有默认备份文件夹 → 直接建在文件夹里；否则建到系统「下载」目录。
+                //   两者都不可用才退回到选择器（与全量导出 exportAllData 的优先级一致）。
+                const folder = String(appBackupFolder.value || bridge.getBackupFolder?.() || '').trim();
+                if (folder && typeof bridge.createBackupFile === 'function') {
+                    session = startChunkedBackup(fileName, 'folder', mime);
+                } else if (typeof bridge.createBackupFileToDownloads === 'function') {
+                    session = startChunkedBackup(fileName, 'downloads', mime);
+                }
             } catch (error) {
-                // 走系统选择器时取消是正常操作，原来 saveFile 那条路也是静默的。
-                showToast('已取消导出聊天记录', 'info', 2000);
-                return { channel: 'native', ok: null };
+                console.warn('聊天记录导出落点回退到选择器:', error);
+                session = null;
+            }
+            if (!session) {
+                try {
+                    session = await openBackupPicker(fileName, mime);
+                } catch (error) {
+                    // 走系统选择器时取消是正常操作，原来 saveFile 那条路也是静默的。
+                    showToast('已取消导出聊天记录', 'info', 2000);
+                    return { channel: 'native', ok: null };
+                }
             }
             // 只在 push 边界 flush：每次 push 传入的都是完整字符串（JSON.stringify 或纯 ASCII
             // 片段），边界必然落在码点之间，不会把代理对劈开。
+            // flush 之后让出一帧：242MB 的序列化 + base64 + 同步 JNI 如果一口气跑完，
+            // 主线程会被连续占满好几秒，录屏里那段纯白就是 WebView 根本没机会重绘。
             let buffer = '';
-            const flush = () => {
+            const flush = async () => {
                 if (!buffer) return;
                 writeBackupText(session, buffer);
                 buffer = '';
+                await new Promise(resolve => setTimeout(resolve, 0));
             };
             const push = (text) => {
                 if (!text) return;
                 buffer += text;
-                if (buffer.length >= 0x40000) flush();
             };
+            const totalMessagesOut = branchChats.reduce(
+                (sum, record) => sum + (Array.isArray(record.messages) ? record.messages.length : 0), 0);
+            let writtenMessages = 0;
+            let lastPercent = -1;
             try {
+                showToast('正在导出聊天记录：共 ' + totalMessagesOut + ' 条', 'info', 2500);
                 push(JSON.stringify(manifest));
                 for (const record of branchChats) {
                     const messages = Array.isArray(record.messages) ? record.messages : [];
@@ -15698,10 +15727,20 @@ const app = createApp({
                         const line = JSON.stringify(message === undefined ? null : message);
                         push(first ? line : ',' + line);
                         first = false;
+                        writtenMessages += 1;
+                        if (buffer.length >= 0x40000) {
+                            await flush();
+                            const percent = Math.min(99, Math.floor(writtenMessages / Math.max(1, totalMessagesOut) * 100));
+                            if (percent >= lastPercent + 10) {
+                                lastPercent = percent;
+                                showToast('正在导出聊天记录 ' + percent + '%（' + writtenMessages
+                                    + ' / ' + totalMessagesOut + ' 条）', 'info', 1500);
+                            }
+                        }
                     }
                     push(']}');
                 }
-                flush();
+                await flush();
                 const finished = String(bridge.finishBackupWrite(session.token) || '');
                 if (finished !== 'OK' && !finished.startsWith('OK:')) {
                     throw new Error(finished.startsWith('ERR:') ? finished.slice(4) : '完成聊天记录写入失败');

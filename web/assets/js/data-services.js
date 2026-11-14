@@ -149,13 +149,11 @@
         return result;
     };
 
-    const cloneForStorage = (value) => {
-        const plainValue = unwrapForStorage(value);
-        if (typeof structuredClone === 'function') {
-            try { return structuredClone(plainValue); } catch (_) { }
-        }
-        return JSON.parse(JSON.stringify(plainValue));
-    };
+    // [rphub 2.9.051] unwrapForStorage 本身已经逐节点重建了整棵树（新数组、新对象、
+    //   Date→ISO、TypedArray→普通数组、循环引用用 WeakMap 保留），随后再 structuredClone
+    //   一次只是把同一份数据拷第二遍。聊天到 242MB 时，多这一份就够把渲染进程顶到 OOM，
+    //   而它拿到的已经是纯 JSON 结构，再 clone 不带来任何额外保证。
+    const cloneForStorage = (value) => unwrapForStorage(value);
     // 2.8.84: 普通对象/数组/标量的“可存储性”由下面的指纹计算兜住，不必在克隆前再整树遍历一遍。
     // 大对象（世界书等）每启动一次省掉一次全量 storageContentKey；非普通原型的值仍走原校验路径，
     // 保证 class 实例/函数等依旧按原样抛 StorageDataError，而不是被克隆悄悄降级成普通对象。
@@ -292,7 +290,12 @@
                 put: (value, key) => {
                     changed(key);
                     if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
-                    if (mirror) mirrors.set(key, cloneForStorage(value));
+                    // [rphub 2.9.051] 聊天不再镜像成单个文件。
+                    //   镜像走 saveEntry 的兜底分支：write(file, {key, value}) → JSON.stringify 整份
+                    //   再按 64KB 一片过桥写盘。聊天到 242MB 时，等于每次保存（含删一条消息）
+                    //   都要多拷一份、多 stringify 一遍、多写 242MB 文件 —— 卡死与「越聊越卡」的主因。
+                    //   聊天的权威副本一直就在主库的分块里，镜像这层只是冗余。
+                    if (mirror && !isChatKey(key)) mirrors.set(key, cloneForStorage(value));
                     return putStoredRecord(store, value, key);
                 },
                 delete: key => {
@@ -744,6 +747,30 @@
             }
         });
     };
+    // [rphub 2.9.051] 只读聊天目录。
+    //   commitConversationState 需要的只有两样东西：现有条数、以及做 CAS 基线用的值。
+    //   这两样都在目录对象里（{rphubChat:1, revision, parts, length}）。此前为了它们调用
+    //   readStoredValueSet，把整份历史（实测 242MB / 3099 条）连同 parts.flat() 读回内存 ——
+    //   删一条消息的峰值因此多出 242MB，是「卡死 → 重载 → 对话还在」的直接成因之一。
+    const readChatBaseline = async (key) => {
+        if (!mainDb) await initDB();
+        const raw = await new Promise((resolve, reject) => {
+            const request = mainDb.transaction(['store'], 'readonly').objectStore('store').get(key);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error || storageWriteError('UnknownError', '读取聊天目录失败'));
+        });
+        if (raw === undefined) return { value: undefined, length: 0, directory: null };
+        if (isChatKey(key) && isChatDirectory(raw)) {
+            if (!Number.isSafeInteger(raw.parts) || raw.parts < 1
+                || !Number.isSafeInteger(raw.length) || raw.length < 1
+                || !/^[a-f0-9]{32}$/.test(raw.revision)) {
+                throw storageWriteError('StorageDataError', '聊天存档目录损坏，已停止读取');
+            }
+            return { value: raw, length: raw.length, directory: raw };
+        }
+        // 未分块的旧格式（条数少、整体不到一块）本身就是数组，直接给长度即可。
+        return { value: raw, length: Array.isArray(raw) ? raw.length : 0, directory: null };
+    };
     const readStoredValueSet = async (keys) => {
         if (!mainDb) await initDB();
         return readStoredValueSetFrom(mainDb, keys);
@@ -771,7 +798,9 @@
                 if (!item || !names.has(item.key) || !['set', 'delete'].includes(item.operation)) throw storageWriteError('StorageDataError', '每个变更键必须有对应基线');
                 if (item.operation === 'delete') return {key: item.key, operation: 'delete', fingerprint: storageContentKey(undefined)};
                 if (!isPlainStorable(item.value)) storageContentKey(item.value);
-                const value = cloneForStorage(item.value);
+                // plain:true = 调用方保证传进来的是本模块刚 unwrap 出来的纯对象（聊天走这条），
+                //   跳过这次深拷贝。IDB 的 put() 在调用瞬间自己会做结构化克隆，JS 侧这份是白拷。
+                const value = item.plain === true ? item.value : cloneForStorage(item.value);
                 if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                 if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
                 return {key: item.key, operation: 'set', value, fingerprint: isChatKey(item.key) ? null : storageContentKey(value)};
@@ -1079,6 +1108,7 @@
         scopedStorageKeyFor: scopedStorageKey,
         storageContentKey,
         readStoredValueSet,
+        readChatBaseline,
         compareAndWriteStoredValues,
         putStoredRecord,
         cloneForStorage,
