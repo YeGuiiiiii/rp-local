@@ -708,6 +708,12 @@
             const error = ref('');
             const info = ref(null);
             const loading = ref(false);
+            const accent = ref(window.RPHubThemeKit?.accent || '');
+            const accentPresets = window.RPHubThemeKit?.presets || [];
+            const syncAccent = () => { accent.value = window.RPHubThemeKit?.accent || ''; };
+            const setAccentColor = value => { window.RPHubThemeKit?.setAccent(value); syncAccent(); };
+            window.addEventListener('rphub-theme-change', syncAccent);
+            onBeforeUnmount(() => window.removeEventListener('rphub-theme-change', syncAccent));
             const tiltEnabled = ref(window.RPGalleryMotion.enabled);
             const syncTilt = () => { tiltEnabled.value = window.RPGalleryMotion.enabled; };
             window.addEventListener('rp-gallery-motion-change', syncTilt);
@@ -735,7 +741,9 @@
                 }
             });
             return {
-                info, error, loading, load, clear, tiltEnabled, ...themePack, ...useCardNight(),
+                info, error, loading, load, clear, tiltEnabled,
+                accent, accentPresets, setAccentColor,
+                ...themePack, ...useCardNight(),
                 setTilt: event => window.RPGalleryMotion.set(event.target.checked),
                 selectPack: id => window.RPThemePacks.set(id),
                 version: window.RP_LOCAL_VERSION
@@ -794,6 +802,20 @@
                   <span class="settings-toggle"></span>
                 </span>
               </label>
+              <div class="shell-form-row shell-accent-row" v-if="selected==='classic'">
+                <span>主题色</span>
+                <div class="shell-accent-swatches">
+                  <button v-for="preset in accentPresets" :key="preset.color" type="button"
+                    class="shell-accent-dot" :class="{'is-active': accent===preset.color}"
+                    :style="{background:preset.color}" :title="preset.name" :aria-label="preset.name"
+                    @click="setAccentColor(preset.color)"></button>
+                  <label class="shell-accent-custom" title="自定义颜色">
+                    <input type="color" :value="accent||'#5a6ff0'" aria-label="自定义主题色"
+                      @input="setAccentColor($event.target.value)">
+                  </label>
+                  <button type="button" class="shell-accent-reset" @click="setAccentColor('')">恢复默认</button>
+                </div>
+              </div>
             </template>
             <template v-if="section==='legacy'">
               <div class="shell-row-list">

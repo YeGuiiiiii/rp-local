@@ -583,7 +583,7 @@ const _hoisted_328 = {
 }
 const _hoisted_329 = { class: "grid grid-cols-1 gap-5" }
 const _hoisted_330 = { class: "group" }
-const _hoisted_331 = { class: "relative mb-2 api-provider-selector-container" }
+const _hoisted_331 = { class: "relative mb-2 api-provider-selector-container flex gap-2" }
 const _hoisted_332 = ["onClick"]
 const _hoisted_333 = { class: "flex items-center min-w-0" }
 const _hoisted_334 = { class: "w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden" }
@@ -596,61 +596,61 @@ const _hoisted_336 = {
   viewBox: "0 0 24 24"
 }
 const _hoisted_337 = { class: "block min-w-0 text-sm font-bold text-gray-700 truncate" }
-const _hoisted_338 = {
+const _hoisted_338 = ["onClick"]
+const _hoisted_339 = {
   key: 0,
   class: "absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2"
 }
-const _hoisted_339 = ["onClick"]
-const _hoisted_340 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
-const _hoisted_341 = ["src", "alt", "onError"]
-const _hoisted_342 = { class: "min-w-0 flex-1" }
-const _hoisted_343 = { class: "block text-sm font-bold truncate" }
-const _hoisted_344 = { class: "block text-xs text-gray-400 font-mono truncate" }
-const _hoisted_345 = {
+const _hoisted_340 = ["onClick"]
+const _hoisted_341 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
+const _hoisted_342 = ["src", "alt", "onError"]
+const _hoisted_343 = { class: "min-w-0 flex-1" }
+const _hoisted_344 = { class: "block text-sm font-bold truncate" }
+const _hoisted_345 = { class: "block text-xs text-gray-400 font-mono truncate" }
+const _hoisted_346 = {
   key: 0,
   class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_346 = ["onClick"]
-const _hoisted_347 = { class: "min-w-0 flex-1" }
-const _hoisted_348 = { class: "block text-sm font-bold truncate" }
-const _hoisted_349 = {
-  key: 0,
-  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
-  fill: "none",
-  stroke: "currentColor",
-  viewBox: "0 0 24 24"
-}
+const _hoisted_347 = ["onClick"]
+const _hoisted_348 = { class: "min-w-0 flex-1" }
+const _hoisted_349 = { class: "block text-sm font-bold truncate" }
 const _hoisted_350 = {
+  key: 0,
+  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
+  fill: "none",
+  stroke: "currentColor",
+  viewBox: "0 0 24 24"
+}
+const _hoisted_351 = {
   key: 0,
   class: "relative"
 }
-const _hoisted_351 = ["onUpdate:modelValue"]
-const _hoisted_352 = { class: "group" }
-const _hoisted_353 = { class: "relative" }
-const _hoisted_354 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
-const _hoisted_355 = ["onClick"]
-const _hoisted_356 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
-const _hoisted_357 = { class: "min-w-0 flex-1" }
-const _hoisted_358 = { class: "flex items-center gap-1.5" }
-const _hoisted_359 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
-const _hoisted_360 = {
+const _hoisted_352 = ["onUpdate:modelValue"]
+const _hoisted_353 = { class: "group" }
+const _hoisted_354 = { class: "relative" }
+const _hoisted_355 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
+const _hoisted_356 = ["onClick"]
+const _hoisted_357 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
+const _hoisted_358 = { class: "min-w-0 flex-1" }
+const _hoisted_359 = { class: "flex items-center gap-1.5" }
+const _hoisted_360 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
+const _hoisted_361 = {
   key: 0,
   class: "border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"
 }
-const _hoisted_361 = { class: "flex items-center justify-between gap-2" }
-const _hoisted_362 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
-const _hoisted_363 = ["value", "onInput"]
-const _hoisted_364 = ["onClick"]
-const _hoisted_365 = ["value", "onInput"]
+const _hoisted_362 = { class: "flex items-center justify-between gap-2" }
+const _hoisted_363 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
+const _hoisted_364 = ["value", "onInput"]
+const _hoisted_365 = ["onClick"]
 const _hoisted_366 = ["value", "onInput"]
-const _hoisted_367 = {
+const _hoisted_367 = ["value", "onInput"]
+const _hoisted_368 = {
   key: 0,
   class: "rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400"
 }
-const _hoisted_368 = ["onClick"]
 const _hoisted_369 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
 const _hoisted_370 = { class: "group md:col-span-2" }
 const _hoisted_371 = { class: "relative group" }
@@ -4215,7 +4215,7 @@ return function render(_ctx, _cache) {
                         _createCommentVNode(" Main API Inputs "),
                         _createElementVNode("div", _hoisted_329, [
                           _createElementVNode("div", _hoisted_330, [
-                            _cache[113] || (_cache[113] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
+                            _cache[114] || (_cache[114] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
                               _createElementVNode("label", { class: "settings-label !mb-0" }, "API 提供商"),
                               _createElementVNode("a", {
                                 href: "https://sta1n.ai/keys",
@@ -4228,7 +4228,7 @@ return function render(_ctx, _cache) {
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (showApiProviderSelector = !showApiProviderSelector),
-                                class: "settings-control flex items-center justify-between text-left"
+                                class: "settings-control flex flex-1 min-w-0 items-center justify-between text-left"
                               }, [
                                 _createElementVNode("span", _hoisted_333, [
                                   _createElementVNode("span", _hoisted_334, [
@@ -4265,8 +4265,29 @@ return function render(_ctx, _cache) {
                                   })
                                 ], -1 /* CACHED */))
                               ], 8 /* PROPS */, _hoisted_332),
+                              _createElementVNode("button", {
+                                type: "button",
+                                onClick: createCustomApiProvider,
+                                class: "settings-control flex w-11 shrink-0 items-center justify-center !px-0",
+                                "aria-label": "新增 API 站点",
+                                title: "新增 API 站点"
+                              }, [...(_cache[108] || (_cache[108] = [
+                                _createElementVNode("svg", {
+                                  class: "w-4 h-4",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2",
+                                    d: "M12 4v16m8-8H4"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_338),
                               showApiProviderSelector
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_338, [
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_339, [
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(apiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("button", {
                                         key: provider.id,
@@ -4274,20 +4295,20 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (selectApiProvider(provider)),
                                         class: _normalizeClass(['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _createElementVNode("span", _hoisted_340, [
+                                        _createElementVNode("span", _hoisted_341, [
                                           _createElementVNode("img", {
                                             src: provider.icon,
                                             alt: provider.name,
                                             class: "w-5 h-5 object-contain",
                                             onError: $event => ($event.target.style.visibility = 'hidden')
-                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_341)
+                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_342)
                                         ]),
-                                        _createElementVNode("span", _hoisted_342, [
-                                          _createElementVNode("span", _hoisted_343, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _createElementVNode("span", _hoisted_344, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
+                                        _createElementVNode("span", _hoisted_343, [
+                                          _createElementVNode("span", _hoisted_344, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _createElementVNode("span", _hoisted_345, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_345, [...(_cache[108] || (_cache[108] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_346, [...(_cache[109] || (_cache[109] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -4296,7 +4317,7 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : _createCommentVNode("v-if", true)
-                                      ], 10 /* CLASS, PROPS */, _hoisted_339))
+                                      ], 10 /* CLASS, PROPS */, _hoisted_340))
                                     }), 128 /* KEYED_FRAGMENT */)),
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(customApiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("button", {
@@ -4305,7 +4326,7 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (selectApiProvider(provider)),
                                         class: _normalizeClass(['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _cache[111] || (_cache[111] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
+                                        _cache[112] || (_cache[112] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
                                           _createElementVNode("svg", {
                                             class: "w-5 h-5 text-gray-500",
                                             fill: "none",
@@ -4320,12 +4341,12 @@ return function render(_ctx, _cache) {
                                             })
                                           ])
                                         ], -1 /* CACHED */)),
-                                        _createElementVNode("span", _hoisted_347, [
-                                          _createElementVNode("span", _hoisted_348, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _cache[109] || (_cache[109] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
+                                        _createElementVNode("span", _hoisted_348, [
+                                          _createElementVNode("span", _hoisted_349, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _cache[110] || (_cache[110] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_349, [...(_cache[110] || (_cache[110] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_350, [...(_cache[111] || (_cache[111] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -4334,14 +4355,14 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : _createCommentVNode("v-if", true)
-                                      ], 10 /* CLASS, PROPS */, _hoisted_346))
+                                      ], 10 /* CLASS, PROPS */, _hoisted_347))
                                     }), 128 /* KEYED_FRAGMENT */))
                                   ]))
                                 : _createCommentVNode("v-if", true)
                             ]),
                             isCustomApiProvider
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_350, [
-                                  _cache[112] || (_cache[112] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_351, [
+                                  _cache[113] || (_cache[113] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
                                       fill: "none",
@@ -4361,16 +4382,16 @@ return function render(_ctx, _cache) {
                                     type: "text",
                                     class: "settings-control settings-control--icon font-mono",
                                     placeholder: "https://your-api.example/v1"
-                                  }, null, 8 /* PROPS */, _hoisted_351), [
+                                  }, null, 8 /* PROPS */, _hoisted_352), [
                                     [_vModelText, settings.apiUrl]
                                   ])
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ]),
-                          _createElementVNode("div", _hoisted_352, [
-                            _cache[115] || (_cache[115] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_353, [
-                              _cache[114] || (_cache[114] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                          _createElementVNode("div", _hoisted_353, [
+                            _cache[116] || (_cache[116] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
+                            _createElementVNode("div", _hoisted_354, [
+                              _cache[115] || (_cache[115] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                 _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
@@ -4393,14 +4414,14 @@ return function render(_ctx, _cache) {
                               }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue"])
                             ])
                           ]),
-                          _createElementVNode("div", _hoisted_354, [
+                          _createElementVNode("div", _hoisted_355, [
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (showCustomApiSites = !showCustomApiSites),
                               class: "flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all"
                             }, [
-                              _createElementVNode("div", _hoisted_356, [
-                                _cache[118] || (_cache[118] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
+                              _createElementVNode("div", _hoisted_357, [
+                                _cache[119] || (_cache[119] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
                                   _createElementVNode("svg", {
                                     class: "w-3.5 h-3.5",
                                     fill: "none",
@@ -4415,12 +4436,12 @@ return function render(_ctx, _cache) {
                                     })
                                   ])
                                 ], -1 /* CACHED */)),
-                                _createElementVNode("div", _hoisted_357, [
-                                  _createElementVNode("div", _hoisted_358, [
-                                    _cache[116] || (_cache[116] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
-                                    _createElementVNode("span", _hoisted_359, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
+                                _createElementVNode("div", _hoisted_358, [
+                                  _createElementVNode("div", _hoisted_359, [
+                                    _cache[117] || (_cache[117] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_360, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
                                   ]),
-                                  _cache[117] || (_cache[117] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
+                                  _cache[118] || (_cache[118] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
                                 ])
                               ]),
                               (_openBlock(), _createElementBlock("svg", {
@@ -4428,7 +4449,7 @@ return function render(_ctx, _cache) {
                                 fill: "none",
                                 stroke: "currentColor",
                                 viewBox: "0 0 24 24"
-                              }, [...(_cache[119] || (_cache[119] = [
+                              }, [...(_cache[120] || (_cache[120] = [
                                 _createElementVNode("path", {
                                   "stroke-linecap": "round",
                                   "stroke-linejoin": "round",
@@ -4436,30 +4457,30 @@ return function render(_ctx, _cache) {
                                   d: "M19 9l-7 7-7-7"
                                 }, null, -1 /* CACHED */)
                               ]))], 2 /* CLASS */))
-                            ], 8 /* PROPS */, _hoisted_355),
+                            ], 8 /* PROPS */, _hoisted_356),
                             showCustomApiSites
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_360, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_361, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(settings.customApiProviders, (provider) => {
                                     return (_openBlock(), _createElementBlock("div", {
                                       key: provider.id,
                                       class: "rounded-xl border border-gray-200/70 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 p-3 shadow-sm hover:shadow transition-shadow space-y-2"
                                     }, [
-                                      _createElementVNode("div", _hoisted_361, [
-                                        _createElementVNode("div", _hoisted_362, [
-                                          _cache[120] || (_cache[120] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
+                                      _createElementVNode("div", _hoisted_362, [
+                                        _createElementVNode("div", _hoisted_363, [
+                                          _cache[121] || (_cache[121] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
                                           _createElementVNode("input", {
                                             value: provider.name,
                                             onInput: $event => (updateCustomApiProvider(provider.id, 'name', $event.target.value)),
                                             type: "text",
                                             placeholder: "站点名称（如：自建代理）",
                                             class: "min-w-0 flex-1 rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_363)
+                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_364)
                                         ]),
                                         _createElementVNode("button", {
                                           type: "button",
                                           onClick: $event => (removeCustomApiProvider(provider.id)),
                                           class: "rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs"
-                                        }, "删除", 8 /* PROPS */, _hoisted_364)
+                                        }, "删除", 8 /* PROPS */, _hoisted_365)
                                       ]),
                                       _createElementVNode("input", {
                                         value: provider.apiUrl,
@@ -4467,39 +4488,19 @@ return function render(_ctx, _cache) {
                                         type: "text",
                                         placeholder: "API 地址，例如 https://api.example.com/v1",
                                         class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_365),
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_366),
                                       _createElementVNode("input", {
                                         value: settings.apiProviderKeys[provider.id] || '',
                                         onInput: $event => (updateCustomApiKey(provider.id, $event.target.value)),
                                         type: "password",
                                         placeholder: "站点密钥 sk-...",
                                         class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_366)
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_367)
                                     ]))
                                   }), 128 /* KEYED_FRAGMENT */)),
                                   (!settings.customApiProviders.length)
-                                    ? (_openBlock(), _createElementBlock("div", _hoisted_367, "暂无自定义站点，点击下方按钮添加"))
-                                    : _createCommentVNode("v-if", true),
-                                  _createElementVNode("button", {
-                                    type: "button",
-                                    onClick: createCustomApiProvider,
-                                    class: "w-full py-2 px-3 rounded-xl border border-dashed border-primary-300 dark:border-primary-700/80 bg-primary-50/60 hover:bg-primary-50 dark:bg-primary-950/20 text-xs font-bold text-primary-600 dark:text-primary-400 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-2xs"
-                                  }, [...(_cache[121] || (_cache[121] = [
-                                    _createElementVNode("svg", {
-                                      class: "w-3.5 h-3.5",
-                                      fill: "none",
-                                      stroke: "currentColor",
-                                      viewBox: "0 0 24 24"
-                                    }, [
-                                      _createElementVNode("path", {
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                        d: "M12 4v16m8-8H4"
-                                      })
-                                    ], -1 /* CACHED */),
-                                    _createTextVNode(" 新增 API 站点 ", -1 /* CACHED */)
-                                  ]))], 8 /* PROPS */, _hoisted_368)
+                                    ? (_openBlock(), _createElementBlock("div", _hoisted_368, "暂无自定义站点，点击上方 + 添加"))
+                                    : _createCommentVNode("v-if", true)
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ]),
@@ -8766,7 +8767,7 @@ const _hoisted_353 = {
 }
 const _hoisted_354 = { class: "grid grid-cols-1 gap-5" }
 const _hoisted_355 = { class: "group" }
-const _hoisted_356 = { class: "relative mb-2 api-provider-selector-container" }
+const _hoisted_356 = { class: "relative mb-2 api-provider-selector-container flex gap-2" }
 const _hoisted_357 = ["onClick"]
 const _hoisted_358 = { class: "flex items-center min-w-0" }
 const _hoisted_359 = { class: "w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden" }
@@ -8779,61 +8780,61 @@ const _hoisted_361 = {
   viewBox: "0 0 24 24"
 }
 const _hoisted_362 = { class: "block min-w-0 text-sm font-bold text-gray-700 truncate" }
-const _hoisted_363 = {
+const _hoisted_363 = ["onClick"]
+const _hoisted_364 = {
   key: 0,
   class: "absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2"
 }
-const _hoisted_364 = ["onClick"]
-const _hoisted_365 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
-const _hoisted_366 = ["src", "alt", "onError"]
-const _hoisted_367 = { class: "min-w-0 flex-1" }
-const _hoisted_368 = { class: "block text-sm font-bold truncate" }
-const _hoisted_369 = { class: "block text-xs text-gray-400 font-mono truncate" }
-const _hoisted_370 = {
+const _hoisted_365 = ["onClick"]
+const _hoisted_366 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
+const _hoisted_367 = ["src", "alt", "onError"]
+const _hoisted_368 = { class: "min-w-0 flex-1" }
+const _hoisted_369 = { class: "block text-sm font-bold truncate" }
+const _hoisted_370 = { class: "block text-xs text-gray-400 font-mono truncate" }
+const _hoisted_371 = {
   key: 0,
   class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_371 = ["onClick"]
-const _hoisted_372 = { class: "min-w-0 flex-1" }
-const _hoisted_373 = { class: "block text-sm font-bold truncate" }
-const _hoisted_374 = {
-  key: 0,
-  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
-  fill: "none",
-  stroke: "currentColor",
-  viewBox: "0 0 24 24"
-}
+const _hoisted_372 = ["onClick"]
+const _hoisted_373 = { class: "min-w-0 flex-1" }
+const _hoisted_374 = { class: "block text-sm font-bold truncate" }
 const _hoisted_375 = {
+  key: 0,
+  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
+  fill: "none",
+  stroke: "currentColor",
+  viewBox: "0 0 24 24"
+}
+const _hoisted_376 = {
   key: 0,
   class: "relative"
 }
-const _hoisted_376 = ["onUpdate:modelValue"]
-const _hoisted_377 = { class: "group" }
-const _hoisted_378 = { class: "relative" }
-const _hoisted_379 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
-const _hoisted_380 = ["onClick"]
-const _hoisted_381 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
-const _hoisted_382 = { class: "min-w-0 flex-1" }
-const _hoisted_383 = { class: "flex items-center gap-1.5" }
-const _hoisted_384 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
-const _hoisted_385 = {
+const _hoisted_377 = ["onUpdate:modelValue"]
+const _hoisted_378 = { class: "group" }
+const _hoisted_379 = { class: "relative" }
+const _hoisted_380 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
+const _hoisted_381 = ["onClick"]
+const _hoisted_382 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
+const _hoisted_383 = { class: "min-w-0 flex-1" }
+const _hoisted_384 = { class: "flex items-center gap-1.5" }
+const _hoisted_385 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
+const _hoisted_386 = {
   key: 0,
   class: "border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"
 }
-const _hoisted_386 = { class: "flex items-center justify-between gap-2" }
-const _hoisted_387 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
-const _hoisted_388 = ["value", "onInput"]
-const _hoisted_389 = ["onClick"]
-const _hoisted_390 = ["value", "onInput"]
+const _hoisted_387 = { class: "flex items-center justify-between gap-2" }
+const _hoisted_388 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
+const _hoisted_389 = ["value", "onInput"]
+const _hoisted_390 = ["onClick"]
 const _hoisted_391 = ["value", "onInput"]
-const _hoisted_392 = {
+const _hoisted_392 = ["value", "onInput"]
+const _hoisted_393 = {
   key: 0,
   class: "rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400"
 }
-const _hoisted_393 = ["onClick"]
 const _hoisted_394 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
 const _hoisted_395 = { class: "group md:col-span-2" }
 const _hoisted_396 = { class: "flex items-center justify-between mb-1.5" }
@@ -9443,7 +9444,7 @@ const _hoisted_766 = {
 }
 const _hoisted_767 = { class: "grid grid-cols-1 gap-5" }
 const _hoisted_768 = { class: "group" }
-const _hoisted_769 = { class: "relative mb-2 api-provider-selector-container" }
+const _hoisted_769 = { class: "relative mb-2 api-provider-selector-container flex gap-2" }
 const _hoisted_770 = ["onClick"]
 const _hoisted_771 = { class: "flex items-center min-w-0" }
 const _hoisted_772 = { class: "w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden" }
@@ -9456,61 +9457,61 @@ const _hoisted_774 = {
   viewBox: "0 0 24 24"
 }
 const _hoisted_775 = { class: "block min-w-0 text-sm font-bold text-gray-700 truncate" }
-const _hoisted_776 = {
+const _hoisted_776 = ["onClick"]
+const _hoisted_777 = {
   key: 0,
   class: "absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2"
 }
-const _hoisted_777 = ["onClick"]
-const _hoisted_778 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
-const _hoisted_779 = ["src", "alt", "onError"]
-const _hoisted_780 = { class: "min-w-0 flex-1" }
-const _hoisted_781 = { class: "block text-sm font-bold truncate" }
-const _hoisted_782 = { class: "block text-xs text-gray-400 font-mono truncate" }
-const _hoisted_783 = {
+const _hoisted_778 = ["onClick"]
+const _hoisted_779 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
+const _hoisted_780 = ["src", "alt", "onError"]
+const _hoisted_781 = { class: "min-w-0 flex-1" }
+const _hoisted_782 = { class: "block text-sm font-bold truncate" }
+const _hoisted_783 = { class: "block text-xs text-gray-400 font-mono truncate" }
+const _hoisted_784 = {
   key: 0,
   class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_784 = ["onClick"]
-const _hoisted_785 = { class: "min-w-0 flex-1" }
-const _hoisted_786 = { class: "block text-sm font-bold truncate" }
-const _hoisted_787 = {
-  key: 0,
-  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
-  fill: "none",
-  stroke: "currentColor",
-  viewBox: "0 0 24 24"
-}
+const _hoisted_785 = ["onClick"]
+const _hoisted_786 = { class: "min-w-0 flex-1" }
+const _hoisted_787 = { class: "block text-sm font-bold truncate" }
 const _hoisted_788 = {
+  key: 0,
+  class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
+  fill: "none",
+  stroke: "currentColor",
+  viewBox: "0 0 24 24"
+}
+const _hoisted_789 = {
   key: 0,
   class: "relative"
 }
-const _hoisted_789 = ["onUpdate:modelValue"]
-const _hoisted_790 = { class: "group" }
-const _hoisted_791 = { class: "relative" }
-const _hoisted_792 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
-const _hoisted_793 = ["onClick"]
-const _hoisted_794 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
-const _hoisted_795 = { class: "min-w-0 flex-1" }
-const _hoisted_796 = { class: "flex items-center gap-1.5" }
-const _hoisted_797 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
-const _hoisted_798 = {
+const _hoisted_790 = ["onUpdate:modelValue"]
+const _hoisted_791 = { class: "group" }
+const _hoisted_792 = { class: "relative" }
+const _hoisted_793 = { class: "mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all" }
+const _hoisted_794 = ["onClick"]
+const _hoisted_795 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
+const _hoisted_796 = { class: "min-w-0 flex-1" }
+const _hoisted_797 = { class: "flex items-center gap-1.5" }
+const _hoisted_798 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
+const _hoisted_799 = {
   key: 0,
   class: "border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"
 }
-const _hoisted_799 = { class: "flex items-center justify-between gap-2" }
-const _hoisted_800 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
-const _hoisted_801 = ["value", "onInput"]
-const _hoisted_802 = ["onClick"]
-const _hoisted_803 = ["value", "onInput"]
+const _hoisted_800 = { class: "flex items-center justify-between gap-2" }
+const _hoisted_801 = { class: "flex items-center gap-1.5 flex-1 min-w-0" }
+const _hoisted_802 = ["value", "onInput"]
+const _hoisted_803 = ["onClick"]
 const _hoisted_804 = ["value", "onInput"]
-const _hoisted_805 = {
+const _hoisted_805 = ["value", "onInput"]
+const _hoisted_806 = {
   key: 0,
   class: "rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400"
 }
-const _hoisted_806 = ["onClick"]
 const _hoisted_807 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
 const _hoisted_808 = { class: "group md:col-span-2" }
 const _hoisted_809 = { class: "flex items-center justify-between mb-1.5" }
@@ -12724,7 +12725,7 @@ return function render(_ctx, _cache) {
                     _createCommentVNode(" Main API Inputs "),
                     _createElementVNode("div", _hoisted_354, [
                       _createElementVNode("div", _hoisted_355, [
-                        _cache[119] || (_cache[119] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
+                        _cache[120] || (_cache[120] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
                           _createElementVNode("label", { class: "settings-label !mb-0" }, "API 提供商"),
                           _createElementVNode("a", {
                             href: "https://sta1n.ai/keys",
@@ -12737,7 +12738,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             type: "button",
                             onClick: $event => (showApiProviderSelector = !showApiProviderSelector),
-                            class: "settings-control flex items-center justify-between text-left"
+                            class: "settings-control flex flex-1 min-w-0 items-center justify-between text-left"
                           }, [
                             _createElementVNode("span", _hoisted_358, [
                               _createElementVNode("span", _hoisted_359, [
@@ -12774,8 +12775,29 @@ return function render(_ctx, _cache) {
                               })
                             ], -1 /* CACHED */))
                           ], 8 /* PROPS */, _hoisted_357),
+                          _createElementVNode("button", {
+                            type: "button",
+                            onClick: createCustomApiProvider,
+                            class: "settings-control flex w-11 shrink-0 items-center justify-center !px-0",
+                            "aria-label": "新增 API 站点",
+                            title: "新增 API 站点"
+                          }, [...(_cache[114] || (_cache[114] = [
+                            _createElementVNode("svg", {
+                              class: "w-4 h-4",
+                              fill: "none",
+                              stroke: "currentColor",
+                              viewBox: "0 0 24 24"
+                            }, [
+                              _createElementVNode("path", {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M12 4v16m8-8H4"
+                              })
+                            ], -1 /* CACHED */)
+                          ]))], 8 /* PROPS */, _hoisted_363),
                           showApiProviderSelector
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_363, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_364, [
                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(apiProviderOptions, (provider) => {
                                   return (_openBlock(), _createElementBlock("button", {
                                     key: provider.id,
@@ -12783,20 +12805,20 @@ return function render(_ctx, _cache) {
                                     onClick: $event => (selectApiProvider(provider)),
                                     class: _normalizeClass(['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                   }, [
-                                    _createElementVNode("span", _hoisted_365, [
+                                    _createElementVNode("span", _hoisted_366, [
                                       _createElementVNode("img", {
                                         src: provider.icon,
                                         alt: provider.name,
                                         class: "w-5 h-5 object-contain",
                                         onError: $event => ($event.target.style.visibility = 'hidden')
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_366)
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_367)
                                     ]),
-                                    _createElementVNode("span", _hoisted_367, [
-                                      _createElementVNode("span", _hoisted_368, _toDisplayString(provider.name), 1 /* TEXT */),
-                                      _createElementVNode("span", _hoisted_369, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
+                                    _createElementVNode("span", _hoisted_368, [
+                                      _createElementVNode("span", _hoisted_369, _toDisplayString(provider.name), 1 /* TEXT */),
+                                      _createElementVNode("span", _hoisted_370, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
                                     ]),
                                     (selectedApiProvider.id === provider.id)
-                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_370, [...(_cache[114] || (_cache[114] = [
+                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_371, [...(_cache[115] || (_cache[115] = [
                                           _createElementVNode("path", {
                                             "stroke-linecap": "round",
                                             "stroke-linejoin": "round",
@@ -12805,7 +12827,7 @@ return function render(_ctx, _cache) {
                                           }, null, -1 /* CACHED */)
                                         ]))]))
                                       : _createCommentVNode("v-if", true)
-                                  ], 10 /* CLASS, PROPS */, _hoisted_364))
+                                  ], 10 /* CLASS, PROPS */, _hoisted_365))
                                 }), 128 /* KEYED_FRAGMENT */)),
                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(customApiProviderOptions, (provider) => {
                                   return (_openBlock(), _createElementBlock("button", {
@@ -12814,7 +12836,7 @@ return function render(_ctx, _cache) {
                                     onClick: $event => (selectApiProvider(provider)),
                                     class: _normalizeClass(['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                   }, [
-                                    _cache[117] || (_cache[117] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
+                                    _cache[118] || (_cache[118] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
                                       _createElementVNode("svg", {
                                         class: "w-5 h-5 text-gray-500",
                                         fill: "none",
@@ -12829,12 +12851,12 @@ return function render(_ctx, _cache) {
                                         })
                                       ])
                                     ], -1 /* CACHED */)),
-                                    _createElementVNode("span", _hoisted_372, [
-                                      _createElementVNode("span", _hoisted_373, _toDisplayString(provider.name), 1 /* TEXT */),
-                                      _cache[115] || (_cache[115] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
+                                    _createElementVNode("span", _hoisted_373, [
+                                      _createElementVNode("span", _hoisted_374, _toDisplayString(provider.name), 1 /* TEXT */),
+                                      _cache[116] || (_cache[116] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
                                     ]),
                                     (selectedApiProvider.id === provider.id)
-                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_374, [...(_cache[116] || (_cache[116] = [
+                                      ? (_openBlock(), _createElementBlock("svg", _hoisted_375, [...(_cache[117] || (_cache[117] = [
                                           _createElementVNode("path", {
                                             "stroke-linecap": "round",
                                             "stroke-linejoin": "round",
@@ -12843,14 +12865,14 @@ return function render(_ctx, _cache) {
                                           }, null, -1 /* CACHED */)
                                         ]))]))
                                       : _createCommentVNode("v-if", true)
-                                  ], 10 /* CLASS, PROPS */, _hoisted_371))
+                                  ], 10 /* CLASS, PROPS */, _hoisted_372))
                                 }), 128 /* KEYED_FRAGMENT */))
                               ]))
                             : _createCommentVNode("v-if", true)
                         ]),
                         isCustomApiProvider
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_375, [
-                              _cache[118] || (_cache[118] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_376, [
+                              _cache[119] || (_cache[119] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                 _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
@@ -12870,16 +12892,16 @@ return function render(_ctx, _cache) {
                                 type: "text",
                                 class: "settings-control settings-control--icon font-mono",
                                 placeholder: "https://your-api.example/v1"
-                              }, null, 8 /* PROPS */, _hoisted_376), [
+                              }, null, 8 /* PROPS */, _hoisted_377), [
                                 [_vModelText, settings.apiUrl]
                               ])
                             ]))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_377, [
-                        _cache[121] || (_cache[121] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
-                        _createElementVNode("div", _hoisted_378, [
-                          _cache[120] || (_cache[120] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                      _createElementVNode("div", _hoisted_378, [
+                        _cache[122] || (_cache[122] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
+                        _createElementVNode("div", _hoisted_379, [
+                          _cache[121] || (_cache[121] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -12902,14 +12924,14 @@ return function render(_ctx, _cache) {
                           }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue"])
                         ])
                       ]),
-                      _createElementVNode("div", _hoisted_379, [
+                      _createElementVNode("div", _hoisted_380, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (showCustomApiSites = !showCustomApiSites),
                           class: "flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all"
                         }, [
-                          _createElementVNode("div", _hoisted_381, [
-                            _cache[124] || (_cache[124] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
+                          _createElementVNode("div", _hoisted_382, [
+                            _cache[125] || (_cache[125] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
                               _createElementVNode("svg", {
                                 class: "w-3.5 h-3.5",
                                 fill: "none",
@@ -12924,12 +12946,12 @@ return function render(_ctx, _cache) {
                                 })
                               ])
                             ], -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_382, [
-                              _createElementVNode("div", _hoisted_383, [
-                                _cache[122] || (_cache[122] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_384, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
+                            _createElementVNode("div", _hoisted_383, [
+                              _createElementVNode("div", _hoisted_384, [
+                                _cache[123] || (_cache[123] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
+                                _createElementVNode("span", _hoisted_385, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
                               ]),
-                              _cache[123] || (_cache[123] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
+                              _cache[124] || (_cache[124] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
                             ])
                           ]),
                           (_openBlock(), _createElementBlock("svg", {
@@ -12937,7 +12959,7 @@ return function render(_ctx, _cache) {
                             fill: "none",
                             stroke: "currentColor",
                             viewBox: "0 0 24 24"
-                          }, [...(_cache[125] || (_cache[125] = [
+                          }, [...(_cache[126] || (_cache[126] = [
                             _createElementVNode("path", {
                               "stroke-linecap": "round",
                               "stroke-linejoin": "round",
@@ -12945,30 +12967,30 @@ return function render(_ctx, _cache) {
                               d: "M19 9l-7 7-7-7"
                             }, null, -1 /* CACHED */)
                           ]))], 2 /* CLASS */))
-                        ], 8 /* PROPS */, _hoisted_380),
+                        ], 8 /* PROPS */, _hoisted_381),
                         showCustomApiSites
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_385, [
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_386, [
                               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(settings.customApiProviders, (provider) => {
                                 return (_openBlock(), _createElementBlock("div", {
                                   key: provider.id,
                                   class: "rounded-xl border border-gray-200/70 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 p-3 shadow-sm hover:shadow transition-shadow space-y-2"
                                 }, [
-                                  _createElementVNode("div", _hoisted_386, [
-                                    _createElementVNode("div", _hoisted_387, [
-                                      _cache[126] || (_cache[126] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
+                                  _createElementVNode("div", _hoisted_387, [
+                                    _createElementVNode("div", _hoisted_388, [
+                                      _cache[127] || (_cache[127] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
                                       _createElementVNode("input", {
                                         value: provider.name,
                                         onInput: $event => (updateCustomApiProvider(provider.id, 'name', $event.target.value)),
                                         type: "text",
                                         placeholder: "站点名称（如：自建代理）",
                                         class: "min-w-0 flex-1 rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_388)
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_389)
                                     ]),
                                     _createElementVNode("button", {
                                       type: "button",
                                       onClick: $event => (removeCustomApiProvider(provider.id)),
                                       class: "rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs"
-                                    }, "删除", 8 /* PROPS */, _hoisted_389)
+                                    }, "删除", 8 /* PROPS */, _hoisted_390)
                                   ]),
                                   _createElementVNode("input", {
                                     value: provider.apiUrl,
@@ -12976,39 +12998,19 @@ return function render(_ctx, _cache) {
                                     type: "text",
                                     placeholder: "API 地址，例如 https://api.example.com/v1",
                                     class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_390),
+                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_391),
                                   _createElementVNode("input", {
                                     value: settings.apiProviderKeys[provider.id] || '',
                                     onInput: $event => (updateCustomApiKey(provider.id, $event.target.value)),
                                     type: "password",
                                     placeholder: "站点密钥 sk-...",
                                     class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_391)
+                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_392)
                                 ]))
                               }), 128 /* KEYED_FRAGMENT */)),
                               (!settings.customApiProviders.length)
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_392, "暂无自定义站点，点击下方按钮添加"))
-                                : _createCommentVNode("v-if", true),
-                              _createElementVNode("button", {
-                                type: "button",
-                                onClick: createCustomApiProvider,
-                                class: "w-full py-2 px-3 rounded-xl border border-dashed border-primary-300 dark:border-primary-700/80 bg-primary-50/60 hover:bg-primary-50 dark:bg-primary-950/20 text-xs font-bold text-primary-600 dark:text-primary-400 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-2xs"
-                              }, [...(_cache[127] || (_cache[127] = [
-                                _createElementVNode("svg", {
-                                  class: "w-3.5 h-3.5",
-                                  fill: "none",
-                                  stroke: "currentColor",
-                                  viewBox: "0 0 24 24"
-                                }, [
-                                  _createElementVNode("path", {
-                                    "stroke-linecap": "round",
-                                    "stroke-linejoin": "round",
-                                    "stroke-width": "2",
-                                    d: "M12 4v16m8-8H4"
-                                  })
-                                ], -1 /* CACHED */),
-                                _createTextVNode(" 新增 API 站点 ", -1 /* CACHED */)
-                              ]))], 8 /* PROPS */, _hoisted_393)
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_393, "暂无自定义站点，点击上方 + 添加"))
+                                : _createCommentVNode("v-if", true)
                             ]))
                           : _createCommentVNode("v-if", true)
                       ]),
@@ -15914,7 +15916,7 @@ return function render(_ctx, _cache) {
                         _createCommentVNode(" Main API Inputs "),
                         _createElementVNode("div", _hoisted_767, [
                           _createElementVNode("div", _hoisted_768, [
-                            _cache[291] || (_cache[291] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
+                            _cache[292] || (_cache[292] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
                               _createElementVNode("label", { class: "settings-label !mb-0" }, "API 提供商"),
                               _createElementVNode("a", {
                                 href: "https://sta1n.ai/keys",
@@ -15927,7 +15929,7 @@ return function render(_ctx, _cache) {
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (showApiProviderSelector = !showApiProviderSelector),
-                                class: "settings-control flex items-center justify-between text-left"
+                                class: "settings-control flex flex-1 min-w-0 items-center justify-between text-left"
                               }, [
                                 _createElementVNode("span", _hoisted_771, [
                                   _createElementVNode("span", _hoisted_772, [
@@ -15964,8 +15966,29 @@ return function render(_ctx, _cache) {
                                   })
                                 ], -1 /* CACHED */))
                               ], 8 /* PROPS */, _hoisted_770),
+                              _createElementVNode("button", {
+                                type: "button",
+                                onClick: createCustomApiProvider,
+                                class: "settings-control flex w-11 shrink-0 items-center justify-center !px-0",
+                                "aria-label": "新增 API 站点",
+                                title: "新增 API 站点"
+                              }, [...(_cache[286] || (_cache[286] = [
+                                _createElementVNode("svg", {
+                                  class: "w-4 h-4",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  viewBox: "0 0 24 24"
+                                }, [
+                                  _createElementVNode("path", {
+                                    "stroke-linecap": "round",
+                                    "stroke-linejoin": "round",
+                                    "stroke-width": "2",
+                                    d: "M12 4v16m8-8H4"
+                                  })
+                                ], -1 /* CACHED */)
+                              ]))], 8 /* PROPS */, _hoisted_776),
                               showApiProviderSelector
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_776, [
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_777, [
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(apiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("button", {
                                         key: provider.id,
@@ -15973,20 +15996,20 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (selectApiProvider(provider)),
                                         class: _normalizeClass(['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _createElementVNode("span", _hoisted_778, [
+                                        _createElementVNode("span", _hoisted_779, [
                                           _createElementVNode("img", {
                                             src: provider.icon,
                                             alt: provider.name,
                                             class: "w-5 h-5 object-contain",
                                             onError: $event => ($event.target.style.visibility = 'hidden')
-                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_779)
+                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_780)
                                         ]),
-                                        _createElementVNode("span", _hoisted_780, [
-                                          _createElementVNode("span", _hoisted_781, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _createElementVNode("span", _hoisted_782, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
+                                        _createElementVNode("span", _hoisted_781, [
+                                          _createElementVNode("span", _hoisted_782, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _createElementVNode("span", _hoisted_783, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_783, [...(_cache[286] || (_cache[286] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_784, [...(_cache[287] || (_cache[287] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -15995,7 +16018,7 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : _createCommentVNode("v-if", true)
-                                      ], 10 /* CLASS, PROPS */, _hoisted_777))
+                                      ], 10 /* CLASS, PROPS */, _hoisted_778))
                                     }), 128 /* KEYED_FRAGMENT */)),
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(customApiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("button", {
@@ -16004,7 +16027,7 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (selectApiProvider(provider)),
                                         class: _normalizeClass(['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _cache[289] || (_cache[289] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
+                                        _cache[290] || (_cache[290] = _createElementVNode("span", { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }, [
                                           _createElementVNode("svg", {
                                             class: "w-5 h-5 text-gray-500",
                                             fill: "none",
@@ -16019,12 +16042,12 @@ return function render(_ctx, _cache) {
                                             })
                                           ])
                                         ], -1 /* CACHED */)),
-                                        _createElementVNode("span", _hoisted_785, [
-                                          _createElementVNode("span", _hoisted_786, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _cache[287] || (_cache[287] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
+                                        _createElementVNode("span", _hoisted_786, [
+                                          _createElementVNode("span", _hoisted_787, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _cache[288] || (_cache[288] = _createElementVNode("span", { class: "block text-xs text-gray-400 truncate" }, "手动输入 API 地址", -1 /* CACHED */))
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_787, [...(_cache[288] || (_cache[288] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_788, [...(_cache[289] || (_cache[289] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -16033,14 +16056,14 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : _createCommentVNode("v-if", true)
-                                      ], 10 /* CLASS, PROPS */, _hoisted_784))
+                                      ], 10 /* CLASS, PROPS */, _hoisted_785))
                                     }), 128 /* KEYED_FRAGMENT */))
                                   ]))
                                 : _createCommentVNode("v-if", true)
                             ]),
                             isCustomApiProvider
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_788, [
-                                  _cache[290] || (_cache[290] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_789, [
+                                  _cache[291] || (_cache[291] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
                                       fill: "none",
@@ -16060,16 +16083,16 @@ return function render(_ctx, _cache) {
                                     type: "text",
                                     class: "settings-control settings-control--icon font-mono",
                                     placeholder: "https://your-api.example/v1"
-                                  }, null, 8 /* PROPS */, _hoisted_789), [
+                                  }, null, 8 /* PROPS */, _hoisted_790), [
                                     [_vModelText, settings.apiUrl]
                                   ])
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ]),
-                          _createElementVNode("div", _hoisted_790, [
-                            _cache[293] || (_cache[293] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_791, [
-                              _cache[292] || (_cache[292] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
+                          _createElementVNode("div", _hoisted_791, [
+                            _cache[294] || (_cache[294] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
+                            _createElementVNode("div", _hoisted_792, [
+                              _cache[293] || (_cache[293] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                 _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
@@ -16092,14 +16115,14 @@ return function render(_ctx, _cache) {
                               }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue"])
                             ])
                           ]),
-                          _createElementVNode("div", _hoisted_792, [
+                          _createElementVNode("div", _hoisted_793, [
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (showCustomApiSites = !showCustomApiSites),
                               class: "flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all"
                             }, [
-                              _createElementVNode("div", _hoisted_794, [
-                                _cache[296] || (_cache[296] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
+                              _createElementVNode("div", _hoisted_795, [
+                                _cache[297] || (_cache[297] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
                                   _createElementVNode("svg", {
                                     class: "w-3.5 h-3.5",
                                     fill: "none",
@@ -16114,12 +16137,12 @@ return function render(_ctx, _cache) {
                                     })
                                   ])
                                 ], -1 /* CACHED */)),
-                                _createElementVNode("div", _hoisted_795, [
-                                  _createElementVNode("div", _hoisted_796, [
-                                    _cache[294] || (_cache[294] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
-                                    _createElementVNode("span", _hoisted_797, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
+                                _createElementVNode("div", _hoisted_796, [
+                                  _createElementVNode("div", _hoisted_797, [
+                                    _cache[295] || (_cache[295] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义 API 站点", -1 /* CACHED */)),
+                                    _createElementVNode("span", _hoisted_798, _toDisplayString(settings.customApiProviders.length), 1 /* TEXT */)
                                   ]),
-                                  _cache[295] || (_cache[295] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
+                                  _cache[296] || (_cache[296] = _createElementVNode("span", { class: "mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate" }, "独立保存专属地址与密钥 · 无数量上限", -1 /* CACHED */))
                                 ])
                               ]),
                               (_openBlock(), _createElementBlock("svg", {
@@ -16127,7 +16150,7 @@ return function render(_ctx, _cache) {
                                 fill: "none",
                                 stroke: "currentColor",
                                 viewBox: "0 0 24 24"
-                              }, [...(_cache[297] || (_cache[297] = [
+                              }, [...(_cache[298] || (_cache[298] = [
                                 _createElementVNode("path", {
                                   "stroke-linecap": "round",
                                   "stroke-linejoin": "round",
@@ -16135,30 +16158,30 @@ return function render(_ctx, _cache) {
                                   d: "M19 9l-7 7-7-7"
                                 }, null, -1 /* CACHED */)
                               ]))], 2 /* CLASS */))
-                            ], 8 /* PROPS */, _hoisted_793),
+                            ], 8 /* PROPS */, _hoisted_794),
                             showCustomApiSites
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_798, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_799, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(settings.customApiProviders, (provider) => {
                                     return (_openBlock(), _createElementBlock("div", {
                                       key: provider.id,
                                       class: "rounded-xl border border-gray-200/70 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 p-3 shadow-sm hover:shadow transition-shadow space-y-2"
                                     }, [
-                                      _createElementVNode("div", _hoisted_799, [
-                                        _createElementVNode("div", _hoisted_800, [
-                                          _cache[298] || (_cache[298] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
+                                      _createElementVNode("div", _hoisted_800, [
+                                        _createElementVNode("div", _hoisted_801, [
+                                          _cache[299] || (_cache[299] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-primary-500" }, null, -1 /* CACHED */)),
                                           _createElementVNode("input", {
                                             value: provider.name,
                                             onInput: $event => (updateCustomApiProvider(provider.id, 'name', $event.target.value)),
                                             type: "text",
                                             placeholder: "站点名称（如：自建代理）",
                                             class: "min-w-0 flex-1 rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_801)
+                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_802)
                                         ]),
                                         _createElementVNode("button", {
                                           type: "button",
                                           onClick: $event => (removeCustomApiProvider(provider.id)),
                                           class: "rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs"
-                                        }, "删除", 8 /* PROPS */, _hoisted_802)
+                                        }, "删除", 8 /* PROPS */, _hoisted_803)
                                       ]),
                                       _createElementVNode("input", {
                                         value: provider.apiUrl,
@@ -16166,39 +16189,19 @@ return function render(_ctx, _cache) {
                                         type: "text",
                                         placeholder: "API 地址，例如 https://api.example.com/v1",
                                         class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_803),
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_804),
                                       _createElementVNode("input", {
                                         value: settings.apiProviderKeys[provider.id] || '',
                                         onInput: $event => (updateCustomApiKey(provider.id, $event.target.value)),
                                         type: "password",
                                         placeholder: "站点密钥 sk-...",
                                         class: "w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors"
-                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_804)
+                                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_805)
                                     ]))
                                   }), 128 /* KEYED_FRAGMENT */)),
                                   (!settings.customApiProviders.length)
-                                    ? (_openBlock(), _createElementBlock("div", _hoisted_805, "暂无自定义站点，点击下方按钮添加"))
-                                    : _createCommentVNode("v-if", true),
-                                  _createElementVNode("button", {
-                                    type: "button",
-                                    onClick: createCustomApiProvider,
-                                    class: "w-full py-2 px-3 rounded-xl border border-dashed border-primary-300 dark:border-primary-700/80 bg-primary-50/60 hover:bg-primary-50 dark:bg-primary-950/20 text-xs font-bold text-primary-600 dark:text-primary-400 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-2xs"
-                                  }, [...(_cache[299] || (_cache[299] = [
-                                    _createElementVNode("svg", {
-                                      class: "w-3.5 h-3.5",
-                                      fill: "none",
-                                      stroke: "currentColor",
-                                      viewBox: "0 0 24 24"
-                                    }, [
-                                      _createElementVNode("path", {
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                        d: "M12 4v16m8-8H4"
-                                      })
-                                    ], -1 /* CACHED */),
-                                    _createTextVNode(" 新增 API 站点 ", -1 /* CACHED */)
-                                  ]))], 8 /* PROPS */, _hoisted_806)
+                                    ? (_openBlock(), _createElementBlock("div", _hoisted_806, "暂无自定义站点，点击上方 + 添加"))
+                                    : _createCommentVNode("v-if", true)
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ]),
@@ -25394,12 +25397,24 @@ const _hoisted_27 = { class: "shell-form-row" }
 const _hoisted_28 = { class: "relative inline-flex items-center cursor-pointer" }
 const _hoisted_29 = ["checked", "onChange"]
 const _hoisted_30 = {
+  key: 0,
+  class: "shell-form-row shell-accent-row"
+}
+const _hoisted_31 = { class: "shell-accent-swatches" }
+const _hoisted_32 = ["title", "aria-label", "onClick"]
+const _hoisted_33 = {
+  class: "shell-accent-custom",
+  title: "自定义颜色"
+}
+const _hoisted_34 = ["value", "onInput"]
+const _hoisted_35 = ["onClick"]
+const _hoisted_36 = {
   key: 3,
   class: "shell-row-list"
 }
-const _hoisted_31 = ["onClick"]
-const _hoisted_32 = ["onClick"]
-const _hoisted_33 = ["onClick"]
+const _hoisted_37 = ["onClick"]
+const _hoisted_38 = ["onClick"]
+const _hoisted_39 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -25584,35 +25599,66 @@ return function render(_ctx, _cache) {
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29),
                 _cache[18] || (_cache[18] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
-            ])
+            ]),
+            (selected==='classic')
+              ? (_openBlock(), _createElementBlock("div", _hoisted_30, [
+                  _cache[20] || (_cache[20] = _createElementVNode("span", null, "主题色", -1 /* CACHED */)),
+                  _createElementVNode("div", _hoisted_31, [
+                    (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(accentPresets, (preset) => {
+                      return (_openBlock(), _createElementBlock("button", {
+                        key: preset.color,
+                        type: "button",
+                        class: _normalizeClass(["shell-accent-dot", {'is-active': accent===preset.color}]),
+                        style: _normalizeStyle({background:preset.color}),
+                        title: preset.name,
+                        "aria-label": preset.name,
+                        onClick: $event => (setAccentColor(preset.color))
+                      }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_32))
+                    }), 128 /* KEYED_FRAGMENT */)),
+                    _createElementVNode("label", _hoisted_33, [
+                      _createElementVNode("input", {
+                        type: "color",
+                        value: accent||'#5a6ff0',
+                        "aria-label": "自定义主题色",
+                        onInput: $event => (setAccentColor($event.target.value))
+                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_34)
+                    ]),
+                    _createElementVNode("button", {
+                      type: "button",
+                      class: "shell-accent-reset",
+                      onClick: $event => (setAccentColor(''))
+                    }, "恢复默认", 8 /* PROPS */, _hoisted_35)
+                  ])
+                ]))
+              : _createCommentVNode("v-if", true)
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (section==='legacy')
-        ? (_openBlock(), _createElementBlock("div", _hoisted_30, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_36, [
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'worldinfo',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "BookOpen" }),
-              _cache[20] || (_cache[20] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
+              _cache[21] || (_cache[21] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_31),
+            ], 8 /* PROPS */, _hoisted_37),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'regex',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "Code2" }),
-              _cache[21] || (_cache[21] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
+              _cache[22] || (_cache[22] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_32),
+            ], 8 /* PROPS */, _hoisted_38),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'uitemplates',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "PanelsTopLeft" }),
-              _cache[22] || (_cache[22] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
+              _cache[23] || (_cache[23] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_33)
+            ], 8 /* PROPS */, _hoisted_39)
           ]))
         : _createCommentVNode("v-if", true)
     ]))

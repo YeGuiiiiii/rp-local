@@ -1,8 +1,8 @@
-# RP 本地版 2.9.048
+# RP 本地版 2.9.050
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.048.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.050.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.048**，Android versionCode 为 **310**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.050**，Android versionCode 为 **312**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.048 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.050 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,16 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.050 聊天记录导出分块写、API 入口合并与经典布局主题色
+
+本节包含 2.9.049～2.9.050 两个小版本（versionCode 311～312）。两版都不改存档结构、不改备份格式，包名与签名不变，可直接覆盖升级。
+
+- 2.9.050 聊天记录导出改分块流式写（本版重点）：此前导出聊天记录是把整份历史拼成一个大字符串，再整包转 base64 交给原生 `saveFile`。聊天一旦到几百 MB（单卡三千楼、200MB 以上很常见），Java 侧要同时持有 base64 字符串（约 323MB）和 `Base64.decode` 出来的字节数组（约 242MB），必然抛 `Error invoking saveFile: Java exception`，导出永远失败。现在改走自动备份已经跑了两年的分块通道（`beginPickerSave → writeBackupChunk → finishBackupWrite`），逐条消息序列化、每 256KB 写一次，内存峰值从 GB 级降到一条消息（最大约 1.5MB）。输出仍是 NDJSON、一行一个分支，**与原实现逐字节一致**，导入端和桌面版都不用改。导出路径上另有两处对整份历史的深拷贝一并去掉，那一份是白拷的。
+- 2.9.049 API 自定义站点入口合并：新增自定义 API 的位置从卡片底部上移到「API 提供商」下拉旁边，只留一处，不再分两处。顺带修掉三个交互问题——下拉按钮永远显示「自定义」看不出当前站点、新建站点后不会自动切过去、删除当前站点后落到默认站点而不是其它自定义站点。
+- 2.9.049 经典布局主题色：外观页在选择经典布局时显示主题色，8 个预设加取色器加恢复默认；切换皮肤不再清空用户自选色。
+
+安装包 `RP-local-2.9.050.apk`：versionCode 312，7,561,066 字节，SHA256 `7dd0f09a5f61d6b3e9e6bbd8b983a62361dac6b64e40b812357aaa3fa12c400c`；校验和见 `dist/SHA256SUMS-2.9.050.txt`。2.9.049 不单独发布安装包，改动并入本版。已知问题：单卡到 200MB 以上时，删除一条消息仍会因整份复制导致渲染进程被杀并重载（表现为「卡一下、对话还在」），该问题已定位，修复安排在下一版。
 
 ## 2.9.048 导入清单、导出回执与备份占用
 
@@ -594,7 +604,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.048`，Android versionCode `310`。
+- 版本：`2.9.050`，Android versionCode `312`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。

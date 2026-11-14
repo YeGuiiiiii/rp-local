@@ -59,7 +59,8 @@
             if (!pack) return;
             selected = pack.id;
             try { localStorage.setItem(key, selected); } catch (_) {}
-            window.RPHubThemeKit?.setAccent('');
+            // 保留用户自选的 accent：以前这里每次切皮肤都 setAccent('')，
+            // 外观页选的主题色会被抹掉。现在让它继续作用于新皮肤。
             if (legacyMode(id)) setMode(legacyMode(id));
             apply();
         }

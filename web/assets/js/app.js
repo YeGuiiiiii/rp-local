@@ -1038,6 +1038,10 @@ const app = createApp({
             if (!settings.apiProviderKeys || typeof settings.apiProviderKeys !== 'object' || Array.isArray(settings.apiProviderKeys)) settings.apiProviderKeys = {};
             settings.apiProviderKeys[id] = '';
             refreshCustomApiProviderOptions();
+            // 建完直接切过去：以前只刷新选项，用户还得自己去下拉里找一遍。
+            // selectApiProvider 会做模型记忆迁移与密钥同步，比自己赋值稳。
+            const created = customApiProviderOptions.find(provider => provider.id === id);
+            if (created) selectApiProvider(created);
             saveData({ saveMemories: false, saveCharacters: false });
             return id;
         };
@@ -1047,9 +1051,17 @@ const app = createApp({
             settings.customApiProviders.splice(index, 1);
             if (settings.apiProviderKeys) delete settings.apiProviderKeys[id];
             if (settings.apiProviderId === id) {
-                settings.apiProviderId = DEFAULT_API_PROVIDER_ID;
-                settings.apiUrl = DEFAULT_API_CONFIG.apiUrl;
-                settings.apiKey = settings.apiProviderKeys[DEFAULT_API_PROVIDER_ID] || '';
+                // 删掉正在用的站点：先回落到其它自定义站点，一个都不剩才回默认。
+                const fallback = settings.customApiProviders[0];
+                if (fallback) {
+                    settings.apiProviderId = fallback.id;
+                    settings.apiUrl = fallback.apiUrl || '';
+                    settings.apiKey = settings.apiProviderKeys[fallback.id] || '';
+                } else {
+                    settings.apiProviderId = DEFAULT_API_PROVIDER_ID;
+                    settings.apiUrl = DEFAULT_API_CONFIG.apiUrl;
+                    settings.apiKey = settings.apiProviderKeys[DEFAULT_API_PROVIDER_ID] || '';
+                }
             }
             refreshCustomApiProviderOptions();
             saveData({ saveMemories: false, saveCharacters: false });
@@ -1126,7 +1138,12 @@ const app = createApp({
             settings.apiKey = settings.apiProviderKeys[settings.apiProviderId] || '';
         };
         const selectedApiProvider = computed(() => {
-            if (isCustomApiProviderId(settings.apiProviderId)) return customApiProviderOption;
+            if (isCustomApiProviderId(settings.apiProviderId)) {
+                // 返回具体站点而不是固定的「自定义」项：否则下拉按钮永远显示「自定义」、
+                // 列表里的勾也永远落在「自定义」上，看不出当前用的是哪个站点。
+                return customApiProviderOptions.find(provider => provider.id === settings.apiProviderId)
+                    || customApiProviderOption;
+            }
             const selectedProvider = getApiProviderById(settings.apiProviderId);
             if (selectedProvider) return selectedProvider;
             return getApiProviderByUrl(settings.apiUrl) || customApiProviderOption;
@@ -6628,7 +6645,7 @@ const app = createApp({
             return dbs;
         };
 
-        const openBackupPicker = async (backupFileName) => {
+        const openBackupPicker = async (backupFileName, mime = 'application/json') => {
             const bridge = window.AndroidBridge;
             if (!(bridge?.isNativeApp?.() && typeof bridge.beginPickerSave === 'function' && typeof bridge.writeBackupChunk === 'function' && typeof bridge.finishBackupWrite === 'function')) return false;
             const pickedToken = await new Promise((resolve) => {
@@ -6642,7 +6659,7 @@ const app = createApp({
                 };
                 window.rphubPickerSaveCancelled = () => finish(null);
                 try {
-                    bridge.beginPickerSave(backupFileName, 'application/json');
+                    bridge.beginPickerSave(backupFileName, mime);
                     showToast('正在打开系统保存位置，请选择文件保存', 'info', 3000);
                 } catch (error) {
                     finish(null);
@@ -15631,6 +15648,75 @@ const app = createApp({
             });
         };
 
+        // [rphub 2.9.050] 聊天记录导出改成分块流式写。
+        //   原来把整份聊天拼成一个大字符串 → Blob → readAsDataURL → saveFile(base64)：
+        //   242MB 的卡走到 Java 侧要同时持有 base64 字符串（input ≈323MB）和
+        //   Base64.decode 出来的 byte[]（≈242MB），Android 单进程堆撑不住，必抛
+        //   "Error invoking saveFile: Java exception"。
+        //   这里改走自动备份已经跑了两年的分块通道（beginPickerSave → writeBackupChunk
+        //   → finishBackupWrite），逐条消息序列化、按 256KB 批量写，峰值从 GB 级降到
+        //   一条消息（最大约 1.5MB）。输出与原实现逐字节一致（NDJSON，一行一个分支），
+        //   导入端与桌面版都不用改。
+        const exportChatLinesStreaming = async (fileName, manifest, branchChats) => {
+            const bridge = window.AndroidBridge;
+            const canStream = bridge?.isNativeApp?.()
+                && typeof bridge.beginPickerSave === 'function'
+                && typeof bridge.writeBackupChunk === 'function'
+                && typeof bridge.finishBackupWrite === 'function';
+            if (!canStream) {
+                const text = [manifest, ...branchChats].map(record => JSON.stringify(record)).join('\n');
+                return cardUtils.downloadBlob(new Blob([text], { type: 'application/x-ndjson;charset=utf-8' }), fileName);
+            }
+            let session = null;
+            try {
+                session = await openBackupPicker(fileName, 'application/x-ndjson');
+            } catch (error) {
+                // 走系统选择器时取消是正常操作，原来 saveFile 那条路也是静默的。
+                showToast('已取消导出聊天记录', 'info', 2000);
+                return { channel: 'native', ok: null };
+            }
+            // 只在 push 边界 flush：每次 push 传入的都是完整字符串（JSON.stringify 或纯 ASCII
+            // 片段），边界必然落在码点之间，不会把代理对劈开。
+            let buffer = '';
+            const flush = () => {
+                if (!buffer) return;
+                writeBackupText(session, buffer);
+                buffer = '';
+            };
+            const push = (text) => {
+                if (!text) return;
+                buffer += text;
+                if (buffer.length >= 0x40000) flush();
+            };
+            try {
+                push(JSON.stringify(manifest));
+                for (const record of branchChats) {
+                    const messages = Array.isArray(record.messages) ? record.messages : [];
+                    push('\n{"branchId":' + JSON.stringify(record.branchId) + ',"messages":[');
+                    let first = true;
+                    for (const message of messages) {
+                        const line = JSON.stringify(message === undefined ? null : message);
+                        push(first ? line : ',' + line);
+                        first = false;
+                    }
+                    push(']}');
+                }
+                flush();
+                const finished = String(bridge.finishBackupWrite(session.token) || '');
+                if (finished !== 'OK' && !finished.startsWith('OK:')) {
+                    throw new Error(finished.startsWith('ERR:') ? finished.slice(4) : '完成聊天记录写入失败');
+                }
+                session.token = '';
+                showToast(finished.startsWith('OK:')
+                    ? '聊天记录已保存到 ' + finished.slice(3)
+                    : '聊天记录已保存', 'success', 3000);
+                return { channel: 'native', ok: null };
+            } catch (error) {
+                abortChunkedBackup(session);
+                return { channel: 'native', ok: false, error: (error && error.message) || String(error) };
+            }
+        };
+
         const exportCharacterChat = async (index) => {
             let char = characters.value[index];
             if (!char) return;
@@ -15651,7 +15737,7 @@ const app = createApp({
                 const branchChats = await Promise.all(branches.map(async branch => {
                     let messages;
                     if (isCurrentCharacter && branch.id === activeStoryBranchId.value) {
-                        messages = cloneForStorage(chatHistory.value);
+                        messages = chatHistory.value.slice();
                     } else if (char.uuid) {
                         messages = await getScopedStoredValue('chat', getStoryBranchScopeId(char.uuid, branch.id));
                     }
@@ -15660,7 +15746,7 @@ const app = createApp({
                     }
                     return {
                         branchId: branch.id,
-                        messages: Array.isArray(messages) ? cloneForStorage(messages) : []
+                        messages: Array.isArray(messages) ? messages : []
                     };
                 }));
                 const totalMessages = branchChats.reduce((sum, branch) => sum + branch.messages.length, 0);
@@ -15713,9 +15799,8 @@ const app = createApp({
                     } : {}),
                     ...(rphubMemorySnapshot ? { memory: rphubMemorySnapshot } : {})
                 };
-                const chatLines = [manifest, ...branchChats].map(record => JSON.stringify(record)).join('\n');
-                const chatBlob = new Blob([chatLines], { type: 'application/x-ndjson;charset=utf-8' });
-                const verdict = await cardUtils.downloadBlob(chatBlob, (char.name || 'character') + '_全部分支_chat.jsonl');
+                const verdict = await exportChatLinesStreaming(
+                    (char.name || 'character') + '_全部分支_chat.jsonl', manifest, branchChats);
                 exportFeedback(verdict, '聊天记录', `已导出 ${branches.length} 个分支，共 ${totalMessages} 条聊天记录`);
             } catch (chatExpError) {
                 console.error('Chat export error:', chatExpError);

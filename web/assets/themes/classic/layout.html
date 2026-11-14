@@ -1290,8 +1290,8 @@
                                             获取API
                                         </a>
                                     </div>
-                                    <div class="relative mb-2 api-provider-selector-container">
-                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex items-center justify-between text-left">
+                                    <div class="relative mb-2 api-provider-selector-container flex gap-2">
+                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex flex-1 min-w-0 items-center justify-between text-left">
                                             <span class="flex items-center min-w-0">
                                                 <span class="w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden">
                                                     <img v-if="selectedApiProvider.icon" :src="selectedApiProvider.icon" :alt="selectedApiProvider.name" class="w-5 h-5 object-contain" @error="$event.target.style.visibility = 'hidden'">
@@ -1306,6 +1306,9 @@
                                             <svg class="w-4 h-4 text-gray-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                             </svg>
+                                        </button>
+                                        <button type="button" @click="createCustomApiProvider" class="settings-control flex w-11 shrink-0 items-center justify-center !px-0" aria-label="新增 API 站点" title="新增 API 站点">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         </button>
                                         <div v-if="showApiProviderSelector" class="absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2">
                                             <button v-for="provider in apiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
@@ -1396,11 +1399,7 @@
                                             <input :value="provider.apiUrl" @input="updateCustomApiProvider(provider.id, 'apiUrl', $event.target.value)" type="text" placeholder="API 地址，例如 https://api.example.com/v1" class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
                                             <input :value="settings.apiProviderKeys[provider.id] || ''" @input="updateCustomApiKey(provider.id, $event.target.value)" type="password" placeholder="站点密钥 sk-..." class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
                                         </div>
-                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击下方按钮添加</div>
-                                        <button type="button" @click="createCustomApiProvider" class="w-full py-2 px-3 rounded-xl border border-dashed border-primary-300 dark:border-primary-700/80 bg-primary-50/60 hover:bg-primary-50 dark:bg-primary-950/20 text-xs font-bold text-primary-600 dark:text-primary-400 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-2xs">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                            新增 API 站点
-                                        </button>
+                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击上方 + 添加</div>
                                     </div>
                                 </div>
 
@@ -2656,8 +2655,8 @@
                                             获取API
                                         </a>
                                     </div>
-                                    <div class="relative mb-2 api-provider-selector-container">
-                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex items-center justify-between text-left">
+                                    <div class="relative mb-2 api-provider-selector-container flex gap-2">
+                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex flex-1 min-w-0 items-center justify-between text-left">
                                             <span class="flex items-center min-w-0">
                                                 <span class="w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden">
                                                     <img v-if="selectedApiProvider.icon" :src="selectedApiProvider.icon" :alt="selectedApiProvider.name" class="w-5 h-5 object-contain" @error="$event.target.style.visibility = 'hidden'">
@@ -2672,6 +2671,9 @@
                                             <svg class="w-4 h-4 text-gray-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                             </svg>
+                                        </button>
+                                        <button type="button" @click="createCustomApiProvider" class="settings-control flex w-11 shrink-0 items-center justify-center !px-0" aria-label="新增 API 站点" title="新增 API 站点">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         </button>
                                         <div v-if="showApiProviderSelector" class="absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2">
                                             <button v-for="provider in apiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
@@ -2762,11 +2764,7 @@
                                             <input :value="provider.apiUrl" @input="updateCustomApiProvider(provider.id, 'apiUrl', $event.target.value)" type="text" placeholder="API 地址，例如 https://api.example.com/v1" class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
                                             <input :value="settings.apiProviderKeys[provider.id] || ''" @input="updateCustomApiKey(provider.id, $event.target.value)" type="password" placeholder="站点密钥 sk-..." class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
                                         </div>
-                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击下方按钮添加</div>
-                                        <button type="button" @click="createCustomApiProvider" class="w-full py-2 px-3 rounded-xl border border-dashed border-primary-300 dark:border-primary-700/80 bg-primary-50/60 hover:bg-primary-50 dark:bg-primary-950/20 text-xs font-bold text-primary-600 dark:text-primary-400 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-2xs">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                            新增 API 站点
-                                        </button>
+                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击上方 + 添加</div>
                                     </div>
                                 </div>
 
