@@ -11656,19 +11656,24 @@ const app = createApp({
                 //   才赋值 chatHistory，所以删一条要愣一两秒才看到变化；删 user 消息还要
                 //   连带删整轮与相关记忆，等得更久。
                 //   现在立刻换数组、让出一帧，失败再整体回滚并提示。
-                // [rphub 2.9.056] 记录删除前是否停在底部。
-                //   浏览器的滚动锚定（overflow-anchor）在「底部内容被移除」时会把视口钉在
-                //   保留下来的旧内容上，表现就是「界面整体上移，要往下滑才回到最新」。
-                //   停在底部时，删完直接把位置钉回底部；停在历史里就不动，避免抢滚动。
+                // [rphub 2.9.057] 按「距底部的距离」保持视口，而不是按 scrollTop。
+                //   聊天列表渲染的是「最后 N 条」，删掉一条后 length 少 1，窗口起点随之前移
+                //   ⇒ 顶部会多渲染进一条更早的消息，把下面的内容整体往下顶。用户看到的
+                //   「界面整个上移、要往下滑」就是这个：不是滚动位置变了，是上面多了一条。
+                //   （2.9.056 只处理了「本来就在底部」那一种，窗口位移这条路没盖到。）
+                //   距底距离是不变量：内容在底部之上增删多少，按它反算 scrollTop 都能回到同一屏；
+                //   本来就在底部时 distFromBottom ≈ clientHeight，反算结果正好到底。
                 const chatScroller = chatContainer.value;
-                const wasAtBottom = chatScroller
-                    ? (chatScroller.scrollHeight - chatScroller.scrollTop - chatScroller.clientHeight) < 96
-                    : false;
+                const distFromBottom = chatScroller
+                    ? (chatScroller.scrollHeight - chatScroller.scrollTop)
+                    : 0;
                 const previousHistory = chatHistory.value;
                 _chatOptimisticPending = true;
                 chatHistory.value = nextHistory;
                 await nextTick();
-                if (wasAtBottom) await scrollChatToBottom();
+                if (chatScroller) {
+                    chatScroller.scrollTop = Math.max(0, chatScroller.scrollHeight - distFromBottom);
+                }
                 let committed;
                 try {
                     const intent = await tryBeginMemoryIntent('删除对话轮次');

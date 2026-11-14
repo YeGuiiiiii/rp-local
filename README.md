@@ -1,8 +1,8 @@
-# RP 本地版 2.9.056
+# RP 本地版 2.9.057
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.056.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.057.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.056**，Android versionCode 为 **318**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.057**，Android versionCode 为 **319**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.056 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.057 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,20 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.057 删除后按距底距离保持视口
+
+本节为 2.9.057（versionCode 319）。只改界面行为，不动存档与备份格式。
+
+- 2.9.056 没修干净：它只在「本来就在底部」时把视口钉回底部，而真正的原因是**渲染窗口平移**。
+  聊天列表只渲染「最后 N 条」，删掉一条后 `length` 少 1、窗口起点随之前移 ⇒ 顶部会多渲染进
+  一条更早的消息，把下面的内容整体往下顶。用户看到的是「界面整个上移、要往下滑才回到最新」，
+  其实滚动位置没变，是上面多了一条。删的那条越高，偏移越明显。
+- 现在按「距底部的距离」这个不变量保持视口：删除前记 `scrollHeight - scrollTop`，渲染完成后
+  用 `scrollHeight - 该值` 反算 `scrollTop`。内容在底部之上的增删都能因此抵消；本来就在底部时
+  该值 ≈ 视口高度，反算结果正好停在底部，不需要再单独特判。
+
+安装包 `RP-local-2.9.057.apk`：versionCode 319，7,569,258 字节，SHA256 `78abdf156f58b913112b97b3203e7af09cebf7c41d62d122d27fb3b95c4e9ef9`；校验和见 `dist/SHA256SUMS-2.9.057.txt`。
 
 ## 2.9.056 删除后视口回到最新
 
@@ -692,7 +706,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.056`，Android versionCode `318`。
+- 版本：`2.9.057`，Android versionCode `319`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。
