@@ -481,3 +481,11 @@
 :root[data-rphub-accent="1"] .settings-card__title > svg {
     color: rgb(var(--primary-600));
 }
+/* [rphub 2.9.062] 未选中项的图标也跟着主色：参考图里图标是粉的，我们之前留在灰。
+   只在选了主题色时生效，默认皮肤不变。 */
+:root[data-rphub-accent="1"] .app-navigation-item .app-navigation-icon {
+    color: rgb(var(--primary-600));
+}
+:root[data-rphub-accent="1"] .app-navigation-item:not(.is-current) {
+    background-color: rgb(var(--primary-50) / 0.55);
+}

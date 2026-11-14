@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.061'; window.RP_LOCAL_RELEASE = 322;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.062'; window.RP_LOCAL_RELEASE = 323;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4267,15 +4267,16 @@
            这就是插件那套「整体色相旋转、亮度不变」在变量层能做到的部分。
            文字用的 gray-400~900 不参与，避免正文也跟着染色。 */
         var cue = function (step) {
-            return '--surface:' + triplet(hsl2rgb(h, 0.10, step.surface)) + ';'
-                + '--gray-50:' + triplet(hsl2rgb(h, 0.10, step.g50)) + ';'
-                + '--gray-100:' + triplet(hsl2rgb(h, 0.09, step.g100)) + ';'
-                + '--gray-200:' + triplet(hsl2rgb(h, 0.08, step.g200)) + ';';
+            // 饱和度不能压太低：0.10 在 97% 亮度上等于灰白，肉眼分不出来（用户对比截图就是这个差别）。
+            return '--surface:' + triplet(hsl2rgb(h, 0.32, step.surface)) + ';'
+                + '--gray-50:' + triplet(hsl2rgb(h, 0.30, step.g50)) + ';'
+                + '--gray-100:' + triplet(hsl2rgb(h, 0.26, step.g100)) + ';'
+                + '--gray-200:' + triplet(hsl2rgb(h, 0.24, step.g200)) + ';';
         };
         // 只有用户真选了主题色才带表面；护眼档（暖纸）自己有一整套暖色调，不能被这层盖掉。
         var withCue = guard.indexOf('data-rphub-accent') >= 0;
-        var cueLight = withCue ? cue({ surface: 0.985, g50: 0.976, g100: 0.952, g200: 0.905 }) : '';
-        var cueDark = withCue ? cue({ surface: 0.135, g50: 0.115, g100: 0.205, g200: 0.275 }) : '';
+        var cueLight = withCue ? cue({ surface: 0.972, g50: 0.958, g100: 0.936, g200: 0.898 }) : '';
+        var cueDark = withCue ? cue({ surface: 0.135, g50: 0.118, g100: 0.200, g200: 0.268 }) : '';
         return ''
             + guard + '{' + light + '--p:' + p + ';}'
             + guard + ':not([data-app-theme="dark"]){--pc:100% 0 0;' + cueLight + '}'
