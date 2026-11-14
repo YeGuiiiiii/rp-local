@@ -709,7 +709,22 @@
             const info = ref(null);
             const loading = ref(false);
             const accent = ref(window.RPHubThemeKit?.accent || '');
-            const accentPresets = window.RPHubThemeKit?.presets || [];
+            // [rphub 2.9.068] 预置色不能依赖 kit 的 getter 是否可用：那个 getter 挂在整个
+            //   主题脚本的最后，脚本任何一处初始化失败都会让 window.RPHubThemeKit 缺席，
+            //   结果就是这一排色点整行消失、只剩取色器和「恢复默认」。这里内置一份兜底，
+            //   kit 有数据时优先用 kit 的（名字/顺序以那边为准）。
+            const ACCENT_PRESETS_FALLBACK = [
+                { name: '鸢尾蓝', color: '#5a6ff0' }, { name: '青碧', color: '#0f9b8e' },
+                { name: '苔绿', color: '#4f8f4a' }, { name: '琥珀', color: '#d98324' },
+                { name: '玫瑰', color: '#e05a76' }, { name: '紫罗兰', color: '#8b5cf6' },
+                { name: '石板', color: '#64748b' }, { name: '赭红', color: '#c2410c' }
+            ];
+            const accentPresets = (() => {
+                try {
+                    const list = window.RPHubThemeKit?.presets;
+                    return Array.isArray(list) && list.length ? list : ACCENT_PRESETS_FALLBACK;
+                } catch (_) { return ACCENT_PRESETS_FALLBACK; }
+            })();
             const syncAccent = () => { accent.value = window.RPHubThemeKit?.accent || ''; };
             const setAccentColor = value => { window.RPHubThemeKit?.setAccent(value); syncAccent(); };
             window.addEventListener('rphub-theme-change', syncAccent);
