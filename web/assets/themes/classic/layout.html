@@ -1290,8 +1290,8 @@
                                             获取API
                                         </a>
                                     </div>
-                                    <div class="relative mb-2 api-provider-selector-container flex gap-2">
-                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex flex-1 min-w-0 items-center justify-between text-left">
+                                    <div class="relative mb-2 api-provider-selector-container">
+                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex items-center justify-between text-left">
                                             <span class="flex items-center min-w-0">
                                                 <span class="w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden">
                                                     <img v-if="selectedApiProvider.icon" :src="selectedApiProvider.icon" :alt="selectedApiProvider.name" class="w-5 h-5 object-contain" @error="$event.target.style.visibility = 'hidden'">
@@ -1306,9 +1306,6 @@
                                             <svg class="w-4 h-4 text-gray-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                             </svg>
-                                        </button>
-                                        <button type="button" @click="createCustomApiProvider" class="settings-control flex w-11 shrink-0 items-center justify-center !px-0" aria-label="新增 API 站点" title="新增 API 站点">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         </button>
                                         <div v-if="showApiProviderSelector" class="absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2">
                                             <button v-for="provider in apiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
@@ -1325,21 +1322,37 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </button>
-                                            <button v-for="provider in customApiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
+                                            <div v-for="provider in customApiProviderOptions" :key="provider.id" role="button" tabindex="0" @keydown.enter.prevent="onCustomApiEntryClick(provider)"  @click="onCustomApiEntryClick(provider)" :class="['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
                                                 <span class="w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0">
-                                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c2.5 2.7 4 6.2 4 10s-1.5 7.3-4 10c-2.5-2.7-4-6.2-4-10s1.5-7.3 4-10z">
+                                                    <svg v-if="provider.id === 'custom'" class="w-5 h-5 text-primary-600" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                    <svg v-else class="w-5 h-5 text-gray-500" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c2.5 2.7 4 6.2 4 10s-1.5 7.3-4 10c-2.5-2.7-4-6.2-4-10s1.5-7.3 4-10z">
                                                         </path>
                                                     </svg>
                                                 </span>
                                                 <span class="min-w-0 flex-1">
                                                     <span class="block text-sm font-bold truncate">{{ provider.name }}</span>
-                                                    <span class="block text-xs text-gray-400 truncate">手动输入 API 地址</span>
+                                                    <span class="block text-xs text-gray-400 truncate">{{ provider.hint || '手动输入 API 地址' }}</span>
                                                 </span>
                                                 <svg v-if="selectedApiProvider.id === provider.id" class="w-4 h-4 ml-2 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
-                                            </button>
+                                                                                            <button v-if="provider.id !== 'custom'" type="button"
+                                                    @click.stop="requestRemoveCustomApiProvider(provider.id)"
+                                                    class="ml-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                    aria-label="删除该站点" title="删除该站点">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+</div>
                                         </div>
                                     </div>
                                     <div v-if="isCustomApiProvider" class="relative">
@@ -1367,41 +1380,6 @@
                                     </div>
                                 </div>
 
-<div class="mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all">
-                                    <button type="button" @click="showCustomApiSites = !showCustomApiSites" class="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all">
-                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-                                                </svg>
-                                            </span>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="block text-xs font-bold text-gray-700 dark:text-gray-200">自定义 API 站点</span>
-                                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80">{{ settings.customApiProviders.length }}</span>
-                                                </div>
-                                                <span class="mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate">独立保存专属地址与密钥 · 无数量上限</span>
-                                            </div>
-                                        </div>
-                                        <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': showCustomApiSites }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </button>
-                                    <div v-if="showCustomApiSites" class="border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar">
-                                        <div v-for="provider in settings.customApiProviders" :key="provider.id" class="rounded-xl border border-gray-200/70 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 p-3 shadow-sm hover:shadow transition-shadow space-y-2">
-                                            <div class="flex items-center justify-between gap-2">
-                                                <div class="flex items-center gap-1.5 flex-1 min-w-0">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-                                                    <input :value="provider.name" @input="updateCustomApiProvider(provider.id, 'name', $event.target.value)" type="text" placeholder="站点名称（如：自建代理）" class="min-w-0 flex-1 rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                                </div>
-                                                <button type="button" @click="removeCustomApiProvider(provider.id)" class="rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs">删除</button>
-                                            </div>
-                                            <input :value="provider.apiUrl" @input="updateCustomApiProvider(provider.id, 'apiUrl', $event.target.value)" type="text" placeholder="API 地址，例如 https://api.example.com/v1" class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                            <input :value="settings.apiProviderKeys[provider.id] || ''" @input="updateCustomApiKey(provider.id, $event.target.value)" type="password" placeholder="站点密钥 sk-..." class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                        </div>
-                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击上方 + 添加</div>
-                                    </div>
-                                </div>
 
                                 <!-- Model Configuration Inputs -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -2655,8 +2633,8 @@
                                             获取API
                                         </a>
                                     </div>
-                                    <div class="relative mb-2 api-provider-selector-container flex gap-2">
-                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex flex-1 min-w-0 items-center justify-between text-left">
+                                    <div class="relative mb-2 api-provider-selector-container">
+                                        <button type="button" @click="showApiProviderSelector = !showApiProviderSelector" class="settings-control flex items-center justify-between text-left">
                                             <span class="flex items-center min-w-0">
                                                 <span class="w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden">
                                                     <img v-if="selectedApiProvider.icon" :src="selectedApiProvider.icon" :alt="selectedApiProvider.name" class="w-5 h-5 object-contain" @error="$event.target.style.visibility = 'hidden'">
@@ -2671,9 +2649,6 @@
                                             <svg class="w-4 h-4 text-gray-400 ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                             </svg>
-                                        </button>
-                                        <button type="button" @click="createCustomApiProvider" class="settings-control flex w-11 shrink-0 items-center justify-center !px-0" aria-label="新增 API 站点" title="新增 API 站点">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         </button>
                                         <div v-if="showApiProviderSelector" class="absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2">
                                             <button v-for="provider in apiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
@@ -2690,21 +2665,37 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </button>
-                                            <button v-for="provider in customApiProviderOptions" :key="provider.id" type="button" @click="selectApiProvider(provider)" :class="['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
+                                            <div v-for="provider in customApiProviderOptions" :key="provider.id" role="button" tabindex="0" @keydown.enter.prevent="onCustomApiEntryClick(provider)"  @click="onCustomApiEntryClick(provider)" :class="['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700']">
                                                 <span class="w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0">
-                                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c2.5 2.7 4 6.2 4 10s-1.5 7.3-4 10c-2.5-2.7-4-6.2-4-10s1.5-7.3 4-10z">
+                                                    <svg v-if="provider.id === 'custom'" class="w-5 h-5 text-primary-600" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                    <svg v-else class="w-5 h-5 text-gray-500" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c2.5 2.7 4 6.2 4 10s-1.5 7.3-4 10c-2.5-2.7-4-6.2-4-10s1.5-7.3 4-10z">
                                                         </path>
                                                     </svg>
                                                 </span>
                                                 <span class="min-w-0 flex-1">
                                                     <span class="block text-sm font-bold truncate">{{ provider.name }}</span>
-                                                    <span class="block text-xs text-gray-400 truncate">手动输入 API 地址</span>
+                                                    <span class="block text-xs text-gray-400 truncate">{{ provider.hint || '手动输入 API 地址' }}</span>
                                                 </span>
                                                 <svg v-if="selectedApiProvider.id === provider.id" class="w-4 h-4 ml-2 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
-                                            </button>
+                                                                                            <button v-if="provider.id !== 'custom'" type="button"
+                                                    @click.stop="requestRemoveCustomApiProvider(provider.id)"
+                                                    class="ml-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                    aria-label="删除该站点" title="删除该站点">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+</div>
                                         </div>
                                     </div>
                                     <div v-if="isCustomApiProvider" class="relative">
@@ -2732,41 +2723,6 @@
                                     </div>
                                 </div>
 
-<div class="mt-3 custom-api-sites-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all">
-                                    <button type="button" @click="showCustomApiSites = !showCustomApiSites" class="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all">
-                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-                                                </svg>
-                                            </span>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="block text-xs font-bold text-gray-700 dark:text-gray-200">自定义 API 站点</span>
-                                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80">{{ settings.customApiProviders.length }}</span>
-                                                </div>
-                                                <span class="mt-0.5 block text-[11px] text-gray-400 dark:text-gray-400 truncate">独立保存专属地址与密钥 · 无数量上限</span>
-                                            </div>
-                                        </div>
-                                        <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': showCustomApiSites }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </button>
-                                    <div v-if="showCustomApiSites" class="border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar">
-                                        <div v-for="provider in settings.customApiProviders" :key="provider.id" class="rounded-xl border border-gray-200/70 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 p-3 shadow-sm hover:shadow transition-shadow space-y-2">
-                                            <div class="flex items-center justify-between gap-2">
-                                                <div class="flex items-center gap-1.5 flex-1 min-w-0">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-                                                    <input :value="provider.name" @input="updateCustomApiProvider(provider.id, 'name', $event.target.value)" type="text" placeholder="站点名称（如：自建代理）" class="min-w-0 flex-1 rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                                </div>
-                                                <button type="button" @click="removeCustomApiProvider(provider.id)" class="rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs">删除</button>
-                                            </div>
-                                            <input :value="provider.apiUrl" @input="updateCustomApiProvider(provider.id, 'apiUrl', $event.target.value)" type="text" placeholder="API 地址，例如 https://api.example.com/v1" class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                            <input :value="settings.apiProviderKeys[provider.id] || ''" @input="updateCustomApiKey(provider.id, $event.target.value)" type="password" placeholder="站点密钥 sk-..." class="w-full rounded-lg border border-gray-200/80 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/50 px-2.5 py-1.5 font-mono text-[11px] text-gray-700 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-primary-500 transition-colors">
-                                        </div>
-                                        <div v-if="!settings.customApiProviders.length" class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-xs text-gray-400">暂无自定义站点，点击上方 + 添加</div>
-                                    </div>
-                                </div>
 
                                 <!-- Model Configuration Inputs -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

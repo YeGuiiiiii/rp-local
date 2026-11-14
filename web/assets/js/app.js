@@ -1000,9 +1000,12 @@ const app = createApp({
         };
         const customApiProviderOption = {
             id: 'custom',
-            name: '自定义',
+            // [rphub 2.9.059] 下拉里的这一项现在就是「新增站点」按钮：点一下建一个，数量不限。
+            //   名字直接写成动作，副标题说明点完要做的事，避免再被当成一个可选项。
+            name: '添加自定义 API 站',
             apiUrl: '',
-            icon: ''
+            icon: '',
+            hint: '点击新增，随后填写地址与密钥'
         };
         const normalizeCustomApiProviders = () => {
             if (!Array.isArray(settings.customApiProviders)) settings.customApiProviders = [];
@@ -1017,7 +1020,8 @@ const app = createApp({
             });
             return validProviders;
         };
-        const customApiProviderOptions = reactive([customApiProviderOption, ...normalizeCustomApiProviders()]);
+        // [rphub 2.9.059] 「添加自定义 API 站」排在已有站点之后，避免抢在真实站点前面。
+        const customApiProviderOptions = reactive([...normalizeCustomApiProviders(), customApiProviderOption]);
         const isCustomApiProviderId = (id) => customApiProviderOptions.some(provider => provider.id === id);
         const getCustomApiUrlValue = (id) => {
             const dynamic = normalizeCustomApiProviders().find(provider => provider.id === id);
@@ -1030,7 +1034,7 @@ const app = createApp({
             else if (isCustomApiProviderId(id)) settings.customApiUrl = String(value || '').trim();
         };
         const refreshCustomApiProviderOptions = () => {
-            customApiProviderOptions.splice(0, customApiProviderOptions.length, customApiProviderOption, ...normalizeCustomApiProviders());
+            customApiProviderOptions.splice(0, customApiProviderOptions.length, ...normalizeCustomApiProviders(), customApiProviderOption);
         };
         const createCustomApiProvider = () => {
             normalizeCustomApiProviders();
@@ -1066,6 +1070,22 @@ const app = createApp({
             }
             refreshCustomApiProviderOptions();
             saveData({ saveMemories: false, saveCharacters: false });
+        };
+        // [rphub 2.9.059] 下拉里的「自定义」不再是可选的空站点，点它就是新增一个站点。
+        //   原来它只是个占位项，选中后要自己去改地址；而唯一的「新增」入口（+ 按钮）
+        //   和下面的折叠卡片重复，卡片本身又只是管理列表，所以把入口收到这一项上。
+        const onCustomApiEntryClick = (provider) => {
+            if (provider && provider.id === 'custom') {
+                createCustomApiProvider();
+                return;
+            }
+            selectApiProvider(provider);
+        };
+        const requestRemoveCustomApiProvider = (id) => {
+            const provider = settings.customApiProviders.find(item => item.id === id);
+            if (!provider) return;
+            confirmAction(`确定删除自定义站点「${provider.name || '未命名'}」吗？已保存的地址与密钥会一并移除。`,
+                () => removeCustomApiProvider(id));
         };
         const updateCustomApiProvider = (id, field, value) => {
             const provider = normalizeCustomApiProviders().find(item => item.id === id);
@@ -6546,6 +6566,39 @@ const app = createApp({
                 isCheckingDataHealth.value = false;
             }
         };
+        // [rphub 2.9.060] 压缩存储：重建数据库文件，把导入残留的空闲页真正还给系统。
+        //   不动导入链路（导入变慢是明确不能接受的），只在用户主动点的时候跑。
+        //   两步都有键数校验；第一步失败主库一个字节都没动，第二步的临时库在重建前已校验完整。
+        const isCompactingStorage = ref(false);
+        const compactStorageNote = ref('');
+        const compactStorage = async () => {
+            if (isCompactingStorage.value) return;
+            const confirmText = '压缩会重建整个数据库文件：先把现有数据复制一份做校验，再删库重建并写回。\n\n'
+                + '过程中请不要关闭应用；数据量大时需要一两分钟。建议先做一次备份再继续。';
+            confirmAction(confirmText, async () => {
+                isCompactingStorage.value = true;
+                compactStorageNote.value = '正在准备…';
+                try {
+                    const result = await window.RPHubStorage.compactDatabase({
+                        onStage: stage => { compactStorageNote.value = stage; },
+                        onProgress: (done, total, label) => {
+                            if (done % 5 === 0 || done === total) {
+                                compactStorageNote.value = label + ' ' + done + ' / ' + total + ' 项';
+                            }
+                        }
+                    });
+                    compactStorageNote.value = '已压缩 ' + result.keys + ' 项，数据库文件已重建';
+                    showToast('存储已压缩，空闲空间已释放', 'success', 4000);
+                } catch (error) {
+                    compactStorageNote.value = '';
+                    console.error('compress storage failed:', error);
+                    showToast('压缩失败：' + ((error && error.message) || error), 'error', 6000);
+                } finally {
+                    isCompactingStorage.value = false;
+                }
+            });
+        };
+
         const scanDataHealth = async () => {
             if (isCheckingDataHealth.value || isCleaningDataHealth.value) return;
             await performDataHealthScan();
@@ -16662,7 +16715,7 @@ const app = createApp({
             showCharacterExportModal, openCharacterExportModal, confirmCharacterExport, // Character Export Modal
             showConfirmModal, confirmMessage, modelMode, isGeminiModel, isTruncationEnabled, isPresetEnabled, chatModelSlots, selectChatModelSlot, slotTemperature, reasoningEffortSlider, reasoningEffortLabel, // Export for template
             isGenerating, isReceiving, isThinking, hasActiveToolInlineWork, isConversationBusy, activeToolContinuationMessageId, activeToolContinuationHasResponse, userInput, pendingCardInteraction, clearPendingCardInteraction, pendingChatImages, pendingChatImageReadCount, requestChatImageSelection, handleChatImageSelection, removePendingChatImage, modelSearchQuery, activeModelTag, modelTags, characterSearchQuery, filteredModels, filteredCharacters,
-            user, settings, apiProviderOptions, selectedApiProvider, isCustomApiProvider, customApiProviderOptions, showApiProviderSelector, selectApiProvider, createCustomApiProvider, removeCustomApiProvider, updateCustomApiProvider, updateCustomApiKey, showCustomArtistEditor, showCustomApiSites, activeCustomArtist, selectCustomArtist, removeCustomArtist, toggleFreezeGeneratedImages, characters, currentCharacter, currentCharacterAvatar, currentCharacterIndex, switchingCharacterIndex, chatHistory, displayedChatMessages, runtimeEnv, refreshRuntimeEnv, copyRuntimeEnv, handleChatScroll, presets, presetRoleOptions, fontSizeOptions, availableImageStyleOptions, imageModelOptions, imageSizeOptions, imageGenCountOptions, imageGenParams, setImageGenParam, resetImageGenParams, imageGenSamplerOptions: IMAGE_GEN_SAMPLER_OPTIONS, imageGenNoiseOptions: IMAGE_GEN_NOISE_OPTIONS, scopeOptions, uiTemplatePlacementOptions, worldInfoPositionOptions, getPresetRoleLabel, getPresetRoleDisplayLabel, getPresetRoleBadgeClass, getSortableItemKey, regexScripts, worldInfo,
+            user, settings, apiProviderOptions, selectedApiProvider, isCustomApiProvider, customApiProviderOptions, showApiProviderSelector, selectApiProvider, createCustomApiProvider, onCustomApiEntryClick, requestRemoveCustomApiProvider, removeCustomApiProvider, updateCustomApiProvider, updateCustomApiKey, showCustomArtistEditor, showCustomApiSites, activeCustomArtist, selectCustomArtist, removeCustomArtist, toggleFreezeGeneratedImages, characters, currentCharacter, currentCharacterAvatar, currentCharacterIndex, switchingCharacterIndex, chatHistory, displayedChatMessages, runtimeEnv, refreshRuntimeEnv, copyRuntimeEnv, handleChatScroll, presets, presetRoleOptions, fontSizeOptions, availableImageStyleOptions, imageModelOptions, imageSizeOptions, imageGenCountOptions, imageGenParams, setImageGenParam, resetImageGenParams, imageGenSamplerOptions: IMAGE_GEN_SAMPLER_OPTIONS, imageGenNoiseOptions: IMAGE_GEN_NOISE_OPTIONS, scopeOptions, uiTemplatePlacementOptions, worldInfoPositionOptions, getPresetRoleLabel, getPresetRoleDisplayLabel, getPresetRoleBadgeClass, getSortableItemKey, regexScripts, worldInfo,
             activeTools, activeToolAggressivenessOptions: ACTIVE_TOOL_AGGRESSIVENESS_OPTIONS, editingActiveTool, normalizeActiveTools, isWebActiveTool, getActiveToolDisplayDescription, getActiveToolResultCountMin, getActiveToolResultCountMax,
             getToolCallModeText, hasThinkingOrTools, isMessageThinkingOrRunning, isThinkingSummaryOpen, toggleThinkingSummary, markThinkingSummaryDetailOpened, getTimelineSteps,
             isStyleFilterDetailsOpen, toggleStyleFilterDetails, getStyleFilterHitSegments,
@@ -16724,7 +16777,7 @@ const app = createApp({
             backupFileName, backupFileNamePreview, buildBackupFileName,
             backupScope, backupScopeOptions, resetBackupScope,
             dataHealthResult, dataHealthError, isCheckingDataHealth, isCleaningDataHealth,
-            scanDataHealth, cleanDataHealthItem, formatDataHealthSize,
+            scanDataHealth, compactStorage, isCompactingStorage, compactStorageNote, cleanDataHealthItem, formatDataHealthSize,
             showApiQuickSelector, quickApiProviders, toggleApiQuickSelector, selectQuickApiProvider, rphubEnterNewline, toggleRphubEnterNewline, autoResizeInput, onChatInput, flushChatInput, handleChatInputEnter, handleChatInputFocus, handleChatInputBlur, stopGeneration, clearChat, toggleChatFullscreen,
             handleConfirm, handleCancel, // Export handlers
             copyMessage, playMessageActionFeedback, canDeleteMessage, deleteMessage, regenerateMessage,

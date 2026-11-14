@@ -440,3 +440,44 @@
 /* [rphub 2.9.048] 备份占用行：文字可换行，按钮不被压扁。 */
 .backup-usage { flex-wrap: wrap; align-items: flex-start; margin-top: 16px; }
 .backup-usage .backup-muted { flex: 1 1 12em; }
+
+/* ── [rphub 2.9.059] 主题色：表面与质感 ──────────────────────────────────────
+   2.9.049 只把主色接到了 --primary-*，开关、选中项、按钮这类「交互件」会跟着变，
+   但表面（抽屉、卡片）仍是中性色，缺少渐变/内高光/投影这些质感，看起来只做了一半。
+   下面全部用「叠加」而不是「替换」：只加 background-image / box-shadow，不动原有底色，
+   所以万一某个变量缺失，最多是不显示，不会把面板刷白或刷黑。
+   仅当用户真的选了主题色（data-rphub-accent="1"）时生效，默认皮肤零影响。 */
+:root[data-rphub-accent="1"] .app-navigation-panel {
+    background-image:
+        radial-gradient(120% 68% at 10% 0%, rgb(var(--primary-400) / 0.10), transparent 62%),
+        linear-gradient(180deg, rgb(var(--primary-50) / 0.45), transparent 44%);
+    border-color: rgb(var(--primary-500) / 0.18);
+    box-shadow: 0 26px 60px -30px rgb(var(--primary-600) / 0.45), 0 10px 30px -20px #00000030;
+}
+:root[data-rphub-accent="1"] .app-navigation-header {
+    background-image: linear-gradient(180deg, rgb(var(--primary-50) / 0.7), transparent);
+}
+:root[data-rphub-accent="1"] .app-navigation-item.is-current {
+    background-image: linear-gradient(135deg, rgb(var(--primary-500) / 0.18), rgb(var(--primary-400) / 0.06));
+    box-shadow: 0 10px 22px -14px rgb(var(--primary-600) / 0.8),
+                inset 0 0 0 1px rgb(var(--primary-500) / 0.16);
+}
+:root[data-rphub-accent="1"] .app-navigation-item.is-current::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    width: 3px;
+    height: 22px;
+    border-radius: 999px;
+    transform: translateY(-50%);
+    background: rgb(var(--primary-600));
+    box-shadow: 0 0 10px rgb(var(--primary-500) / 0.55);
+}
+:root[data-rphub-accent="1"] :is(.settings-card, .list-card) {
+    border-color: rgb(var(--primary-500) / 0.14);
+    box-shadow: 0 2px 12px -8px rgb(var(--primary-700) / 0.22);
+}
+:root[data-rphub-accent="1"] .settings-card__title > svg {
+    color: rgb(var(--primary-600));
+}

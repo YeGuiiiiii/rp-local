@@ -1224,6 +1224,101 @@
 
     const setRawStoredValue = (key, value) => dbSet(String(key), value);
 
+    // [rphub 2.9.060] 压缩存储：把「活数据」拷进一个全新文件，再换回来。
+    //   IndexedDB 底层是 SQLite，删除/覆盖只把页标成空闲，从不还给系统，也没有 vacuum。
+    //   所以每导入一次备份，文件就涨「旧数据 + 新数据」，且永不回落。
+    //   唯一能真正缩小的办法就是重建文件。这里不动导入链路（导入变慢是用户明确反对的），
+    //   只在用户主动点「压缩存储」时跑一次：
+    //     1) 复制到临时库并校验键数 —— 失败就删临时库，主库一个字节都没动；
+    //     2) 删主库、原地重建、从临时库写回；
+    //     3) 删临时库。
+    //   聊天分块的每个 part 都是独立键，按键复制即可，不需要理解目录结构。
+    const COMPACT_DB_NAME = 'RPHubDB_compact';
+    const deleteDbByName = (name) => new Promise(resolve => {
+        let settled = false;
+        const finish = ok => { if (!settled) { settled = true; resolve(ok); } };
+        let request;
+        try { request = indexedDB.deleteDatabase(name); } catch (_) { finish(false); return; }
+        request.onsuccess = () => finish(true);
+        request.onerror = () => finish(false);
+        request.onblocked = () => finish(false);
+        setTimeout(() => finish(false), 20000);
+    });
+    const readAllKeys = (db) => new Promise((resolve, reject) => {
+        const request = db.transaction(['store'], 'readonly').objectStore('store').getAllKeys();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error || storageWriteError('UnknownError', '读取键清单失败'));
+    });
+    const readOne = (db, key) => new Promise((resolve, reject) => {
+        const request = db.transaction(['store'], 'readonly').objectStore('store').get(key);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || storageWriteError('UnknownError', '读取 ' + key + ' 失败'));
+    });
+    const writeOne = (db, key, value) => new Promise((resolve, reject) => {
+        const tx = db.transaction(['store'], 'readwrite');
+        const store = tx.objectStore('store');
+        if (value === undefined) store.delete(key); else store.put(value, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || storageWriteError('UnknownError', '写入 ' + key + ' 失败'));
+        tx.onabort = () => reject(tx.error || storageWriteError('AbortError', '写入 ' + key + ' 已中止'));
+    });
+    const copyAllKeys = async (from, to, keys, onProgress, label) => {
+        for (let index = 0; index < keys.length; index++) {
+            const key = keys[index];
+            // 一个键一个事务：单条最大是聊天的一个 4MB 分块，事务短、失败点明确。
+            await writeOne(to, key, await readOne(from, key));
+            onProgress?.(index + 1, keys.length, label);
+        }
+    };
+    const compactDatabase = async (options = {}) => {
+        const onProgress = options.onProgress;
+        const onStage = options.onStage;
+        if (!mainDb) await initDB();
+        if (!mainDb) throw storageWriteError('UnknownError', '主库未打开');
+        const keys = await readAllKeys(mainDb);
+        if (!keys.length) throw storageWriteError('StorageDataError', '主库是空的，没有可压缩的数据');
+        onStage?.('正在创建临时库');
+        await deleteDbByName(COMPACT_DB_NAME);
+        const temp = await openAppDB(COMPACT_DB_NAME, DB_VERSION);
+        try {
+            onStage?.('正在复制 ' + keys.length + ' 项到临时库');
+            await copyAllKeys(mainDb, temp, keys, onProgress, '复制');
+            const copied = await readAllKeys(temp);
+            if (copied.length !== keys.length) {
+                throw storageWriteError('StorageDataError', '临时库校验失败：' + copied.length + ' / ' + keys.length);
+            }
+        } catch (error) {
+            try { temp.close(); } catch (_) {}
+            await deleteDbByName(COMPACT_DB_NAME);
+            throw error;
+        }
+        // 到这里临时库里已有一份完整的活数据。主库下面会被删掉重建。
+        onStage?.('正在重建主库文件');
+        try { mainDb.close(); } catch (_) {}
+        mainDb = null;
+        if (!await deleteDbByName(DB_NAME)) {
+            // 删不掉（多半被别的页面占着）：临时库留着没用，清掉，主库原样未动。
+            try { temp.close(); } catch (_) {}
+            await deleteDbByName(COMPACT_DB_NAME);
+            mainDb = await openAppDB(DB_NAME, DB_VERSION);
+            throw storageWriteError('InvalidStateError', '无法重建主库，可能被其它页面占用，请关闭其它页面后重试');
+        }
+        mainDb = await openAppDB(DB_NAME, DB_VERSION);
+        try {
+            onStage?.('正在写回主库');
+            await copyAllKeys(temp, mainDb, keys, onProgress, '写回');
+            const restored = await readAllKeys(mainDb);
+            if (restored.length !== keys.length) {
+                throw storageWriteError('StorageDataError', '写回校验失败：' + restored.length + ' / ' + keys.length);
+            }
+        } finally {
+            try { temp.close(); } catch (_) {}
+        }
+        await deleteDbByName(COMPACT_DB_NAME);
+        onStage?.('完成');
+        return { keys: keys.length };
+    };
+
     window.RPHubStorage = Object.freeze({
         readMemoryState,
         commitMemoryState,
@@ -1236,6 +1331,7 @@
         storageContentKey,
         readStoredValueSet,
         readChatBaseline,
+        compactDatabase,
         compareAndWriteStoredValues,
         putStoredRecord,
         cloneForStorage,
