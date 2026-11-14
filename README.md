@@ -1,8 +1,8 @@
-# RP 本地版 2.9.054
+# RP 本地版 2.9.055
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.054.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.055.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.054**，Android versionCode 为 **316**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.055**，Android versionCode 为 **317**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.054 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.055 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,25 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.055 删除消息先改界面再落库
+
+本节为 2.9.055（versionCode 317）。不改存档与备份格式，包名与签名不变。
+
+- 删除不再「等落库才动界面」（本版重点）：原来 `deleteMessage` 要等整条链跑完才赋值
+  `chatHistory`——整份快照 3 次（补消息 id、清理 UI 模板、恢复二级记忆要的轮数）、记忆重绑定、
+  记忆写库、聊天写库，全部完成界面才变。删 user 消息还要连带删整轮与相关记忆，所以等得更久；
+  删 AI 消息也有一截延迟。现在先把新数组赋给 `chatHistory` 并 `await nextTick()` 让出一帧，
+  再去做持久化；失败则整体回滚并提示。这一窗口内会压住自动保存，避免抢在事务前写库。
+- 三条整份快照换成轮次索引：`ensureConversationMessageIds`、`pruneUiTemplateChangesFromTurn`、
+  `restoreSecondaryClassicMemoriesForTurnCount` 只需要「第几轮、这一轮有哪些下标」，
+  不必把整份聊天 `toPlainContextMessage`。为此轮次对象补了 `userIndexes` / `assistantIndexes`
+  与 `sourceIndexes` 别名，记忆层取「某轮里 user/assistant 的消息 id」不再依赖合并后的消息对象。
+  8 组边界用例逐轮比对了 `sourceIndexes` / `userIndexes` / `assistantIndexes`，与旧快照完全一致。
+- 仍未处理：记忆重绑定与记忆写库本身（几百条记忆、十几 MB）仍在主线程上，命中缓存后
+  这一步会是主要剩余耗时；要再快就得把记忆写入拆成分段并让出主线程。
+
+安装包 `RP-local-2.9.055.apk`：versionCode 317，7,569,258 字节，SHA256 `9c11ef10210d5f0332b5a1b19445c9a67a2cd29dabf789f62c5d63bde6fe2a13`；校验和见 `dist/SHA256SUMS-2.9.055.txt`。
 
 ## 2.9.054 正文渲染按消息缓存
 
@@ -660,7 +679,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.054`，Android versionCode `316`。
+- 版本：`2.9.055`，Android versionCode `317`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。

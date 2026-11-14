@@ -1981,11 +1981,17 @@
         for (const group of groups) {
             if (group.role === 'user') { pending = group; continue; }
             if (!pending) continue;
+            // userIndexes / assistantIndexes 让记忆那一层不必再拿「合并后的消息对象」，
+            // sourceIndexes 是与 indexes 同一个数组的别名，兼容旧调用方。
+            const indexes = pending.indexes.concat(group.indexes);
             turns.push({
                 turn: turns.length + 1,
                 startIndex: pending.startIndex,
                 endIndex: group.endIndex,
-                indexes: pending.indexes.concat(group.indexes)
+                indexes,
+                sourceIndexes: indexes,
+                userIndexes: pending.indexes,
+                assistantIndexes: group.indexes
             });
             pending = null;
         }

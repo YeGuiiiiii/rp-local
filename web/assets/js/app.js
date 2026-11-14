@@ -1493,6 +1493,8 @@ const app = createApp({
         const switchingCharacterIndex = ref(-1);
 
         const chatHistory = ref([]);
+        // 乐观删除进行中：这段时间不触发自动保存，等事务自己写或回滚。
+        let _chatOptimisticPending = false;
         // 编辑任意消息时收起底部输入栏：键盘弹出会把输入栏顶上去，压住编辑区的保存/取消按钮
         const isAnyMessageEditing = computed(() => chatHistory.value.some(m => m && m.isEditing_Message));
         const CHAT_RENDER_INITIAL_LIMIT = 20;
@@ -9128,6 +9130,9 @@ const app = createApp({
         // Message edits and generation completion still call saveData/saveChatHistoryNow directly.
         watch(() => chatHistory.value.length, () => {
             if (_isApplyingCharacterScopedData) return;
+            // [rphub 2.9.055] 乐观删除期间的自动保存要压住：这一窗口里的数组还没落库，
+            //   交给 commitConversationState 自己写（它会用 chatWriteIntents 顶掉排队中的旧写）。
+            if (_chatOptimisticPending) return;
             scheduleChatHistorySave();
         });
 
@@ -9515,11 +9520,11 @@ const app = createApp({
             });
 
             let removedBlocks = 0;
-            const snapshot = buildConversationTurnSnapshot();
+            const snapshot = chatTurnIndex();
             const blockMessageIndexes = new Set();
             snapshot.turns.forEach(turnInfo => {
                 if ((turnInfo.turn || 0) < turn) return;
-                turnInfo.sourceIndexes.forEach(sourceIndex => blockMessageIndexes.add(sourceIndex));
+                turnInfo.indexes.forEach(sourceIndex => blockMessageIndexes.add(sourceIndex));
             });
             blockMessageIndexes.forEach(msgIndex => {
                 const msg = chatHistory.value[msgIndex];
@@ -11646,6 +11651,15 @@ const app = createApp({
                 recentGenerationTimes.value = recentGenerationTimes.value.filter(t => !removedMessageIds.has(t.id || t));
                 const nextHistory = chatHistory.value.filter((_, messageIndex) => !removedIndexes.has(messageIndex));
                 const uiCleanup = pruneUiTemplateChangesFromTurn(affectedTurn);
+                // [rphub 2.9.055] 先把界面改掉，再落库。
+                //   原来要等「整份快照 3 次 + 记忆重绑定 + 记忆写库 + 聊天写库」全跑完
+                //   才赋值 chatHistory，所以删一条要愣一两秒才看到变化；删 user 消息还要
+                //   连带删整轮与相关记忆，等得更久。
+                //   现在立刻换数组、让出一帧，失败再整体回滚并提示。
+                const previousHistory = chatHistory.value;
+                _chatOptimisticPending = true;
+                chatHistory.value = nextHistory;
+                await nextTick();
                 let committed;
                 try {
                     const intent = await tryBeginMemoryIntent('删除对话轮次');
@@ -11655,7 +11669,7 @@ const app = createApp({
                     }
                     if (intent) {
                         nextMemories = restoreSecondaryClassicMemoriesForTurnCount(
-                            buildConversationTurnSnapshot(nextHistory, { includeSystem: false }).turns.length,
+                            buildChatTurnIndex(nextHistory).turns.length,
                             nextMemories
                         );
                     }
@@ -11670,8 +11684,12 @@ const app = createApp({
                     console.error('Delete message commit failed:', error);
                     committed = { ok: false, error };
                 }
-                if (!committed.ok) { showToast(`删除失败：${committed.error?.message || '对话变更尚未完整保存，请重试'}`, 'error'); return; }
-                chatHistory.value = nextHistory;
+                _chatOptimisticPending = false;
+                if (!committed.ok) {
+                    chatHistory.value = previousHistory;
+                    showToast(`删除失败：${committed.error?.message || '对话变更尚未完整保存，请重试'}`, 'error');
+                    return;
+                }
                 await saveMemorySettingsNow();
                 const deletedLabel = deletesUserTurn ? '该轮次' : 'AI 消息';
                 showToast(`${deletedLabel}已删除，相关项已一并清除`, 'success');
@@ -12554,7 +12572,10 @@ const app = createApp({
         };
 
         const getClassicTurnSourceIds = (turnInfo, role) => {
-            const sourceIndexes = turnInfo?.[role]?._sourceIndexes || [];
+            // [rphub 2.9.055] 轮次索引直接给出 userIndexes / assistantIndexes，
+            //   不必再依赖「后处理快照里合并后的消息对象」。
+            const direct = turnInfo?.[role + 'Indexes'];
+            const sourceIndexes = Array.isArray(direct) ? direct : (turnInfo?.[role]?._sourceIndexes || []);
             return sourceIndexes
                 .map(index => chatHistory.value[index])
                 .filter(message => message?.role === role && message.id)
@@ -12562,10 +12583,11 @@ const app = createApp({
         };
 
         const ensureConversationMessageIds = async () => {
-            const snapshot = buildConversationTurnSnapshot(chatHistory.value, { includeSystem: false });
+            // [rphub 2.9.055] 只需要轮次与各轮的消息下标，不必把整份聊天后处理成消息对象。
+            const snapshot = chatTurnIndex();
             let changed = false;
             snapshot.turns.forEach(turnInfo => {
-                turnInfo.sourceIndexes.forEach(index => {
+                turnInfo.indexes.forEach(index => {
                     const message = chatHistory.value[index];
                     if (!message || !['user', 'assistant'].includes(message.role) || message.id) return;
                     message.id = generateUUID();
@@ -12573,9 +12595,7 @@ const app = createApp({
                 });
             });
             if (changed) await saveChatHistoryNow();
-            return changed
-                ? buildConversationTurnSnapshot(chatHistory.value, { includeSystem: false })
-                : snapshot;
+            return changed ? chatTurnIndex() : snapshot;
         };
 
         const hasClassicMemoryForJob = (job) => {
