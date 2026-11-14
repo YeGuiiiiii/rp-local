@@ -822,6 +822,7 @@
                                 <h4 class="text-sm font-bold text-gray-700">数据体检</h4>
                                 <p class="text-xs text-gray-500 mt-1">检查重复 UI 模板、旧渲染缓存、超量记录和重复图片。</p>
                             </div>
+                            <button type="button" @click="compactStorage" :disabled="isCompactingStorage || isCheckingDataHealth || isAutoBackingUp" class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold disabled:opacity-50" title="重建数据库文件，把导入残留的空闲页真正释放（需要一点时间）">{{ isCompactingStorage ? '压缩中…' : '压缩存储' }}</button>
                             <button type="button" @click="scanDataHealth" :disabled="isCheckingDataHealth || isAutoBackingUp" class="px-3 py-2 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 text-sm font-semibold disabled:opacity-50">
                                 {{ isCheckingDataHealth ? '检查中...' : '开始体检' }}
                             </button>
