@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.065'; window.RP_LOCAL_RELEASE = 326;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.066'; window.RP_LOCAL_RELEASE = 327;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4274,23 +4274,15 @@
                 + '--gray-200:' + triplet(hsl2rgb(h, 0.24, step.g200)) + ';';
         };
         // 只有用户真选了主题色才带表面；护眼档（暖纸）自己有一整套暖色调，不能被这层盖掉。
+        // 表面中性色仍然走变量：theme.css 里的 --surface / --gray-* 是「255 255 255」这种
+        //   裸三元组，不是 #hex 也不是 rgb()，整表复刻的正则匹配不到，必须在这里补。
+        //   夜间不染（参考图夜间是中性深灰），由下面的 :not([data-app-theme="dark"]) 分流。
         var withCue = guard.indexOf('data-rphub-accent') >= 0;
         var cueLight = withCue ? cue({ surface: 0.972, g50: 0.958, g100: 0.936, g200: 0.898 }) : '';
-        // 夜间不染表面：参考图夜间是中性的深灰，只有选中项带色。
-        //   插件也是这个逻辑——饱和度低于 8 的颜色不算主色家族，一律不转。
-        var cueDark = '';
-        // 玻璃层：抽屉/弹窗的底色是 90% 的白，铺在表面之上，所以只染表面永远看不出变化。
-        //   改成由主色派生的半透明色，注意必须用 rgb(r g b / a)，逗号混写会让整条声明失效。
-        var glass = '';
-        if (withCue) {
-            glass = '--glass-bg:rgb(' + triplet(hsl2rgb(h, 0.34, 0.975)) + ' / 0.72);'
-                + '--glass-bg-strong:rgb(' + triplet(hsl2rgb(h, 0.34, 0.972)) + ' / 0.90);'
-                + '--glass-edge:rgb(' + triplet(hsl2rgb(h, 0.28, 0.945)) + ' / 0.78);';
-        }
         return ''
             + guard + '{' + light + '--p:' + p + ';}'
-            + guard + ':not([data-app-theme="dark"]){--pc:100% 0 0;' + cueLight + glass + '}'
-            + guard + '[data-app-theme="dark"]{' + dark + textRamp + '--p:' + pDark + cueDark + '}'
+            + guard + ':not([data-app-theme="dark"]){--pc:100% 0 0;' + cueLight + '}'
+            + guard + '[data-app-theme="dark"]{' + dark + textRamp + '--p:' + pDark + '}'
             + guard + '[data-app-theme="dark"][data-theme]{--p:' + pDark + ';}';
     }
 
@@ -4740,10 +4732,6 @@
     var ANCHOR_HUE = 232;            // 默认主色（鸢尾蓝）的色相，旋转基准
     var recolorTexts = {};           // href -> 原文，只抓一次
     var recolorBusy = false;
-
-    function recolorTarget(hsl) {
-        return { h: hsl[0] * 360, s: hsl[1], l: hsl[2] };
-    }
 
     function recolorOne(r, g, b, accentHsl) {
         // rgb2hsl 返回的是 [度数, 0-1, 0-1]，hsl2rgb 也按度数收、返回数组，别当对象用。
