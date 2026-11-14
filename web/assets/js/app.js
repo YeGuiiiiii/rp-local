@@ -9890,12 +9890,23 @@ const app = createApp({
             }
 
             // 三、只写：先回收离得最远的几个，再补渲染最靠近视口的几个。
+            if (!demoteQueue.length && !renderQueue.length) return;
+            // [rphub 2.9.058] 占位符换成真实面板时高度会变（几十像素 → 几百像素）。
+            //   只要这些节点在视口上方，下面的内容就会被整体顶下去；只按 scrollTop 记忆
+            //   是补不回来的。这里以「距底距离」为准，写完立刻把视口钉回原位。
+            const distanceFromBottom = container.scrollHeight - container.scrollTop;
+            let mutated = false;
+            const keepViewport = () => {
+                const target = Math.max(0, container.scrollHeight - distanceFromBottom);
+                if (Math.abs(container.scrollTop - target) > 1) container.scrollTop = target;
+            };
             demoteQueue.slice(0, 6).forEach(item => {
                 const placement = item.placement
                     || (item.node.classList.contains('ui-template-message-block-top') ? 'top' : 'bottom');
                 item.node.dataset.rphubUiLazy = String(item.index);
                 item.node.dataset.rphubUiPlacement = placement;
                 item.node.innerHTML = buildMobileUiLazyBlock(item.index, placement);
+                mutated = true;
             });
 
             renderQueue
@@ -9927,7 +9938,13 @@ const app = createApp({
                 node.dataset.rphubUiPlacement = placement;
                 node.dataset.rphubUiLoaded = 'true';
                 node.removeAttribute('data-rphub-ui-lazy');
+                mutated = true;
             });
+            if (mutated) {
+                keepViewport();
+                // 图片/字体在下一帧才落地，会再撑高一次，补一次。
+                if (typeof requestAnimationFrame === 'function') requestAnimationFrame(keepViewport);
+            }
         };
 
         let mobileUiLazyTimer = null;
@@ -11651,6 +11668,14 @@ const app = createApp({
                 recentGenerationTimes.value = recentGenerationTimes.value.filter(t => !removedMessageIds.has(t.id || t));
                 const nextHistory = chatHistory.value.filter((_, messageIndex) => !removedIndexes.has(messageIndex));
                 const uiCleanup = pruneUiTemplateChangesFromTurn(affectedTurn);
+                // [rphub 2.9.058] 让渲染窗口的起点保持不变。
+                //   列表渲染的是「最后 N 条」，删一条后 length 少 1、起点随之前移一位，
+                //   顶部就多渲染进一条更早的消息。而那条消息的 UI 面板在窗口外时是懒加载
+                //   占位符（几十像素），一旦被填成真实面板（几百像素），它下面的所有内容
+                //   整体被顶下去 —— 用户看到的就是「上移两次对话」。删几条就把渲染条数减几条。
+                if (chatRenderLimit.value > CHAT_RENDER_MIN_LIMIT) {
+                    chatRenderLimit.value = Math.max(CHAT_RENDER_MIN_LIMIT, chatRenderLimit.value - removedIndexes.size);
+                }
                 // [rphub 2.9.055] 先把界面改掉，再落库。
                 //   原来要等「整份快照 3 次 + 记忆重绑定 + 记忆写库 + 聊天写库」全跑完
                 //   才赋值 chatHistory，所以删一条要愣一两秒才看到变化；删 user 消息还要
