@@ -17818,9 +17818,7 @@ const _hoisted_17 = {
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { createElementVNode: _createElementVNode, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, renderList: _renderList, Fragment: _Fragment, toDisplayString: _toDisplayString, normalizeStyle: _normalizeStyle, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, normalizeClass: _normalizeClass, resolveComponent: _resolveComponent, createBlock: _createBlock, withKeys: _withKeys, Transition: _Transition, withCtx: _withCtx } = _Vue
-
-    const _component_card_night_select = _resolveComponent("card-night-select")
+    const { createElementVNode: _createElementVNode, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, renderList: _renderList, Fragment: _Fragment, toDisplayString: _toDisplayString, normalizeStyle: _normalizeStyle, withModifiers: _withModifiers, createCommentVNode: _createCommentVNode, normalizeClass: _normalizeClass, withKeys: _withKeys, Transition: _Transition, withCtx: _withCtx, createBlock: _createBlock } = _Vue
 
     return (_openBlock(), _createBlock(_Transition, {
       name: "app-navigation",
@@ -17986,12 +17984,6 @@ return function render(_ctx, _cache) {
                     ]))
                   }), 128 /* KEYED_FRAGMENT */))
                 ]),
-                (currentView === 'chat')
-                  ? (_openBlock(), _createBlock(_component_card_night_select, {
-                      key: 0,
-                      disabled: !characterName
-                    }, null, 8 /* PROPS */, ["disabled"]))
-                  : _createCommentVNode("v-if", true),
                 _createElementVNode("footer", {
                   class: "app-navigation-user",
                   style: _normalizeStyle({ '--i': footerOrder })

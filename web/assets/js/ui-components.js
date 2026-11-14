@@ -426,7 +426,6 @@
                                 </div>
                             </section>
                         </nav>
-                        <card-night-select v-if="currentView === 'chat'" :disabled="!characterName"></card-night-select>
                         <footer class="app-navigation-user" :style="{ '--i': footerOrder }">
                             <img v-if="user.avatar" :src="user.avatar" alt="">
                             <span v-else class="app-navigation-avatar">{{ (user.name || 'U').charAt(0).toUpperCase() }}</span>
