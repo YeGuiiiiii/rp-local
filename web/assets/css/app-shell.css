@@ -447,14 +447,14 @@
    下面全部用「叠加」而不是「替换」：只加 background-image / box-shadow，不动原有底色，
    所以万一某个变量缺失，最多是不显示，不会把面板刷白或刷黑。
    仅当用户真的选了主题色（data-rphub-accent="1"）时生效，默认皮肤零影响。 */
-:root[data-rphub-accent="1"] .app-navigation-panel {
+:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-panel {
     background-image:
         radial-gradient(120% 68% at 10% 0%, rgb(var(--primary-400) / 0.10), transparent 62%),
         linear-gradient(180deg, rgb(var(--primary-50) / 0.45), transparent 44%);
     border-color: rgb(var(--primary-500) / 0.18);
     box-shadow: 0 26px 60px -30px rgb(var(--primary-600) / 0.45), 0 10px 30px -20px #00000030;
 }
-:root[data-rphub-accent="1"] .app-navigation-header {
+:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-header {
     background-image: linear-gradient(180deg, rgb(var(--primary-50) / 0.7), transparent);
 }
 :root[data-rphub-accent="1"] .app-navigation-item.is-current {
@@ -494,7 +494,8 @@
 :root[data-rphub-accent="1"] .app-navigation-item .app-navigation-icon {
     color: rgb(var(--primary-600));
 }
-:root[data-rphub-accent="1"] .app-navigation-item:not(.is-current) {
+/* 只在白天给未选中项铺底。夜间 --primary-50 是深酒红，铺 55% 会让整个抽屉变红 —— 2.9.062 漏了这条判断。 */
+:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-item:not(.is-current) {
     background-color: rgb(var(--primary-50) / 0.55);
 }
 
