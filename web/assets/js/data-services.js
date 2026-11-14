@@ -198,25 +198,151 @@
             }
         };
     };
+
+    // [rphub 2.9.052] 聊天写入从「每次整份重写」改成「块级增量」。
+    //   原来任何一次改动（发一条、删一条）都会先删掉全部 61 个 4MB 块再逐块重写，
+    //   242MB 的卡等于每次操作写 242MB 盘；实测 JS 侧序列化只占 0.4 秒，卡顿主体是这笔写盘。
+    //   现在：目录里多记 sizes（每块条数）与 edge（每块首尾消息 id），写入前先定位
+    //   「从第几块开始真的变了」，保留的块一个字节都不动，只重写变化的那些。
+    //   目录仍保留 rphubChat: 1 —— 旧版本按 parts 循环 flat 读回，多出来的字段会被忽略，
+    //   所以降级安装也不会读坏；新版本读到没有 sizes/edge 的旧目录时退化为整份重写。
+    const chatSizeCache = new WeakMap();
+    const chatMessageBytes = (message) => {
+        if (!message || typeof message !== 'object') return 64;
+        // content 的 length 一变就重算：流式生成时最后一条每帧都在长，缓存必须失效。
+        const stamp = (typeof message.content === 'string' ? message.content.length : -1)
+            + '|' + (Array.isArray(message.uiTemplateBlocks) ? message.uiTemplateBlocks.length : -1)
+            + '|' + (message.avatar ? 1 : 0);
+        const hit = chatSizeCache.get(message);
+        if (hit && hit.stamp === stamp) return hit.bytes;
+        const bytes = JSON.stringify(message).length * 2 + 64;
+        chatSizeCache.set(message, { stamp, bytes });
+        return bytes;
+    };
+    const chatIdOf = (message) => (message && typeof message === 'object'
+        && typeof message.id === 'string' && message.id) || null;
+    const chatEdgeOf = (messages) => (!Array.isArray(messages) || !messages.length)
+        ? [null, null] : [chatIdOf(messages[0]), chatIdOf(messages[messages.length - 1])];
+    const chunkChatMessages = (messages) => {
+        const groups = [];
+        let group = [], bytes = 0;
+        for (const message of messages) {
+            const size = chatMessageBytes(message);
+            if (group.length && bytes + size > CHAT_PART_BYTES) {
+                groups.push(group); group = []; bytes = 0;
+            }
+            group.push(message); bytes += size;
+        }
+        if (group.length) groups.push(group);
+        return groups;
+    };
+    const chatDirectoryValid = (directory) => isChatDirectory(directory)
+        && Number.isSafeInteger(directory.parts) && directory.parts >= 1
+        && Number.isSafeInteger(directory.length) && directory.length >= 1
+        && typeof directory.revision === 'string' && /^[a-f0-9]{32}$/.test(directory.revision);
+    // 带 sizes/edge 的目录才谈得上「定位变化」；旧目录一律整份重写。
+    const chatDirectoryIndexed = (directory) => chatDirectoryValid(directory)
+        && Array.isArray(directory.sizes) && directory.sizes.length === directory.parts
+        && Array.isArray(directory.edge) && directory.edge.length === directory.parts
+        && directory.sizes.every(count => Number.isSafeInteger(count) && count >= 0)
+        && directory.sizes.reduce((total, count) => total + count, 0) === directory.length;
+
+    const writeChatFull = (store, key, value) => {
+        removeChatParts(store, key);
+        const groups = chunkChatMessages(value);
+        if (groups.length <= 1) {
+            chatVersions.delete(value);
+            return store.put(value, key);
+        }
+        const directory = {
+            rphubChat: 1,
+            revision: crypto.randomUUID().replace(/-/g, ''),
+            parts: groups.length,
+            length: value.length,
+            sizes: groups.map(group => group.length),
+            edge: groups.map(chatEdgeOf)
+        };
+        groups.forEach((items, index) => store.put(items, chatPartKey(directory, index)));
+        chatVersions.set(value, directory);
+        return store.put(directory, key);
+    };
+
+    // 定位「第一块真的变了的」下标。返回 { first, keep }：0..first-1 块原样保留，
+    // value.slice(keep) 之后的内容重新切块并从 first 开始写。返回 null 表示无法增量。
+    const planChatWrite = (directory, value) => {
+        if (!chatDirectoryIndexed(directory)) return null;
+        // 等长就是编辑（条数不变、内容可能变），保守走整份重写 —— 编辑场景很少，不值得冒漏写的风险。
+        if (value.length === directory.length) return null;
+        const position = new Map();
+        for (let index = 0; index < value.length; index++) {
+            const id = chatIdOf(value[index]);
+            if (id === null || position.has(id)) return null;
+            position.set(id, index);
+        }
+        let offset = 0;
+        for (let index = 0; index < directory.parts; index++) {
+            const count = directory.sizes[index];
+            if (count === 0) continue;
+            const [firstId, lastId] = directory.edge[index];
+            if (firstId === null || lastId === null) return null;
+            // 双锚点：首条仍落在该块应在的起点、末条仍是同一条，且间距等于原块长度。
+            // 只要块内少了一条，末条位置就会前移，这里立刻对不上。
+            if (position.get(firstId) !== offset || position.get(lastId) !== offset + count - 1) {
+                return { first: index, keep: offset };
+            }
+            offset += count;
+        }
+        // 全部块都没变、只是变长 => 纯追加：连最后一块一起重排，新消息能塞进末块就别开新块。
+        if (offset === directory.length && value.length > directory.length) {
+            const last = directory.parts - 1;
+            return { first: last, keep: offset - directory.sizes[last] };
+        }
+        return null;
+    };
+
+    const writeChatIncremental = (store, key, value, directory, plan) => {
+        const first = plan.first;
+        const groups = chunkChatMessages(value.slice(plan.keep));
+        const parts = first + groups.length;
+        if (parts <= 1) {
+            // 退化成一个块：按旧格式直接存数组，顺手清掉残留块。
+            removeChatParts(store, key);
+            chatVersions.delete(value);
+            return store.put(value, key);
+        }
+        // 块数变少时把尾部多余的块删掉（revision 不变，key 也就没变）。
+        for (let index = parts; index < directory.parts; index++) store.delete(chatPartKey(directory, index));
+        const next = {
+            rphubChat: 1,
+            revision: directory.revision,
+            parts,
+            length: value.length,
+            sizes: directory.sizes.slice(0, first).concat(groups.map(group => group.length)),
+            edge: directory.edge.slice(0, first).concat(groups.map(chatEdgeOf))
+        };
+        groups.forEach((items, offset) => store.put(items, chatPartKey(next, first + offset)));
+        chatVersions.set(value, next);
+        return store.put(next, key);
+    };
+
     // 聊天里的历史界面可能达数百 MB；目录与全部块在同一事务提交。
     const putStoredRecord = (store, value, key) => {
         if (!isChatKey(key) || !Array.isArray(value)) return store.put(value, key);
-        const parts = [];
-        let part = [], bytes = 0;
-        for (const message of value) {
-            const size = JSON.stringify(message).length * 2 + 64;
-            if (part.length && bytes + size > CHAT_PART_BYTES) {
-                parts.push(part); part = []; bytes = 0;
+        // 先读旧目录再决定走哪条路。onsuccess 里抛错不会自己中止事务，
+        // 统一转给 store.fail（由 runStorageWriteTransaction 注入的 abortWith）。
+        const request = store.get(key);
+        request.onsuccess = () => {
+            try {
+                const directory = request.result;
+                const plan = planChatWrite(directory, value);
+                if (plan) writeChatIncremental(store, key, value, directory, plan);
+                else writeChatFull(store, key, value);
+            } catch (error) {
+                if (typeof store.fail === 'function') store.fail(error);
+                else throw error;
             }
-            part.push(message); bytes += size;
-        }
-        if (part.length) parts.push(part);
-        removeChatParts(store, key);
-        if (parts.length <= 1) return store.put(value, key);
-        const directory = { rphubChat: 1, revision: crypto.randomUUID().replace(/-/g, ''), parts: parts.length, length: value.length };
-        parts.forEach((items, index) => store.put(items, chatPartKey(directory, index)));
-        chatVersions.set(value, directory);
-        return store.put(directory, key);
+        };
+        return request;
     };
     const deleteStoredRecord = (store, key) => {
         if (isChatKey(key)) removeChatParts(store, key);
@@ -287,6 +413,7 @@
             };
             result = schedule({
                 get: key => store.get(key),
+                fail: error => abortWith(error),
                 put: (value, key) => {
                     changed(key);
                     if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
@@ -295,7 +422,7 @@
                     //   再按 64KB 一片过桥写盘。聊天到 242MB 时，等于每次保存（含删一条消息）
                     //   都要多拷一份、多 stringify 一遍、多写 242MB 文件 —— 卡死与「越聊越卡」的主因。
                     //   聊天的权威副本一直就在主库的分块里，镜像这层只是冗余。
-                    if (mirror && !isChatKey(key)) mirrors.set(key, cloneForStorage(value));
+                    if (mirror && !isChatKey(key) && !isPrivateChatKey(key)) mirrors.set(key, cloneForStorage(value));
                     return putStoredRecord(store, value, key);
                 },
                 delete: key => {
