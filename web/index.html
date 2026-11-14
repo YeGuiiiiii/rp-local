@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.069'; window.RP_LOCAL_RELEASE = 330;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.070'; window.RP_LOCAL_RELEASE = 331;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4484,7 +4484,10 @@
             }
         }
         ensureStyle(document, kitCss());
-        applyRecolor(accent);
+        // [rphub 2.9.070] 整表复刻必须包起来：它一旦抛错，paint() 后面的
+        //   scheduleFrameSync / syncUi 全部不执行，而 KEY_ACCENT 已经写进 localStorage，
+        //   表现就是「换了色但界面不动、之后再也切不动」——重进软件才复现。
+        try { applyRecolor(accent); } catch (error) { console.warn('[rphub] 整表复刻异常', error); }
         if (isTop) scheduleFrameSync(opts.immediate === false ? 300 : 0);
         else frames().forEach(applyToFrame);
         if (isTop) syncUi();
@@ -4814,6 +4817,7 @@
         if (recolorBusy) return;
         recolorBusy = true;
         var jobs = [];
+        try {
         var sheets = Array.prototype.slice.call(document.styleSheets || []);
         sheets.forEach(function (sheet) {
             var owner = sheet.ownerNode;
@@ -4836,6 +4840,11 @@
         }).catch(function (e) {
             console.warn('[rphub] 主色整表复刻失败', e);
         }).then(function () { recolorBusy = false; });
+        } catch (error) {
+            // 同步阶段出错（例如 file:// 下 fetch 直接抛）也必须复位，否则后续换色全被挡住。
+            console.warn('[rphub] 整表复刻同步阶段失败', error);
+            recolorBusy = false;
+        }
     }
 
     window.RPHubThemeKit = Object.freeze({
