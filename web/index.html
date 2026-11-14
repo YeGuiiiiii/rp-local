@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.068'; window.RP_LOCAL_RELEASE = 329;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.069'; window.RP_LOCAL_RELEASE = 330;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4803,8 +4803,14 @@
         if (node) node.textContent = '';
     }
 
+    function activeSkin() {
+        return (document.documentElement.dataset.uiSkin || 'classic');
+    }
     function applyRecolor(accent) {
         if (!accent) { clearRecolor(); return; }
+        // [rphub 2.9.069] 只服务经典布局。主题色那一行本来就只在这套布局里出现，
+        //   但整表复刻是全局的：不拦的话另外两套布局（vampire / 辰月）的底色也会被染色。
+        if (activeSkin() !== 'classic') { clearRecolor(); return; }
         if (recolorBusy) return;
         recolorBusy = true;
         var jobs = [];
@@ -4812,6 +4818,8 @@
         sheets.forEach(function (sheet) {
             var owner = sheet.ownerNode;
             if (!owner || owner.id === STYLE_ID || owner.id === RECOLOR_ID) return;
+            // 别家皮肤的样式表一律跳过：它们的底色属于各自的视觉语言，不该被主色带跑。
+            if (owner.id && owner.id.indexOf('ui-skin-') === 0 && owner.id !== 'ui-skin-classic') return;
             if (owner.tagName === 'STYLE') { jobs.push(Promise.resolve(owner.textContent)); return; }
             var href = owner.href;
             if (!href) return;
