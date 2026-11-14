@@ -23837,7 +23837,6 @@ return function render(_ctx, _cache) {
 
     const _component_poke_mascot = _resolveComponent("poke-mascot")
     const _component_icon = _resolveComponent("icon")
-    const _component_card_night_select = _resolveComponent("card-night-select")
 
     return (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
       show
@@ -23893,7 +23892,6 @@ return function render(_ctx, _cache) {
                   ], 8 /* PROPS */, _hoisted_8))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _createVNode(_component_card_night_select, { disabled: !name }, null, 8 /* PROPS */, ["disabled"]),
               _createElementVNode("div", _hoisted_9, [
                 _createElementVNode("button", {
                   type: "button",
@@ -25192,6 +25190,7 @@ return function render(_ctx, _cache) {
     const { createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, Fragment: _Fragment, resolveComponent: _resolveComponent, createVNode: _createVNode, createTextVNode: _createTextVNode, renderList: _renderList, normalizeStyle: _normalizeStyle, normalizeClass: _normalizeClass } = _Vue
 
     const _component_icon = _resolveComponent("icon")
+    const _component_card_night_select = _resolveComponent("card-night-select")
 
     return (_openBlock(), _createElementBlock("div", _hoisted_1, [
       (section==='runtime')
@@ -25401,7 +25400,9 @@ return function render(_ctx, _cache) {
                     }, "恢复默认", 8 /* PROPS */, _hoisted_35)
                   ])
                 ]))
-              : _createCommentVNode("v-if", true)
+              : _createCommentVNode("v-if", true),
+            _createCommentVNode(" [rphub 2.9.072] 「当前卡片夜间显示」从侧边菜单并进外观分区。\n                   不传 disabled：这个组件里没有 characterName，传了会让整个分区渲染失败。 "),
+            _createVNode(_component_card_night_select)
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (section==='legacy')

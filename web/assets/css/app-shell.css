@@ -446,31 +446,31 @@
    但表面（抽屉、卡片）仍是中性色，缺少渐变/内高光/投影这些质感，看起来只做了一半。
    下面全部用「叠加」而不是「替换」：只加 background-image / box-shadow，不动原有底色，
    所以万一某个变量缺失，最多是不显示，不会把面板刷白或刷黑。
-   仅当用户真的选了主题色（data-rphub-accent="1"）时生效，默认皮肤零影响。 */
-:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-panel {
+   仅当主色在该布局+皮肤下被允许（data-accent-scope="1"）时生效，其余皮肤零影响。 */
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-panel {
     background-image:
         radial-gradient(120% 68% at 10% 0%, rgb(var(--primary-400) / 0.10), transparent 62%),
         linear-gradient(180deg, rgb(var(--primary-50) / 0.45), transparent 44%);
     border-color: rgb(var(--primary-500) / 0.18);
     box-shadow: 0 26px 60px -30px rgb(var(--primary-600) / 0.45), 0 10px 30px -20px #00000030;
 }
-:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-header {
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-header {
     background-image: linear-gradient(180deg, rgb(var(--primary-50) / 0.7), transparent);
 }
-:root[data-rphub-accent="1"] .app-navigation-item.is-current {
+:root[data-accent-scope="1"] .app-navigation-item.is-current {
     /* 底色压轻：0.18 的实色太"重"，改成低透明度的双向渐变，靠边缘亮、中间透。 */
     background-image: linear-gradient(135deg, rgb(var(--primary-500) / 0.10), rgb(var(--primary-400) / 0.03) 55%, rgb(var(--primary-500) / 0.07));
     box-shadow: 0 12px 24px -16px rgb(var(--primary-600) / 0.55),
                 inset 0 1px 0 rgb(255 255 255 / 0.7),
                 inset 0 0 0 1px rgb(var(--primary-500) / 0.22);
 }
-:root[data-rphub-accent="1"] .app-navigation-item.is-current,
-:root[data-rphub-accent="1"] .app-navigation-item.is-current .app-navigation-icon {
+:root[data-accent-scope="1"] .app-navigation-item.is-current,
+:root[data-accent-scope="1"] .app-navigation-item.is-current .app-navigation-icon {
     /* 字与图标要"亮"而不是"沉"：直接用 600 档，并提饱和。 */
     color: rgb(var(--primary-600));
-    filter: saturate(1.35);
+    filter: saturate(1.12);
 }
-:root[data-rphub-accent="1"] .app-navigation-item.is-current::before {
+:root[data-accent-scope="1"] .app-navigation-item.is-current::before {
     content: '';
     position: absolute;
     left: 3px;
@@ -482,36 +482,62 @@
     background: rgb(var(--primary-600));
     box-shadow: 0 0 10px rgb(var(--primary-500) / 0.55);
 }
-:root[data-rphub-accent="1"] :is(.settings-card, .list-card) {
+:root[data-accent-scope="1"] :is(.settings-card, .list-card) {
     border-color: rgb(var(--primary-500) / 0.14);
     box-shadow: 0 2px 12px -8px rgb(var(--primary-700) / 0.22);
 }
-:root[data-rphub-accent="1"] .settings-card__title > svg {
+:root[data-accent-scope="1"] .settings-card__title > svg {
     color: rgb(var(--primary-600));
 }
 /* [rphub 2.9.062] 未选中项的图标也跟着主色：参考图里图标是粉的，我们之前留在灰。
    只在选了主题色时生效，默认皮肤不变。 */
-:root[data-rphub-accent="1"] .app-navigation-item .app-navigation-icon {
+:root[data-accent-scope="1"] .app-navigation-item .app-navigation-icon {
     color: rgb(var(--primary-600));
 }
 /* 只在白天给未选中项铺底。夜间 --primary-50 是深酒红，铺 55% 会让整个抽屉变红 —— 2.9.062 漏了这条判断。 */
-:root[data-rphub-accent="1"]:not([data-app-theme="dark"]) .app-navigation-item:not(.is-current) {
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-item:not(.is-current) {
     background-color: rgb(var(--primary-50) / 0.55);
 }
 
 /* [rphub 2.9.063] 开关加过渡：实色块 + 硬边太生硬，改成渐变底 + 内阴影 + 滑块渐变。
    只在选了主题色时生效，默认皮肤的开关不动。 */
-:root[data-rphub-accent="1"] .settings-toggle-input:checked + .settings-toggle {
-    background-image: linear-gradient(135deg,
-        rgb(var(--primary-500)) 0%,
-        rgb(var(--primary-600)) 52%,
+:root[data-accent-scope="1"] .settings-toggle-input:checked + .settings-toggle {
+    /* 2.9.072：横向渐变，左浅右深（原来 135deg 斜向，看起来是整块深色）。 */
+    background-image: linear-gradient(90deg,
+        rgb(var(--primary-300)) 0%,
+        rgb(var(--primary-500)) 55%,
         rgb(var(--primary-700)) 100%);
     box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.18), inset 0 -1px 0 rgb(255 255 255 / 0.12);
 }
-:root[data-rphub-accent="1"] .settings-toggle::after {
+:root[data-accent-scope="1"] .settings-toggle::after {
     background-image: linear-gradient(180deg, #ffffff, rgb(248 248 250));
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.06);
 }
-:root[data-rphub-accent="1"] .settings-toggle {
+:root[data-accent-scope="1"] .settings-toggle {
     transition: background-color .18s ease, box-shadow .18s ease;
+}
+
+/* ── [rphub 2.9.071] 抽屉的融合感 ──────────────────────────────────────────
+   之前是「白玻璃 + 实心浅卡片」，两层都不透明，染色只能染到很浅的一层，
+   看着还是白。改成：地板给足颜色，卡片半透明白，靠透出的地板色自然融合。
+   只在选了主题色的浅色模式生效。 */
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-panel {
+    background-image:
+        radial-gradient(120% 90% at 8% 0%, rgb(var(--primary-200) / 0.55), transparent 60%),
+        linear-gradient(165deg, rgb(var(--primary-100) / 0.92), rgb(var(--primary-50) / 0.96) 55%, rgb(var(--primary-100) / 0.88));
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+}
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-item {
+    /* 半透明白：让地板色透上来，这是"融合"的唯一来源 */
+    background-color: rgb(255 255 255 / 0.52);
+    border-color: rgb(var(--primary-300) / 0.30);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+:root[data-accent-scope="1"]:not([data-app-theme="dark"]) .app-navigation-item.is-current {
+    background-color: rgb(255 255 255 / 0.42);
+    /* 2.9.072：选中项降饱和。底色压到 18%/8%，边框 30%，不再压过文字。 */
+    background-image: linear-gradient(135deg, rgb(var(--primary-400) / 0.18), rgb(var(--primary-300) / 0.08));
+    border-color: rgb(var(--primary-400) / 0.30);
 }

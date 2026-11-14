@@ -359,7 +359,6 @@
                     <icon :name="item.icon"/><span>{{item.name}}</span>
                   </button>
                 </div>
-                <card-night-select :disabled="!name"></card-night-select>
                 <div class="yy-menu-bottom">
                   <button type="button" @click="$emit('navigate','advanced')"><icon name="SlidersHorizontal"/><span>高级功能</span></button>
                   <button type="button" @click="toggleDayNight" :aria-label="night?'切换到日间模式':'切换到夜间模式'"
@@ -831,6 +830,9 @@
                   <button type="button" class="shell-accent-reset" @click="setAccentColor('')">恢复默认</button>
                 </div>
               </div>
+              <!-- [rphub 2.9.072] 「当前卡片夜间显示」从侧边菜单并进外观分区。
+                   不传 disabled：这个组件里没有 characterName，传了会让整个分区渲染失败。 -->
+              <card-night-select></card-night-select>
             </template>
             <template v-if="section==='legacy'">
               <div class="shell-row-list">

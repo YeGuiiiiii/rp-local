@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.070'; window.RP_LOCAL_RELEASE = 331;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.073'; window.RP_LOCAL_RELEASE = 332;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4278,7 +4278,7 @@
         //   裸三元组，不是 #hex 也不是 rgb()，整表复刻的正则匹配不到，必须在这里补。
         //   夜间不染（参考图夜间是中性深灰），由下面的 :not([data-app-theme="dark"]) 分流。
         var withCue = guard.indexOf('data-rphub-accent') >= 0;
-        var cueLight = withCue ? cue({ surface: 0.972, g50: 0.958, g100: 0.936, g200: 0.898 }) : '';
+        var cueLight = withCue ? cue({ surface: 0.964, g50: 0.948, g100: 0.924, g200: 0.884 }) : '';
         return ''
             + guard + '{' + light + '--p:' + p + ';}'
             + guard + ':not([data-app-theme="dark"]){--pc:100% 0 0;' + cueLight + '}'
@@ -4376,6 +4376,9 @@
 
     function kitCss() {
         var accent = accentNow();
+        // 皮肤/布局不接受主色时，连 --primary-* 的替换也不生成：否则按钮、开关
+        //   这些走变量的地方仍会被带跑，等于换个皮肤还带着上一套颜色。
+        if (accent && !accentScopeAllowed()) accent = '';
         var css = EYE + EYE_NIGHT;
         if (accent) {
             css += accentCss(accent, ':root[data-rphub-accent="1"]');
@@ -4471,6 +4474,10 @@
         if (scheme) root.dataset.rphubScheme = scheme;
         if (accent) root.dataset.rphubAccent = '1';
         else if (root.dataset.rphubAccent) delete root.dataset.rphubAccent;
+        // [rphub 2.9.073] 把「这套布局+皮肤是否接受主色」落成属性，CSS 直接用，
+        //   免得每条规则各自拼 data-ui-skin / data-ui-pack / data-app-theme 三重判断。
+        if (accent && accentScopeAllowed()) root.dataset.accentScope = '1';
+        else if (root.dataset.accentScope) delete root.dataset.accentScope;
 
         var changed = theme !== themeNow();
         if (changed) {
@@ -4743,7 +4750,7 @@
         var delta = ((h - ANCHOR_HUE + 540) % 360) - 180;
         // 主色家族：够彩、且色相离默认蓝不远（排除红/绿/黄这些语义色）
         if (sat >= 0.12 && Math.abs(delta) <= 62) {
-            var ns = Math.min(1, sat * (accentHsl[1] / 0.62));
+            var ns = Math.min(1, sat * (accentHsl[1] / 0.78));
             return hsl2rgb(h + (accentHsl[0] - ANCHOR_HUE), ns, l);
         }
         // 近白/浅灰：越亮染得越轻，压住「泛白」又不至于把面板刷成彩色。
@@ -4752,8 +4759,8 @@
         if (sat < 0.13 && l > 0.55) {
             // HSL 的彩度被 (1-|2l-1|) 卡死：l≈0.97 时 s 给 0.05 只有 0.7/255，等于没染。
             //   所以这里直接把 s 拉到 0.42，并把纯白压到 0.966，才能看出那层粉。
-            var tint = 0.42;
-            var nl = Math.min(l, 0.966);
+            var tint = 0.50;
+            var nl = Math.min(l, 0.948);
             return hsl2rgb(accentHsl[0], tint, nl);
         }
         return [r, g, b];
@@ -4791,6 +4798,27 @@
             });
     }
 
+    // file:// 下 fetch 会同步抛，XHR 一般能读同目录文件；两条都试，失败就算了。
+    function readCssText(href) {
+        return new Promise(function (resolve) {
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', href, true);
+                xhr.onload = function () {
+                    var ok = (xhr.status >= 200 && xhr.status < 300) || (xhr.status === 0 && xhr.responseText);
+                    resolve(ok ? xhr.responseText : '');
+                };
+                xhr.onerror = function () { resolve(''); };
+                xhr.send();
+            } catch (_) {
+                try {
+                    fetch(href, { cache: 'force-cache' }).then(function (r) { return r.ok ? r.text() : ''; })
+                        .then(resolve).catch(function () { resolve(''); });
+                } catch (__) { resolve(''); }
+            }
+        });
+    }
+
     function recolorStyleNode() {
         var node = document.getElementById(RECOLOR_ID);
         if (!node) {
@@ -4806,14 +4834,34 @@
         if (node) node.textContent = '';
     }
 
-    function activeSkin() {
-        return (document.documentElement.dataset.uiSkin || 'classic');
+    /* [rphub 2.9.073] 外观有三个互相独立的维度，之前每次写规则都各判各的，
+       结果拦布局漏皮肤（2.9.069）、拦皮肤又得再改一次。集中到一处：
+         layout  布局：classic / vampire …
+         pack    皮肤包：默认 / 玥玥 / 冬至 …
+         mode    明暗：light / dark
+       凡是主题相关的判断，一律从这里取，不要再读 dataset。 */
+    function themeScope() {
+        var root = document.documentElement;
+        var packs = window.RPThemePacks;
+        var pack = root.dataset.uiPack || '';
+        var first = packs && packs.catalog && packs.catalog[0] && packs.catalog[0].id;
+        return {
+            layout: root.dataset.uiSkin || 'classic',
+            pack: pack,
+            isDefaultPack: !first || !pack || pack === first,
+            mode: root.dataset.appTheme === 'dark' ? 'dark' : 'light'
+        };
+    }
+    // 主色只服务「经典布局 + 默认皮肤」。其余组合有自己的配色语言，不能被带跑。
+    function accentScopeAllowed() {
+        var scope = themeScope();
+        return scope.layout === 'classic' && scope.isDefaultPack;
     }
     function applyRecolor(accent) {
         if (!accent) { clearRecolor(); return; }
         // [rphub 2.9.069] 只服务经典布局。主题色那一行本来就只在这套布局里出现，
         //   但整表复刻是全局的：不拦的话另外两套布局（vampire / 辰月）的底色也会被染色。
-        if (activeSkin() !== 'classic') { clearRecolor(); return; }
+        if (!accentScopeAllowed()) { clearRecolor(); return; }
         if (recolorBusy) return;
         recolorBusy = true;
         var jobs = [];
@@ -4828,10 +4876,10 @@
             var href = owner.href;
             if (!href) return;
             if (recolorTexts[href]) { jobs.push(Promise.resolve(recolorTexts[href])); return; }
-            jobs.push(fetch(href, { cache: 'force-cache' })
-                .then(function (r) { return r.ok ? r.text() : ''; })
-                .then(function (t) { if (t) recolorTexts[href] = t; return t; })
-                .catch(function () { return ''; }));
+            jobs.push(readCssText(href).then(function (t) {
+                if (t) recolorTexts[href] = t;
+                return t;
+            }));
         });
         Promise.all(jobs).then(function (texts) {
             var src = texts.filter(Boolean).join('\n');
@@ -4852,6 +4900,8 @@
         get accent() { return accentNow() || ''; },
         get schemes() { return SCHEMES.map(function (s) { return { key: s.key, label: s.label }; }); },
         get presets() { return PRESETS.map(function (p) { return { name: p[0], color: p[1] }; }); },
+        themeScope: themeScope,
+        accentScopeAllowed: accentScopeAllowed,
         setScheme: setScheme,
         setAccent: setAccent,
         toggleDayNight: toggleDayNight,
