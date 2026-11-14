@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.064'; window.RP_LOCAL_RELEASE = 325;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.065'; window.RP_LOCAL_RELEASE = 326;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -4492,6 +4492,7 @@
             }
         }
         ensureStyle(document, kitCss());
+        applyRecolor(accent);
         if (isTop) scheduleFrameSync(opts.immediate === false ? 300 : 0);
         else frames().forEach(applyToFrame);
         if (isTop) syncUi();
@@ -4726,6 +4727,119 @@
     if (isTop) {
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncUi);
         else syncUi();
+    }
+
+    /* ── [rphub 2.9.065] 主色整表复刻：抓 CSS 文本逐 token 改色 ─────────────────
+       变量层只能改「引用了变量」的地方，写死的白/灰永远不动（抽屉那层 90% 白玻璃就是
+       这样盖住一切的）。这里改成插件那套做法：把整份 CSS 当字符串，逐个颜色 token
+       做「色相旋转 + 饱和度缩放 + 亮度不动」，再作为最后一张表注入。
+
+       比插件多一条：近白色（s<8 且 l>55）按亮度轻微染上主色。不染的话白玻璃还是白，
+       加这条才压得住泛白。 */
+    var RECOLOR_ID = 'rphub-accent-recolor';
+    var ANCHOR_HUE = 232;            // 默认主色（鸢尾蓝）的色相，旋转基准
+    var recolorTexts = {};           // href -> 原文，只抓一次
+    var recolorBusy = false;
+
+    function recolorTarget(hsl) {
+        return { h: hsl[0] * 360, s: hsl[1], l: hsl[2] };
+    }
+
+    function recolorOne(r, g, b, accentHsl) {
+        // rgb2hsl 返回的是 [度数, 0-1, 0-1]，hsl2rgb 也按度数收、返回数组，别当对象用。
+        var hsl = rgb2hsl([r, g, b]);
+        var h = hsl[0], sat = hsl[1], l = hsl[2];
+        var delta = ((h - ANCHOR_HUE + 540) % 360) - 180;
+        // 主色家族：够彩、且色相离默认蓝不远（排除红/绿/黄这些语义色）
+        if (sat >= 0.12 && Math.abs(delta) <= 62) {
+            var ns = Math.min(1, sat * (accentHsl[1] / 0.62));
+            return hsl2rgb(h + (accentHsl[0] - ANCHOR_HUE), ns, l);
+        }
+        // 近白/浅灰：越亮染得越轻，压住「泛白」又不至于把面板刷成彩色。
+        //   注意 l=1 时无论给多少饱和度算出来都是纯白，必须先让出一点亮度，否则
+        //   白玻璃（rgba(255,255,255,.9)）改完还是白，白改一场。
+        if (sat < 0.13 && l > 0.55) {
+            // HSL 的彩度被 (1-|2l-1|) 卡死：l≈0.97 时 s 给 0.05 只有 0.7/255，等于没染。
+            //   所以这里直接把 s 拉到 0.42，并把纯白压到 0.966，才能看出那层粉。
+            var tint = 0.42;
+            var nl = Math.min(l, 0.966);
+            return hsl2rgb(accentHsl[0], tint, nl);
+        }
+        return [r, g, b];
+    }
+
+    function recolorCssText(text, accent) {
+        var A = hex2rgb(accent);
+        if (!A) return text;
+        var accentHsl = rgb2hsl(A);
+        if (accentHsl[1] < 0.08) return text;      // 近灰的主色没有色相可言，不处理
+        var cache = {};
+        var hexToRgb = function (hex) {
+            var h = hex.length === 3 ? hex.split('').map(function (c) { return c + c; }).join('') : hex;
+            var n = parseInt(h, 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        };
+        var toHex = function (rgb) {
+            return rgb.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('');
+        };
+        return String(text)
+            .replace(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(,\s*[\d.]+\s*)?\)/g,
+                function (m, r, g, b, alpha) {
+                    var key = r + ',' + g + ',' + b;
+                    if (!cache[key]) cache[key] = recolorOne(+r, +g, +b, accentHsl).map(Math.round).join(' ');
+                    var tail = alpha ? ' / ' + String(alpha).replace(/^[,\s]+/, '') : '';
+                    return 'rgb(' + cache[key] + tail + ')';
+                })
+            .replace(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![0-9a-fA-F])/g, function (m, hex) {
+                var key = hex.toLowerCase();
+                if (!cache['#' + key]) {
+                    var src = hexToRgb(key);
+                    cache['#' + key] = toHex(recolorOne(src[0], src[1], src[2], accentHsl));
+                }
+                return '#' + cache['#' + key];
+            });
+    }
+
+    function recolorStyleNode() {
+        var node = document.getElementById(RECOLOR_ID);
+        if (!node) {
+            node = document.createElement('style');
+            node.id = RECOLOR_ID;
+            (document.head || document.documentElement).appendChild(node);
+        }
+        return node;
+    }
+
+    function clearRecolor() {
+        var node = document.getElementById(RECOLOR_ID);
+        if (node) node.textContent = '';
+    }
+
+    function applyRecolor(accent) {
+        if (!accent) { clearRecolor(); return; }
+        if (recolorBusy) return;
+        recolorBusy = true;
+        var jobs = [];
+        var sheets = Array.prototype.slice.call(document.styleSheets || []);
+        sheets.forEach(function (sheet) {
+            var owner = sheet.ownerNode;
+            if (!owner || owner.id === STYLE_ID || owner.id === RECOLOR_ID) return;
+            if (owner.tagName === 'STYLE') { jobs.push(Promise.resolve(owner.textContent)); return; }
+            var href = owner.href;
+            if (!href) return;
+            if (recolorTexts[href]) { jobs.push(Promise.resolve(recolorTexts[href])); return; }
+            jobs.push(fetch(href, { cache: 'force-cache' })
+                .then(function (r) { return r.ok ? r.text() : ''; })
+                .then(function (t) { if (t) recolorTexts[href] = t; return t; })
+                .catch(function () { return ''; }));
+        });
+        Promise.all(jobs).then(function (texts) {
+            var src = texts.filter(Boolean).join('\n');
+            if (!src) return;
+            recolorStyleNode().textContent = recolorCssText(src, accent);
+        }).catch(function (e) {
+            console.warn('[rphub] 主色整表复刻失败', e);
+        }).then(function () { recolorBusy = false; });
     }
 
     window.RPHubThemeKit = Object.freeze({
