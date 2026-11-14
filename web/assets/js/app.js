@@ -8912,6 +8912,7 @@ const app = createApp({
         });
         const releaseCharacterRuntime = async () => {
             clearMessageRenderCaches();
+            bumpMessageBodyGeneration();
             styleFilteredContentCache.clear();
             window.RPHubUtils.clearParseCache();
             await nextTick();
@@ -10576,7 +10577,49 @@ const app = createApp({
         });
         watch(() => [settings.styleFilterEnabled, regexScripts.value, user.name], () => {
             clearMessageRenderCaches();
+            bumpMessageBodyGeneration();
         }, { deep: true });
+
+        // [rphub 2.9.054] 正文渲染整条链按消息对象缓存。
+        //   模板里每条气泡都要 parseCot(msg.content) 四到六次、processMainContent 一到三次，
+        //   再进 renderMarkdown。后两者内部虽有缓存，但键里拼的是整段正文（单条 78KB），
+        //   命中也得先复制一遍再哈希；于是「展开思维链 / 切换视角 / 删一条」这种只改一个
+        //   标志位的操作，会把 100 条气泡的整条链重跑一次 —— 那几秒就耗在这里。
+        //   这里把 (cot, 流式正文, 定稿正文) 挂在消息对象上（WeakMap），content 引用一变
+        //   就整条失效（编辑、流式增量都会换新字符串，因此天然不会读到旧结果）。
+        // renderMarkdown 的输入还会随记忆角标版本变化，这里一并让正文缓存失效。
+        watch(memoryCitationVersion, () => { bumpMessageBodyGeneration(); });
+        let messageBodyGeneration = 0;
+        const messageBodyCache = new WeakMap();
+        const bumpMessageBodyGeneration = () => { messageBodyGeneration += 1; };
+        const getMessageBodyEntry = (message) => {
+            const content = typeof message?.content === 'string' ? message.content : '';
+            const cached = messageBodyCache.get(message);
+            if (cached && cached.content === content && cached.generation === messageBodyGeneration) return cached;
+            const entry = { content, generation: messageBodyGeneration, cot: null, settled: null, live: null };
+            messageBodyCache.set(message, entry);
+            return entry;
+        };
+        const messageCot = (message) => {
+            const entry = getMessageBodyEntry(message);
+            if (!entry.cot) entry.cot = parseCot(entry.content);
+            return entry.cot;
+        };
+        const messageBody = (message, streaming = false) => {
+            const entry = getMessageBodyEntry(message);
+            const key = streaming ? 'live' : 'settled';
+            if (!entry[key]) {
+                const main = messageCot(message).main || '';
+                const processed = main ? processMainContent(main, streaming) : { text: '', showSpinner: false };
+                entry[key] = {
+                    hasMain: Boolean(main),
+                    text: processed.text,
+                    showSpinner: Boolean(processed.showSpinner),
+                    html: processed.text ? renderMarkdown(processed.text, message?.role || 'assistant') : ''
+                };
+            }
+            return entry[key];
+        };
 
         const messageUsesHtmlFrame = (msg) => {
             if (!msg || !msg.content) return false;
@@ -16656,7 +16699,7 @@ const app = createApp({
             createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, performDailyAutoBackup, backupOverdueDays, maybeRemindDailyBackup, analyzeBackupSize, openBackupSizeModal, backupSizeReport, showBackupSizeModal, exportLegacyBackups, purgeLegacyBackups, restoreAutoBackupRecord, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled, batchDeletePresets, deletePresetGroup,
             activePresetGroupName, activePresetGroup, visiblePresetGroups, openPresetGroup, showPresetGroupForm,
             presetGroupDraft, presetGroupEditing, presetGroupError, openPresetGroupForm, savePresetGroup, exportPresetGroups, importPresets,
-            renderMarkdown, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
+            renderMarkdown, messageBody, messageCot, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
             openExportModal: (type) => {
                 exportType.value = type;
                 selectedExportIndices.value.clear();

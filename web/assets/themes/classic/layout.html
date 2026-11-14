@@ -163,7 +163,7 @@
 
                     <template v-if="currentCharacter &amp;&amp; chatHistory.length > 0">
                     <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="index">
-                    <div ref="messageElements" :data-role="msg.role" :data-chat-index="index" v-show="!(msg.role === 'assistant' &amp;&amp; index === chatHistory.length - 1 &amp;&amp; isThinking &amp;&amp; !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls &amp;&amp; msg.toolCalls.length)))" :class="['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]" :style="{ transitionDelay: (displayIndex % 5) * 50 + 'ms' }">
+                    <div ref="messageElements" :data-role="msg.role" :data-chat-index="index" v-show="!(msg.role === 'assistant' &amp;&amp; index === chatHistory.length - 1 &amp;&amp; isThinking &amp;&amp; !(msg.reasoning || messageCot(msg).cot || messageCot(msg).main || (msg.toolCalls &amp;&amp; msg.toolCalls.length)))" :class="['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]" :style="{ transitionDelay: (displayIndex % 5) * 50 + 'ms' }">
                         <div :class="['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row']">
                             <!-- Avatar -->
                             <div v-show="!settings.immersiveMode" :class="['flex-shrink-0 select-none', msg.shouldAnimate &amp;&amp; msg.role !== 'system' ? 'animate-message-fade-in' : '']">
@@ -311,18 +311,18 @@
                                                 <ui-template-pending></ui-template-pending>
                                             </div>
                                             <!-- Main Part -->
-                                            <template v-if="parseCot(msg.content).main">
+                                            <template v-if="messageBody(msg).hasMain">
                                                 <template v-if="index === chatHistory.length - 1 &amp;&amp; isGenerating">
-                                                    <div v-if="processMainContent(parseCot(msg.content).main, true).text" class="markdown-body" :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}" v-html="renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)">
+                                                    <div v-if="messageBody(msg, true).text" class="markdown-body" :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}" v-html="messageBody(msg, true).html">
                                                     </div>
-                                                    <div v-if="processMainContent(parseCot(msg.content).main, true).showSpinner" class="flex flex-col items-center justify-center p-8 w-full mt-2 gap-4 opacity-90">
+                                                    <div v-if="messageBody(msg, true).showSpinner" class="flex flex-col items-center justify-center p-8 w-full mt-2 gap-4 opacity-90">
                                                         <div class="ui-build-dots" aria-hidden="true"><i></i><i></i><i></i></div>
                                                         <span class="text-[16px] font-bold tracking-wider text-blue-600/80">正在构建
                                                             UI 界面</span>
                                                     </div>
                                                 </template>
                                                 <template v-else="">
-                                                    <div class="markdown-body" :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}" v-html="renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)">
+                                                    <div class="markdown-body" :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}" v-html="messageBody(msg).html">
                                                     </div>
                                                 </template>
                                             </template>

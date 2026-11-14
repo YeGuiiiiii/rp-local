@@ -1,8 +1,8 @@
-# RP 本地版 2.9.053
+# RP 本地版 2.9.054
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.053.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.054.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.053**，Android versionCode 为 **315**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.054**，Android versionCode 为 **316**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.053 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.054 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,28 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.054 正文渲染按消息缓存
+
+本节为 2.9.054（versionCode 316）。不改存档与备份格式，包名与签名不变。
+
+- 重渲染不再重跑渲染链（本版重点）：消息气泡的正文是模板里现算的 ——
+  `renderMarkdown(processMainContent(parseCot(msg.content).main, …).text, …)`。
+  `renderMarkdown` 与 `parseCot` 内部虽有缓存，但两者的键都拼着整段正文（单条 78KB），
+  命中也得先复制一遍再哈希；`processMainContent` 则完全没有缓存。于是「展开思考」
+  「切换叙事视角」「删一条消息」这类只改一个标志位的操作，会把当前渲染窗口里
+  100 条气泡的整条链重跑一遍。
+- 现在把 `(cot, 流式正文, 定稿正文)` 挂在消息对象上（WeakMap），`content` 换新字符串
+  就整条失效（编辑、流式增量天然不会读到旧结果），另加一个版本号在「正则/样式过滤/
+  用户名/记忆角标版本」变化时统一作废。实测 100 条 × 6000 字，一次重渲染的计算次数：
+  旧 500 次 parseCot + 300 次 processMainContent + 200 次 renderMarkdown，
+  新首次 100 / 200 / 200，第二次 **0 / 0 / 0**。
+- 模板调用点同步收敛：`v-if="parseCot(msg.content).main"`、两个 `processMainContent(...)`
+  与两处 `renderMarkdown(...)` 全部换成 `messageBody(msg)` / `messageBody(msg, true)`，
+  `v-show` 里那两处 `parseCot` 换成 `messageCot(msg)`。两套模板（`index.html` 与
+  `classic/layout.html`）都改，`main-render.js` 一并重编译。
+
+安装包 `RP-local-2.9.054.apk`：versionCode 316，7,569,258 字节，SHA256 `cc136bc88d7503dd4f269da2ac2f0ecbbfcba457a37f7705bfac2c8ec808a0d2`；校验和见 `dist/SHA256SUMS-2.9.054.txt`。
 
 ## 2.9.053 滑动卡顿：轮次查询与懒加载 UI 的重写
 
@@ -638,7 +660,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.053`，Android versionCode `315`。
+- 版本：`2.9.054`，Android versionCode `316`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.053'; window.RP_LOCAL_RELEASE = 315;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.054'; window.RP_LOCAL_RELEASE = 316;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -652,7 +652,7 @@
                     <div ref="messageElements"
                         :data-role="msg.role"
                         :data-chat-index="index"
-                        v-show="!(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))"
+                        v-show="!(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || messageCot(msg).cot || messageCot(msg).main || (msg.toolCalls && msg.toolCalls.length)))"
                         :class="['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]"
                         :style="{ transitionDelay: (displayIndex % 5) * 50 + 'ms' }">
                         <div
@@ -850,15 +850,15 @@
                                                 <ui-template-pending></ui-template-pending>
                                             </div>
                                             <!-- Main Part -->
-                                            <template v-if="parseCot(msg.content).main">
+                                            <template v-if="messageBody(msg).hasMain">
                                                 <template
                                                     v-if="index === chatHistory.length - 1 && isGenerating">
-                                                    <div v-if="processMainContent(parseCot(msg.content).main, true).text"
+                                                    <div v-if="messageBody(msg, true).text"
                                                         class="markdown-body"
                                                         :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}"
-                                                        v-html="renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)">
+                                                        v-html="messageBody(msg, true).html">
                                                     </div>
-                                                    <div v-if="processMainContent(parseCot(msg.content).main, true).showSpinner"
+                                                    <div v-if="messageBody(msg, true).showSpinner"
                                                         class="flex flex-col items-center justify-center p-8 w-full mt-2 gap-4 opacity-90">
                                                         <div class="ui-build-dots" aria-hidden="true"><i></i><i></i><i></i></div>
                                                         <span
@@ -869,7 +869,7 @@
                                                 <template v-else>
                                                     <div class="markdown-body"
                                                         :style="settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}"
-                                                        v-html="renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)">
+                                                        v-html="messageBody(msg).html">
                                                     </div>
                                                 </template>
                                             </template>

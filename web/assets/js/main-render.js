@@ -2307,19 +2307,19 @@ return function render(_ctx, _cache) {
                                               ]))
                                             : _createCommentVNode("v-if", true),
                                           _createCommentVNode(" Main Part "),
-                                          (parseCot(msg.content).main)
+                                          (messageBody(msg).hasMain)
                                             ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
                                                 (index === chatHistory.length - 1 && isGenerating)
                                                   ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                                      (processMainContent(parseCot(msg.content).main, true).text)
+                                                      (messageBody(msg, true).text)
                                                         ? (_openBlock(), _createElementBlock("div", {
                                                             key: 0,
                                                             class: "markdown-body",
                                                             style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                            innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
+                                                            innerHTML: messageBody(msg, true).html
                                                           }, null, 12 /* STYLE, PROPS */, _hoisted_102))
                                                         : _createCommentVNode("v-if", true),
-                                                      (processMainContent(parseCot(msg.content).main, true).showSpinner)
+                                                      (messageBody(msg, true).showSpinner)
                                                         ? (_openBlock(), _createElementBlock("div", _hoisted_103, [...(_cache[26] || (_cache[26] = [
                                                             _createElementVNode("div", {
                                                               class: "ui-build-dots",
@@ -2337,7 +2337,7 @@ return function render(_ctx, _cache) {
                                                       key: 1,
                                                       class: "markdown-body",
                                                       style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                      innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
+                                                      innerHTML: messageBody(msg).html
                                                     }, null, 12 /* STYLE, PROPS */, _hoisted_104))
                                               ], 64 /* STABLE_FRAGMENT */))
                                             : _createCommentVNode("v-if", true),
@@ -2549,7 +2549,7 @@ return function render(_ctx, _cache) {
                           ], 2 /* CLASS */)
                         ], 2 /* CLASS */)
                       ], 14 /* CLASS, STYLE, PROPS */, _hoisted_51)), [
-                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
+                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || messageCot(msg).cot || messageCot(msg).main || (msg.toolCalls && msg.toolCalls.length)))]
                       ])
                     }), 128 /* KEYED_FRAGMENT */))
                   : _createCommentVNode("v-if", true),
@@ -10749,19 +10749,19 @@ return function render(_ctx, _cache) {
                                               ]))
                                             : _createCommentVNode("v-if", true),
                                           _createCommentVNode(" Main Part "),
-                                          (parseCot(msg.content).main)
+                                          (messageBody(msg).hasMain)
                                             ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
                                                 (index === chatHistory.length - 1 && isGenerating)
                                                   ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                                      (processMainContent(parseCot(msg.content).main, true).text)
+                                                      (messageBody(msg, true).text)
                                                         ? (_openBlock(), _createElementBlock("div", {
                                                             key: 0,
                                                             class: "markdown-body",
                                                             style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                            innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, true).text, msg.role)
+                                                            innerHTML: messageBody(msg, true).html
                                                           }, null, 12 /* STYLE, PROPS */, _hoisted_101))
                                                         : _createCommentVNode("v-if", true),
-                                                      (processMainContent(parseCot(msg.content).main, true).showSpinner)
+                                                      (messageBody(msg, true).showSpinner)
                                                         ? (_openBlock(), _createElementBlock("div", _hoisted_102, [...(_cache[26] || (_cache[26] = [
                                                             _createElementVNode("div", {
                                                               class: "ui-build-dots",
@@ -10779,7 +10779,7 @@ return function render(_ctx, _cache) {
                                                       key: 1,
                                                       class: "markdown-body",
                                                       style: _normalizeStyle(settings.fontSize ? { fontSize: settings.fontSize + 'px' } : {}),
-                                                      innerHTML: renderMarkdown(processMainContent(parseCot(msg.content).main, false).text, msg.role)
+                                                      innerHTML: messageBody(msg).html
                                                     }, null, 12 /* STYLE, PROPS */, _hoisted_103))
                                               ], 64 /* STABLE_FRAGMENT */))
                                             : _createCommentVNode("v-if", true),
@@ -10991,7 +10991,7 @@ return function render(_ctx, _cache) {
                           ], 2 /* CLASS */)
                         ], 2 /* CLASS */)
                       ], 14 /* CLASS, STYLE, PROPS */, _hoisted_50)), [
-                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls && msg.toolCalls.length)))]
+                        [_vShow, !(msg.role === 'assistant' && index === chatHistory.length - 1 && isThinking && !(msg.reasoning || messageCot(msg).cot || messageCot(msg).main || (msg.toolCalls && msg.toolCalls.length)))]
                       ])
                     }), 128 /* KEYED_FRAGMENT */))
                   : _createCommentVNode("v-if", true),
