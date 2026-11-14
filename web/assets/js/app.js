@@ -68,6 +68,7 @@ const {
     appendEnhancedMemoryRecall,
     buildContextViewerState,
     buildConversationTurnSnapshot: createConversationTurnSnapshot,
+    buildTurnIndex: buildChatTurnIndex,
     escapeXmlAttribute,
     getConversationTurnAtIndexFromSnapshot,
     getPostprocessedChatMessages: postprocessChatHistory,
@@ -1514,13 +1515,15 @@ const app = createApp({
         const getChatRenderMessageLimit = () => normalizeChatRenderMessageLimit(settings.chatRenderMessageLimit);
         const getUiTemplateKeepFloors = () => normalizeUiTemplateKeepFloors(settings.uiTemplateKeepFloors);
         const getMobileUiTemplateRetention = (history = []) => {
-            const snapshot = buildConversationTurnSnapshot(Array.isArray(history) ? history : []);
-            const turns = Array.isArray(snapshot?.turns) ? snapshot.turns : [];
+            // [rphub 2.9.053] 这里只要「最后 K 轮用到的消息下标」，用轮次索引即可。
+            //   原来为此调用 buildConversationTurnSnapshot，把整份聊天后处理成消息对象；
+            //   而它挂在 displayedChatMessages 这种每次重算的 computed 上。
+            const turns = chatTurnIndex(history).turns;
             const firstKeptTurn = Math.max(1, turns.length - getUiTemplateKeepFloors() + 1);
             const keptIndexes = new Set();
             turns.forEach(turnInfo => {
                 if (Number(turnInfo?.turn) < firstKeptTurn) return;
-                (turnInfo?.sourceIndexes || []).forEach(index => keptIndexes.add(index));
+                (turnInfo?.indexes || []).forEach(index => keptIndexes.add(index));
             });
             return { firstKeptTurn, keptIndexes };
         };
@@ -1946,8 +1949,30 @@ const app = createApp({
             createConversationTurnSnapshot(messages, options)
         );
 
+        // [rphub 2.9.053] 轮次索引缓存。
+        //   getConversationTurnAtIndex 原来每次都 buildConversationTurnSnapshot()：3099 条消息
+        //   逐条 toPlainContextMessage，合并同角色消息时还要拼接正文，一次 100ms 上下。
+        //   而 processMobileLazyUiTemplates 对视野附近的**每一条**消息各调一次 —— 每次滚动
+        //   等于重建几遍整份快照，表现就是「一直在滑，屏幕突然定住两三秒」。
+        //   轮次只取决于角色序列，按 role 走一遍即可，结果缓存到角色序列变化为止。
+        let _chatTurnIndexCache = { fingerprint: null, byIndex: null, turns: null };
+        const chatTurnIndex = (list = chatHistory.value) => {
+            const history = Array.isArray(list) ? list : [];
+            let fingerprint = history.length;
+            for (let index = 0; index < history.length; index++) {
+                const role = history[index]?.role;
+                fingerprint = (fingerprint + (role === 'user' ? 1 : role === 'assistant' ? 2 : 0) * (index + 1)) % 2147483647;
+            }
+            const cached = _chatTurnIndexCache;
+            if (cached.byIndex && cached.fingerprint === fingerprint && cached.byIndex.length === history.length) return cached;
+            const built = buildChatTurnIndex(history);
+            _chatTurnIndexCache = { fingerprint, byIndex: built.byIndex, turns: built.turns };
+            return _chatTurnIndexCache;
+        };
         const getConversationTurnAtIndex = (index) => {
-            return getConversationTurnAtIndexFromSnapshot(buildConversationTurnSnapshot(), index);
+            if (!Number.isFinite(index) || index < 0) return null;
+            const { byIndex, turns } = chatTurnIndex();
+            return byIndex[index] || (turns.length + 1);
         };
 
         const getLatestCompleteConversationTurn = () => {
@@ -9813,33 +9838,68 @@ const app = createApp({
             };
         };
 
+        // [rphub 2.9.053] 懒加载 UI 改成「先读后写 + 迟滞回收」。
+        //   原来在同一个循环里既 getBoundingClientRect 又改 innerHTML：改一次就强制重排，
+        //   而块内容里常带大图（data URL），来回滑动会把已经渲染好的块反复拆掉重建。
+        //   录屏里「一直滑着，屏幕突然定住两三秒」正是这类抖动叠加重排。
+        //   现在：矩形一次性读完（只触发一次布局）再统一写；只有离屏超过两屏才回收，
+        //   每趟最多回收 6 个、渲染 8 个，避免单帧做太多事。
         const processMobileLazyUiTemplates = () => {
             const container = chatContainer.value;
             if (!container) return;
             const retention = getMobileUiTemplateRetention(chatHistory.value);
-            const nearViewport = (node) => {
-                const rect = node.getBoundingClientRect();
-                return rect.bottom > -420 && rect.top < window.innerHeight + 420;
-            };
+            const viewportHeight = window.innerHeight || 720;
+            const nearMargin = 420;
+            const keepMargin = Math.max(viewportHeight * 2, 720);
+            const nodes = Array.from(container.querySelectorAll('.ui-template-render'));
+            if (!nodes.length) return;
 
-            container.querySelectorAll('.ui-template-render').forEach(node => {
-                if (node.dataset.rphubUiLazy) return;
-                const messageNode = node.closest('[data-chat-index]');
-                const index = Number(messageNode?.dataset.chatIndex);
-                if (!Number.isFinite(index) || retention.keptIndexes.has(index)) return;
-                if (nearViewport(node)) return;
-                const placement = node.dataset.rphubUiPlacement
-                    || (node.classList.contains('ui-template-message-block-top') ? 'top' : 'bottom');
-                node.dataset.rphubUiLazy = String(index);
-                node.dataset.rphubUiPlacement = placement;
-                node.innerHTML = buildMobileUiLazyBlock(index, placement);
+            // 一、只读：所有矩形一次取完，避免读写交替触发重排。
+            const measured = nodes.map(node => {
+                const rect = node.getBoundingClientRect();
+                return {
+                    node,
+                    top: rect.top,
+                    bottom: rect.bottom,
+                    lazy: node.dataset.rphubUiLazy || '',
+                    placement: node.dataset.rphubUiPlacement || ''
+                };
             });
 
-            container.querySelectorAll('[data-rphub-ui-lazy]').forEach(marker => {
-                const node = marker.closest('.ui-template-render') || marker;
-                const index = Number(node.dataset.rphubUiLazy);
-                const placement = node.dataset.rphubUiPlacement === 'bottom' ? 'bottom' : 'top';
-                if (!Number.isFinite(index) || !nearViewport(node)) return;
+            // 二、分拣：该渲染的、该回收的。
+            const renderQueue = [];
+            const demoteQueue = [];
+            for (const item of measured) {
+                const near = item.bottom > -nearMargin && item.top < viewportHeight + nearMargin;
+                if (item.lazy) {
+                    if (near) renderQueue.push(item);
+                    continue;
+                }
+                const messageNode = item.node.closest('[data-chat-index]');
+                const index = Number(messageNode?.dataset.chatIndex);
+                if (!Number.isFinite(index) || retention.keptIndexes.has(index)) continue;
+                // 迟滞：跑出两屏以上才回收，进出视口附近不再反复拆建。
+                if (item.bottom > -keepMargin && item.top < viewportHeight + keepMargin) continue;
+                demoteQueue.push({ ...item, index });
+            }
+
+            // 三、只写：先回收离得最远的几个，再补渲染最靠近视口的几个。
+            demoteQueue.slice(0, 6).forEach(item => {
+                const placement = item.placement
+                    || (item.node.classList.contains('ui-template-message-block-top') ? 'top' : 'bottom');
+                item.node.dataset.rphubUiLazy = String(item.index);
+                item.node.dataset.rphubUiPlacement = placement;
+                item.node.innerHTML = buildMobileUiLazyBlock(item.index, placement);
+            });
+
+            renderQueue
+                .sort((left, right) => Math.abs(left.top) - Math.abs(right.top))
+                .slice(0, 8)
+                .forEach(entry => {
+                const node = entry.node;
+                const index = Number(entry.lazy);
+                const placement = entry.placement === 'bottom' ? 'bottom' : 'top';
+                if (!Number.isFinite(index)) return;
                 const source = chatHistory.value[index];
                 if (!source || source.role !== 'assistant') {
                     node.innerHTML = '<div class="text-[11px] text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-center">此楼没有 UI 状态</div>';
@@ -9887,12 +9947,35 @@ const app = createApp({
         const hiddenChatMessageCount = computed(() => Math.max(0, chatHistory.value.length - chatRenderLimit.value));
 
         const displayedChatMessages = computed(() => {
-            const startIndex = Math.max(0, chatHistory.value.length - chatRenderLimit.value);
-            const uiTemplateRetention = getMobileUiTemplateRetention(chatHistory.value);
-            return chatHistory.value.slice(startIndex).map((msg, offset) => ({
-                msg: buildMobileUiTemplateDisplayMessage(msg, startIndex + offset, uiTemplateRetention),
-                index: startIndex + offset
-            }));
+            const history = chatHistory.value;
+            const startIndex = Math.max(0, history.length - chatRenderLimit.value);
+            const uiTemplateRetention = getMobileUiTemplateRetention(history);
+            // [rphub 2.9.053] 模板里原来对每条消息各做一次 chatHistory.slice(...).some(...)：
+            //   渲染 100 条就要新建 100 个数组、拷几十万个引用，还把整份 chatHistory 拖进依赖。
+            //   改成一次前后缀扫描，两个布尔值随行带出去。
+            const hasUserBefore = new Uint8Array(history.length);
+            let userSeen = false;
+            for (let index = 0; index < history.length; index++) {
+                hasUserBefore[index] = userSeen ? 1 : 0;
+                if (history[index]?.role === 'user') userSeen = true;
+            }
+            const hasSelfAfter = new Uint8Array(history.length);
+            let selfSeen = false;
+            for (let index = history.length - 1; index >= 0; index--) {
+                hasSelfAfter[index] = selfSeen ? 1 : 0;
+                if (history[index]?.isSelf) selfSeen = true;
+            }
+            const items = new Array(history.length - startIndex);
+            for (let offset = 0; offset < items.length; offset++) {
+                const index = startIndex + offset;
+                items[offset] = {
+                    msg: buildMobileUiTemplateDisplayMessage(history[index], index, uiTemplateRetention),
+                    index,
+                    hasUserBefore: hasUserBefore[index] === 1,
+                    hasSelfAfter: hasSelfAfter[index] === 1
+                };
+            }
+            return items;
         });
 
         const getChatScrollAnchor = () => {

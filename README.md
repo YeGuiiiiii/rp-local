@@ -1,8 +1,8 @@
-# RP 本地版 2.9.052
+# RP 本地版 2.9.053
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.052.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.053.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.052**，Android versionCode 为 **314**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.053**，Android versionCode 为 **315**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.052 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.053 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,17 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.053 滑动卡顿：轮次查询与懒加载 UI 的重写
+
+本节为 2.9.053（versionCode 315）。不涉及存档结构与备份格式，包名与签名不变，可直接覆盖升级。
+
+- 轮次编号不再重建整份快照（本版重点）：`getConversationTurnAtIndex` 每次调用都会 `buildConversationTurnSnapshot()`——把 3099 条消息逐条 `toPlainContextMessage`，合并同角色消息时还要拼接正文。而 `processMobileLazyUiTemplates` 对视野附近的**每一条**消息各调一次，于是每趟滚动都在重建几遍整份快照。现在改成按角色序列走一遍的轻量索引（不建副本、不拼正文），结果缓存到角色序列变化为止。实测 3099 条：整趟取号 39 ms → 1.2 ms，单次滚动 37 ms → 1.3 ms（约 30 倍）。与旧实现逐个下标比对，8 组边界全部一致（连续 assistant 合并、system/tool、`_preventContextMerge`、开头孤立 assistant、结尾孤立 user、空历史、全 system）。
+- 懒加载 UI 读写分离 + 迟滞回收：原来同一个循环里既 `getBoundingClientRect` 又改 `innerHTML`，改一次就强制重排；块内容常带大图（data URL），来回滑动会把已经渲染好的块反复拆掉重建。现在矩形一次读完再统一写，只有离屏超过两屏才回收，每趟最多回收 6 个、渲染 8 个。
+- 消息模板去掉逐条 `chatHistory.slice(...).some(...)`：渲染 100 条就要新建 100 个数组、拷几十万个引用，还把整份 chatHistory 拖进依赖。改成渲染前一次前后缀扫描，两个布尔值随行带出。
+- 顺带发现（本版未改）：懒加载渲染时 `getConversationTurnAtIndex(index)` 返回的是数字，代码却读 `turnInfo?.turn`，恒为 0，UI 模板状态因此总按第 0 轮取。已有存档多半带 `uiTemplateBlocks`，走的是存好的 HTML，所以平时看不出来；将来要修「UI 状态回放」时先修这里。
+
+安装包 `RP-local-2.9.053.apk`：versionCode 315，7,565,162 字节，SHA256 `1beb34d65adda976a7a90a34dc5b47b650835db1725532a318ba77c89538fb85`；校验和见 `dist/SHA256SUMS-2.9.053.txt`。
 
 ## 2.9.052 聊天保存改块级增量
 
@@ -627,7 +638,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.052`，Android versionCode `314`。
+- 版本：`2.9.053`，Android versionCode `315`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。

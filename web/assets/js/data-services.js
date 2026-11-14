@@ -1950,10 +1950,62 @@
         return finalMessages;
     };
 
+    // [rphub 2.9.053] 只要轮次编号时的轻量索引：不建消息副本、不拼接正文。
+    //   轮次只取决于「角色序列」，与正文无关；原来为了拿一个 turn 号，要把整份聊天逐条
+    //   toPlainContextMessage，合并同角色消息时还要 join 正文，3099 条约 100ms。而这个
+    //   函数会被「视野附近每条消息各调一次」，于是每次滚动都要重建几遍整份快照。
+    const buildTurnIndex = (messages) => {
+        const list = Array.isArray(messages) ? messages : [];
+        const byIndex = new Int32Array(list.length);
+        const turns = [];
+        // 第一趟：按「同角色且未禁用合并」切成逻辑消息组。
+        const groups = [];
+        let current = null;
+        for (let index = 0; index < list.length; index++) {
+            const message = list[index];
+            if (!message || typeof message !== 'object') continue;
+            const role = message.role;
+            if (role !== 'user' && role !== 'assistant') { current = null; continue; }
+            const preventMerge = message._preventContextMerge === true;
+            if (current && current.role === role && current.preventMerge !== true && preventMerge !== true) {
+                current.indexes.push(index);
+                current.endIndex = index;
+                continue;
+            }
+            current = { role, startIndex: index, endIndex: index, indexes: [index], preventMerge };
+            groups.push(current);
+        }
+        // 第二趟：user 组后面紧跟 assistant 组才算一轮。必须等整组结束再配对，
+        //   否则「连续三条 assistant」只把第一条算进轮次，与旧实现不一致。
+        let pending = null;
+        for (const group of groups) {
+            if (group.role === 'user') { pending = group; continue; }
+            if (!pending) continue;
+            turns.push({
+                turn: turns.length + 1,
+                startIndex: pending.startIndex,
+                endIndex: group.endIndex,
+                indexes: pending.indexes.concat(group.indexes)
+            });
+            pending = null;
+        }
+        for (const info of turns) for (const index of info.indexes) byIndex[index] = info.turn;
+        // 不在任何轮次里的（system、孤立 user、开头 assistant）与
+        // getConversationTurnAtIndexFromSnapshot 的兜底一致：已结束轮次数 + 1。
+        let cursor = 0;
+        for (let index = 0; index < list.length; index++) {
+            if (byIndex[index]) continue;
+            while (cursor < turns.length && turns[cursor].endIndex < index) cursor += 1;
+            byIndex[index] = cursor + 1;
+        }
+        return { byIndex, turns };
+    };
+
     window.RPHubContextUtils = {
         appendEnhancedMemoryRecall,
         buildContextViewerState,
         buildConversationTurnSnapshot,
+        buildTurnIndex,
         escapeXmlAttribute,
         getConversationTurnAtIndexFromSnapshot,
         getPostprocessedChatMessages,

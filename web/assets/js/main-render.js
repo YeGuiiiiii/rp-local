@@ -1971,7 +1971,7 @@ return function render(_ctx, _cache) {
                       ]))
                     : _createCommentVNode("v-if", true),
                 (currentCharacter && chatHistory.length > 0)
-                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
+                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) => {
                       return _withDirectives((_openBlock(), _createElementBlock("div", {
                         key: index,
                         ref_for: true,
@@ -2369,12 +2369,12 @@ return function render(_ctx, _cache) {
                                         ], 10 /* CLASS, PROPS */, _hoisted_65))
                               ], 10 /* CLASS, PROPS */, _hoisted_56),
                               _createCommentVNode(" Message Actions "),
-                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
+                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !hasSelfAfter))
                                 ? (_openBlock(), _createElementBlock("div", {
                                     key: 0,
                                     class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
                                   }, [
-                                    (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
+                                    (index === chatHistory.length - 1 && (msg.role === 'user' || hasUserBefore))
                                       ? (_openBlock(), _createElementBlock("button", {
                                           key: 0,
                                           onClick: $event => (regenerateMessage(index)),
@@ -10413,7 +10413,7 @@ return function render(_ctx, _cache) {
                       ]))
                     : _createCommentVNode("v-if", true),
                 (currentCharacter && chatHistory.length > 0)
-                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index }, displayIndex) => {
+                  ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) => {
                       return _withDirectives((_openBlock(), _createElementBlock("div", {
                         key: index,
                         ref_for: true,
@@ -10811,12 +10811,12 @@ return function render(_ctx, _cache) {
                                         ], 10 /* CLASS, PROPS */, _hoisted_64))
                               ], 10 /* CLASS, PROPS */, _hoisted_55),
                               _createCommentVNode(" Message Actions "),
-                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf)))
+                              (!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !hasSelfAfter))
                                 ? (_openBlock(), _createElementBlock("div", {
                                     key: 0,
                                     class: _normalizeClass(['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'])
                                   }, [
-                                    (index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user')))
+                                    (index === chatHistory.length - 1 && (msg.role === 'user' || hasUserBefore))
                                       ? (_openBlock(), _createElementBlock("button", {
                                           key: 0,
                                           onClick: $event => (regenerateMessage(index)),

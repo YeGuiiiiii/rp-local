@@ -162,7 +162,7 @@
                     </div>
 
                     <template v-if="currentCharacter &amp;&amp; chatHistory.length > 0">
-                    <template v-for="({ msg, index }, displayIndex) in displayedChatMessages" :key="index">
+                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="index">
                     <div ref="messageElements" :data-role="msg.role" :data-chat-index="index" v-show="!(msg.role === 'assistant' &amp;&amp; index === chatHistory.length - 1 &amp;&amp; isThinking &amp;&amp; !(msg.reasoning || parseCot(msg.content).cot || parseCot(msg.content).main || (msg.toolCalls &amp;&amp; msg.toolCalls.length)))" :class="['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]" :style="{ transitionDelay: (displayIndex % 5) * 50 + 'ms' }">
                         <div :class="['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row']">
                             <!-- Avatar -->
@@ -338,8 +338,8 @@
                                     </div>
 
                                     <!-- Message Actions -->
-                                    <div v-if="!msg.isEditing_Message &amp;&amp; !isMessageThinkingOrRunning(msg) &amp;&amp; !(index === chatHistory.length - 1 &amp;&amp; !msg.isSelf &amp;&amp; isGenerating) &amp;&amp; !(msg.isSelf &amp;&amp; isConversationBusy &amp;&amp; !chatHistory.slice(index + 1).some(m => m.isSelf))" :class="['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100']">
-                                        <button v-if="index === chatHistory.length - 1 &amp;&amp; (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user'))" @click="regenerateMessage(index)" class="message-action-button" title="重新生成">
+                                    <div v-if="!msg.isEditing_Message &amp;&amp; !isMessageThinkingOrRunning(msg) &amp;&amp; !(index === chatHistory.length - 1 &amp;&amp; !msg.isSelf &amp;&amp; isGenerating) &amp;&amp; !(msg.isSelf &amp;&amp; isConversationBusy &amp;&amp; !hasSelfAfter)" :class="['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100']">
+                                        <button v-if="index === chatHistory.length - 1 &amp;&amp; (msg.role === 'user' || hasUserBefore)" @click="regenerateMessage(index)" class="message-action-button" title="重新生成">
                                             <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                                                 </path>

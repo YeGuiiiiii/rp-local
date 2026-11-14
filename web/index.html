@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.052'; window.RP_LOCAL_RELEASE = 314;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.053'; window.RP_LOCAL_RELEASE = 315;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -648,7 +648,7 @@
                     </div>
 
                     <template v-if="currentCharacter && chatHistory.length > 0">
-                    <template v-for="({ msg, index }, displayIndex) in displayedChatMessages" :key="index">
+                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="index">
                     <div ref="messageElements"
                         :data-role="msg.role"
                         :data-chat-index="index"
@@ -892,9 +892,9 @@
                                     </div>
 
                                     <!-- Message Actions -->
-                                    <div v-if="!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !chatHistory.slice(index + 1).some(m => m.isSelf))"
+                                    <div v-if="!msg.isEditing_Message && !isMessageThinkingOrRunning(msg) && !(index === chatHistory.length - 1 && !msg.isSelf && isGenerating) && !(msg.isSelf && isConversationBusy && !hasSelfAfter)"
                                         :class="['message-action-bar absolute bottom-0 -mb-9 md:-mb-10 flex items-center transition-opacity duration-200', msg.isSelf ? 'right-0' : 'left-0', isStyleFilterDetailsOpen(msg, index) ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100']">
-                                        <button v-if="index === chatHistory.length - 1 && (msg.role === 'user' || chatHistory.slice(0, index).some(m => m.role === 'user'))"
+                                        <button v-if="index === chatHistory.length - 1 && (msg.role === 'user' || hasUserBefore)"
                                             @click="regenerateMessage(index)"
                                             class="message-action-button"
                                             title="重新生成">
