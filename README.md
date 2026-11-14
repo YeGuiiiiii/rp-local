@@ -1,8 +1,8 @@
-# RP 本地版 2.9.060
+# RP 本地版 2.9.069
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.060.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.069.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.060**，Android versionCode 为 **321**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.069**，Android versionCode 为 **330**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -16,7 +16,7 @@ cd rp-local
 需要与安装包一致的固定版本时：
 
 ```sh
-git clone --branch v2.9.060 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
+git clone --branch v2.9.069 --depth 1 https://github.com/YeGuiiiiii/rp-local.git
 ```
 
 Windows 如果提示文件名过长，下载时添加长路径选项：`git -c core.longpaths=true clone https://github.com/YeGuiiiiii/rp-local.git`。
@@ -24,6 +24,22 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.061～2.9.069 主题色整表复刻与压缩按钮补位
+
+本节合并记录 2.9.061 至 2.9.069（versionCode 322～330）。
+
+- **2.9.061** 经典布局补上「压缩存储」按钮。2.9.060 只改了 `index.html` 的模板，经典布局的同一张卡片在 `themes/classic/layout.html` 里，用户看不到按钮。
+- **2.9.062** 主题色表面饱和度 0.10 → 0.32。0.10 在 97% 亮度上等于灰白，肉眼分不出；同时把未选中项的图标改成主色。
+- **2.9.063** 选中项底色压轻（0.18 实色 → 10%/3%/7% 三段渐变）并加顶边高光；字色改 `primary-600` + `saturate(1.35)`；开关改三段渐变 + 内阴影 + 滑块竖向渐变。
+- **2.9.064** 玻璃层（`--glass-bg` / `--glass-bg-strong` / `--glass-edge`）改由主色派生。抽屉铺的是 90% 白玻璃，只染 `--surface` 永远看不出变化。夜间取消表面染色——参考图夜间是中性深灰，插件也只转「主色家族」的颜色。
+- **2.9.065** 改为**整表复刻**：抓取所有样式表的 CSS 文本，逐颜色 token 做「色相旋转 + 饱和度缩放 + 亮度不动」，注入为最后一张样式表。近白/浅灰额外轻染（l ≤ 0.966、s = 0.42），因为 HSL 彩度被 `1-|2l-1|` 卡死，l=1 时任何饱和度都是纯白。语义色（红/绿/黄）按色相距离排除。
+- **2.9.066** 清掉旧路径残留：删 `recolorTarget`（未使用）、`glass` 覆盖（与整表复刻重复）、`cueDark`（恒为空）。`cueLight` 保留——`theme.css` 里的 `--surface: 255 255 255` 是裸三元组，正则匹配不到。
+- **2.9.067** 修夜间抽屉整片酒红：2.9.062 加的 `primary-50` 铺底规则没分昼夜，`--primary-50` 在暗色 ramp 里是深酒红。面板渐变、顶栏渐变、未选中项铺底三条统一加 `:not([data-app-theme="dark"])`。
+- **2.9.068** 预置色整排消失的兜底：色点由 `window.RPHubThemeKit?.presets` 驱动，getter 挂在主题脚本末尾，脚本任何一处初始化失败都会让整排消失。内置 8 色兜底，kit 有数据时优先用 kit。
+- **2.9.069** 整表复刻限定经典布局：`data-ui-skin !== 'classic'` 时清空染色表，并跳过 `ui-skin-*` 里非 classic 的样式表，避免默认布局的配色带跑另外两套皮肤。
+
+安装包 `RP-local-2.9.069.apk`：versionCode 330，7,573,354 字节，SHA256 `f7f69fa8ce5d9ec39d3e731a7c183a9e870ac7ebd71123a190de2d00f6c21103`。
 
 ## 2.9.060 存储压缩、主题色表面与自定义 API 入口
 
@@ -732,7 +748,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.060`，Android versionCode `321`。
+- 版本：`2.9.069`，Android versionCode `330`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。
