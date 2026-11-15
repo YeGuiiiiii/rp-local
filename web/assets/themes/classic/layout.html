@@ -3048,6 +3048,7 @@
 
 
         <image-download-sheet></image-download-sheet>
+        <update-notice :blocked="showUserSetupModal || showAnnouncement || backupTask.active"></update-notice>
         <release-announcement :show="showAnnouncement" @close="closeAnnouncement" @event="openCompetition"></release-announcement>
         <user-setup-modal :show="showUserSetupModal" :name="tempUserSetup.name" :description="tempUserSetup.description" :person="tempUserSetup.person" @update:name="tempUserSetup.name = $event" @update:description="tempUserSetup.description = $event" @update:person="tempUserSetup.person = $event" @save="saveUserSetup"></user-setup-modal>
         <action-confirm-modal :show="showConfirmModal" :message="confirmMessage" @confirm="handleConfirm" @cancel="handleCancel"></action-confirm-modal>

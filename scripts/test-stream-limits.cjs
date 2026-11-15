@@ -37,9 +37,17 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
       buffer: Buffer.from(JSON.stringify({ type: 'rp-hub-complete-backup', entries: [{ key: 'rp_hub_stream_limit_probe', value: 'new' }] })) });
   }
   async function failed() {
+    await selectContents();
     await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'failed', null, { timeout: 180000 });
     assert.equal(await page.evaluate(() => RPHubStorage.getStoredValue('stream_limit_probe')), 'old');
     return page.evaluate(() => __qa.streamImportPanel.state.error);
+  }
+  async function selectContents() {
+    await page.waitForFunction(() => ['select', 'ready', 'failed'].includes(__qa.streamImportPanel.state.phase),
+      null, { timeout: 120000 });
+    if (await page.evaluate(() => __qa.streamImportPanel.state.phase === 'select')) {
+      await page.getByRole('button', { name: '导入选中项', exact: true }).click();
+    }
   }
   try {
     await page.goto('https://sta1n156.github.io/RP-Hub/'); await init();
@@ -50,13 +58,13 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     await page.evaluate(() => {
       const input = document.querySelector('[aria-label="选择流式导入文件"]'), transfer = new DataTransfer();
       transfer.items.add(new File(['{"type":"rp-hub-complete-backup","entries":[{"key":"rp_hub_characters","value":[{"name":"over","description":"',
-        'x'.repeat(33 * 1048576), '"}]}]}'], 'single-33mb.json', { type: 'application/json' }));
+        'x'.repeat(129 * 1048576), '"}]}]}'], 'single-129mb.json', { type: 'application/json' }));
       input.files = transfer.files; input.dispatchEvent(new Event('change'));
     });
     report.singleRecordLimit = await failed();
-    assert.match(report.singleRecordLimit, /32 MB/);
+    assert.match(report.singleRecordLimit, /128 MB/);
     await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
-    await page.getByLabel('传输速度', { exact: true }).selectOption('fast');
+    await page.getByLabel('导入档位', { exact: true }).selectOption('fast');
     await page.evaluate(() => {
       const input = document.querySelector('[aria-label="选择流式导入文件"]'), transfer = new DataTransfer();
       transfer.items.add(new File(['{"type":"rp-hub-complete-backup","entries":[{"key":"rp_hub_characters","value":[{"uuid":"fast-card","name":"大卡","description":"',
@@ -67,10 +75,11 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     assert.equal(await page.evaluate(() => __qa.streamImportPanel.state.summary.cards), 1);
     await page.getByRole('dialog', { name: '导入备份', exact: true }).getByRole('button', { name: '取消', exact: true }).click();
     await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
-    await page.getByLabel('传输速度', { exact: true }).selectOption('balanced');
+    await page.getByLabel('导入档位', { exact: true }).selectOption('balanced');
     const largeFile = path.resolve(root, '../RP-流式导入实验/test-data/large-340mb.json');
     await page.getByLabel('选择流式导入文件').setInputFiles(largeFile);
     report.largeFileBytes = fs.statSync(largeFile).size;
+    await selectContents();
     await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready', null, { timeout: 120000 });
     report.largeLibraryReady = await page.evaluate(() => __qa.streamImportPanel.state.summary.cards > 0);
     assert.equal(report.largeLibraryReady, true, 'A large library of individually bounded cards must be accepted');
@@ -106,6 +115,6 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     assert.deepEqual(report.restored, { count: 16, descriptionBytes: 2 * 1048576, probe: 'committed' });
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(root, 'verification/stream-import-1.05/limits.json'), JSON.stringify({ ...report, errors }, null, 2));
-    console.log('Worker faults, 33 MiB record limit, 340 MiB streamed library and actual 32 MiB restore passed.');
+    console.log('Worker faults, 128 MiB record limit, 33 MiB acceptance, 340 MiB streamed library and actual 32 MiB restore passed.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

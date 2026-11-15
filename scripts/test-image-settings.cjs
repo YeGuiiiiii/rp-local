@@ -151,7 +151,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.waitForFunction(() => __exported.length === 2 && !__qa.isExportingAllData);
     await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
     assert.deepEqual(await page.evaluate(() => __exported.map(({ name, target }) => ({ name, target }))), [
-      { name: await page.evaluate(() => __exported[0].name), target: 'downloads' }, { name: '我的备份.json', target: 'custom' },
+      { name: await page.evaluate(() => __exported[0].name), target: 'downloads' }, { name: '我的备份.json', target: 'downloads' },
     ]);
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify({ samplers: 6, noiseSchedules: 3, persistedAfterReload: true,

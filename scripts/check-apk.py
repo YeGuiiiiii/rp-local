@@ -88,9 +88,20 @@ if tuple(map(int, version.split('.'))) >= (1, 6):
         ("Lcom/rphub/app/MainActivity;", "writeBase64ToDownloads", "导出文件"),
     ]:
         method = next(method for method in classes[class_name].get_methods() if method.get_name() == method_name)
-        strings = [str(operand[-1]) for instruction in method.get_instructions()
-                   if instruction.get_name().startswith("const-string") for operand in instruction.get_operands()]
-        assert strings.count("Download/RP本地版/" + directory) == 2, (method_name, strings)
+        instructions = "\n".join(instruction.get_output() for instruction in method.get_instructions())
+        if "Lcom/rphub/app/DownloadFiles;" in classes:
+            downloads = classes["Lcom/rphub/app/DownloadFiles;"]
+            fields = {field.get_name(): field.get_init_value().get_value() for field in downloads.get_fields()
+                      if field.get_init_value()}
+            assert fields["BACKUPS" if directory == "数据备份" else "EXPORTS"] == "Download/RP本地版/" + directory
+            assert "DownloadFiles;->" + ("open(" if directory == "数据备份" else "save(") in instructions
+            if directory == "数据备份":
+                assert "DownloadFiles;->BACKUPS" in instructions
+            else:
+                save = next(item for item in downloads.get_methods() if item.get_name() == "save")
+                assert "Download/RP本地版/导出文件" in "\n".join(item.get_output() for item in save.get_instructions())
+        else:
+            assert "Download/RP本地版/" + directory in instructions
 show_lighthouse = next(method for method in activity.get_methods() if method.get_name() == "showLighthouseLayer")
 assert "OnlineReturn;->attach" in "\n".join(i.get_output() for i in show_lighthouse.get_instructions())
 return_listener = classes["Lcom/rphub/app/MainActivity$OnlineReturn;"]

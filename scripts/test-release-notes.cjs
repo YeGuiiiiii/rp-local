@@ -94,7 +94,8 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await dialog(fresh).getByRole('button').count(), 3, 'Close plus two optional event entries, no confirmation');
         assert.equal(await fresh.locator('.release-footer').innerText(), '', 'No explanatory footer');
         assert.match(await fresh.locator('.release-reading').innerText(), /特别鸣谢红花铃🔔老师、启元老师/);
-        assert.match(await fresh.locator('.release-reading').innerText(), /QQ 群 472441481、132292045 发布/);
+        assert.match(await fresh.locator('.release-reading').innerText(), /QQ 群 132292045 发布/);
+        assert.ok(!(await fresh.locator('.release-reading').innerText()).includes('472441481'));
         assert.equal(await fresh.locator('.release-reading').evaluate(reading => {
             const viewport = reading.getBoundingClientRect();
             return [...reading.querySelectorAll('.competition-entry')].length === 2

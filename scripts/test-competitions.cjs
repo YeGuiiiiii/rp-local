@@ -137,7 +137,7 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await page.evaluate(() => __qa.currentView), 'advanced');
         assert.equal(await page.getByRole('button', { name: '科技／科幻杯', exact: true }).isVisible(), true, 'Returning preserves the selected banner');
         await page.evaluate(() => __qa.openAnnouncement());
-        assert.match(await page.locator('.release-section').first().innerText(), /鸣谢.*红花铃.*启元.*472441481/s);
+        assert.match(await page.locator('.release-section').first().innerText(), /鸣谢.*红花铃.*启元.*132292045/s);
         await page.locator('.release-reading').evaluate(element => { element.scrollTop = 90; });
         await page.locator('.release-overlay').getByRole('button', { name: '奇幻杯周赛', exact: true }).scrollIntoViewIfNeeded();
         const announcementScroll = await page.locator('.release-reading').evaluate(element => element.scrollTop);

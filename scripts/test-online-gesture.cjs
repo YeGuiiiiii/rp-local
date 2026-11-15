@@ -68,7 +68,7 @@ fs.mkdirSync(output, { recursive: true });
         const mask = await page.locator('.shell-online-mask').boundingBox();
         assert.deepEqual(mask, { x: 0, y: 0, width: 390, height: 844 });
         assert.equal(await page.locator('.app-main').evaluate(el => el.inert), true);
-        for (const name of ['灯塔', '万象广场']) {
+        for (const name of ['灯塔', '万相广场']) {
             const point = await center(option(name)), anchor = await center(trigger());
             assert.ok(point.x < anchor.x && point.y < anchor.y, name + ' is above and left of the trigger');
             assert.equal(await option(name).evaluate(el => getComputedStyle(el).borderRadius), '50%');
@@ -88,9 +88,11 @@ fs.mkdirSync(output, { recursive: true });
         await touch('touchEnd'); await closed();
         assert.equal(await page.evaluate(() => __onlineCalls.length), 2);
         await hold();
-        await touch('touchMove', await center(option('万象广场')));
-        await page.waitForFunction(() => document.querySelector('.shell-online-choice.is-target')?.getAttribute('aria-label') === '万象广场');
+        await touch('touchMove', await center(option('万相广场')));
+        await page.waitForFunction(() => document.querySelector('.shell-online-choice.is-target')?.getAttribute('aria-label') === '万相广场');
         await touch('touchEnd'); await closed('square');
+        await page.evaluate(() => window.rphubHandleBack());
+        assert.equal(await page.evaluate(() => __qa.currentView), 'square');
         await page.evaluate(() => window.rphubHandleBack());
         assert.equal(await page.evaluate(() => __qa.currentView), 'settings', 'Online page returns to the caller');
         await hold(); await touch('touchMove', { x: 35, y: 100 }); await touch('touchEnd'); await closed();
@@ -129,7 +131,7 @@ fs.mkdirSync(output, { recursive: true });
                 await page.waitForTimeout(220);
                 await trigger().tap(); await dialog().waitFor(); await page.waitForTimeout(220);
                 const anchor = await center(trigger());
-                for (const name of ['灯塔', '万象广场']) {
+                for (const name of ['灯塔', '万相广场']) {
                     const box = await option(name).boundingBox();
                     assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.width <= viewport.width && box.y + box.height + 25 <= viewport.height);
                     assert.ok(box.x + box.width / 2 < anchor.x && box.y + box.height / 2 < anchor.y);

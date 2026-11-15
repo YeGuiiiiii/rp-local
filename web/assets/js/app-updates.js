@@ -4,8 +4,9 @@
     function createUpdater(options) {
         const storage = options.storage;
         const state = (options.reactive || (value => value))({
-            automatic: storage.getItem('rp-auto-update') === 'true', phase: 'idle',
-            latest: null, progress: 0, error: '', currentVersion: options.currentVersion
+            automatic: storage.getItem('rp-update-notifications') !== 'false', phase: 'idle',
+            latest: null, progress: 0, error: '', currentVersion: options.currentVersion,
+            showNotice: false, mascot: 'yueyue'
         });
         let pending, timer;
         const bridge = () => options.bridge?.();
@@ -31,7 +32,11 @@
         };
         const check = (automatic = false) => {
             if (pending) return pending;
-            if (['downloading', 'verifying', 'ready'].includes(state.phase)) return Promise.resolve();
+            if (['downloading', 'verifying'].includes(state.phase)) {
+                if (!automatic) state.showNotice = true;
+                return Promise.resolve();
+            }
+            const readyCode = ['ready', 'permission'].includes(state.phase) ? state.latest?.versionCode : null;
             state.phase = 'checking';
             state.error = '';
             pending = (async () => {
@@ -48,11 +53,16 @@
                         || !/^[a-f0-9]{64}$/.test(info.sha256) || !/^https:\/\//.test(info.url))
                         throw new Error('更新信息不完整，暂时不能下载，请稍后重试。');
                     state.latest = info.versionCode > options.currentCode ? info : null;
-                    state.phase = state.latest ? 'available' : 'current';
+                    state.phase = state.latest ? (readyCode === info.versionCode ? 'ready' : 'available') : 'current';
                     storage.setItem('rp-update-checked', String(Date.now()));
-                    if (automatic && state.latest) {
-                        options.notice?.('发现 RP-Local ' + info.versionName + '，可在设置里查看更新。');
-                        if (bridge()?.isUnmetered()) download(true);
+                    let dismissed = {};
+                    try { dismissed = JSON.parse(storage.getItem('rp-update-dismissed') || '{}') || {}; } catch {}
+                    const quiet = dismissed.code === info.versionCode && Date.now() - dismissed.at < 24 * 3600000;
+                    if (state.latest && (!automatic || !quiet)) {
+                        if (!state.showNotice) state.mascot = Math.random() < .5 ? 'yueyue' : 'honghualing';
+                        state.showNotice = true;
+                    } else if (!state.latest) {
+                        state.showNotice = false;
                     }
                 } catch (error) {
                     state.phase = 'error';
@@ -64,7 +74,12 @@
         };
         return {
             state, check, download, stop,
-            setAutomatic(value) { storage.setItem('rp-auto-update', String(value)); state.automatic = value; },
+            setAutomatic(value) { storage.setItem('rp-update-notifications', String(value)); state.automatic = value; },
+            dismiss() {
+                state.showNotice = false;
+                if (state.latest) storage.setItem('rp-update-dismissed',
+                    JSON.stringify({ code: state.latest.versionCode, at: Date.now() }));
+            },
             async start() {
                 if (!bridge()) return;
                 refresh();
@@ -85,7 +100,6 @@
     else root.RPUpdates = createUpdater({
         reactive: root.Vue.reactive, storage: root.localStorage, fetch: root.fetch.bind(root),
         currentCode: root.RP_LOCAL_RELEASE, currentVersion: root.RP_LOCAL_VERSION,
-        bridge: () => root.RPLocalUpdates,
-        notice: message => root.dispatchEvent(new CustomEvent('rp:notice', { detail: { message } }))
+        bridge: () => root.RPLocalUpdates
     });
 })(typeof window === 'undefined' ? globalThis : window);

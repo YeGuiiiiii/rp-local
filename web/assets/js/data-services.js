@@ -79,13 +79,14 @@
         const synchronized = !!revision && revision === window.RPLocalStore.readRevision()
             && (Array.isArray(value) || isCharacterDirectory(value));
         const entries = synchronized ? [{ key: 'rp_hub_characters', value }]
-            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY && !isPrivateChatKey(key))
+            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY)
                 .map(key => key === 'rp_hub_characters' ? { key, value } : { key });
         if (!synchronized) await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false, force: true });
         await window.RPLocalStore.initialize(entries, async (key, restored) => {
             await dbSetTo(mainDb, key, restored, { mirror: false, force: true });
             if (key === 'rp_hub_characters') initialReads.set(key, restored);
-        }, { synchronized, readEntry: key => dbGetFrom(mainDb, key) });
+        }, { synchronized, readEntry: key => isChatKey(key) || isPrivateChatKey(key)
+            ? readOne(mainDb, key) : dbGetFrom(mainDb, key) });
         const characters = entries.find(entry => entry.key === 'rp_hub_characters');
         if (characters) initialReads.set(characters.key, characters.value);
         if (!synchronized) {
@@ -382,8 +383,7 @@
                     pendingMirrors++;
                     latestMirrorRevision = mirrorRevision;
                 }
-                Promise.all([...mirrors].map(([key, value]) => value === undefined
-                    ? window.RPLocalStore.remove(key) : window.RPLocalStore.save(key, value)))
+                Promise.resolve(mirrors.size ? window.RPLocalStore.saveBatch([...mirrors]) : undefined)
                     .then(() => {
                         if (mirrorRevision && --pendingMirrors === 0 && !mirrorFailed)
                             return window.RPLocalStore.saveRevision(latestMirrorRevision);
@@ -403,7 +403,19 @@
                 if (options.signal.aborted) { onSignalAbort(); return; }
             }
             const store = transaction.objectStore('store');
+            store.fail = abortWith;
             const mirror = targetDb === mainDb && options.mirror !== false && window.RPLocalStore?.available;
+            if (mirror) {
+                const put = store.put.bind(store), remove = store.delete.bind(store);
+                store.put = (value, key) => {
+                    if (isChatKey(key) || isPrivateChatKey(key)) mirrors.set(key, value);
+                    return put(value, key);
+                };
+                store.delete = key => {
+                    if (isChatKey(key) || isPrivateChatKey(key)) mirrors.set(key, undefined);
+                    return remove(key);
+                };
+            }
             const changed = key => {
                 initialReads.delete(key);
                 if (mirror && !mirrorRevision) {
@@ -417,11 +429,7 @@
                 put: (value, key) => {
                     changed(key);
                     if (key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
-                    // [rphub 2.9.051] 聊天不再镜像成单个文件。
-                    //   镜像走 saveEntry 的兜底分支：write(file, {key, value}) → JSON.stringify 整份
-                    //   再按 64KB 一片过桥写盘。聊天到 242MB 时，等于每次保存（含删一条消息）
-                    //   都要多拷一份、多 stringify 一遍、多写 242MB 文件 —— 卡死与「越聊越卡」的主因。
-                    //   聊天的权威副本一直就在主库的分块里，镜像这层只是冗余。
+                    // Chat directories and changed parts are mirrored by the native store hooks above.
                     if (mirror && !isChatKey(key) && !isPrivateChatKey(key)) mirrors.set(key, cloneForStorage(value));
                     return putStoredRecord(store, value, key);
                 },
@@ -881,11 +889,7 @@
     //   删一条消息的峰值因此多出 242MB，是「卡死 → 重载 → 对话还在」的直接成因之一。
     const readChatBaseline = async (key) => {
         if (!mainDb) await initDB();
-        const raw = await new Promise((resolve, reject) => {
-            const request = mainDb.transaction(['store'], 'readonly').objectStore('store').get(key);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error || storageWriteError('UnknownError', '读取聊天目录失败'));
-        });
+        const raw = await readOne(mainDb, key);
         if (raw === undefined) return { value: undefined, length: 0, directory: null };
         if (isChatKey(key) && isChatDirectory(raw)) {
             if (!Number.isSafeInteger(raw.parts) || raw.parts < 1

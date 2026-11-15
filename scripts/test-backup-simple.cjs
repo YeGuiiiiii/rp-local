@@ -34,9 +34,9 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         await surface.getByRole('button', { name: '云端下载', exact: true }).click();
         assert.equal(await page.getByPlaceholder('XXXX-XXXX-XXXX-XXXX').isVisible(), true);
         await page.evaluate(() => __qa.closeCloudBackup());
-        assert.equal(await surface.getByLabel('传输速度', { exact: true }).isVisible(), true,
+        assert.equal(await surface.getByLabel('导入档位', { exact: true }).isVisible(), true,
             'Import and export speed must be available on the main backup page');
-        await surface.getByLabel('传输速度', { exact: true }).selectOption('fast');
+        await surface.getByLabel('导入档位', { exact: true }).selectOption('fast');
         assert.equal(await page.evaluate(() => __qa.backupProfile), 'fast');
         const chosen = page.waitForEvent('filechooser');
         await surface.getByText('导入备份', { exact: true }).click();
@@ -76,7 +76,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
                         RPThemePacks.set(skin); RPThemePacks.setMode(mode);
                         __qa.autoBackupConfig.enabled = true; __qa.toasts = [];
                     }, { skin, mode });
-                    assert.equal(await surface.getByLabel('传输速度', { exact: true }).isVisible(), true);
+                    assert.equal(await surface.getByLabel('导入档位', { exact: true }).isVisible(), true);
                     assert.ok(await surface.evaluate(node => node.getBoundingClientRect().width <= 761));
                     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
                     if (width !== 390) await page.screenshot({ path: path.join(output, `${skin}-${mode}-${width}.png`), animations: 'disabled' });

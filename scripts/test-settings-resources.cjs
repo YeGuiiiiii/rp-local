@@ -43,7 +43,8 @@ fs.mkdirSync(output, { recursive: true });
             for (let i = 0; i < 2; i++) {
                 await page.evaluate(() => __qa.openAnnouncement());
                 const first = page.locator('.release-section').first();
-                assert.match(await first.innerText(), /鸣谢.*红花铃.*启元.*472441481/s);
+                assert.match(await first.innerText(), /鸣谢.*红花铃.*启元/s);
+                assert.doesNotMatch(await first.innerText(), /472441481/);
                 await page.getByRole('button', { name: '关闭更新公告', exact: true }).click();
             }
         });
@@ -230,7 +231,7 @@ fs.mkdirSync(output, { recursive: true });
                     await page.evaluate(({ theme, scheme }) => {
                         RPThemePacks.set(theme); RPHubThemeKit.setScheme(scheme); __qa.toasts = [];
                     }, { theme, scheme });
-                    await page.waitForTimeout(200);
+                    await page.getByRole('button', { name: '搜索世界书', exact: true }).waitFor();
                     assert.equal(await page.locator('.workspace-context, .worldinfo-search, .worldinfo-pagination').count(), 0);
                     assert.equal(await page.getByRole('button', { name: '搜索世界书', exact: true }).count(), 1);
                     await page.screenshot({ path: path.join(review, `${theme}-${scheme}-${width}-top.png`) });

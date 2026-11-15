@@ -33,8 +33,9 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
                 __qa.navigateWorkspace(view);
             }, { view, field, titleKey });
             const list = page.locator('#' + view + '-list'), checkboxes = list.locator('.resource-select input');
-            await page.getByRole('button', { name: '批量删除' + label, exact: true }).click();
-            assert.equal(await page.locator('.resource-batch-actions button').count(), 2);
+            assert.equal(await page.locator('.resource-batch-actions button').count(), 1);
+            await page.getByRole('button', { name: '全选' + label, exact: true }).click();
+            await page.getByRole('button', { name: '全不选' + label, exact: true }).click();
             assert.equal(await checkboxes.count(), view === 'worldinfo' ? 100 : 125);
             const first = checkboxes.first();
             const box = await first.locator('..').boundingBox();
@@ -52,8 +53,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
                         await page.evaluate(({ skin, mode }) => {
                             RPThemePacks.set(skin); RPThemePacks.setMode(mode); __qa.toasts = [];
                         }, { skin, mode });
-                        const header = page.locator('.resource-management .settings-page-header');
-                        assert.ok(await header.getByRole('button', { name: '删除所选' + label, exact: true }).isVisible());
+                        assert.ok(await page.getByRole('button', { name: '删除所选', exact: true }).isVisible());
                         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
                         assert.equal(await list.locator('.resource-select input:checked').count(), 2);
                         await page.screenshot({ path: path.join(output, `${view}-${skin}-${mode}-${width}.png`), animations: 'disabled' });
@@ -61,6 +61,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
                 }
             }
             await page.setViewportSize({ width: 390, height: 844 });
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
             await secondRow.getByRole('button', { name: '查看同名条目', exact: true }).click();
             assert.equal(await page.evaluate(view => view === 'worldinfo' ? __qa.showWorldInfoEditor : __qa.showRegexEditor, view), true);
             await page.evaluate(view => { if (view === 'worldinfo') __qa.showWorldInfoEditor = false; else __qa.showRegexEditor = false; }, view);
@@ -80,16 +81,18 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             const beforeScroll = await list.evaluate(node => node.closest('.management-view').scrollTop);
             const cdp = await context.newCDPSession(page);
             await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 175, y: 650 }] });
-            for (let y = 620; y >= 300; y -= 40)
+            for (let y = 620; y >= 300; y -= 40) {
                 await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 175, y }] });
+                await page.evaluate(() => new Promise(requestAnimationFrame));
+            }
             await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
             await page.waitForFunction(({ view, before }) => document.getElementById(view + '-list').closest('.management-view').scrollTop > before, { view, before: beforeScroll });
             assert.equal(await page.evaluate(() => __qa.showWorldInfoEditor || __qa.showRegexEditor), false);
-            await page.getByRole('button', { name: '删除所选' + label, exact: true }).click();
+            await page.getByRole('button', { name: '删除所选', exact: true }).click();
             assert.match(await page.evaluate(() => __qa.globalConfirmModal.message), /2/);
             await page.evaluate(() => __qa.globalConfirmModal.onCancel());
             assert.equal(await page.evaluate(field => __qa[field].length, field), 125);
-            await page.getByRole('button', { name: '删除所选' + label, exact: true }).click();
+            await page.getByRole('button', { name: '删除所选', exact: true }).click();
             await page.evaluate(() => __qa.globalConfirmModal.onConfirm());
             await page.waitForFunction(field => __qa[field].length === 123, field);
             assert.equal(await page.evaluate(({ field, titleKey }) => __qa[field].some(item => item[titleKey] === '同名条目'), { field, titleKey }), false);
@@ -98,7 +101,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             await page.getByRole('button', { name: '全不选' + label, exact: true }).click();
             assert.equal(await list.locator('.resource-select input:checked').count(), 0);
             await page.getByRole('button', { name: '全选' + label, exact: true }).click();
-            await page.getByRole('button', { name: '删除所选' + label, exact: true }).click();
+            await page.getByRole('button', { name: '删除所选', exact: true }).click();
             await page.evaluate(() => __qa.globalConfirmModal.onConfirm());
             await page.waitForFunction(field => __qa[field].length === 0, field);
             assert.equal(await list.locator('.sortable-list-item').count(), 0);
