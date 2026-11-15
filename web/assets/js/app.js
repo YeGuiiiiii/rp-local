@@ -6099,6 +6099,10 @@ const app = createApp({
         };
         // 落点已固定，丢弃历史上选择过的文件夹，避免继续影响写入
         try { if (appBackupFolder.value) { appBackupFolder.value = ''; } } catch (_) {}
+        // [rphub 2.9.110] 只有「当前已经选中一张卡」时才需要等记忆。
+        //   记忆是按角色分支加载的，卡片列表为空时 _classicMemoriesLoaded 永远不会变 true
+        //   ——2.9.107 无条件等待，导致首次使用（没有任何卡）导入直接被卡住、导入根本没开始。
+        const shouldWaitMemoryBeforeImport = () => !!(currentCharacter.value && currentCharacter.value.uuid);
         // [rphub 2.9.107] 导入角色卡前等记忆载入，避免启动竞态直接报错
         const waitForMemoryLoaded = async (timeoutMs = 10000) => {
             const startedAt = Date.now();
@@ -15872,7 +15876,7 @@ const app = createApp({
                         return;
                     }
                     try {
-                        if (!await waitForMemoryLoaded(10000)) {
+                        if (shouldWaitMemoryBeforeImport() && !await waitForMemoryLoaded(10000)) {
                             showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
                             return;
                         }
@@ -15900,9 +15904,8 @@ const app = createApp({
                         return;
                     }
                     try {
-                        // 启动瞬间记忆可能还没载入，等一会儿再导，不要直接失败
-                        const ready = await waitForMemoryLoaded(10000);
-                        if (!ready) {
+                        // 仅当已选中角色（有记忆作用域）时才等，空列表直接导入
+                        if (shouldWaitMemoryBeforeImport() && !await waitForMemoryLoaded(10000)) {
                             showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
                             return;
                         }
