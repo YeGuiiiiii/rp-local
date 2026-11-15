@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.112'; window.RP_LOCAL_RELEASE = 371;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.113'; window.RP_LOCAL_RELEASE = 372;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -3379,6 +3379,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div v-if="worldInfoPageCount > 1" class="worldinfo-pager">
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage <= 1" @click="setWorldInfoPage(worldInfoPage - 1)">上一页</button>
+                    <span class="worldinfo-pager-info">第 {{ worldInfoPage }} / {{ worldInfoPageCount }} 页 · 每页 200 条</span>
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage >= worldInfoPageCount" @click="setWorldInfoPage(worldInfoPage + 1)">下一页</button>
                 </div>
 
                 <div id="worldinfo-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">

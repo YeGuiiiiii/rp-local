@@ -2057,7 +2057,20 @@ const app = createApp({
         const globalFirst = (a, b) => Number(b.scope === 'global') - Number(a.scope === 'global');
         const orderedWorldInfo = computed(() => worldInfo.value.map((entry, index) => ({ entry, index }))
             .sort((a, b) => globalFirst(a.entry, b.entry)));
-        const visibleWorldInfo = computed(() => orderedWorldInfo.value.slice(0, worldInfoLimit.value));
+        // [rphub 2.9.113] 世界书改分页：原来靠 worldInfoLimit 滚到底再加 100，
+        //   条目上千时滚动条会一直变长、滚动位置也跟着跳。改成 200 条一页。
+        const WORLDINFO_PAGE_SIZE = 200;
+        const worldInfoPage = ref(1);
+        const worldInfoPageCount = computed(() => Math.max(1, Math.ceil(orderedWorldInfo.value.length / WORLDINFO_PAGE_SIZE)));
+        const visibleWorldInfo = computed(() => {
+            const start = (worldInfoPage.value - 1) * WORLDINFO_PAGE_SIZE;
+            return orderedWorldInfo.value.slice(start, start + WORLDINFO_PAGE_SIZE);
+        });
+        const setWorldInfoPage = page => {
+            worldInfoPage.value = Math.min(Math.max(1, Math.round(Number(page) || 1)), worldInfoPageCount.value);
+            scrollWorldInfoTop();
+        };
+        watch(worldInfoPageCount, count => { if (worldInfoPage.value > count) worldInfoPage.value = count; });
         const onWorldInfoScroll = event => {
             const view = event.target;
             worldInfoScrolled.value = view.scrollTop > 300;
@@ -2072,6 +2085,7 @@ const app = createApp({
         };
         watch([currentView, currentCharacterIndex], () => {
             worldInfoLimit.value = 100;
+            worldInfoPage.value = 1;
             worldInfoScrolled.value = false;
         });
         const managedRegexScripts = computed(() => regexScripts.value.map((script, index) => ({ script, index }))
@@ -17235,7 +17249,7 @@ const app = createApp({
             },
 
             showRegexEditor, showWorldInfoEditor, editingRegex, editingWorldInfo, worldInfoKeysText, updateEditingWorldInfoKeys,
-            resourceBatch, resourceTap, visibleWorldInfo, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
+            resourceBatch, resourceTap, visibleWorldInfo, worldInfoPage, worldInfoPageCount, setWorldInfoPage, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
             worldInfoSettings, showWorldInfoSettings, showMemorySettings, settingsHelpTopic, showActiveToolSettings, showUiTemplateSettings, estimatedGenerationTime, currentWaitTime,
             globalConfirmModal,
 
