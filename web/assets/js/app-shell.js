@@ -365,7 +365,7 @@
                     :title="night?'切换到日间模式':'切换到夜间模式'"><icon :name="night?'Sun':'Moon'"/><span>{{night?'日间':'夜间'}}</span></button>
                   <button type="button" @click="$emit('navigate','settings')"><icon name="Settings2"/><span>设置</span></button>
                 </div>
-                <p class="yy-menu-signature">RP 本地版 {{version}}</p>
+                <p class="yy-menu-signature">RP-Local {{version}}</p>
               </section>
             </div>
           </teleport>`
@@ -905,7 +905,7 @@
                 @keydown.esc.stop.prevent="$emit('close')" @keydown="trapFocus">
                 <section class="release-notice" role="dialog" aria-modal="true" aria-labelledby="release-title">
                   <header class="release-header">
-                    <div><h2 id="release-title">{{notes.title}}</h2><p>RP 本地版 {{notes.version}} <span>与 {{notes.baseline}} 对照</span></p></div>
+                    <div><h2 id="release-title">{{notes.title}}</h2><p>RP-Local {{notes.version}} <span>与 {{notes.baseline}} 对照</span></p></div>
                     <button type="button" class="release-close" aria-label="关闭更新公告" title="关闭更新公告" @click="$emit('close')"><icon name="X"/></button>
                   </header>
                   <div class="release-reading" tabindex="0" role="region" aria-label="更新内容">

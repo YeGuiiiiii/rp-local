@@ -3,4 +3,5 @@
     <color name="window_bg">#f9fafb</color>
     <color name="window_bg_dark">#10151c</color>
     <color name="brand_blue">#2563eb</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>

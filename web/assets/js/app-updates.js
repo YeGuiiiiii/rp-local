@@ -51,7 +51,7 @@
                     state.phase = state.latest ? 'available' : 'current';
                     storage.setItem('rp-update-checked', String(Date.now()));
                     if (automatic && state.latest) {
-                        options.notice?.('发现 RP 本地版 ' + info.versionName + '，可在设置里查看更新。');
+                        options.notice?.('发现 RP-Local ' + info.versionName + '，可在设置里查看更新。');
                         if (bridge()?.isUnmetered()) download(true);
                     }
                 } catch (error) {

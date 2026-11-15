@@ -7,8 +7,8 @@ sdkInfo:
   minSdkVersion: 21
   targetSdkVersion: 33
 versionInfo:
-  versionCode: 354
-  versionName: '2.9.095'
+  versionCode: 368
+  versionName: '2.9.109'
 resourcesInfo:
   packageId: 127
   keepRawValues: true

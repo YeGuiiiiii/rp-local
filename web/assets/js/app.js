@@ -6097,6 +6097,18 @@ const app = createApp({
             if (!window.AndroidBridge?.isNativeApp?.()) return;
             appBackupFolder.value = String(window.AndroidBridge.getBackupFolder?.() || '');
         };
+        // 落点已固定，丢弃历史上选择过的文件夹，避免继续影响写入
+        try { if (appBackupFolder.value) { appBackupFolder.value = ''; } } catch (_) {}
+        // [rphub 2.9.107] 导入角色卡前等记忆载入，避免启动竞态直接报错
+        const waitForMemoryLoaded = async (timeoutMs = 10000) => {
+            const startedAt = Date.now();
+            while (Date.now() - startedAt < timeoutMs) {
+                if (_classicMemoriesLoaded && _b1MemoryState) return true;
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            return !!( _classicMemoriesLoaded && _b1MemoryState);
+        };
+
         const chooseAppBackupFolder = () => {
             if (window.AndroidBridge?.isNativeApp?.() && typeof window.AndroidBridge.chooseBackupFolder === 'function') {
                 window.AndroidBridge.chooseBackupFolder();
@@ -6104,6 +6116,25 @@ const app = createApp({
             }
             showToast('当前环境不支持选择默认保存文件夹', 'warning');
         };
+        // [rphub 2.9.103] 落点改为固定，界面上不再提供「选择默认文件夹」。
+        //   这段页面来自原版模板，用 DOM 方式摘掉按钮，避免改动模板结构。
+        const removeBackupFolderButton = () => {
+            try {
+                document.querySelectorAll('button').forEach(button => {
+                    if (String(button.textContent || '').trim() === '选择默认文件夹') button.remove();
+                });
+            } catch (_) {}
+        };
+        const observeBackupFolderButton = () => {
+            removeBackupFolderButton();
+            try {
+                const observer = new MutationObserver(() => removeBackupFolderButton());
+                observer.observe(document.body, { childList: true, subtree: true });
+            } catch (_) {}
+        };
+        if (document.body) observeBackupFolderButton();
+        else document.addEventListener('DOMContentLoaded', observeBackupFolderButton, { once: true });
+
         window.rphubBackupFolderChanged = (folderUri) => {
             appBackupFolder.value = String(folderUri || '');
             showToast(appBackupFolder.value ? '默认保存文件夹已更新' : '已清除默认保存文件夹', 'success');
@@ -6778,10 +6809,9 @@ const app = createApp({
                 if (!getMainDb()) await initDB();
                 const fileName = buildBackupFileName();
                 const nativeBridge = window.AndroidBridge;
+                // [rphub 2.9.103] 备份固定走「下载」通道（RP本地版 根目录），不再受用户选择影响
                 const nativeExportTarget = nativeBridge?.isNativeApp?.()
-                    ? (String(appBackupFolder.value || nativeBridge.getBackupFolder?.() || '').trim()
-                        ? 'folder'
-                        : (typeof nativeBridge.createBackupFileToDownloads === 'function' ? 'downloads' : ''))
+                    ? (typeof nativeBridge.createBackupFileToDownloads === 'function' ? 'downloads' : 'folder')
                     : '';
                 if (pickLocation === true) session = await openBackupPicker(fileName);
                 if (!session && nativeExportTarget) {
@@ -15834,27 +15864,54 @@ const app = createApp({
             } else if (file.type === 'application/json' || file.name.toLowerCase().endsWith('.json')) {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
+                    let data = null;
                     try {
-                        const data = JSON.parse(e.target.result);
-                        await importCharacterData(data, null, { sourceBytes: file.size });
+                        data = JSON.parse(e.target.result);
                     } catch (err) {
                         showToast('JSON解析失败: ' + err.message, 'error');
+                        return;
+                    }
+                    try {
+                        if (!await waitForMemoryLoaded(10000)) {
+                            showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
+                            return;
+                        }
+                        await importCharacterData(data, null, { sourceBytes: file.size });
+                    } catch (err) {
+                        console.error(err);
+                        showToast('导入失败: ' + (err && err.message || err), 'error');
                     }
                 };
                 reader.readAsText(file);
             } else if (file.type === 'image/png' || file.name.endsWith('.png')) {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
+                    // [rphub 2.9.107] 把「解析」和「导入」分开报错。
+                    //   原来整段共用一个 catch，导入阶段抛的「记忆尚未加载完成」也被标成
+                    //   「PNG解析失败」，看起来像文件坏了，其实只是启动竞态。
+                    const buffer = e.target.result;
+                    let parsed = null;
                     try {
-                        const buffer = e.target.result;
-                        const { data } = cardUtils.parsePngCharacterData(buffer);
-                        const blob = new Blob([buffer], { type: 'image/png' });
-                        const avatarUrl = await cardUtils.blobToDataUrl(blob);
-                        await importCharacterData(data, avatarUrl, { sourceBytes: file.size });
+                        parsed = cardUtils.parsePngCharacterData(buffer);
                     } catch (err) {
                         if (err.chunks) console.warn("Available chunks:", Object.keys(err.chunks));
                         console.error(err);
                         showToast('PNG解析失败: ' + err.message, 'error');
+                        return;
+                    }
+                    try {
+                        // 启动瞬间记忆可能还没载入，等一会儿再导，不要直接失败
+                        const ready = await waitForMemoryLoaded(10000);
+                        if (!ready) {
+                            showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
+                            return;
+                        }
+                        const blob = new Blob([buffer], { type: 'image/png' });
+                        const avatarUrl = await cardUtils.blobToDataUrl(blob);
+                        await importCharacterData(parsed.data, avatarUrl, { sourceBytes: file.size });
+                    } catch (err) {
+                        console.error(err);
+                        showToast('导入失败: ' + (err && err.message || err), 'error');
                     }
                 };
                 reader.readAsArrayBuffer(file);
@@ -16013,11 +16070,16 @@ const app = createApp({
                 // 先走默认落点，别再每次都弹系统选择器：
                 //   有默认备份文件夹 → 直接建在文件夹里；否则建到系统「下载」目录。
                 //   两者都不可用才退回到选择器（与全量导出 exportAllData 的优先级一致）。
-                const folder = String(appBackupFolder.value || bridge.getBackupFolder?.() || '').trim();
-                if (folder && typeof bridge.createBackupFile === 'function') {
-                    session = startChunkedBackup(fileName, 'folder', mime);
-                } else if (typeof bridge.createBackupFileToDownloads === 'function') {
+                // [rphub 2.9.101] 回到 2.9.099 之前的落点：走 createBackupFile，
+                //   即「Download/RP本地版/导出文件/」。2.9.100 改成系统下载目录后，
+                //   文件被写到 RP本地版 根目录，和以前的导出位置对不上。
+                // [rphub 2.9.103] 落点固定：只走 createBackupFileToDownloads。
+                //   不能走 createBackupFile —— 它读的是原生侧保存的文件夹，JS 清不掉，
+                //   用户改过备份位置后导出就会跟着跑过去。
+                if (typeof bridge.createBackupFileToDownloads === 'function') {
                     session = startChunkedBackup(fileName, 'downloads', mime);
+                } else if (typeof bridge.createBackupFile === 'function') {
+                    session = startChunkedBackup(fileName, 'folder', mime);
                 }
             } catch (error) {
                 console.warn('聊天记录导出落点回退到选择器:', error);
@@ -16083,7 +16145,7 @@ const app = createApp({
                 session.token = '';
                 showToast(finished.startsWith('OK:')
                     ? '聊天记录已保存到 ' + finished.slice(3)
-                    : '聊天记录已保存', 'success', 3000);
+                    : '聊天记录已保存到系统「下载」目录', 'success', 3000);
                 return { channel: 'native', ok: null };
             } catch (error) {
                 abortChunkedBackup(session);
