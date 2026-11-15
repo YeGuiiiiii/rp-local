@@ -1368,9 +1368,24 @@ const app = createApp({
             settings.fastModel = fast;
             const mode = ['quality', 'balanced', 'fast'].includes(saved.mode) ? saved.mode : 'quality';
             currentModelMode.value = mode;
-            // settings.model 是「当前生效的模型」，必须跟着一起切，否则上面那个
-            // [apiUrl, apiKey, model] 的 watcher 会把 qualityModel 又改回旧模型。
-            const activeModel = { quality, balanced, fast, slot4, slot5 }[mode] || quality || balanced || fast || slot4 || slot5;
+            // [rphub 2.9.077] 这里原本写的是 { quality, balanced, fast, slot4, slot5 }，
+            //   slot4 / slot5 没有加 settings. 前缀 —— 裸标识符在严格模式下直接
+            //   ReferenceError，这一行抛错后 settings.model 根本没被更新；紧接着
+            //   [apiUrl, apiKey, model] 的 watcher 拿旧站的 model 又把 qualityModel
+            //   写了回去，于是「切到哪个站，第一个栏位都是第一个站的模型」。
+            //   顺手把 4 / 5 号栏位也纳入恢复，否则切站后它们同样停留在上一站。
+            settings.slot4Model = saved.slot4Model || '';
+            settings.slot5Model = saved.slot5Model || '';
+            const slots = {
+                quality: settings.qualityModel,
+                balanced: settings.balancedModel,
+                fast: settings.fastModel,
+                slot4: settings.slot4Model,
+                slot5: settings.slot5Model
+            };
+            const activeModel = slots[mode]
+                || settings.qualityModel || settings.balancedModel || settings.fastModel
+                || settings.slot4Model || settings.slot5Model;
             if (activeModel) settings.model = activeModel;
             applyModelSlotTemperature(mode);
         };
@@ -8809,6 +8824,9 @@ const app = createApp({
             if (job.status === 'done') recordImageFreezeEntry(card, task.requestUrl);
         };
 
+        // 同一提示词的结果缓存：10 分钟内不再重复生成（仅非 fresh 生效）
+        const IMAGE_RESULT_CACHE_MS = 10 * 60 * 1000;
+        const _imageResultCache = new Map();
         const startGeneratedImageTask = (requestUrl, fresh = false) => {
             const request = new URL(requestUrl, window.location.href);
             const provider = { ...imageApi.current };
@@ -8827,11 +8845,33 @@ const app = createApp({
                 task.job = job;
                 [...task.cards].forEach(card => renderGeneratedImageJob(card, task, job));
             };
+            // [rphub 2.9.093] 真正的病根：第一张出图后，消息重渲染会再走一次
+            //   loadGeneratedImageCard → startGeneratedImageTask，而任务表里那一条
+            //   已经被重编号/清理掉，于是判定为「新图」，再调一次 generateNovelImage
+            //   —— 这就是 14 秒后那笔重复扣费。
+            //   这里加一层「按规范 URL 记住已生成结果」的缓存：同一个提示词在一次会话内
+            //   只真的生成一次；只有 fresh（用户主动重新生成，标签顺序已变、URL 不同）才绕过。
+            const canonicalKey = (() => {
+                try {
+                    const canonical = new URL(request.href);
+                    canonical.searchParams.delete('nocache');
+                    return taskIdentity(canonical.href);
+                } catch (_) { return requestKey; }
+            })();
+            // [rphub 2.9.094] 不能在这里提前 return：那样会跳过 publish → 卡片收不到完成事件，
+            //   一直停在「等待生成」。改成只算出「能不能复用」，让正常流程继续走，
+            //   真正省下请求的是下面 novelai 分支里的那次条件调用。
+            const cachedImageUrl = (() => {
+                if (fresh) return '';
+                const hit = _imageResultCache.get(canonicalKey);
+                return hit && Date.now() - hit.at < IMAGE_RESULT_CACHE_MS ? hit.imageUrl : '';
+            })();
             task.promise = (async () => {
                 task.baseUrl = imageApi.endpoint(provider);
                 if (provider.protocol === 'novelai') {
                     publish({ status: 'running' });
-                    const imageUrl = await window.RPImageProviders.generateNovelImage({ ...provider, endpoint: task.baseUrl },
+                    const imageUrl = cachedImageUrl || await window.RPImageProviders.generateNovelImage(
+                        { ...provider, endpoint: task.baseUrl },
                         Object.fromEntries(request.searchParams.entries()));
                     const job = { status: 'done', imageUrl };
                     publish(job);
@@ -8876,15 +8916,27 @@ const app = createApp({
                     }
                     publish(job);
                 }
-                if (fresh && job.status === 'done') {
-                    const reusableRequest = new URL(task.requestUrl);
-                    reusableRequest.searchParams.set('nocache', '0');
-                    generatedImageTasks.delete(task.key);
-                    task.key = taskIdentity(reusableRequest.href);
-                    generatedImageTasks.set(task.key, task);
+                return job;
+            })().then((job) => {
+                // [rphub 2.9.085] 重新生成（fresh）必须把任务按「去掉 nocache 的规范 URL」重新登记。
+                //   原来这段只写在 jobs 协议分支末尾，而 novelai / openai 两个分支是提前 return 的，
+                //   永远走不到 —— 于是重渲染按规范 URL 查不到任务，另起一条新的，
+                //   表现为「点一次重新生成，隔几秒再扣一次费」。
+                if (job && job.status === 'done' && job.imageUrl) {
+                    try { _imageResultCache.set(canonicalKey, { imageUrl: job.imageUrl, at: Date.now() }); } catch (_) {}
+                }
+                if (fresh && job && job.status === 'done') {
+                    try {
+                        const reusable = new URL(task.requestUrl);
+                        reusable.searchParams.delete('nocache');
+                        generatedImageTasks.delete(task.key);
+                        task.requestUrl = reusable.href;
+                        task.key = taskIdentity(reusable.href);
+                        generatedImageTasks.set(task.key, task);
+                    } catch (error) { console.warn('[rphub] 重生成任务重编号失败', error); }
                 }
                 return job;
-            })().catch((error) => {
+            }).catch((error) => {
                 const job = { status: 'failed', error: error.message || '生成失败' };
                 publish(job);
                 return job;
@@ -9011,7 +9063,11 @@ const app = createApp({
             if (!sourceUrl) return;
             const nextImageUrl = new URL(sourceUrl, window.location.href);
             nextImageUrl.searchParams.set('tag', tags.join(', '));
-            nextImageUrl.searchParams.set('nocache', '1');
+            // [rphub 2.9.090] 这里原来是 nocache=1，也是「重新生成」独有的差异点：
+            //   首轮生图用的模板里是 nocache=0。nocache=1 会让任何后续对该 URL 的取图
+            //   都绕过缓存重新打到生图端点，而首次生成命中了缓存，所以只有重新生成翻倍。
+            //   改成 0，让已生成的图可以被复用。
+            nextImageUrl.searchParams.set('nocache', '0');
 
             const originalContent = message.content;
             const finishLoading = () => {
@@ -9029,6 +9085,17 @@ const app = createApp({
                 }
                 message.content = updatedContent;
                 message.shouldAnimate = false;
+                // [rphub 2.9.084] 重新生成会发两次请求。原因：内容里的 image### 令牌换了
+                //   标签顺序 → 渲染层算出的是「另一个 URL」→ 冻结表里没有它 → 判定为新图，
+                //   又跑一次生成任务（9 秒后的第二次扣费）。
+                //   这里把刚生成的结果同时按「带 nocache」和「去 nocache」两个键登记，
+                //   让随后的重渲染直接命中，不再重复请求。
+                try {
+                    const canonical = new URL(nextImageUrl.href);
+                    canonical.searchParams.delete('nocache');
+                    recordImageFreezeEntry(card, canonical.href);
+                    recordImageFreezeEntry(card, nextImageUrl.href);
+                } catch (error) { console.warn('[rphub] 重生成图登记冻结失败', error); }
                 scheduleChatHistorySave();
                 showToast('已重新生成图片', 'success');
                 nextTick(finishLoading);
@@ -12708,10 +12775,28 @@ const app = createApp({
             const key = getClassicMemoryKey(sourceAssistantIds, targetTurn.turn);
             if (!includeText) return { index: targetIndex, turn: targetTurn.turn, sourceAssistantIds, key };
 
+            // [rphub 2.9.082] 轮次快照只保证有 userIndexes / assistantIndexes（2.9.055 起），
+            //   合并后的 .user / .assistant 并不一定有。原来这里硬读 .user / .assistant，
+            //   取不到正文 → 该轮被判成空轮 → runClassicJob 记一次"已完成"后直接跳过，
+            //   表现就是「补录瞬间 100%、零写入、无任何报错」。
+            //   现在按索引回表拼一条等效消息，两条路径都能取到正文。
+            const turnMessage = (turnInfo, role) => {
+                const direct = turnInfo?.[role] || null;
+                const directText = direct && typeof direct === 'object' ? String(direct.content || '') : '';
+                if (directText) return direct;
+                const indexes = Array.isArray(turnInfo?.[role + 'Indexes']) ? turnInfo[role + 'Indexes'] : [];
+                const parts = indexes.map(index => chatHistory.value[index]).filter(message => message && message.role === role);
+                if (!parts.length) return direct;
+                return {
+                    role,
+                    content: parts.map(message => String(message.content || '')).join('\n\n'),
+                    _sourceIndexes: indexes
+                };
+            };
             const contextTurns = turns.slice(Math.max(0, targetIndex - 3), targetIndex + 1).map(turnInfo => ({
                 turn: turnInfo.turn,
-                userContent: getMemoryMessageText(turnInfo.user),
-                assistantContent: getMemoryMessageText(turnInfo.assistant),
+                userContent: getMemoryMessageText(turnMessage(turnInfo, 'user')),
+                assistantContent: getMemoryMessageText(turnMessage(turnInfo, 'assistant')),
                 isTarget: turnInfo === targetTurn
             }));
             const targetContext = contextTurns[contextTurns.length - 1];
@@ -12725,11 +12810,11 @@ const app = createApp({
                 contextTurns,
                 sourceUserIds,
                 sourceAssistantIds,
-                sourceUserText: (targetTurn.user?._sourceIndexes || [])
+                sourceUserText: (turnMessage(targetTurn, 'user')?._sourceIndexes || [])
                     .map(index => chatHistory.value[index])
                     .filter(message => message?.role === 'user')
                     .map(message => String(message.content || ''))
-                    .join('\n\n') || String(targetTurn.user?.content || ''),
+                    .join('\n\n') || String(turnMessage(targetTurn, 'user')?.content || ''),
                 sourceAssistantText: targetContext.assistantContent,
                 key
             };
@@ -15380,17 +15465,29 @@ const app = createApp({
 
         const handleAvatarUpload = (event) => {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        editingCharacter.data.avatar = await compressImage(e.target.result, 1600, 0.92);
-                    } catch (err) {
-                        editingCharacter.data.avatar = e.target.result;
-                    }
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const raw = String(e.target.result || '');
+                // [rphub 2.9.083] 这里原来有两条会写坏卡片的路径：
+                //   1) compressImage 失败时 resolve 空串，直接把 avatar 写成 '' —— 卡片变空白图；
+                //   2) 抛错时回退成「原图 dataURL」，几十 MB 的 base64 塞进卡片记录，
+                //      写入超限后整条 __rp_card__ 写不进去，readCharacter 读回时抛
+                //      「角色卡内容缺失」，表现就是卡片死掉、连带聊天看起来也没了。
+                //   现在两级压缩都失败就中止，一个字节都不写。
+                const compress = async (edge, quality) => {
+                    try { return await compressImage(raw, edge, quality); } catch (_) { return ''; }
                 };
-                reader.readAsDataURL(file);
-            }
+                let next = await compress(raw, 1600, 0.92);
+                if (!next) next = await compress(raw, 1024, 0.85);
+                if (!next || !/^data:image\//.test(next)) {
+                    showToast('这张图片无法处理（格式不支持或已损坏），角色卡未改动', 'error', 5000);
+                    event.target.value = '';
+                    return;
+                }
+                editingCharacter.data.avatar = next;
+            };
+            reader.readAsDataURL(file);
         };
 
         // Import/Export Logic

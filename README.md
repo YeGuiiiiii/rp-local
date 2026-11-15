@@ -1,8 +1,8 @@
-# RP 本地版 2.9.076
+# RP 本地版 2.9.095
 
-已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.076.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
+已发布安装包：[版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。本地构建生成 `dist/RP-local-2.9.095.apk`，安装包放在发布页，不随源码提交。同一包名和签名，可直接覆盖升级旧本地版，不要先卸载。
 
-当前版本为 **2.9.076**，Android versionCode 为 **335**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前版本为 **2.9.095**，Android versionCode 为 **354**。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
 ## 获取源码
 
@@ -24,6 +24,15 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 其他平台可将仓库地址设为 `https://github.com/YeGuiiiiii/rp-local.git`，网页目录设为 `web`。仓库已包含编译后的网页资源，直接托管静态文件即可；本地预览、修改和 Android 打包见 [BUILDING.md](BUILDING.md)。网页预览不包含 Android 的私有文件、目录授权和后台恢复能力。
 
 源码沿用上游 **CC BY-NC 4.0** 许可，保留署名和非商用限制。这里提供公开源码与非商用修改、分享，不将项目改为 MIT 或其他允许商用的许可；第三方资源遵循各自许可。
+
+## 2.9.077～2.9.095 多站模型、补录回表与生图重复扣费
+
+- **2.9.077** 多 API 站点切换后第一个模型栏位总是上一站的：`applyProviderModelMemory()` 里 `{ quality, balanced, fast, slot4, slot5 }` 的 `slot4 / slot5` 少了 `settings.` 前缀，裸标识符抛 `ReferenceError`，函数在 `settings.model = activeModel` 之前中断；随后 `[apiUrl, apiKey, model]` 的 watcher 拿旧站 model 又把 `qualityModel` 写回去。补齐前缀并把 4/5 号栏位一并纳入恢复。
+- **2.9.078～2.9.081** 补录定位用的临时诊断（已在 2.9.095 全部移除）。
+- **2.9.082** 补录「瞬间 100%、记忆为零」：`buildClassicSummaryJob` 读的是 `turnInfo.user / .assistant`，而轮次快照自 2.9.055 起只保证 `userIndexes / assistantIndexes`；取不到正文时该轮被判成空轮，`runClassicJob` 记一次「已完成」后直接跳过，既不写库也不报错。改为按索引回 `chatHistory` 拼等效消息，两条路径都能取到正文。
+- **2.9.083** 换角色卡封面可能写坏卡片：`compressImage` 失败时 resolve 空串会写入空白图；抛错时回退成原图 dataURL，几十 MB 的 base64 塞进卡片记录后整条写不进去，读回抛「角色卡内容缺失」。改为两级压缩，都失败就中止并提示，一个字节都不写。
+- **2.9.084～2.9.094** 重新生成图片重复扣费：现象是一次点击产生两条站点记录（间隔约 14 秒）。定位过程走了弯路——前四版靠读代码猜路径（冻结表未登记、任务未重编号、`nocache` 参数）全部无效；第 6 版改用全局钩子（fetch / XHR / img.src / 原生网络桥）才拿到证据：完事后确有一次 `generateNovelImage` 由此 `startGeneratedImageTask` 之外的第二个任务发出。最终修法是**按规范 URL 缓存生成结果**（同一提示词 10 分钟内只真正生成一次，`fresh` 强制绕过）。2.9.094 修掉缓存命中时提前 return 导致卡片停在「等待生成」的问题。
+- **2.9.095** 移除全部临时探针，仅保留上述三项修复。
 
 ## 2.9.074～2.9.076 抽屉控件归位与弹层键盘适配
 
@@ -754,7 +763,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 ## 安装与试用
 
 - 应用名称：**RP 本地版**。
-- 版本：`2.9.076`，Android versionCode `335`。
+- 版本：`2.9.095`，Android versionCode `354`。
 - 包名：`com.rphub.local`，可以和原版同时安装，不会覆盖原版。
 - 两个应用的数据独立；旧数据不会自动出现在本地版中。
 - 首次启动仍显示原版的称呼设置窗口，这是正常初始化。
