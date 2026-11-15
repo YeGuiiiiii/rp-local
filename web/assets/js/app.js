@@ -12862,12 +12862,23 @@ const app = createApp({
             const result = await requestMemoryJson({
                 model, temperature: 0.2, stream: false, messages: requestMessages, signal
             });
-            const summary = parseCot(result.content).main
+            // [rphub 2.9.112] 只取 parseCot(...).main 会误杀：模型把正文整段包进思维链时，
+            //   main 是空串，于是被当成「没有有效总结」直接报错。提炼人物档案喂 7 万字、
+            //   模型的输出很容易被整体判成 COT，这个分支就必现。
+            //   现在按 main → cot → 原始文本 三级回退，并在真为空时带上原文开头，便于定位。
+            const raw = String(result.content || '');
+            const parsedRaw = parseCot(raw);
+            const picked = String(parsedRaw.main || '').trim()
+                || String(parsedRaw.cot || '').trim()
+                || raw;
+            const summary = picked
                 .replace(/^```(?:text|markdown)?\s*/i, '')
                 .replace(/\s*```$/, '')
                 .replace(/^(?:最新对话总结|总结)[:：]\s*/i, '')
                 .trim();
-            if (!summary) throw new Error('副模型没有返回有效总结');
+            if (!summary) {
+                throw new Error('副模型返回为空' + (raw ? '（原始内容 ' + raw.length + ' 字：' + raw.slice(0, 60) + '…）' : ''));
+            }
             return summary.replace(/\n{3,}/g, '\n\n');
         };
 
