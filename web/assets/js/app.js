@@ -448,6 +448,8 @@ const app = createApp({
             settingsSection.value = section;
         };
         const shellGoBack = () => {
+            const updateNotice = document.querySelector('.update-notice[open]');
+            if (updateNotice) { window.RPUpdates.dismiss(); updateNotice.close(); return true; }
             const imageDownload = document.querySelector('.image-download-sheet[open]');
             if (imageDownload) { imageDownload.close(); return true; }
             if (streamImportPanel.value?.handleBack()) return true;
@@ -15512,8 +15514,8 @@ const app = createApp({
                 const compress = async (edge, quality) => {
                     try { return await compressImage(raw, edge, quality); } catch (_) { return ''; }
                 };
-                let next = await compress(raw, 1600, 0.92);
-                if (!next) next = await compress(raw, 1024, 0.85);
+                let next = await compress(1600, 0.92);
+                if (!next) next = await compress(1024, 0.85);
                 if (!next || !/^data:image\//.test(next)) {
                     showToast('这张图片无法处理（格式不支持或已损坏），角色卡未改动', 'error', 5000);
                     event.target.value = '';
@@ -17300,6 +17302,7 @@ app.component('ResourceBatchActions', window.RPAppShell.ResourceBatchActions);
 app.component('ShellAdvanced', window.RPAppShell.Advanced);
 app.component('ShellSettings', window.RPAppShell.Settings);
 app.component('UpdatePanel', window.RPAppShell.UpdatePanel);
+app.component('UpdateNotice', window.RPAppShell.UpdateNotice);
 app.component('ShellUtilities', window.RPAppShell.Utilities);
 app.component('CompetitionDetail', window.RPAppShell.CompetitionDetail);
 app.component('GalleryPage', window.RPGalleryPage);

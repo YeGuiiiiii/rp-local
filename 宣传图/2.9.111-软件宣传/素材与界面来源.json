@@ -1,0 +1,170 @@
+{
+  "name": "RP-Local-2.9.111-故事继续-软件宣传",
+  "size": [
+    2400,
+    3600
+  ],
+  "version": "2.9.111",
+  "group": "132292045",
+  "meowaJobId": "job_0109a5602e344aa0a447b75c34838dc9",
+  "illustration": "artwork\\promo-redesign-20261115\\generated\\为_AI_角色扮演软件_RP_本地版绘制竖版宣传海报的插画底图_无任何文字_数字_手机或_9f4f51ac\\result_images_0_url.png",
+  "illustrationSha256": "ba2715102cebece9e0a5770ed694b17e881d0c42c7f882a46be561f729c63340",
+  "prompt": "为 AI 角色扮演软件 RP 本地版绘制竖版宣传海报的插画底图，无任何文字、数字、手机或界面。参考图只用于保留两位成年女性的身份和服装，重新设计两人的动作与整体场景，不要把参考图贴在白底上。\n\n整体是精美的日式游戏宣传插画与白色纸艺杂志设计结合，白纸、浅灰、清淡薄荷色，点缀深红缎带和少量金色铃铛。留白干净，边缘有少量纸页、书签和红色缎带贯穿，营造故事从书页延伸出来的感觉，不要满屏散花与装饰。\n\n严格安排构图：最上方约四分之一保持纯净浅色，留给之后排软件名和标题；左侧约六成从画面高度26%到78%保持非常干净的浅色留白，之后将放两张真实的软件界面截图，不画任何假界面。两位人物共同构成右侧约四成的大幅插画，人物完整的头脸都在右侧，不进入左侧截图留白。黑长发玥玥位于右上，银月发夹在画面右侧，暗酒红眼睛，白色薄纱披帛与唐朝霓裳羽衣、黑红金色裙，赤足，红绳金铃脚饰，轻轻向左伸手展示软件的位置；白长发红花铃位于右下，红色玫瑰发饰、红黑缎带、金铃项圈、红金开叉旗袍、黑色薄丝袜与黑色系带高跟鞋，侧坐在向左下展开的白纸书页上，微笑看向左侧。两人不是小贴纸，而是有统一光影、布料流动与纸页交错的大幅半身到全身插画，允许裙摆自然延伸到右边缘。\n\n画面下方约18%重新留出宽阔浅色干净区域，用于之后排两项更新亮点与交流群号。人物不要进入最下面这块文字留白区。整体简洁有设计感，软件展示区域比人物区域更大。\n",
+  "screens": [
+    {
+      "source": "artwork\\promo-redesign-20261115\\screens\\screen-day-home.png",
+      "sha256": "4757c952a42e268500c0906c23754bcef2fdaa30e217820daa92b133a84c49ec",
+      "capturedFrom": "Current 2.9.111 web application rendered in Edge at a mobile viewport",
+      "physicalDeviceCapture": false,
+      "originalSize": [
+        1170,
+        2532
+      ],
+      "displayWidth": 930,
+      "angle": 2,
+      "screenshotPixelsUnpainted": true
+    },
+    {
+      "source": "artwork\\promo-redesign-20261115\\screens\\screen-night-gallery.png",
+      "sha256": "85aca0ad432b82fa3e72dcdfd4d484af2eb19aabbda6a6da056f3aebdd81de1c",
+      "capturedFrom": "Current 2.9.111 web application rendered in Edge at a mobile viewport",
+      "physicalDeviceCapture": false,
+      "originalSize": [
+        1170,
+        2760
+      ],
+      "displayWidth": 470,
+      "angle": -3,
+      "screenshotPixelsUnpainted": true
+    }
+  ],
+  "text": [
+    {
+      "text": "AI 角色扮演  /  Android 本地版",
+      "bounds": [
+        135,
+        130,
+        812,
+        177
+      ],
+      "size": 48
+    },
+    {
+      "text": "RP-Local",
+      "bounds": [
+        125,
+        235,
+        1058,
+        391
+      ],
+      "size": 230
+    },
+    {
+      "text": "故事继续，更新更省心。",
+      "bounds": [
+        135,
+        510,
+        993,
+        588
+      ],
+      "size": 78
+    },
+    {
+      "text": "角色卡 · 世界书 · 分支记忆",
+      "bounds": [
+        135,
+        710,
+        709,
+        759
+      ],
+      "size": 49
+    },
+    {
+      "text": "2.9.111",
+      "bounds": [
+        135,
+        810,
+        289,
+        842
+      ],
+      "size": 42
+    },
+    {
+      "text": "新版自动提醒",
+      "bounds": [
+        135,
+        3160,
+        555,
+        3230
+      ],
+      "size": 70
+    },
+    {
+      "text": "应用内下载，确认后安装",
+      "bounds": [
+        135,
+        3270,
+        608,
+        3314
+      ],
+      "size": 43
+    },
+    {
+      "text": "多项体验修复",
+      "bounds": [
+        1310,
+        3160,
+        1730,
+        3229
+      ],
+      "size": 70
+    },
+    {
+      "text": "角色卡导入 · 记忆补录",
+      "bounds": [
+        1310,
+        3270,
+        1733,
+        3312
+      ],
+      "size": 43
+    },
+    {
+      "text": "更新交流群",
+      "bounds": [
+        135,
+        3410,
+        370,
+        3457
+      ],
+      "size": 47
+    },
+    {
+      "text": "132292045",
+      "bounds": [
+        465,
+        3390,
+        942,
+        3457
+      ],
+      "size": 86
+    },
+    {
+      "text": "基于 STA1N156 / RP-Hub  ·  鸣谢 红花铃、启元",
+      "bounds": [
+        135,
+        3530,
+        830,
+        3562
+      ],
+      "size": 32
+    }
+  ],
+  "uncoveredFeetBounds": [
+    1190,
+    1400,
+    1700,
+    1840
+  ],
+  "updateBehavior": "Automatically checks and reminds; downloading and installing require confirmation."
+}

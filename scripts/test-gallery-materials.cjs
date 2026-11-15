@@ -164,11 +164,16 @@ const portrait = fs.readFileSync(path.join(root, 'dist/app-icon.png'));
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => __qa.openSettingsSection('appearance'));
-    assert.equal(await page.locator('select:visible,input[type="color"]:visible').count(), 0);
+    assert.equal(await page.getByRole('combobox', { name: '当前卡片夜间显示', exact: true }).count(), 1);
+    assert.equal(await page.locator('input[type="color"]:visible').count(), 0);
     await page.evaluate(() => RPHubThemeKit.setAccent('#168273'));
     await page.getByRole('radio', { name: '经典皮肤', exact: true }).check();
     await page.getByRole('radio', { name: '玥玥经典皮肤', exact: true }).check();
+    assert.equal(await page.evaluate(() => RPHubThemeKit.accent), '#168273', 'Changing skins preserves the chosen accent');
+    await page.getByRole('radio', { name: '经典皮肤', exact: true }).check();
+    await page.getByRole('button', { name: '恢复默认', exact: true }).click();
     assert.equal(await page.evaluate(() => RPHubThemeKit.accent), '');
+    await page.getByRole('radio', { name: '玥玥经典皮肤', exact: true }).check();
     await page.evaluate(() => RPThemePacks.setMode('day'));
     await page.locator('label.shell-form-row').filter({ has: page.getByRole('switch', { name: '夜间模式', exact: true }) }).click();
     assert.equal(await page.evaluate(() => RPHubThemeKit.scheme), 'night');

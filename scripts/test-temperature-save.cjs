@@ -86,7 +86,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         await page.evaluate(() => RPLocalStore.flush());
         await page.reload(); await ready();
         assert.deepEqual(await page.evaluate(() => __qa.settings.slotTemperatures),
-            { quality: 0.6, balanced: 0.8, fast: 0.3 });
+            { quality: 0.6, balanced: 0.8, fast: 0.3, slot4: 1, slot5: 1 });
         await page.evaluate(() => {
             __qa.toasts = [];
             const put = IDBObjectStore.prototype.put;

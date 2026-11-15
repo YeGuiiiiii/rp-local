@@ -44,9 +44,10 @@
     const pendingFailures = new Map();
     let webWritesPaused = false;
     const ordered = (key, task) => {
+        const keys = Array.isArray(key) ? key : [key];
         const next = queue.then(task).then(
-            value => { pendingFailures.delete(key); return value; },
-            error => { pendingFailures.set(key, error); throw error; },
+            value => { keys.forEach(item => pendingFailures.delete(item)); return value; },
+            error => { keys.forEach(item => pendingFailures.set(item, error)); throw error; },
         );
         queue = next.catch(() => {});
         return next;
@@ -74,7 +75,7 @@
         const name = safeName(key.replace('rp_hub_', '')).slice(0, 48) + '-' + (await hash(key)).slice(0, 16);
         return `${directory}${name}.json`;
     };
-    async function saveEntry(key, value) {
+    async function saveEntry(key, value, revision) {
         if (!bridge) return;
         if (key.startsWith('__rp_card_image__:')) {
             write(`角色卡数据/${folderOf(value)}/封面数据.json`, value.avatar);
@@ -91,7 +92,8 @@
                 name: card.name, favoriteAt: card.favoriteAt || null, createdAt: card.createdAt
             })));
         } else {
-            const file = await pathOf(key);
+            const base = await pathOf(key);
+            const file = revision ? base.replace(/(?:\.[a-f0-9]{32})?\.json$/, '.' + revision + '.json') : base;
             write(file, { key, value });
             inventory[key] = file;
         }
@@ -118,7 +120,7 @@
         }
         if (synchronized) return;
         // A full backup import can replace the database directly; remove stale file references.
-        if (existing) {
+        if (entries.length) {
             const active = new Set(entries.map(entry => entry.key));
             for (const [key, file] of Object.entries(inventory)) {
                 if (!active.has(key) && !(key.startsWith('__ls__:') && localStorage.getItem(key.slice(7)) !== null)) {
@@ -130,7 +132,7 @@
         // The old database remains intact; copy it before enabling file writes.
         for (const entry of entries)
             await saveEntry(entry.key, Object.hasOwn(entry, 'value') ? entry.value : await readEntry(entry.key));
-        if (!existing) {
+        if (!entries.length) {
             const index = read('个人数据/角色卡索引.json') || [];
             const restored = index.map(card => {
                 const value = read(`角色卡数据/${card.storageFolder}/角色卡.json`);
@@ -196,6 +198,26 @@
         save: (key, value) => ordered('record:' + key, async () => {
             await saveEntry(key, value);
             if (bridge) write('个人数据/文件索引.json', inventory);
+        }),
+        saveBatch: entries => ordered(entries.map(([key]) => 'record:' + key), async () => {
+            const previous = { ...inventory };
+            const revision = crypto.randomUUID().replace(/-/g, '');
+            try {
+                for (const [key, value] of entries) {
+                    if (value === undefined) delete inventory[key];
+                    else await saveEntry(key, value, revision);
+                }
+                // Publish the directory only after every changed chat part has reached disk.
+                if (bridge) write('个人数据/文件索引.json', inventory);
+            } catch (error) {
+                const abandoned = Object.values(inventory).filter(file => !Object.values(previous).includes(file));
+                inventory = previous;
+                for (const file of abandoned) { try { call('remove', file); } catch (_) {} }
+                throw error;
+            }
+            for (const [key] of entries) {
+                if (previous[key] && previous[key] !== inventory[key]) call('remove', previous[key]);
+            }
         }),
         remove: key => ordered('record:' + key, async () => {
             if (key.startsWith('__rp_card__:') || key.startsWith('__rp_card_image__:')) return;

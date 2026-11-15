@@ -10,7 +10,7 @@ fs.mkdirSync(output, { recursive: true });
         await context.addInitScript(require('./mock-files.cjs'));
         await context.addInitScript(() => {
             if (!localStorage.getItem('update-fixture')) {
-                localStorage.setItem('rp-auto-update', 'false');
+                localStorage.setItem('rp-update-notifications', 'false');
                 localStorage.setItem('update-fixture', '1');
             }
             window.__updates = { phase: 'idle' };
@@ -59,8 +59,9 @@ fs.mkdirSync(output, { recursive: true });
                 const panel = page.locator('.app-update-controls:visible');
                 await panel.waitFor();
                 await panel.scrollIntoViewIfNeeded();
-                assert.equal(await panel.getByRole('switch', { name: '自动更新' }).isChecked(), false);
+                assert.equal(await panel.getByRole('switch', { name: '更新提醒' }).isChecked(), false);
                 await panel.getByRole('button', { name: '检查更新', exact: true }).click();
+                await page.getByRole('button', { name: '关闭更新提醒' }).click();
                 await panel.getByRole('status').filter({ hasText: '发现新版本 2.9.599' }).waitFor();
                 assert.equal(await page.evaluate(() => __updateDownloads.length), 0);
                 const check = await panel.getByRole('button', { name: '检查更新', exact: true }).boundingBox();
@@ -83,13 +84,14 @@ fs.mkdirSync(output, { recursive: true });
         const panel = page.locator('.app-update-controls:visible');
         await panel.locator('label.app-update-toggle').click();
         await page.reload(); await ready();
-        assert.equal(await page.locator('.app-update-controls:visible').getByRole('switch', { name: '自动更新' }).isChecked(), true);
+        assert.equal(await page.locator('.app-update-controls:visible').getByRole('switch', { name: '更新提醒' }).isChecked(), true);
         await page.locator('.app-update-controls:visible label.app-update-toggle').click();
         failure = true;
         await page.getByRole('button', { name: '检查更新', exact: true }).click();
         await page.getByRole('alert').filter({ hasText: '更新服务暂时不可用' }).waitFor();
         failure = false;
         await page.getByRole('button', { name: '检查更新', exact: true }).click();
+        await page.getByRole('button', { name: '关闭更新提醒' }).click();
         await page.getByRole('button', { name: '下载更新', exact: true }).click();
         await page.waitForFunction(() => __updateDownloads.length === 1);
         assert.equal(await page.evaluate(() => __updateDownloads[0].automatic), false);

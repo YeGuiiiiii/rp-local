@@ -46,7 +46,9 @@ const evidence = path.join(root, 'verification');
       __qa.showUserSetupModal = false;
     });
     await page.getByRole('button', { name: '在线入口', exact: true }).click();
-    await page.getByRole('button', { name: '万象广场', exact: true }).click();
+    await page.getByRole('button', { name: '万相广场', exact: true }).click();
+    await page.getByRole('button', { name: '返回本地版', exact: true }).click();
+    assert.equal(await page.evaluate(() => __qa.currentView), 'square');
     await page.getByRole('button', { name: '返回本地版', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'characters');
     for (const view of ['square', 'lighthouse', 'generator', 'novel']) {
@@ -64,6 +66,10 @@ const evidence = path.join(root, 'verification');
       assert.ok(await back.evaluate(el => getComputedStyle(el).backgroundImage.includes('/chenyue/close')));
       if (view === 'square') await page.screenshot({ path: path.join(evidence, 'online-return-390.png') });
       await back.click();
+      if (view !== 'lighthouse') {
+        assert.equal(await page.evaluate(() => __qa.currentView), view);
+        await back.click();
+      }
       assert.equal(await page.evaluate(() => __qa.currentView), 'characters');
     }
     await page.evaluate(async () => {

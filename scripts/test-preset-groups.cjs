@@ -107,9 +107,12 @@ fs.mkdirSync(output, { recursive: true });
     await page.getByRole('button', { name: '保存分组', exact: true }).click();
     await page.getByText('这个分组还没有预设', { exact: true }).waitFor();
     await page.waitForFunction(async name => (await RPHubStorage.getStoredValue('preset_groups')).includes(name), custom);
+    const raw = { name: '导入的独立预设', content: '完整正文\n"引号"与中文', role: 'user', enabled: false, group: '外部组名', customContent: true, metadata: { keep: ['a', 2] } };
+    await importFile([raw, { name: '第二项', content: '二号正文', enabled: true, role: 'assistant' }]);
+    await page.waitForFunction(async () => JSON.stringify(await RPHubStorage.getStoredValue('presets')) === JSON.stringify(__qa.presets));
+    await page.evaluate(() => RPLocalStore.flush());
     await page.reload(); await ready(); await overview();
     await page.getByRole('button', { name: '打开分组：' + custom, exact: true }).waitFor();
-    const raw = { name: '导入的独立预设', content: '完整正文\n"引号"与中文', role: 'user', enabled: false, group: '外部组名', customContent: true, metadata: { keep: ['a', 2] } };
     await importFile([raw]); await importFile(raw);
     assert.equal((await snapshot()).groups.filter(name => name === '默认分组').length, 1);
     assert.equal((await snapshot()).groups.includes('外部组名'), false);
@@ -130,7 +133,6 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.locator('.preset-group-body').count(), 0);
     await toggle.focus(); await page.keyboard.press('Enter');
     assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
-    await importFile([raw, { name: '第二项', content: '二号正文', enabled: true, role: 'assistant' }]);
     assert.equal((await snapshot()).presets.filter(preset => preset.group === custom).length, 2);
     const itemExport = await download(async () => {
       await groupAction('导出组内预设');
@@ -176,10 +178,10 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.evaluate(() => __qa.selectedPresetIndices.length), 3);
     await page.evaluate(() => { __qa.openPresetBatchMoveModal(); __qa.presetBatchTargetGroup = '移动后的空白测试组'; __qa.applyPresetBatchMove(); });
     assert.equal((await snapshot()).presets.filter(preset => preset.group === '旧组').length, 0);
-    assert.ok((await snapshot()).groups.includes('旧组'), 'Empty source group is retained');
+    assert.equal((await snapshot()).groups.includes('旧组'), false, 'Moving all presets removes the empty source group');
     await overview();
     const allGroups = await download(() => page.getByRole('button', { name: '导出全部分组', exact: true }).click());
-    assert.ok(allGroups.data.groups.some(group => group.name === '旧组' && group.presets.length === 0));
+    assert.equal(allGroups.data.groups.some(group => group.name === '旧组'), false);
     const allBeforeImport = await snapshot();
     await importFile(allGroups.data);
     assert.equal((await snapshot()).presets.length, allBeforeImport.presets.length * 2);
@@ -194,13 +196,13 @@ fs.mkdirSync(output, { recursive: true });
       }
     }
     await page.getByRole('button', { name: '打开分组：' + renamed, exact: true }).click();
-    await page.getByRole('button', { name: '打开分组：旧组', exact: true }).click();
+    await page.getByRole('button', { name: '打开分组：移动后的空白测试组', exact: true }).click();
     const otherFlags = await page.evaluate(() => __qa.presets.filter(p => p.group !== '默认分组').map(p => p.enabled));
     const defaultSwitch = page.getByRole('switch', { name: '启用分组：默认分组', exact: true });
     if (!await defaultSwitch.isChecked()) await defaultSwitch.locator('..').click();
     assert.equal(await defaultSwitch.isChecked(), true);
     assert.deepEqual(await page.evaluate(() => __qa.presets.filter(p => p.group !== '默认分组').map(p => p.enabled)), otherFlags);
-    assert.equal(await page.getByRole('button', { name: '打开分组：旧组', exact: true }).getAttribute('aria-expanded'), 'true', 'Switch does not change open group');
+    assert.equal(await page.getByRole('button', { name: '打开分组：移动后的空白测试组', exact: true }).getAttribute('aria-expanded'), 'true', 'Switch does not change open group');
     await capture('empty-group-night-1280');
     const beforeReload = await snapshot();
     await page.waitForFunction(async () => JSON.stringify(await RPHubStorage.getStoredValue('presets')) === JSON.stringify(__qa.presets));
@@ -208,14 +210,14 @@ fs.mkdirSync(output, { recursive: true });
     await page.reload(); await ready(); await overview();
     assert.deepEqual(await snapshot(), beforeReload);
     assert.deepEqual(await page.evaluate(() => RPHubStorage.getStoredValue('group_sentinel')), { chat: '聊天不变', memory: '记忆不变' });
-    await page.getByRole('button', { name: '打开分组：旧组', exact: true }).click();
+    await page.getByRole('button', { name: '打开分组：移动后的空白测试组', exact: true }).click();
     await page.evaluate(() => window.rphubHandleBack());
     assert.equal(await page.evaluate(() => __qa.currentView), 'characters');
     assert.deepEqual(errors, []); assert.deepEqual(missing, []);
-    const report = { legacyOfficialMigration: true, emptyGroupPersists: true, customNameAndRename: true,
+    const report = { legacyOfficialMigration: true, populatedGroupPersists: true, customNameAndRename: true,
       ordinaryImportUsesNamedDefault: true, inGroupImportExport: true, groupedRoundTripAndSameNameMerge: true,
-      fullLibraryIncludesEmptyGroups: true, invalidImportAtomic: true, sortPreservesOtherGroups: true,
-      batchMoveAndEmptySource: true, backToCallerWithExpandedGroup: true, contentAndRolesAndFlagsRetained: true,
+      emptySourceGroupPruned: true, invalidImportAtomic: true, sortPreservesOtherGroups: true,
+      batchMoveAndSourceCleanup: true, backToCallerWithExpandedGroup: true, contentAndRolesAndFlagsRetained: true,
       accordionAndKeyboard: true, explicitGroupFileChooser: true, globalImportIndependentOfOpenGroup: true,
       groupToggleDoesNotExpandOrChangeOtherGroups: true,
       reloadAndOtherDataPreserved: true, widths: [360, 390, 1280], schemes: ['day', 'night'], errors, missing };

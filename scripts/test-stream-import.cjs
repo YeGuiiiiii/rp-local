@@ -52,7 +52,7 @@ const fixture = () => ({
       const prefix = workerMode === 'native-url' ? 'self.fetch = () => Promise.reject(new Error("Worker cannot access Android file URLs"));\n'
         : workerMode === 'crash' ? 'throw new Error("injected worker failure");\n'
         : workerMode === 'hang' ? 'Blob.prototype.arrayBuffer = () => new Promise(() => {});\n'
-          : workerMode === 'slow' ? 'const originalRead = Blob.prototype.arrayBuffer; Blob.prototype.arrayBuffer = async function () { await new Promise(resolve => setTimeout(resolve, 25)); return originalRead.call(this); };\n' : '';
+          : workerMode === 'slow' ? 'const originalRead = Blob.prototype.arrayBuffer; Blob.prototype.arrayBuffer = async function () { await new Promise(resolve => setTimeout(resolve, 1000)); return originalRead.call(this); };\n' : '';
       return route.fulfill({ contentType: 'application/javascript', body: prefix + fs.readFileSync(file, 'utf8') });
     }
     return route.fulfill({ path: file, contentType: ({ '.js': 'application/javascript', '.html': 'text/html', '.css': 'text/css' })[path.extname(file)] || 'application/octet-stream' });
@@ -71,7 +71,8 @@ const fixture = () => ({
     await page.evaluate(() => { __qa.navigateWorkspace('settings'); __qa.navigateWorkspace('backup'); });
     await page.getByText('导入备份', { exact: true }).waitFor();
     assert.equal(await page.getByRole('button', { name: '流式导入 JSON', exact: true }).count(), 0);
-    assert.equal(await page.getByLabel('选择备份文件').count(), 1, 'JSON and ZIP share one backup picker');
+    await page.getByLabel('选择备份文件', { exact: true }).waitFor({ state: 'attached' });
+    assert.equal(await page.getByLabel('选择备份文件', { exact: true }).count(), 1, 'JSON and ZIP share one backup picker');
   }
   async function stage(data = fixture(), phase = 'ready') {
     if (await page.evaluate(() => __qa.streamImportPanel?.state.phase === 'ready'))
@@ -118,6 +119,10 @@ const fixture = () => ({
         }, { parent, view });
         const back = page.locator('.management-view:visible,.h-full:visible').getByRole('button', { name: /^(返回|返回本地版)$/ }).first();
         if (await back.count()) await back.click(); else await page.evaluate(() => __qa.shellGoBack());
+        if (['generator', 'square', 'novel'].includes(view)) {
+          assert.equal(await page.evaluate(() => __qa.currentView), view, 'Embedded pages ask for a second back');
+          await page.evaluate(() => __qa.shellGoBack());
+        }
         assert.equal(await page.evaluate(() => __qa.currentView), parent, parent + ' -> ' + view);
         navigation.push(parent + '/' + view);
       }
@@ -275,7 +280,10 @@ const fixture = () => ({
         };
       });
     });
-    await page.reload(); await ready(); await unchanged(); await backup();
+    await page.reload(); await ready(); await unchanged();
+    await page.getByText('上次导入没有正常结束', { exact: true }).waitFor();
+    await page.getByRole('button', { name: '关闭导入弹窗', exact: true }).click();
+    await backup();
     await stage();
     for (const [skin, theme] of [['journal','day'],['vampire','night'],['classic','day'],['classic','night']]) {
       await page.getByRole('button', { name: '取消', exact: true }).click();

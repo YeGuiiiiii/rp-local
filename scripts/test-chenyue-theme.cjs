@@ -44,6 +44,7 @@ const root = path.resolve(__dirname,'..'), web = path.join(root,'web');
     const screenshots=[];
     for(const [width,height] of [[360,640],[390,844],[1280,900]]){
       await page.setViewportSize({width,height});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       for(const mode of ['day','night']){
         await page.evaluate(mode=>RPHubThemeKit.setScheme(mode),mode);
         await page.evaluate(async()=>{__qa.navigateWorkspace('chat');await Vue.nextTick();__qa.isNavigationOpen=true;});

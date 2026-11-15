@@ -158,7 +158,7 @@ fs.mkdirSync(output, { recursive: true });
         for (const section of await page.evaluate(() => RPReleaseNotes.notes.sections.filter(section => section.text))) {
             assert.ok(notice.includes(section.text), 'Announcement must show the current release content');
         }
-        assert.ok(notice.includes('472441481') && notice.includes('132292045'));
+        assert.ok(!notice.includes('472441481') && notice.includes('132292045'));
         await capture('announcement-mobile');
         await page.getByRole('button', { name: '关闭更新公告' }).click();
         await page.setViewportSize({ width: 1280, height: 900 });

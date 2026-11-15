@@ -630,9 +630,9 @@
         template: `<section class="app-update-controls" aria-label="软件更新">
           <div class="app-update-line">
             <label class="app-update-toggle">
-              <span>自动更新</span>
+              <span>更新提醒</span>
               <span class="relative inline-flex flex-none items-center">
-                <input type="checkbox" role="switch" aria-label="自动更新" class="settings-toggle-input sr-only"
+                <input type="checkbox" role="switch" aria-label="更新提醒" class="settings-toggle-input sr-only"
                   :checked="state.automatic" @change="updates.setAutomatic($event.target.checked)">
                 <span class="settings-toggle"></span>
               </span>
@@ -641,7 +641,7 @@
               <icon name="RefreshCw"/>检查更新
             </button>
           </div>
-          <p class="app-update-hint">Wi-Fi 下自动下载，安装前确认。</p>
+          <p class="app-update-hint">发现新版本时提醒，下载前由你确认。</p>
           <p v-if="status" class="app-update-status" role="status">{{status}}</p>
           <progress v-if="state.phase==='downloading'" :value="state.progress" max="100" aria-label="更新下载进度"></progress>
           <p v-if="state.error" class="shell-error" role="alert">{{state.error}}</p>
@@ -652,6 +652,75 @@
             <a v-else-if="!busy" class="shell-button" :href="state.latest.url" target="_blank" rel="noopener"><icon name="Download"/>下载安装包</a>
           </div>
         </section>`
+    };
+    const UpdateNotice = {
+        components: { Icon },
+        props: { blocked: Boolean },
+        setup(props) {
+            const updates = window.RPUpdates, state = updates.state;
+            const dialog = ref(null), ready = ref(false), imageFailed = ref(false);
+            const sync = () => {
+                const visible = ready.value && !props.blocked && state.showNotice && !!state.latest;
+                if (visible && !dialog.value.open) dialog.value.showModal();
+                else if (!visible && dialog.value.open) dialog.value.close();
+            };
+            const finish = () => { ready.value = true; };
+            watch([ready, () => props.blocked, () => state.showNotice], sync, { flush: 'post' });
+            watch(() => state.mascot, () => { imageFailed.value = false; });
+            onMounted(() => {
+                if (window.__rpDataReady && !document.querySelector('.entry-transition')) finish();
+                window.addEventListener('rp:startup-finished', finish, { once: true });
+            });
+            onBeforeUnmount(() => {
+                window.removeEventListener('rp:startup-finished', finish);
+                dialog.value?.close();
+            });
+            const dismiss = () => { updates.dismiss(); dialog.value.close(); };
+            return { updates, state, dialog, imageFailed, dismiss,
+                trapFocus: useDialogFocus(() => state.showNotice && !props.blocked, '.update-notice'),
+                closed: () => { if (!props.blocked && state.showNotice) updates.dismiss(); },
+                busy: computed(() => ['checking', 'downloading', 'verifying'].includes(state.phase)),
+                installable: computed(() => ['ready', 'permission'].includes(state.phase)),
+                status: computed(() => ({
+                    checking: '正在检查最新版本…', downloading: '正在下载 ' + state.progress + '%',
+                    verifying: '正在校验安装包…', ready: '更新已下载，可以安装',
+                    permission: '请允许安装更新，返回后点击安装。'
+                })[state.phase] || '')
+            };
+        },
+        template: `<teleport to="body">
+          <dialog ref="dialog" class="update-notice" aria-labelledby="update-notice-title"
+            data-rphub-no-save @cancel.prevent="dismiss" @close="closed" @click.self="dismiss" @keydown="trapFocus">
+            <template v-if="state.latest">
+              <button type="button" class="update-notice-close" aria-label="关闭更新提醒" title="关闭更新提醒"
+                @click="dismiss" autofocus><icon name="X"/></button>
+              <div class="update-notice-art" aria-hidden="true">
+                <img v-if="!imageFailed" :src="'assets/images/updates/' + state.mascot + '.webp'"
+                  alt="" width="720" height="540" data-rphub-no-save @error="imageFailed = true">
+                <icon v-else name="BellRing"/>
+              </div>
+              <header class="update-notice-header">
+                <h2 id="update-notice-title">发现新版本</h2>
+                <p>RP-Local <strong>{{state.latest.versionName}}</strong></p>
+              </header>
+              <footer class="update-notice-actions">
+                <p v-if="status" role="status">{{status}}</p>
+                <progress v-if="state.phase === 'downloading'" :value="state.progress" max="100" aria-label="更新下载进度"></progress>
+                <p v-if="state.error" role="alert">{{state.error}}</p>
+                <div>
+                  <button type="button" class="shell-button" @click="dismiss">暂不更新</button>
+                  <button v-if="installable" type="button" class="shell-button update-notice-primary"
+                    @click="updates.install()"><icon name="PackageCheck"/>安装更新</button>
+                  <button v-else-if="updates.native" type="button" class="shell-button update-notice-primary"
+                    :disabled="busy" @click="state.phase === 'error' ? updates.check() : updates.download()">
+                    <icon :name="state.phase === 'error' ? 'RefreshCw' : 'Download'"/>{{state.phase === 'error' ? '重新检查' : '下载更新'}}</button>
+                  <a v-else class="shell-button update-notice-primary" :href="state.latest.url"
+                    target="_blank" rel="noopener"><icon name="Download"/>下载安装包</a>
+                </div>
+              </footer>
+            </template>
+          </dialog>
+        </teleport>`
     };
     const Settings = {
         components: { Icon, MascotHeader, PersonaAvatar, UpdatePanel },
@@ -922,5 +991,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, UpdatePanel, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, UpdatePanel, UpdateNotice, ImageDownloadSheet, ReleaseAnnouncement });
 })();

@@ -1,0 +1,608 @@
+[
+  {
+    "name": "RP-Local-把故事留在身边-主海报",
+    "size": [
+      2400,
+      4000
+    ],
+    "campaignVersion": "2.9.111",
+    "group": "132292045",
+    "meowaJobId": "job_9766eae02cc74e80a62d4a6a2ad02b68",
+    "illustration": "artwork\\promo-redesign-20261115\\position-swap\\为_RP-Local_软件宣传海报重绘一张无文字的竖版插画底图_参考第一张的两位成年女性_dfa47c08\\result_images_0_url.png",
+    "illustrationSha256": "c2f05a4e4e28d50b80f89794126cf46267f3c5a68db4ff20ae25c76455b9c940",
+    "screens": [
+      {
+        "source": "artwork\\promo-redesign-20261115\\phone-screens\\characters.jpg",
+        "sha256": "e9a1375e10ae7d656e01f110d3885c0da4be7bcd7907eb49a3b77af19055fe0c",
+        "capturedFrom": "User-provided mobile screenshot, November 15, 2026",
+        "screenshotVersion": "2.9.109",
+        "originalSize": [
+          1260,
+          2800
+        ],
+        "crop": null,
+        "displayWidth": 640,
+        "angle": 0,
+        "screenshotPixelsUnpainted": true
+      },
+      {
+        "source": "artwork\\promo-redesign-20261115\\phone-screens\\gallery.jpg",
+        "sha256": "9a28dc025a26bdd892965c69bd65e6372733d42655f890aaa1481a8f01d09544",
+        "capturedFrom": "User-provided mobile screenshot, November 15, 2026",
+        "screenshotVersion": "2.9.109",
+        "originalSize": [
+          1260,
+          2800
+        ],
+        "crop": null,
+        "displayWidth": 640,
+        "angle": 0,
+        "screenshotPixelsUnpainted": true
+      }
+    ],
+    "text": [
+      {
+        "text": "AI 角色扮演  /  Android 本地版",
+        "bounds": [
+          135,
+          130,
+          812,
+          177
+        ],
+        "size": 48
+      },
+      {
+        "text": "RP-Local",
+        "bounds": [
+          125,
+          235,
+          1058,
+          391
+        ],
+        "size": 230
+      },
+      {
+        "text": "故事随你展开，",
+        "bounds": [
+          135,
+          505,
+          681,
+          582
+        ],
+        "size": 78
+      },
+      {
+        "text": "陪伴留在身边。",
+        "bounds": [
+          135,
+          615,
+          681,
+          692
+        ],
+        "size": 78
+      },
+      {
+        "text": "角色卡 · 世界书 · 分支记忆",
+        "bounds": [
+          135,
+          810,
+          649,
+          854
+        ],
+        "size": 44
+      },
+      {
+        "text": "2.9.111  /  新版体验",
+        "bounds": [
+          135,
+          890,
+          486,
+          927
+        ],
+        "size": 38
+      },
+      {
+        "text": "角色卡",
+        "bounds": [
+          50,
+          1030,
+          164,
+          1067
+        ],
+        "size": 38
+      },
+      {
+        "text": "画廊",
+        "bounds": [
+          735,
+          1030,
+          811,
+          1067
+        ],
+        "size": 38
+      },
+      {
+        "text": "世界随你编排",
+        "bounds": [
+          135,
+          3170,
+          483,
+          3227
+        ],
+        "size": 58
+      },
+      {
+        "text": "世界书多选 · 固定生图",
+        "bounds": [
+          135,
+          3275,
+          508,
+          3312
+        ],
+        "size": 38
+      },
+      {
+        "text": "画面随心切换",
+        "bounds": [
+          875,
+          3170,
+          1223,
+          3227
+        ],
+        "size": 58
+      },
+      {
+        "text": "生图站点 · 画廊与皮肤",
+        "bounds": [
+          875,
+          3275,
+          1248,
+          3313
+        ],
+        "size": 38
+      },
+      {
+        "text": "存档多重守护",
+        "bounds": [
+          1615,
+          3170,
+          1963,
+          3228
+        ],
+        "size": 58
+      },
+      {
+        "text": "多重备份 · 云端互传",
+        "bounds": [
+          1615,
+          3275,
+          1950,
+          3312
+        ],
+        "size": 38
+      },
+      {
+        "text": "新版自动提醒，应用内更新",
+        "bounds": [
+          135,
+          3435,
+          879,
+          3496
+        ],
+        "size": 62
+      },
+      {
+        "text": "确认后下载与安装 · 持续修复导入、记忆等问题",
+        "bounds": [
+          135,
+          3535,
+          926,
+          3573
+        ],
+        "size": 38
+      },
+      {
+        "text": "更新交流群",
+        "bounds": [
+          135,
+          3750,
+          370,
+          3797
+        ],
+        "size": 47
+      },
+      {
+        "text": "132292045",
+        "bounds": [
+          465,
+          3725,
+          942,
+          3792
+        ],
+        "size": 86
+      },
+      {
+        "text": "基于 STA1N156 / RP-Hub  ·  鸣谢 红花铃、启元",
+        "bounds": [
+          135,
+          3890,
+          830,
+          3922
+        ],
+        "size": 32
+      }
+    ],
+    "uncoveredFeetBounds": [
+      1490,
+      2510,
+      1840,
+      2940
+    ],
+    "updateBehavior": "Automatically checks and reminds; downloading and installing require confirmation."
+  },
+  {
+    "name": "RP-Local-让想象有画面-功能篇",
+    "size": [
+      2400,
+      4500
+    ],
+    "campaignVersion": "2.9.111",
+    "group": "132292045",
+    "meowaJobId": "job_cd2f58d9c0ce4018a27b6daad45f75e1",
+    "illustration": "artwork\\promo-redesign-20261115\\feature-banner\\为_RP-Local_软件宣传海报制作一张横版插画页眉_无文字_数字_手机_界面_参考图是两_72b63fca\\result_images_0_url.png",
+    "illustrationSha256": "a6bd3020d9da7f742e466fd15f6507ef905246a3b18d07d67cf32e79588faeec",
+    "screens": [
+      {
+        "source": "artwork\\promo-redesign-20261115\\phone-screens\\worldbook.jpg",
+        "sha256": "b9db4f475eb759cafb608b06c0d8cbe3fc95823f19bdf44620a5c2429854a2e2",
+        "capturedFrom": "User-provided mobile screenshot, November 15, 2026",
+        "screenshotVersion": "2.9.109",
+        "originalSize": [
+          1260,
+          2800
+        ],
+        "crop": [
+          0,
+          0,
+          1260,
+          2360
+        ],
+        "displayWidth": 650,
+        "angle": 0,
+        "screenshotPixelsUnpainted": true
+      },
+      {
+        "source": "artwork\\promo-redesign-20261115\\phone-screens\\backup.jpg",
+        "sha256": "b8a9a2bb035149881bfc326667d0dd1df8696e60a39d1a6cba94bf1ced472ee2",
+        "capturedFrom": "User-provided mobile screenshot, November 15, 2026",
+        "screenshotVersion": "2.9.109",
+        "originalSize": [
+          1260,
+          2800
+        ],
+        "crop": [
+          0,
+          0,
+          1260,
+          2360
+        ],
+        "displayWidth": 650,
+        "angle": 0,
+        "screenshotPixelsUnpainted": true
+      },
+      {
+        "source": "artwork\\promo-redesign-20261115\\phone-screens\\gallery.jpg",
+        "sha256": "9a28dc025a26bdd892965c69bd65e6372733d42655f890aaa1481a8f01d09544",
+        "capturedFrom": "User-provided mobile screenshot, November 15, 2026",
+        "screenshotVersion": "2.9.109",
+        "originalSize": [
+          1260,
+          2800
+        ],
+        "crop": [
+          0,
+          0,
+          1260,
+          2360
+        ],
+        "displayWidth": 650,
+        "angle": 0,
+        "screenshotPixelsUnpainted": true
+      }
+    ],
+    "text": [
+      {
+        "text": "RP-Local",
+        "bounds": [
+          135,
+          1000,
+          765,
+          1105
+        ],
+        "size": 155
+      },
+      {
+        "text": "让想象有画面，让故事有归处。",
+        "bounds": [
+          140,
+          1210,
+          1232,
+          1287
+        ],
+        "size": 78
+      },
+      {
+        "text": "AI 角色扮演  /  Android 本地版  /  2.9.111",
+        "bounds": [
+          140,
+          1350,
+          905,
+          1390
+        ],
+        "size": 40
+      },
+      {
+        "text": "01",
+        "bounds": [
+          135,
+          1525,
+          187,
+          1557
+        ],
+        "size": 42
+      },
+      {
+        "text": "设定自由编排",
+        "bounds": [
+          135,
+          1615,
+          507,
+          1676
+        ],
+        "size": 62
+      },
+      {
+        "text": "世界书多选，批量管理",
+        "bounds": [
+          135,
+          1720,
+          495,
+          1757
+        ],
+        "size": 36
+      },
+      {
+        "text": "02",
+        "bounds": [
+          875,
+          1525,
+          927,
+          1557
+        ],
+        "size": 42
+      },
+      {
+        "text": "故事多重留存",
+        "bounds": [
+          875,
+          1615,
+          1247,
+          1677
+        ],
+        "size": 62
+      },
+      {
+        "text": "每日备份，网页云端互传",
+        "bounds": [
+          875,
+          1720,
+          1271,
+          1757
+        ],
+        "size": 36
+      },
+      {
+        "text": "03",
+        "bounds": [
+          1615,
+          1525,
+          1667,
+          1557
+        ],
+        "size": 42
+      },
+      {
+        "text": "画面值得收藏",
+        "bounds": [
+          1615,
+          1615,
+          1987,
+          1676
+        ],
+        "size": 62
+      },
+      {
+        "text": "新画廊、图片与多款皮肤",
+        "bounds": [
+          1615,
+          1720,
+          2011,
+          1757
+        ],
+        "size": 36
+      },
+      {
+        "text": "固定生图",
+        "bounds": [
+          135,
+          3260,
+          375,
+          3318
+        ],
+        "size": 60
+      },
+      {
+        "text": "喜欢的画面，固定保留",
+        "bounds": [
+          135,
+          3360,
+          515,
+          3397
+        ],
+        "size": 38
+      },
+      {
+        "text": "生图网站可切换",
+        "bounds": [
+          1310,
+          3260,
+          1730,
+          3318
+        ],
+        "size": 60
+      },
+      {
+        "text": "选择适合自己的生图服务",
+        "bounds": [
+          1310,
+          3360,
+          1728,
+          3397
+        ],
+        "size": 38
+      },
+      {
+        "text": "多重备份保护",
+        "bounds": [
+          135,
+          3470,
+          495,
+          3530
+        ],
+        "size": 60
+      },
+      {
+        "text": "本地存档 · 每日 JSON 备份",
+        "bounds": [
+          135,
+          3570,
+          591,
+          3607
+        ],
+        "size": 38
+      },
+      {
+        "text": "原网站云端互传",
+        "bounds": [
+          1310,
+          3470,
+          1730,
+          3528
+        ],
+        "size": 60
+      },
+      {
+        "text": "共用备份码，传输角色卡与聊天",
+        "bounds": [
+          1310,
+          3570,
+          1842,
+          3607
+        ],
+        "size": 38
+      },
+      {
+        "text": "更好看的陪伴",
+        "bounds": [
+          135,
+          3680,
+          495,
+          3738
+        ],
+        "size": 60
+      },
+      {
+        "text": "画廊、图片与皮肤外观一起焕新",
+        "bounds": [
+          135,
+          3780,
+          667,
+          3818
+        ],
+        "size": 38
+      },
+      {
+        "text": "应用内更新",
+        "bounds": [
+          1310,
+          3680,
+          1610,
+          3739
+        ],
+        "size": 60
+      },
+      {
+        "text": "新版自动提醒，确认后下载安装",
+        "bounds": [
+          1310,
+          3780,
+          1842,
+          3817
+        ],
+        "size": 38
+      },
+      {
+        "text": "持续修复，让每一次续写更顺手。",
+        "bounds": [
+          135,
+          3970,
+          930,
+          4022
+        ],
+        "size": 53
+      },
+      {
+        "text": "云端传输包含角色卡与聊天，不含记忆与设置。",
+        "bounds": [
+          135,
+          4070,
+          807,
+          4102
+        ],
+        "size": 32
+      },
+      {
+        "text": "更新交流群",
+        "bounds": [
+          135,
+          4260,
+          370,
+          4307
+        ],
+        "size": 47
+      },
+      {
+        "text": "132292045",
+        "bounds": [
+          465,
+          4235,
+          942,
+          4302
+        ],
+        "size": 86
+      },
+      {
+        "text": "基于 STA1N156 / RP-Hub  ·  鸣谢 红花铃、启元",
+        "bounds": [
+          135,
+          4400,
+          830,
+          4432
+        ],
+        "size": 32
+      }
+    ],
+    "uncoveredFeetBounds": null,
+    "updateBehavior": "Automatically checks and reminds; downloading and installing require confirmation."
+  }
+]

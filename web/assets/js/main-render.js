@@ -1553,6 +1553,7 @@ return function render(_ctx, _cache) {
     const _component_pagination_controls = _resolveComponent("pagination-controls")
     const _component_memory_backfill_modal = _resolveComponent("memory-backfill-modal")
     const _component_image_download_sheet = _resolveComponent("image-download-sheet")
+    const _component_update_notice = _resolveComponent("update-notice")
     const _component_release_announcement = _resolveComponent("release-announcement")
     const _component_user_setup_modal = _resolveComponent("user-setup-modal")
     const _component_action_confirm_modal = _resolveComponent("action-confirm-modal")
@@ -6994,6 +6995,7 @@ return function render(_ctx, _cache) {
         onRetry: startBatchMemoryExtraction
       }, null, 8 /* PROPS */, ["show", "progress", "onClose", "onStop", "onRetry"]),
       _createVNode(_component_image_download_sheet),
+      _createVNode(_component_update_notice, { blocked: showUserSetupModal || showAnnouncement || backupTask.active }, null, 8 /* PROPS */, ["blocked"]),
       _createVNode(_component_release_announcement, {
         show: showAnnouncement,
         onClose: closeAnnouncement,
@@ -9968,6 +9970,7 @@ return function render(_ctx, _cache) {
     const _component_competition_detail = _resolveComponent("competition-detail")
     const _component_memory_backfill_modal = _resolveComponent("memory-backfill-modal")
     const _component_image_download_sheet = _resolveComponent("image-download-sheet")
+    const _component_update_notice = _resolveComponent("update-notice")
     const _component_release_announcement = _resolveComponent("release-announcement")
     const _component_user_setup_modal = _resolveComponent("user-setup-modal")
     const _component_action_confirm_modal = _resolveComponent("action-confirm-modal")
@@ -16690,6 +16693,7 @@ return function render(_ctx, _cache) {
         onRetry: startBatchMemoryExtraction
       }, null, 8 /* PROPS */, ["show", "progress", "onClose", "onStop", "onRetry"]),
       _createVNode(_component_image_download_sheet),
+      _createVNode(_component_update_notice, { blocked: showUserSetupModal || showAnnouncement || backupTask.active }, null, 8 /* PROPS */, ["blocked"]),
       _createVNode(_component_release_announcement, {
         show: showAnnouncement,
         onClose: closeAnnouncement,
@@ -24921,12 +24925,12 @@ return function render(_ctx, _cache) {
     return (_openBlock(), _createElementBlock("section", _hoisted_1, [
       _createElementVNode("div", _hoisted_2, [
         _createElementVNode("label", _hoisted_3, [
-          _cache[1] || (_cache[1] = _createElementVNode("span", null, "自动更新", -1 /* CACHED */)),
+          _cache[1] || (_cache[1] = _createElementVNode("span", null, "更新提醒", -1 /* CACHED */)),
           _createElementVNode("span", _hoisted_4, [
             _createElementVNode("input", {
               type: "checkbox",
               role: "switch",
-              "aria-label": "自动更新",
+              "aria-label": "更新提醒",
               class: "settings-toggle-input sr-only",
               checked: state.automatic,
               onChange: $event => (updates.setAutomatic($event.target.checked))
@@ -24944,7 +24948,7 @@ return function render(_ctx, _cache) {
           _cache[2] || (_cache[2] = _createTextVNode("检查更新 ", -1 /* CACHED */))
         ], 8 /* PROPS */, _hoisted_6)
       ]),
-      _cache[6] || (_cache[6] = _createElementVNode("p", { class: "app-update-hint" }, "Wi-Fi 下自动下载，安装前确认。", -1 /* CACHED */)),
+      _cache[6] || (_cache[6] = _createElementVNode("p", { class: "app-update-hint" }, "发现新版本时提醒，下载前由你确认。", -1 /* CACHED */)),
       status
         ? (_openBlock(), _createElementBlock("p", _hoisted_7, _toDisplayString(status), 1 /* TEXT */))
         : _createCommentVNode("v-if", true),
@@ -25001,6 +25005,146 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true)
           ]))
         : _createCommentVNode("v-if", true)
+    ]))
+  }
+}
+})();
+window.RPCompiledRenders.UpdateNotice = (function () {
+const _Vue = Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
+
+const _hoisted_1 = ["onCancel", "onClose", "onClick", "onKeydown"]
+const _hoisted_2 = ["onClick"]
+const _hoisted_3 = {
+  class: "update-notice-art",
+  "aria-hidden": "true"
+}
+const _hoisted_4 = ["src", "onError"]
+const _hoisted_5 = { class: "update-notice-header" }
+const _hoisted_6 = { class: "update-notice-actions" }
+const _hoisted_7 = {
+  key: 0,
+  role: "status"
+}
+const _hoisted_8 = ["value"]
+const _hoisted_9 = {
+  key: 2,
+  role: "alert"
+}
+const _hoisted_10 = ["onClick"]
+const _hoisted_11 = ["onClick"]
+const _hoisted_12 = ["disabled", "onClick"]
+const _hoisted_13 = ["href"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, createBlock: _createBlock, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, Fragment: _Fragment, withModifiers: _withModifiers, Teleport: _Teleport } = _Vue
+
+    const _component_icon = _resolveComponent("icon")
+
+    return (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
+      _createElementVNode("dialog", {
+        ref: "dialog",
+        class: "update-notice",
+        "aria-labelledby": "update-notice-title",
+        "data-rphub-no-save": "",
+        onCancel: _withModifiers(dismiss, ["prevent"]),
+        onClose: closed,
+        onClick: _withModifiers(dismiss, ["self"]),
+        onKeydown: trapFocus
+      }, [
+        (state.latest)
+          ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+              _createElementVNode("button", {
+                type: "button",
+                class: "update-notice-close",
+                "aria-label": "关闭更新提醒",
+                title: "关闭更新提醒",
+                onClick: dismiss,
+                autofocus: ""
+              }, [
+                _createVNode(_component_icon, { name: "X" })
+              ], 8 /* PROPS */, _hoisted_2),
+              _createElementVNode("div", _hoisted_3, [
+                (!imageFailed)
+                  ? (_openBlock(), _createElementBlock("img", {
+                      key: 0,
+                      src: 'assets/images/updates/' + state.mascot + '.webp',
+                      alt: "",
+                      width: "720",
+                      height: "540",
+                      "data-rphub-no-save": "",
+                      onError: $event => (imageFailed = true)
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_4))
+                  : (_openBlock(), _createBlock(_component_icon, {
+                      key: 1,
+                      name: "BellRing"
+                    }))
+              ]),
+              _createElementVNode("header", _hoisted_5, [
+                _cache[1] || (_cache[1] = _createElementVNode("h2", { id: "update-notice-title" }, "发现新版本", -1 /* CACHED */)),
+                _createElementVNode("p", null, [
+                  _cache[0] || (_cache[0] = _createTextVNode("RP-Local ", -1 /* CACHED */)),
+                  _createElementVNode("strong", null, _toDisplayString(state.latest.versionName), 1 /* TEXT */)
+                ])
+              ]),
+              _createElementVNode("footer", _hoisted_6, [
+                status
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_7, _toDisplayString(status), 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                (state.phase === 'downloading')
+                  ? (_openBlock(), _createElementBlock("progress", {
+                      key: 1,
+                      value: state.progress,
+                      max: "100",
+                      "aria-label": "更新下载进度"
+                    }, null, 8 /* PROPS */, _hoisted_8))
+                  : _createCommentVNode("v-if", true),
+                (state.error)
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_9, _toDisplayString(state.error), 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
+                _createElementVNode("div", null, [
+                  _createElementVNode("button", {
+                    type: "button",
+                    class: "shell-button",
+                    onClick: dismiss
+                  }, "暂不更新", 8 /* PROPS */, _hoisted_10),
+                  installable
+                    ? (_openBlock(), _createElementBlock("button", {
+                        key: 0,
+                        type: "button",
+                        class: "shell-button update-notice-primary",
+                        onClick: $event => (updates.install())
+                      }, [
+                        _createVNode(_component_icon, { name: "PackageCheck" }),
+                        _cache[2] || (_cache[2] = _createTextVNode("安装更新", -1 /* CACHED */))
+                      ], 8 /* PROPS */, _hoisted_11))
+                    : (updates.native)
+                      ? (_openBlock(), _createElementBlock("button", {
+                          key: 1,
+                          type: "button",
+                          class: "shell-button update-notice-primary",
+                          disabled: busy,
+                          onClick: $event => (state.phase === 'error' ? updates.check() : updates.download())
+                        }, [
+                          _createVNode(_component_icon, { name: state.phase === 'error' ? 'RefreshCw' : 'Download' }, null, 8 /* PROPS */, ["name"]),
+                          _createTextVNode(_toDisplayString(state.phase === 'error' ? '重新检查' : '下载更新'), 1 /* TEXT */)
+                        ], 8 /* PROPS */, _hoisted_12))
+                      : (_openBlock(), _createElementBlock("a", {
+                          key: 2,
+                          class: "shell-button update-notice-primary",
+                          href: state.latest.url,
+                          target: "_blank",
+                          rel: "noopener"
+                        }, [
+                          _createVNode(_component_icon, { name: "Download" }),
+                          _cache[3] || (_cache[3] = _createTextVNode("下载安装包", -1 /* CACHED */))
+                        ], 8 /* PROPS */, _hoisted_13))
+                ])
+              ])
+            ], 64 /* STABLE_FRAGMENT */))
+          : _createCommentVNode("v-if", true)
+      ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1)
     ]))
   }
 }

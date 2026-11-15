@@ -1,0 +1,26 @@
+[
+  {
+    "name": "RP-Local-2.9.111-霓裳玥玥-更新宣传",
+    "size": [
+      1600,
+      2400
+    ],
+    "group": "132292045",
+    "illustration": "artwork/update-notice-20261115/yueyue/为_RP-Local_新版本提醒弹窗绘制一张单人透明背景插画_无文字_参考图中的成年玥玥_899ec270/result_images_0_url.png",
+    "meowaJobId": "job_2a8e6ed3e6534d3391d82096b590477f",
+    "screenshot": ".impeccable/review/update-notice-2.9.111/poster-yueyue.png",
+    "screenshotSha256": "bdf04be4cca8d986aeb09abedd55faeab3baaa50c7c5e8180ec5ad98cdf35c93"
+  },
+  {
+    "name": "RP-Local-2.9.111-旗袍红花铃-更新宣传",
+    "size": [
+      1600,
+      2400
+    ],
+    "group": "132292045",
+    "illustration": "artwork/update-notice-20261115/honghualing-qipao/为_RP-Local_新版本提醒弹窗绘制一张成年红花铃的单人透明背景插画_无文字_参考图_905805d9/result_images_0_url.png",
+    "meowaJobId": "job_2f6f509d585e477da3892031b7f0bed4",
+    "screenshot": ".impeccable/review/update-notice-2.9.111/poster-honghualing.png",
+    "screenshotSha256": "5e3edd6ca054666e67f66e53a399132811bafafe7026d4700661402f5c6b84ca"
+  }
+]

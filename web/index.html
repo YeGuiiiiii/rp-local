@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.110'; window.RP_LOCAL_RELEASE = 369;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.111'; window.RP_LOCAL_RELEASE = 370;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -3439,6 +3439,7 @@
 
 
         <image-download-sheet></image-download-sheet>
+        <update-notice :blocked="showUserSetupModal || showAnnouncement || backupTask.active"></update-notice>
         <release-announcement :show="showAnnouncement" @close="closeAnnouncement" @event="openCompetition"></release-announcement>
         <user-setup-modal :show="showUserSetupModal" :name="tempUserSetup.name"
             :description="tempUserSetup.description" :person="tempUserSetup.person"

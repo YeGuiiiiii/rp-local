@@ -129,7 +129,8 @@ fs.mkdirSync(output, { recursive: true });
         await reading.waitFor();
         await page.waitForTimeout(240);
         assert.match(await reading.innerText(), /特别鸣谢红花铃🔔老师、启元老师/);
-        assert.match(await reading.innerText(), /QQ 群 472441481、132292045 发布/);
+        assert.match(await reading.innerText(), /QQ 群 132292045 发布/);
+        assert.ok(!(await reading.innerText()).includes('472441481'));
         await reading.evaluate(el => { el.scrollTop = el.scrollHeight; });
         assert.ok(await page.evaluate(() => document.querySelector('.release-section:last-child').getBoundingClientRect().bottom
             <= document.querySelector('.release-footer').getBoundingClientRect().top));
