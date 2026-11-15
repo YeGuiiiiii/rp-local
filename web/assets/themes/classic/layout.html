@@ -2380,6 +2380,19 @@
                     </div>
                 </div>
 
+                <div class="worldinfo-toolbar">
+                    <label class="worldinfo-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path stroke-linecap="round" d="m20 20-3.2-3.2"></path></svg>
+                        <input v-model="worldInfoQuery" type="search" placeholder="搜索名称或关键词" autocomplete="off">
+                    </label>
+                    <span class="worldinfo-search-count">{{ worldInfoTotalCount }} 条</span>
+                </div>
+                <div class="worldinfo-pager worldinfo-pager--top">
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage <= 1" @click="setWorldInfoPage(worldInfoPage - 1)"><span aria-hidden="true">‹</span> 上一页</button>
+                    <span class="worldinfo-pager-info">{{ worldInfoPage }} / {{ worldInfoPageCount }}</span>
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage >= worldInfoPageCount" @click="setWorldInfoPage(worldInfoPage + 1)">下一页 <span aria-hidden="true">›</span></button>
+                </div>
+
                 <div id="worldinfo-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
                     <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index"
                         class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
@@ -2428,6 +2441,12 @@
                         </div>
                     </div>
                 </div>
+                <div class="worldinfo-pager worldinfo-pager--bottom">
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage <= 1" @click="setWorldInfoPage(worldInfoPage - 1)"><span aria-hidden="true">‹</span> 上一页</button>
+                    <span class="worldinfo-pager-info">{{ worldInfoPage }} / {{ worldInfoPageCount }}</span>
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage >= worldInfoPageCount" @click="setWorldInfoPage(worldInfoPage + 1)">下一页 <span aria-hidden="true">›</span></button>
+                </div>
+
             </div>
 
         <div v-if="currentView === 'settings-detail'" class="management-view settings-view shell-settings-detail" :data-section="settingsSection">

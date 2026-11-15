@@ -2061,11 +2061,29 @@ const app = createApp({
         //   条目上千时滚动条会一直变长、滚动位置也跟着跳。改成 200 条一页。
         const WORLDINFO_PAGE_SIZE = 200;
         const worldInfoPage = ref(1);
-        const worldInfoPageCount = computed(() => Math.max(1, Math.ceil(orderedWorldInfo.value.length / WORLDINFO_PAGE_SIZE)));
+        // [rphub 2.9.116] 世界书页内搜索：按名称 / 关键词 / 正文过滤，与分页同源
+        const worldInfoQuery = ref('');
+        const filteredWorldInfo = computed(() => {
+            const query = worldInfoQuery.value.trim().toLowerCase();
+            if (!query) return orderedWorldInfo.value;
+            return orderedWorldInfo.value.filter(({ entry }) => {
+                const haystack = [
+                    entry?.comment, entry?.key, entry?.keys,
+                    Array.isArray(entry?.key) ? entry.key.join(' ') : '',
+                    Array.isArray(entry?.keys) ? entry.keys.join(' ') : '',
+                    entry?.content
+                ].filter(Boolean).join('\n').toLowerCase();
+                return haystack.includes(query);
+            });
+        });
+        const worldInfoPageCount = computed(() => Math.max(1, Math.ceil(filteredWorldInfo.value.length / WORLDINFO_PAGE_SIZE)));
+        // 计数按「当前筛选结果」走，和页数同源，避免搜索时数字与页数打架
+        const worldInfoTotalCount = computed(() => filteredWorldInfo.value.length);
         const visibleWorldInfo = computed(() => {
             const start = (worldInfoPage.value - 1) * WORLDINFO_PAGE_SIZE;
-            return orderedWorldInfo.value.slice(start, start + WORLDINFO_PAGE_SIZE);
+            return filteredWorldInfo.value.slice(start, start + WORLDINFO_PAGE_SIZE);
         });
+        watch(worldInfoQuery, () => { worldInfoPage.value = 1; });
         const setWorldInfoPage = page => {
             worldInfoPage.value = Math.min(Math.max(1, Math.round(Number(page) || 1)), worldInfoPageCount.value);
             scrollWorldInfoTop();
@@ -17249,7 +17267,7 @@ const app = createApp({
             },
 
             showRegexEditor, showWorldInfoEditor, editingRegex, editingWorldInfo, worldInfoKeysText, updateEditingWorldInfoKeys,
-            resourceBatch, resourceTap, visibleWorldInfo, worldInfoPage, worldInfoPageCount, setWorldInfoPage, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
+            resourceBatch, resourceTap, visibleWorldInfo, worldInfoPage, worldInfoPageCount, worldInfoTotalCount, worldInfoQuery, setWorldInfoPage, worldInfoViewport, worldInfoScrolled, onWorldInfoScroll, scrollWorldInfoTop, resourceScope, managedRegexScripts,
             worldInfoSettings, showWorldInfoSettings, showMemorySettings, settingsHelpTopic, showActiveToolSettings, showUiTemplateSettings, estimatedGenerationTime, currentWaitTime,
             globalConfirmModal,
 
