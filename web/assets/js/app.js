@@ -9888,9 +9888,7 @@ const app = createApp({
         // 列表 :src 原本直接吃原始 data URL，DOM 属性里挂的是几百 KB 到 1MB 的 base64 串；
         // 这里换成 64 字符的 blob 地址，同一张卡的地址只建一次。
         // 键用「长度 + 首 64 + 末 32」，避免把整串塞进 Map 当 key 反复算哈希。
-        // 刻意不做容量驱逐、也不 revokeObjectURL：卡片滚出屏幕后仍留在 DOM 里
-        // （列表容器有 content-visibility:auto），此时 revoke 会让它滚回来时直接裂图。
-        // blob 地址随页面重载一起释放，生命周期与 characters 里的原始 data URL 同阶。
+        // 滚出屏幕的卡片仍在 DOM 中，保留其地址；离开显示列表后再回收旧图片。
         const listAvatarCache = new Map();
         const listAvatarUrl = (source) => {
             const raw = String(source || '');
@@ -9953,6 +9951,16 @@ const app = createApp({
                 regexCount: getCharacterRegexCount(char)
             }));
         });
+        const releaseListAvatars = (cards = []) => {
+            const retained = new Set(cards.map(card => card.avatar));
+            listAvatarCache.forEach((url, key) => {
+                if (retained.has(url)) return;
+                if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+                listAvatarCache.delete(key);
+            });
+        };
+        watch(displayedCharacters, releaseListAvatars, { flush: 'post' });
+        onBeforeUnmount(() => releaseListAvatars());
 
         const loadMoreCharacters = () => {
             characterDisplayLimit.value += 8;
