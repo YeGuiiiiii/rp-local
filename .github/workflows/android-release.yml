@@ -2,6 +2,8 @@ name: Publish verified Android APK
 
 on:
   push:
+    branches:
+      - hh/compatibility-maintenance
     tags:
       - 'v[0-9]*'
 
@@ -18,7 +20,18 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Select prepared package
+        id: package
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [[ -f "dist/RELEASE-$version.md" && -f "dist/SHA256SUMS-$version.txt" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No prepared package for $GITHUB_REF_NAME; retain the maintainer's release." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Verify and publish signed APK
+        if: steps.package.outputs.ready == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
