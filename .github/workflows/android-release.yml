@@ -2,6 +2,8 @@ name: Publish verified Android APK
 
 on:
   push:
+    branches:
+      - hh/compatibility-maintenance
     tags:
       - 'v[0-9]*'
 
