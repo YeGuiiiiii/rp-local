@@ -1234,6 +1234,7 @@
             show: Boolean,
             character: { type: Object, required: true },
             editing: Boolean,
+            avatarLoading: Boolean,
             tab: { type: String, default: 'basic' }
         },
         emits: ['close', 'save', 'avatar-upload', 'update:tab', 'update-field'],
@@ -1277,9 +1278,10 @@
                             <div class="flex flex-col items-center flex-shrink min-h-0">
                                 <div class="w-auto h-[40vh] md:h-[45vh] aspect-[2/3] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden relative group shadow-xl ring-4 ring-white">
                                     <img :src="character.avatar" class="w-full h-full object-cover">
-                                    <label class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-[2px]">
+                                    <label class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity cursor-pointer backdrop-blur-[2px]"
+                                        :class="avatarLoading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
                                         <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        <span class="text-white font-bold text-sm">更换图片</span>
+                                        <span class="text-white font-bold text-sm" role="status">{{ avatarLoading ? '处理图片中…' : '更换图片' }}</span>
                                         <input type="file" accept="image/*" @change="$emit('avatar-upload', $event)" class="hidden">
                                     </label>
                                 </div>
@@ -1312,7 +1314,7 @@
 
                     <div class="p-3 md:p-5 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50/80 backdrop-blur-sm flex-shrink-0">
                         <button @click="$emit('close')" class="px-6 py-2.5 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 rounded-xl transition-all font-bold text-sm shadow-sm active:scale-95">取消</button>
-                        <button @click="$emit('save')" class="px-8 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-all font-bold text-sm shadow-md hover:shadow-lg active:scale-95 flex items-center">
+                        <button @click="$emit('save')" :disabled="avatarLoading" class="px-8 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-all font-bold text-sm shadow-md hover:shadow-lg active:scale-95 flex items-center disabled:opacity-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             保存角色
                         </button>

@@ -2051,14 +2051,11 @@ const app = createApp({
         };
         const globalWorldInfo = ref([]);
         const worldInfo = ref([]);
-        const worldInfoLimit = ref(100);
         const worldInfoViewport = ref(null);
         const worldInfoScrolled = ref(false);
         const globalFirst = (a, b) => Number(b.scope === 'global') - Number(a.scope === 'global');
         const orderedWorldInfo = computed(() => worldInfo.value.map((entry, index) => ({ entry, index }))
             .sort((a, b) => globalFirst(a.entry, b.entry)));
-        // [rphub 2.9.113] 世界书改分页：原来靠 worldInfoLimit 滚到底再加 100，
-        //   条目上千时滚动条会一直变长、滚动位置也跟着跳。改成 200 条一页。
         const WORLDINFO_PAGE_SIZE = 200;
         const worldInfoPage = ref(1);
         // [rphub 2.9.116] 世界书页内搜索：按名称 / 关键词 / 正文过滤，与分页同源
@@ -2092,9 +2089,6 @@ const app = createApp({
         const onWorldInfoScroll = event => {
             const view = event.target;
             worldInfoScrolled.value = view.scrollTop > 300;
-            if (view.scrollHeight - view.scrollTop - view.clientHeight < 600) {
-                worldInfoLimit.value = Math.min(worldInfo.value.length, worldInfoLimit.value + 100);
-            }
         };
         const scrollWorldInfoTop = () => {
             worldInfoViewport.value?.scrollTo({
@@ -2102,7 +2096,6 @@ const app = createApp({
             });
         };
         watch([currentView, currentCharacterIndex], () => {
-            worldInfoLimit.value = 100;
             worldInfoPage.value = 1;
             worldInfoScrolled.value = false;
         });
@@ -3558,7 +3551,7 @@ const app = createApp({
         // 定位：把整段对话压成「人物档案 / 故事总纪事」，供用户自己贴进世界书或人设。
         // 三条硬线：① 只写自有键 rphub_mem_tools_extract，不碰 classic_memories
         //          ② 结果不自动进上下文、不进向量索引 —— 不复制就永远是草稿
-        //          ③ 提示词照搬第三方工坊原文，只去掉首行 NSFW 声明
+        //          ③ 沿用工坊提示词，保持内容要求与标签边界一致
         const MEM_TOOLS_EXTRACT_KEY = 'rphub_mem_tools_extract';
         const MEM_TOOLS_EXTRACT_TAGS = {
             character: { tag: 'character', attr: 'name', fallback: '未命名人物', label: '人物' },
@@ -3568,7 +3561,7 @@ const app = createApp({
             "你是一名专精于长篇角色扮演与互动叙事的【专业级人物档案与世界书设定集整理器】。下面是角色扮演对话的完整上下文记录（包含逐轮总结与关键原文）。",
             "对话中玩家可能以“你”或其他名字被称呼，指代玩家时一律以对话里的实际称呼或名字为准，不得自行猜测姓名。",
             "任务：全面、详尽地提取上下文中真实登场或被明确提及的【全部人物】（包括主角、主要女主/男主、常驻配角、对手、具有剧情推动作用的路人、家属等，宁多勿漏），为每个人物输出一份详实饱满、可直接作为长期记忆世界书条目（Lorebook/Character Book）使用的深度立体独立档案。",
-            "输出格式（必须严格遵守）：每个人物用一对标签包裹，形如 <character name=\"人物正式称呼\">档案正文</character>；标签外严禁输出任何解释、标题、前言、结语或代码块标记。标签之后的正文直到下一个标签之前，都视为该人物的档案内容。同一人物的不同称谓必须合并（name 取最正式完整名称）。",
+            "输出格式（必须严格遵守）：每个人物用一对标签包裹，形如 <character name=\"人物正式称呼\">档案正文</character>；标签外严禁输出任何解释、标题、前言、结语或代码块标记。档案正文必须放在该人物的开始标签与闭合标签之间。同一人物的不同称谓必须合并（name 取最正式完整名称）。",
             "【档案正文专业多维结构强制要求】（必须按以下 8 个方面分段深入详述，字数要充实饱满，拒绝空泛的性格形容词，全部落到具体动作、物件、原声台词与真实经历上，严禁一两句话草率概括；仅露一面且信息极少的纯路人可精简为 1、2、6、8 项）：",
             "1.【基本身份、社会定位与一句话定义】：",
             "  - 基础身份：正式全名、昵称/代号/外号（谁有资格叫）、名字的来历或替他说了什么；性别、年龄与生日或生命阶段、社会阶层与公开职业、所属势力/阵营/家庭、法定身份与户籍/学籍归属、当前实力等级或阶层位置。",
@@ -3865,29 +3858,39 @@ const app = createApp({
                 { role: 'user', content: parts.join('\n\n') }
             ];
         };
-        // 标签解析：模型被 max_tokens 截断时没有闭合标签，剩下的一律算作最后一条，别整份丢掉
+        const getMemToolsExtractTags = (text, kind) => [...String(text || '').matchAll(
+            new RegExp(`<(/?)${MEM_TOOLS_EXTRACT_TAGS[kind].tag}\\b(?:[^>"']|"[^"]*"|'[^']*')*>`, 'gi')
+        )];
+        // 缺少闭合标签时以下一个人物为边界，保留截断正文。
         const parseMemToolsExtract = (text, kind) => {
             const spec = MEM_TOOLS_EXTRACT_TAGS[kind];
             const raw = String(text || '');
-            const open = new RegExp(`<${spec.tag}\\s+${spec.attr}\\s*=\\s*(["'])([\\s\\S]*?)\\1\\s*>`, 'gi');
+            const tags = getMemToolsExtractTags(raw, kind);
             const entries = [];
-            let match;
-            while ((match = open.exec(raw)) !== null) {
-                const bodyStart = open.lastIndex;
-                const closeIndex = raw.toLowerCase().indexOf(`</${spec.tag}>`, bodyStart);
-                const body = String(closeIndex >= 0 ? raw.slice(bodyStart, closeIndex) : raw.slice(bodyStart)).trim();
-                if (closeIndex >= 0) open.lastIndex = closeIndex + spec.tag.length + 3;
+            tags.forEach((match, index) => {
+                if (match[1]) return;
+                const body = raw.slice(match.index + match[0].length, tags[index + 1]?.index ?? raw.length).trim();
                 if (body) {
+                    const opening = match[0]
+                        .replace(/=\s*[“”]([^“”]*)[“”]/g, (_, value) => '="' + value.replace(/"/g, '&quot;') + '"')
+                        .replace(/=\s*[‘’]([^‘’]*)[‘’]/g, (_, value) => "='" + value.replace(/'/g, '&#39;') + "'");
+                    const node = new DOMParser().parseFromString(opening, 'text/html').body.firstElementChild;
                     entries.push({
                         id: generateUUID(),
                         kind,
-                        label: String(match[2] || '').trim() || spec.fallback,
+                        label: String(node?.getAttribute(spec.attr) || '').trim() || spec.fallback,
                         text: body
                     });
                 }
-                if (closeIndex < 0) break;
-            }
+            });
             return entries;
+        };
+        const keepMemToolsExtractDraft = (text, kind) => {
+            const spec = MEM_TOOLS_EXTRACT_TAGS[kind];
+            memToolsExtract.entries = [...(memToolsExtract.entries || []), {
+                id: generateUUID(), kind, label: `${spec.label}原文（待整理）`, text: String(text || '')
+            }];
+            memToolsExtract.notice = '未识别到条目格式，已保留为原文草稿，可编辑、复制或保存；原有条目未替换';
         };
         const runMemToolsExtract = async kind => {
             const spec = MEM_TOOLS_EXTRACT_TAGS[kind];
@@ -3923,7 +3926,7 @@ const app = createApp({
                 memToolsExtractRaw[kind] = String(text || '');
                 const parsed = parseMemToolsExtract(text, kind);
                 if (!parsed.length) {
-                    memToolsExtract.error = `模型没有按 <${spec.tag} ${spec.attr}="…"> 标签输出，这次结果拆不出条目`;
+                    keepMemToolsExtractDraft(text, kind);
                     return;
                 }
                 // 只替换同类型的旧条目：重生成人物档案不该把已经好的故事纪事冲掉
@@ -4400,12 +4403,8 @@ const app = createApp({
         const memToolsExtractRawUser = reactive({ character: '', story: '' });
         const memToolsExtractContinueRound = reactive({ character: 0, story: 0 });
         const memToolsExtractHasUnclosed = (text, kind) => {
-            const spec = MEM_TOOLS_EXTRACT_TAGS[kind] || MEM_TOOLS_EXTRACT_TAGS.character;
-            const s = String(text || '').toLowerCase();
-            const tag = spec.tag.toLowerCase();
-            const open = (s.match(new RegExp('<' + tag + '\\b', 'g')) || []).length;
-            const close = (s.match(new RegExp('</' + tag + '>', 'g')) || []).length;
-            return open > close;
+            const tags = getMemToolsExtractTags(text, kind === 'story' ? 'story' : 'character');
+            return !!tags.length && !tags[tags.length - 1][1];
         };
         const memToolsExtractNeedsContinue = kind => {
             const key = kind === 'story' ? 'story' : 'character';
@@ -4484,6 +4483,10 @@ const app = createApp({
                 memToolsExtractRaw[key] = merged;
                 memToolsExtractContinueRound[key] = (Number(memToolsExtractContinueRound[key]) || 0) + 1;
                 const parsed = memToolsExtractDedupe(parseMemToolsExtract(merged, key));
+                if (!parsed.length) {
+                    keepMemToolsExtractDraft(merged, key);
+                    return;
+                }
                 const kept = (memToolsExtract.entries || []).filter(entry => entry.kind !== key);
                 memToolsExtract.entries = [...kept, ...parsed];
                 memToolsExtract.notice = memToolsExtractHasUnclosed(merged, key)
@@ -4793,6 +4796,8 @@ const app = createApp({
 
         // Editing States
         const editingCharacter = reactive({ id: undefined, data: {} });
+        const characterAvatarLoading = ref(false);
+        let characterAvatarUploadEpoch = 0;
         const editorTab = ref('basic'); // 'basic', 'description', 'personality', 'first_mes'
         const isBatchDeleteMode = ref(false);
         const characterGridView = ref(localStorage.getItem('rp-character-layout') !== 'deck');
@@ -8941,6 +8946,15 @@ const app = createApp({
                 if (label) label.textContent = `生成中 ${Math.round(progress)}%`;
                 return;
             }
+            if (job.status === 'failed') {
+                const image = card.querySelector('img');
+                image?.removeAttribute('src');
+                card.classList.remove('is-generating', 'is-waiting');
+                card.classList.add('is-generation-error');
+                card.dataset.imageJobState = 'failed';
+                if (label) label.textContent = job.error || '生成失败';
+                return;
+            }
 
             const imageUrl = job.imageUrl
                 ? new URL(job.imageUrl, task.baseUrl).href
@@ -9022,19 +9036,21 @@ const app = createApp({
                 }
                 if (provider.protocol === 'openai') {
                     if (!provider.model.trim()) throw new Error('请在生图设置中填写此接口的模型名称');
+                    const size = provider.size.trim().replace(/^(\d+)\s*[x×]\s*(\d+)$/i, '$1x$2');
                     publish({ status: 'running' });
                     const payload = await fetchImageJobJson(task.baseUrl, {
                         method: 'POST', timeoutMs: 180000, bodyLimit: 32 * 1024 * 1024,
                         headers: { 'content-type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                        body: JSON.stringify({ model: provider.model.trim(), n: 1, size: provider.size.trim() || 'auto',
+                        body: JSON.stringify({ model: provider.model.trim(), n: 1, ...(size ? { size } : {}),
                             prompt: [request.searchParams.get('tag'), request.searchParams.get('artist')].filter(Boolean).join(', ') })
                     });
                     const image = payload.data?.[0];
-                    let imageUrl = image?.url;
+                    let imageUrl = image?.url ? new URL(image.url, task.baseUrl).href : '';
                     if (image?.b64_json) {
                         const mime = image.b64_json.startsWith('/9j/') ? 'image/jpeg'
                             : image.b64_json.startsWith('UklGR') ? 'image/webp' : 'image/png';
-                        imageUrl = 'data:' + mime + ';base64,' + image.b64_json;
+                        imageUrl = image.b64_json.startsWith('data:image/') ? image.b64_json
+                            : 'data:' + mime + ';base64,' + image.b64_json;
                     }
                     if (!imageUrl) throw new Error(payload.error?.message || '生图接口未返回图片，请检查接口格式和模型');
                     const job = { status: 'done', imageUrl };
@@ -9947,9 +9963,7 @@ const app = createApp({
         // 列表 :src 原本直接吃原始 data URL，DOM 属性里挂的是几百 KB 到 1MB 的 base64 串；
         // 这里换成 64 字符的 blob 地址，同一张卡的地址只建一次。
         // 键用「长度 + 首 64 + 末 32」，避免把整串塞进 Map 当 key 反复算哈希。
-        // 刻意不做容量驱逐、也不 revokeObjectURL：卡片滚出屏幕后仍留在 DOM 里
-        // （列表容器有 content-visibility:auto），此时 revoke 会让它滚回来时直接裂图。
-        // blob 地址随页面重载一起释放，生命周期与 characters 里的原始 data URL 同阶。
+        // 滚出屏幕的卡片仍在 DOM 中，保留其地址；离开显示列表后再回收旧图片。
         const listAvatarCache = new Map();
         const listAvatarUrl = (source) => {
             const raw = String(source || '');
@@ -10012,6 +10026,16 @@ const app = createApp({
                 regexCount: getCharacterRegexCount(char)
             }));
         });
+        const releaseListAvatars = (cards = []) => {
+            const retained = new Set(cards.map(card => card.avatar));
+            listAvatarCache.forEach((url, key) => {
+                if (retained.has(url)) return;
+                if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+                listAvatarCache.delete(key);
+            });
+        };
+        watch(displayedCharacters, releaseListAvatars, { flush: 'post' });
+        onBeforeUnmount(() => releaseListAvatars());
 
         const loadMoreCharacters = () => {
             characterDisplayLimit.value += 8;
@@ -14523,19 +14547,24 @@ const app = createApp({
             try {
                 char = await window.RPHubStorage.readCharacter(char);
                 editingCharacter.id = index;
-                editingCharacter.data = JSON.parse(JSON.stringify(char));
+                editingCharacter.data = cloneForStorage(char);
                 editorTab.value = 'basic';
                 showCharacterEditor.value = true;
             } catch (error) { showToast(error.message, 'error'); }
         };
         watch(showCharacterEditor, opened => {
-            if (!opened) editingCharacter.data = {};
+            if (!opened) {
+                characterAvatarUploadEpoch++;
+                characterAvatarLoading.value = false;
+                editingCharacter.data = {};
+            }
         });
         watch(showUiTemplateEditor, opened => {
             if (!opened) editingUiTemplate.data = {};
         });
 
         const saveCharacter = async () => {
+            if (characterAvatarLoading.value) return;
             const characterRegexScripts = (editingCharacter.data.regexScripts || [])
                 .map(script => normalizeRegexScript({ ...script, scope: 'character' }, 'character'))
                 .filter(script => script.scope !== 'global');
@@ -15641,31 +15670,24 @@ const app = createApp({
             }
         };
 
-        const handleAvatarUpload = (event) => {
-            const file = event.target.files[0];
+        const handleAvatarUpload = async (event) => {
+            const input = event.target;
+            const file = input.files?.[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const raw = String(e.target.result || '');
-                // [rphub 2.9.083] 这里原来有两条会写坏卡片的路径：
-                //   1) compressImage 失败时 resolve 空串，直接把 avatar 写成 '' —— 卡片变空白图；
-                //   2) 抛错时回退成「原图 dataURL」，几十 MB 的 base64 塞进卡片记录，
-                //      写入超限后整条 __rp_card__ 写不进去，readCharacter 读回时抛
-                //      「角色卡内容缺失」，表现就是卡片死掉、连带聊天看起来也没了。
-                //   现在两级压缩都失败就中止，一个字节都不写。
-                const compress = async (edge, quality) => {
-                    try { return await compressImage(raw, edge, quality); } catch (_) { return ''; }
-                };
-                let next = await compress(1600, 0.92);
-                if (!next) next = await compress(1024, 0.85);
-                if (!next || !/^data:image\//.test(next)) {
-                    showToast('这张图片无法处理（格式不支持或已损坏），角色卡未改动', 'error', 5000);
-                    event.target.value = '';
-                    return;
-                }
-                editingCharacter.data.avatar = next;
-            };
-            reader.readAsDataURL(file);
+            input.value = '';
+            const draft = editingCharacter.data;
+            const epoch = ++characterAvatarUploadEpoch;
+            const isCurrent = () => epoch === characterAvatarUploadEpoch
+                && showCharacterEditor.value && editingCharacter.data === draft;
+            characterAvatarLoading.value = true;
+            try {
+                const next = await compressImage(file, 1600, 0.92);
+                if (isCurrent()) draft.avatar = next;
+            } catch (error) {
+                if (isCurrent()) showToast('封面未更换：' + error.message, 'error', 5000);
+            } finally {
+                if (epoch === characterAvatarUploadEpoch) characterAvatarLoading.value = false;
+            }
         };
 
         // Import/Export Logic
@@ -15910,19 +15932,21 @@ const app = createApp({
 
                             if (!await stopCurrentCharacterWork()) return;
                             if (!getMainDb()) await initDB();
-                            await Promise.all([
-                                ...importedBranches.map(branch => setScopedStoredValue(
-                                    'chat',
-                                    getStoryBranchScopeId(char.uuid, branch.id),
-                                    chatByBranch.get(branch.id),
-                                    { clone: false }
-                                )),
-                                setScopedStoredValue('branches', char.uuid, {
-                                    version: 1,
-                                    activeBranchId: importedActiveId,
-                                    branches: cloneForStorage(importedBranches)
-                                }, { clone: false })
-                            ]);
+                            const imported = await window.RPHubStorage.commitStoredValueBatch({
+                                writes: [
+                                    ...importedBranches.map(branch => ({
+                                        key: window.RPHubStorage.scopedStorageKeyFor('chat', getStoryBranchScopeId(char.uuid, branch.id)),
+                                        value: chatByBranch.get(branch.id)
+                                    })),
+                                    {
+                                        key: window.RPHubStorage.scopedStorageKeyFor('branches', char.uuid),
+                                        value: { version: 1, activeBranchId: importedActiveId, branches: importedBranches }
+                                    }
+                                ]
+                            });
+                            if (imported.status !== 'committed') {
+                                throw imported.error || new Error('分支聊天未完整保存，请重试');
+                            }
 
                             _isApplyingCharacterScopedData = true;
                             storyBranches.value = importedBranches;
@@ -15996,8 +16020,8 @@ const app = createApp({
                         const importedChat = cloneForStorage(records);
                         if (!await stopCurrentCharacterWork()) return;
                         _isApplyingCharacterScopedData = true;
-                        chatHistory.value = prepareLoadedChatHistoryForDisplay(importedChat);
                         await setScopedStoredValue('chat', getCurrentStoryBranchScopeId(), importedChat, { clone: false });
+                        chatHistory.value = prepareLoadedChatHistoryForDisplay(importedChat);
                         updateCurrentStoryBranchSummary();
                         await saveStoryBranchesForCharacter(char);
                         finishApplyingCharacterScopedData();
@@ -17112,7 +17136,7 @@ const app = createApp({
             createNewCharacter, editCharacter, saveCharacter, deleteCharacter, selectCharacter, toggleCharacterFavorite, isCharacterFavorite,
             currentUiTemplates, managedUiTemplates, activeUiTemplates, uiTemplateUpdateStatus, createUiTemplate, editUiTemplate, saveUiTemplate, deleteUiTemplate, importUiTemplates, updateUiTemplatesFromChat, renderEditingUiTemplatePreview, handleUiTemplateClick,
             isBatchDeleteMode, isNavigationOpen, selectedCharacterIndices, toggleBatchDeleteMode, toggleCharacterSelection, batchDeleteCharacters,
-            handleAvatarUpload, importCharacter,
+            handleAvatarUpload, characterAvatarLoading, importCharacter,
             showMemTools, openMemTools, closeMemTools, memToolsScopeId, memToolsAudit, memToolsDiag, runMemToolsDiag, memToolsConfig, runMemToolsAudit, saveMemToolsConfig,
             memToolsVersions, loadMemToolsVersions, saveMemToolsSnapshot, restoreMemToolsSnapshot, deleteMemToolsSnapshot, memToolsTimeText,
             memToolsMerge, memToolsMergePickable, memToolsMergePickedList, memToolsMergeGap, memToolsMergeCanRun,

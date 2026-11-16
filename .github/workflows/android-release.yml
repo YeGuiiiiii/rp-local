@@ -1,0 +1,49 @@
+name: Publish verified Android APK
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-stable-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify and publish signed APK
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]{3}$ ]]
+          apk="RP-local-$version.apk"
+          checksum="SHA256SUMS-$version.txt"
+          notes="dist/RELEASE-$version.md"
+          test -f "dist/$checksum"
+          test -f "$notes"
+          source="$(gh api "repos/$GH_REPO/commits/codex/download-$version" --jq .sha)"
+          curl --fail --location --retry 3 \
+            "https://raw.githubusercontent.com/$GH_REPO/$source/dist/$apk" -o "dist/$apk"
+          (cd dist && sha256sum --check "$checksum")
+          if gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-state"; then
+            grep -qx true "$RUNNER_TEMP/release-state"
+            gh release upload "$GITHUB_REF_NAME" "dist/$apk" "dist/$checksum" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "dist/$apk" "dist/$checksum" \
+              --verify-tag --draft --title "$version" --notes-file "$notes"
+          fi
+          gh release download "$GITHUB_REF_NAME" --pattern "$apk" --pattern "$checksum" \
+            --dir "$RUNNER_TEMP/release-verification"
+          (cd "$RUNNER_TEMP/release-verification" && sha256sum --check "$checksum")
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest --title "$version" --notes-file "$notes"

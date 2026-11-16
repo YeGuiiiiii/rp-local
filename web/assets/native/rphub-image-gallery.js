@@ -411,11 +411,14 @@
 
     function recordGeneratedImage(card) {
         if (!card || !card.isConnected) return;
+        if (card.dataset.imageJobState !== 'done' && card.dataset.imageJobState !== 'frozen') return;
+        if (card.classList.contains('is-generation-error')) return;
         var image = card.querySelector('img');
         var src = image && (image.currentSrc || image.src);
-        // 生图卡片的 src 可能是远端 URL，也可能是服务端直接回 base64（data:）。
-        // 两种都要收，不能因为不是 http 就跳过。
-        if (!src) { stats.noSrc++; return; }
+        if (!src || !image.complete || !image.naturalWidth || !image.naturalHeight) {
+            stats.noSrc++;
+            return;
+        }
         if (!window.RPImagePolicy.isContentImage(image)) return;
         var requestUrl = card.dataset.imageRequest || '';
         var meta = parseRequestMeta(requestUrl);
@@ -550,9 +553,7 @@
     }
 
     function collectGeneratedFromDom() {
-        // 不能只认 data-image-job-state="done"：重新打开会话时官方会把卡片重置为
-        // loading 并重新发起任务，历史卡片会长期停在这个状态。只要 img 有 src 就说明
-        // 图已经显示出来了，就该收。
+        // 成功任务和从本地恢复的历史图都能采集，错误或占位图片不入库。
         var cards = document.querySelectorAll('.generated-image-card');
         for (var i = 0; i < cards.length; i++) recordGeneratedImage(cards[i]);
     }

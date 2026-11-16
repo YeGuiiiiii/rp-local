@@ -1,11 +1,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
-const evidence = path.join(root, 'verification');
+const evidence = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, 'verification');
+fs.mkdirSync(evidence, { recursive: true });
 
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -91,6 +92,7 @@ const evidence = path.join(root, 'verification');
       const card = document.createElement('div');
       card.id = 'generated-fixture';
       card.className = 'generated-image-card';
+      card.dataset.imageJobState = 'done';
       const image = new Image(40, 40);
       image.src = 'https://story.test/generated.png';
       card.appendChild(image);

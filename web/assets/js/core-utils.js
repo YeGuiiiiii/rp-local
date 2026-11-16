@@ -71,21 +71,39 @@ const parseCot = (text) => {
 // 后一个 image### 不能作为前一个标签的结尾。
 const getImageTagRegex = () => /image###((?:(?!image###|###)[^\r\n])*?)(?:###|(?=\r?\n)|$)/gi;
 
-const compressImage = (source, maxWidth = 300, quality = 0.7) => new Promise((resolve) => {
+const compressImage = (source, maxEdge = 300, quality = 0.7) => new Promise((resolve, reject) => {
     const image = new Image();
-    image.src = source;
-    image.onload = () => {
-        const scale = Math.min(1, maxWidth / image.width);
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(image.width * scale);
-        canvas.height = Math.round(image.height * scale);
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#FFFFFF';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+    let objectUrl = '', canvas;
+    const finish = (error, result) => {
+        clearTimeout(timer);
+        image.onload = image.onerror = null;
+        image.src = '';
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        if (canvas) canvas.width = canvas.height = 0;
+        if (error) reject(error);
+        else resolve(result);
     };
-    image.onerror = () => resolve(source);
+    const timer = setTimeout(() => finish(new Error('图片处理超时，请缩小图片后重试')), 30000);
+    image.onload = () => {
+        try {
+            if (!image.naturalWidth || !image.naturalHeight) throw new Error('图片尺寸无效');
+            const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
+            canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#FFFFFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const result = canvas.toDataURL('image/jpeg', quality);
+            if (!result.startsWith('data:image/')) throw new Error('图片压缩失败');
+            finish(null, result);
+        } catch (error) { finish(error); }
+    };
+    image.onerror = () => finish(new Error('图片无法解码，请使用有效的 JPG、PNG 或 WebP 图片'));
+    try {
+        image.src = source instanceof Blob ? (objectUrl = URL.createObjectURL(source)) : source;
+    } catch (error) { finish(error); }
 });
 
 const readUsageNumber = (...values) => {

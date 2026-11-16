@@ -16,7 +16,7 @@
  * 把 Blob 读成 base64，再经 JS 桥交给原生写进系统下载目录（MediaStore）。
  *
  * 这个脚本因此做三件事，全部是旁路，不改站点任何代码：
- *   1. 记住 URL.createObjectURL 产出的 Blob（站点 3 秒后 revoke 也不影响我们）；
+ *   1. 在地址有效期间记住 Blob，点击后由读取任务持有，revoke 时清理缓存；
  *   2. 捕获阶段拦截 <a download href="blob:…|data:…"> 的点击，preventDefault 掉原始导航；
  *   3. FileReader → base64 → 桥 saveFile(base64, fileName, mimeType)。
  *
@@ -68,6 +68,13 @@
         } catch (e) {
         }
         return url;
+      };
+    }
+    var originalRevoke = URL.revokeObjectURL;
+    if (typeof originalRevoke === 'function') {
+      URL.revokeObjectURL = function (url) {
+        delete blobs[url];
+        return originalRevoke.call(URL, url);
       };
     }
   } catch (e) {

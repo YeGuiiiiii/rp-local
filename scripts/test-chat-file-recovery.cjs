@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const root = path.resolve(process.env.RP_TEST_ROOT || path.join(__dirname, '..'));
 const source = name => fs.readFileSync(path.join(root, 'web/assets', name), 'utf8');
 
