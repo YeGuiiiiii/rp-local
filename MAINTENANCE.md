@@ -6,7 +6,8 @@
 
 ## 发布认领
 
-- R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 发布，Codex 已认领，工作分支 `hh/compatibility-maintenance`。先比对现有正式包签名，验证 APK 内容和测试，再上传 APK 与 SHA256；不纳入更新服务的三处未提交改动，真机未核实项继续保留。
+- R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 已认领，工作分支 `hh/compatibility-maintenance`。按用户“直接上传 Git”的要求，APK 放在独立下载分支 `codex/download-2.9.117`，源码同步主线；上传完成后再记录交付状态。未创建 GitHub Release 前，不代表正式版自动更新源已切换。
+- 2026-11-16 打包验证：APK `7,918,459` 字节，SHA256 `0f1d48d30018b5b7aa263f104116a7df352bb39f001d886adfa4e6203d9f1cd6`；与 GitHub `2.9.116` 正式包及历史 `0.1` 包证书相同，签名检查通过。`check-apk.py --version 2.9.117` 校验包名、版本、192 个网页文件、5 档图标、v2/v3 签名及无重复资源；本版全量测试 **68/68 通过**。三处更新服务未提交改动不纳入；未安装 Android 真机。
 
 ## 已完成
 
