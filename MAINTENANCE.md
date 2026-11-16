@@ -2,11 +2,12 @@
 
 **所有维护成员开工前优先读取本清单。** 先同步远程信息，检查本表、工作分支和 `git status`；认领后提交并推送状态再动手，避免两边重复修。修复后先提交代码，再注明提交、验证结果并划线，不能删除记录。
 
-本轮工作分支：`hh/compatibility-maintenance`。以下“已完成”表示分支源码与浏览器验证完成，尚不表示已合并主线、发布 APK 或验证手机现场。详细复现记录见 [问题排查记录](问题排查-20261116.md)。
+本轮工作分支：`hh/compatibility-maintenance`，本次修复与版本源码已同步 `main`。`2.9.117` APK 已上传独立下载分支，见下方交付记录；尚未创建 GitHub Release 或完成手机现场验证。详细复现记录见 [问题排查记录](问题排查-20261116.md)。
 
 ## 发布认领
 
-- R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 已认领，工作分支 `hh/compatibility-maintenance`。按用户“直接上传 Git”的要求，APK 放在独立下载分支 `codex/download-2.9.117`，源码同步主线；上传完成后再记录交付状态。未创建 GitHub Release 前，不代表正式版自动更新源已切换。
+- ~~R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 完成。源码提交 `cf3b249` 已同步 `main`，APK 提交 `acfe20a` 位于独立下载分支 `codex/download-2.9.117`，SHA256 文件随包提供。已从 GitHub 公开下载链接重新下载，字节数与 SHA256 均匹配本地验证包。~~
+- [下载 2.9.117 APK](https://github.com/YeGuiiiiii/rp-local/raw/refs/heads/codex/download-2.9.117/dist/RP-local-2.9.117.apk)。未创建 GitHub Release，正式版自动更新源尚未切换；用户手动下载覆盖安装，仍需 Android 真机验收。
 - 2026-11-16 打包验证：APK `7,918,459` 字节，SHA256 `0f1d48d30018b5b7aa263f104116a7df352bb39f001d886adfa4e6203d9f1cd6`；与 GitHub `2.9.116` 正式包及历史 `0.1` 包证书相同，签名检查通过。`check-apk.py --version 2.9.117` 校验包名、版本、192 个网页文件、5 档图标、v2/v3 签名及无重复资源；本版全量测试 **68/68 通过**。三处更新服务未提交改动不纳入；未安装 Android 真机。
 
 ## 已完成
