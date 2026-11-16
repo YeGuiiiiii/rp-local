@@ -16686,12 +16686,19 @@ const app = createApp({
                 else recentGenerationTimes.value = [];
 
                 window.__rpBootStage = '载入角色记忆';
-                // [rphub 2.9.122] 启动不再 await 记忆加载。
-                //   实测三版兜底都没用：那个 await 会长时间占住主线程，
-                //   setTimeout(20s) 到 25 秒都没跑；持久化开关又依赖 localStorage 与定时器，
-                //   一样救不回来。既然记忆是可选能力，就别让它参与启动的先后顺序 ——
-                //   先记下要加载的作用域，等首屏渲染完再异步加载。
-                window.__rpBootPendingMemoryScope = getStoryBranchScopeId(char.uuid);
+                // [rphub 2.9.126] 恢复启动时加载记忆的时序。
+                //   2.9.122 曾把它挪到首屏之后，影响所有用户的记忆就绪时间，
+                //   而它只救回了单个极端个例，收益与面不成比例，故撤回。
+                //   保留的是「上次卡过就跳过」的持久开关与超时兜底：
+                //   常态用户走 await，卡过的设备走跳过，两条路都不影响别人。
+                let skipMemoryThisBoot = false;
+                try { skipMemoryThisBoot = localStorage.getItem('rphub.memoryBootSkip') === '1'; } catch (_) {}
+                if (skipMemoryThisBoot) {
+                    window.__rpBootStage = '已按上次记录跳过记忆加载';
+                    window.__rpMemoryLoadSkipped = true;
+                } else {
+                    await loadCharacterMemories(getStoryBranchScopeId(char.uuid), ' on restore');
+                }
                 window.__rpBootStage = '应用角色资源';
 
                 // Enforce special rules (Nai画图正则 & 自动生图)
@@ -16716,16 +16723,7 @@ const app = createApp({
             window.__rpHasSavedChat = !!(currentCharacter.value && chatHistory.value.length);
             window.__rpDataReady = true;
             try { localStorage.setItem('rphub.bootAttempts', '0'); } catch (_) {}
-            // 首屏就绪后再补记忆：卡住也只影响记忆功能本身，不影响使用
-            if (window.__rpBootPendingMemoryScope) {
-                const pendingScope = window.__rpBootPendingMemoryScope;
-                window.__rpBootPendingMemoryScope = null;
-                setTimeout(() => {
-                    loadCharacterMemories(pendingScope, ' (after boot)').catch(error => {
-                        console.error('[rphub] 后台记忆加载失败:', error);
-                    });
-                }, 1500);
-            }
+
             if (window.__rpMemoryLoadSkipped) {
                 showToast('记忆读取超时已跳过，聊天与角色卡正常可用；可到「记忆工具」重试', 'warning', 7000);
             }
