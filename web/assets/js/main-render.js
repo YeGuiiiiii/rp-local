@@ -6203,7 +6203,7 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => {memorySettings.mode = 'classic'; settingsHelpTopic = ''},
-                                  class: "absolute inset-0 rounded-lg",
+                                  class: "absolute inset-0 w-full h-full rounded-lg",
                                   "aria-label": "切换到基础模式"
                                 }, null, 8 /* PROPS */, _hoisted_604),
                                 _cache[210] || (_cache[210] = _createElementVNode("span", { class: "relative z-10 pointer-events-none" }, "基础模式", -1 /* CACHED */)),
@@ -6227,7 +6227,7 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => {memorySettings.mode = 'enhanced'; settingsHelpTopic = ''},
-                                  class: "absolute inset-0 rounded-lg",
+                                  class: "absolute inset-0 w-full h-full rounded-lg",
                                   "aria-label": "切换到增强模式"
                                 }, null, 8 /* PROPS */, _hoisted_605),
                                 _cache[212] || (_cache[212] = _createElementVNode("span", { class: "relative z-10 pointer-events-none" }, "增强模式", -1 /* CACHED */)),
@@ -14697,7 +14697,7 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => {memorySettings.mode = 'classic'; settingsHelpTopic = ''},
-                                  class: "absolute inset-0 rounded-lg",
+                                  class: "absolute inset-0 w-full h-full rounded-lg",
                                   "aria-label": "切换到基础模式"
                                 }, null, 8 /* PROPS */, _hoisted_618),
                                 _cache[216] || (_cache[216] = _createElementVNode("span", { class: "relative z-10 pointer-events-none" }, "基础模式", -1 /* CACHED */)),
@@ -14721,7 +14721,7 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => {memorySettings.mode = 'enhanced'; settingsHelpTopic = ''},
-                                  class: "absolute inset-0 rounded-lg",
+                                  class: "absolute inset-0 w-full h-full rounded-lg",
                                   "aria-label": "切换到增强模式"
                                 }, null, 8 /* PROPS */, _hoisted_619),
                                 _cache[218] || (_cache[218] = _createElementVNode("span", { class: "relative z-10 pointer-events-none" }, "增强模式", -1 /* CACHED */)),
