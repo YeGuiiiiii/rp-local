@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 const activity = fs.readFileSync(path.join(root, 'android/smali/com/rphub/app/MainActivity.smali'), 'utf8').replace(/\r\n/g, '\n');

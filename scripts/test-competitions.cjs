@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const bridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 const output = path.join(root, 'verification/competitions-1.21');

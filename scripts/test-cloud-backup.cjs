@@ -1,9 +1,9 @@
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
-const evidence = path.join(root, '.impeccable/review/backup-2.9.005');
+const evidence = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, '.impeccable/review/backup-2.9.005');
 fs.mkdirSync(evidence, { recursive: true });
 (async () => {
     const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -59,10 +59,10 @@ fs.mkdirSync(evidence, { recursive: true });
     try {
         await page.goto('https://sta1n156.github.io/RP-Hub/');
         await page.waitForFunction(() => window.__rpDataReady && !document.querySelector('.entry-transition'));
-        await page.evaluate(async () => {
+        await page.evaluate(async cardA => {
             window.__qa = document.getElementById('app').__vue_app__._container._vnode.component.setupState;
             __qa.showUserSetupModal = false;
-            __qa.characters = ['a', 'b'].map(id => ({ uuid: 'cloud-' + id, name: '原卡' + id }));
+            __qa.characters = [cardA, { uuid: 'cloud-b', name: '原卡b' }];
             await RPHubStorage.setStoredValue('characters', RPHubStorage.cloneForStorage(__qa.characters));
             await RPHubStorage.setScopedStoredValue('chat', 'cloud-a', [{ role: 'assistant', content: '原聊天' }]);
             await RPHubStorage.setScopedStoredValue('chat', 'cloud-a__branch__local', [{ role: 'assistant', content: '旧分支' }]);
@@ -70,17 +70,19 @@ fs.mkdirSync(evidence, { recursive: true });
             __qa.openCloudBackup('download');
             __qa.cloudBackup.restoreKey = '1234-5678-9ABC-DEFG';
             window.__restoreJob = __qa.startCloudRestore();
-        });
+        }, JSON.parse(blobs.get(characters[0].hash)));
         await page.waitForFunction(() => !__qa.cloudBackup.busy);
         assert.equal(await page.evaluate(async () => (await RPHubStorage.getScopedStoredValue('chat', 'cloud-a'))[0].content), '原聊天',
             '后续下载失败不得提前覆盖前面的聊天');
         assert.equal(await page.evaluate(async () => (await RPHubStorage.readMemoryState('cloud-a')).list[0].summary), '原记忆');
         assert.ok((await page.evaluate(() => __qa.backupTask.error)).includes('校验失败'), '大小相同但内容损坏也必须拒绝');
-        assert.equal(await page.evaluate(async () => (await RPHubStorage.readCharacterDirectory())[0].name), '原卡a');
+        assert.equal(await page.evaluate(async () => (await RPHubStorage.readCharacterDirectory())[0].name), '云端卡a');
         await page.evaluate(() => RPHubStorage.setStoredValue('cloud-failure-probe', '仍可保存'));
         assert.equal(await page.evaluate(() => RPHubStorage.getStoredValue('cloud-failure-probe')), '仍可保存');
         await page.getByRole('button', { name: '关闭备份弹窗', exact: true }).click();
         corrupt = false;
+        Object.assign(characters[0], piece(await page.evaluate(async () =>
+            RPHubStorage.readCharacter((await RPHubStorage.readCharacterDirectory())[0]))));
         await page.evaluate(() => {
             Object.defineProperty(Response.prototype, 'body', { configurable: true, get: () => null });
             window.__restoreJob = __qa.startCloudRestore();

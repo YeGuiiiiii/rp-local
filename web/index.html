@@ -3382,6 +3382,13 @@
                 </div>
 
 
+                <div v-if="worldInfoPageCount > 1" class="worldinfo-pager worldinfo-pager--top">
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage <= 1"
+                        @click="setWorldInfoPage(worldInfoPage - 1)"><span aria-hidden="true">‹</span> 上一页</button>
+                    <span class="worldinfo-pager-info">{{ worldInfoPage }} / {{ worldInfoPageCount }}</span>
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage >= worldInfoPageCount"
+                        @click="setWorldInfoPage(worldInfoPage + 1)">下一页 <span aria-hidden="true">›</span></button>
+                </div>
                 <div id="worldinfo-list" class="sortable-list" @pointerdown.capture="resourceTap.start" @pointermove.capture.passive="resourceTap.move" @pointercancel.capture="resourceTap.cancel" @click.capture="resourceTap.click">
                     <div v-for="({ entry, index }) in visibleWorldInfo" :key="getSortableItemKey(entry)" :data-resource-index="index"
                         class="sortable-list-item" :class="{ 'is-off': !entry.enabled }">
@@ -3430,6 +3437,13 @@
                         </div>
                     </div>
                 </div>
+                <div v-if="worldInfoPageCount > 1" class="worldinfo-pager worldinfo-pager--bottom">
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage <= 1"
+                        @click="setWorldInfoPage(worldInfoPage - 1)"><span aria-hidden="true">‹</span> 上一页</button>
+                    <span class="worldinfo-pager-info">{{ worldInfoPage }} / {{ worldInfoPageCount }}</span>
+                    <button type="button" class="worldinfo-pager-btn" :disabled="worldInfoPage >= worldInfoPageCount"
+                        @click="setWorldInfoPage(worldInfoPage + 1)">下一页 <span aria-hidden="true">›</span></button>
+                </div>
 
             </div>
 
@@ -3448,6 +3462,7 @@
 
         <image-download-sheet></image-download-sheet>
         <release-announcement :show="showAnnouncement" @close="closeAnnouncement" @event="openCompetition"></release-announcement>
+        <update-notice :blocked="showUserSetupModal || showAnnouncement || backupTask.active"></update-notice>
         <user-setup-modal :show="showUserSetupModal" :name="tempUserSetup.name"
             :description="tempUserSetup.description" :person="tempUserSetup.person"
             @update:name="tempUserSetup.name = $event"
@@ -3470,7 +3485,7 @@
             @generate="showAddCharacterMenu = false; navigateWorkspace('generator')"
             @import-character="importCharacter($event); showAddCharacterMenu = false"></add-character-modal>
 
-        <character-editor-modal :show="showCharacterEditor" :character="editingCharacter.data"
+        <character-editor-modal :show="showCharacterEditor" :character="editingCharacter.data" :avatar-loading="characterAvatarLoading"
             :editing="editingCharacter.id !== undefined" :tab="editorTab" @close="closeCharacterEditor"
             @save="saveCharacter" @avatar-upload="handleAvatarUpload" @update:tab="editorTab = $event"
             @update-field="editingCharacter.data[$event.field] = $event.value"></character-editor-modal>
@@ -4070,7 +4085,7 @@
                 <template v-else>
                     <ul class="mt-4 space-y-1.5 pl-4 list-disc text-[13px] leading-relaxed text-gray-500">
                         <li>本机没有的角色卡会新增进来</li>
-                        <li>本机已有、而且完全相同的角色卡，连同聊天一起跳过，保留本机的</li>
+                        <li>角色卡、聊天和分支全部相同才跳过；有差异时使用云端备份</li>
                         <li>本机已有但内容不同的角色卡，以备份为准，连同聊天一起替换</li>
                         <li>本机其他角色卡不受影响，完成后页面会自动刷新</li>
                     </ul>

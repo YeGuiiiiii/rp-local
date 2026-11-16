@@ -1,9 +1,9 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
-const output = path.join(root, '.impeccable/review/update-notice-2.9.111');
+const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, '.impeccable/review/update-notice-2.9.111');
 fs.mkdirSync(output, { recursive: true });
 
 (async () => {

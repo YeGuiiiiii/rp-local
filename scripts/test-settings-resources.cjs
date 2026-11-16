@@ -1,10 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const bridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
-const output = path.join(root, 'verification/settings-resources-1.19');
+const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, 'verification/settings-resources-1.19');
 const baseline = process.argv.includes('--baseline');
 fs.mkdirSync(output, { recursive: true });
 
@@ -154,9 +154,10 @@ fs.mkdirSync(output, { recursive: true });
             entries: 1200, rendered: await page.locator('#worldinfo-list .sortable-list-item').count(),
             openMs: timings.map(value => Math.round(value)), medianMs: Math.round(timings.slice().sort((a, b) => a - b)[1])
         };
-        await check('large books initially render bounded rows while icon search covers the last entry', async () => {
-            assert.ok(performanceReport.rendered <= 100, 'A 1200-entry book must not create all row controls');
-            assert.equal(await page.locator('.workspace-context, .worldinfo-search, .worldinfo-pagination').count(), 0);
+        await check('large books page rows while icon search covers the last entry', async () => {
+            assert.ok(performanceReport.rendered <= 200, 'A 1200-entry book must render only the current page');
+            await page.getByRole('button', { name: '搜索世界书', exact: true }).waitFor();
+            assert.equal(await page.locator('.worldinfo-pager').count(), 2);
             await page.getByRole('button', { name: '搜索世界书', exact: true }).click();
             const search = page.locator('#sakura-entry-search input[type="search"]');
             await search.fill('世界书条目 1200');
@@ -166,16 +167,17 @@ fs.mkdirSync(output, { recursive: true });
             assert.equal(await page.evaluate(() => __qa.editingWorldInfo.id), 1199);
             await page.evaluate(() => { __qa.showWorldInfoEditor = false; });
         });
-        await check('continuous scrolling reaches later entries and the circular button returns to top', async () => {
+        await check('pagination reaches later entries and the circular button returns to top', async () => {
+            await page.evaluate(() => { __qa.worldInfoQuery = ''; __qa.setWorldInfoPage(1); });
             const view = page.locator('.worldinfo-view');
-            while (await page.locator('#worldinfo-list .sortable-list-item').count() < 1200) {
-                const previous = await page.locator('#worldinfo-list .sortable-list-item').count();
-                await view.evaluate(el => { el.scrollTop = el.scrollHeight; });
-                await page.waitForFunction(previous => document.querySelectorAll('#worldinfo-list .sortable-list-item').length > previous, previous);
+            const nextPage = page.locator('.worldinfo-pager--bottom .worldinfo-pager-btn').nth(1);
+            for (let pageNumber = 2; pageNumber <= 6; pageNumber++) {
+                await nextPage.click();
+                await page.waitForFunction(number => document.querySelector('.worldinfo-pager--top .worldinfo-pager-info')?.textContent.trim() === `${number} / 6`, pageNumber);
             }
             assert.equal(await page.getByRole('spinbutton', { name: '世界书页码', exact: true }).count(), 0);
             assert.equal(await page.locator('#worldinfo-list h3').last().innerText(), '世界书条目 1200');
-            await page.locator('#worldinfo-list button[title="编辑"]').nth(1106).click();
+            await page.locator('#worldinfo-list button[title="编辑"]').nth(106).click();
             assert.equal(await page.evaluate(() => __qa.editingWorldInfo.id), 1106);
             await page.evaluate(() => {
                 __qa.editingWorldInfo.data.comment = '已修改的远处条目';
@@ -197,6 +199,7 @@ fs.mkdirSync(output, { recursive: true });
             assert.equal(await view.evaluate(el => getComputedStyle(el, '::-webkit-scrollbar').display), 'block');
         });
         await check('sorting visible rows preserves all unloaded data', async () => {
+            await page.evaluate(() => __qa.setWorldInfoPage(1));
             const handles = page.locator('#worldinfo-list .sortable-list-handle');
             await page.waitForFunction(() => {
                 const sortable = Sortable.get(document.getElementById('worldinfo-list'));
@@ -223,7 +226,7 @@ fs.mkdirSync(output, { recursive: true });
             assert.deepEqual(result.page.slice().sort(), ['世界书条目 1', '世界书条目 2', '世界书条目 3']);
         });
         if (!baseline) {
-            const review = path.join(root, '.impeccable/review/cleanup-2.9.006');
+            const review = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, '.impeccable/review/cleanup-2.9.006');
             fs.mkdirSync(review, { recursive: true });
             for (const width of [390, 1280]) {
                 await page.setViewportSize({ width, height: 844 });
@@ -232,7 +235,6 @@ fs.mkdirSync(output, { recursive: true });
                         RPThemePacks.set(theme); RPHubThemeKit.setScheme(scheme); __qa.toasts = [];
                     }, { theme, scheme });
                     await page.getByRole('button', { name: '搜索世界书', exact: true }).waitFor();
-                    assert.equal(await page.locator('.workspace-context, .worldinfo-search, .worldinfo-pagination').count(), 0);
                     assert.equal(await page.getByRole('button', { name: '搜索世界书', exact: true }).count(), 1);
                     await page.screenshot({ path: path.join(review, `${theme}-${scheme}-${width}-top.png`) });
                     await page.locator('.worldinfo-view').evaluate(el => { el.scrollTop = 700; });

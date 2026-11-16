@@ -1,10 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const bridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
-const output = path.join(root, '.impeccable/review/image-providers');
+const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, '.impeccable/review/image-providers');
 fs.mkdirSync(output, { recursive: true });
 
 (async () => {
@@ -13,7 +13,7 @@ fs.mkdirSync(output, { recursive: true });
         const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
         await context.addInitScript(bridge);
         const page = await context.newPage(), errors = [], requests = [];
-        let fail = false, base64 = false, modelFail = false;
+        let fail = false, jobsFail = false, format = 'url', modelFail = false;
         page.on('pageerror', error => errors.push(error.message));
         await context.route('**/*', route => {
             const url = new URL(route.request().url()), method = route.request().method();
@@ -29,13 +29,17 @@ fs.mkdirSync(output, { recursive: true });
                     } });
                 if (url.pathname.endsWith('/images/generations')) return route.fulfill({ headers,
                     status: fail ? 401 : 200, json: fail ? { error: { message: 'fixture key rejected' } } : {
-                        data: [base64 ? { b64_json: fs.readFileSync(path.join(root, 'dist/app-icon.png')).toString('base64') }
-                            : { url: 'https://images-b.test/result.png' }]
+                        data: [format === 'base64' || format === 'data-uri'
+                            ? { b64_json: (format === 'data-uri' ? 'data:image/png;base64,' : '')
+                                + fs.readFileSync(path.join(root, 'dist/app-icon.png')).toString('base64') }
+                            : { url: format === 'relative' ? '../result.png' : 'https://images-b.test/result.png' }]
                     } });
                 if (url.pathname.endsWith('/api/jobs')) return route.fulfill({ headers,
                     json: { id: 'job-a', status: 'queued' } });
                 if (url.pathname.endsWith('/api/jobs/job-a')) return route.fulfill({ headers,
-                    json: { id: 'job-a', status: 'done', imageUrl: 'https://images-a.test/result.png' } });
+                    json: jobsFail
+                        ? { id: 'job-a', status: 'failed', error: 'fixture generation failed' }
+                        : { id: 'job-a', status: 'done', imageUrl: 'https://images-a.test/result.png' } });
                 if (url.pathname.endsWith('.png')) return route.fulfill({ headers,
                     contentType: 'image/png', path: path.join(root, 'dist/app-icon.png') });
                 return route.fulfill({ headers, json: { status: 'ok', type: 'sta1n', data: { value: 10 } } });
@@ -61,6 +65,8 @@ fs.mkdirSync(output, { recursive: true });
             'Image settings must let the user add independent providers');
         await keyInput().fill('original-key');
         await page.getByRole('button', { name: '添加生图接口', exact: true }).click();
+        assert.equal(await page.getByLabel('输出尺寸', { exact: true }).inputValue(), '1024x1024',
+            'New OpenAI profiles must start with explicit dimensions rather than auto');
         await page.getByLabel('接口名称', { exact: true }).fill('A站');
         await page.getByLabel('接口名称', { exact: true }).press('Tab');
         await page.getByLabel('接口格式', { exact: true }).selectOption('jobs');
@@ -127,7 +133,7 @@ fs.mkdirSync(output, { recursive: true });
                 __qa.chatHistory = [{ id, role: 'assistant', content: 'image###a silver tree, ' + id + '###', shouldAnimate: false }];
                 __qa.navigateWorkspace('chat');
             }, { id, provider });
-            return page.locator('.generated-image-card').first();
+            return page.locator('.generated-image-card').last();
         };
         requests.length = 0;
         let card = await generate('task-a', a);
@@ -143,7 +149,37 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(openai.body.model, 'fixture-image-2');
         assert.match(openai.body.prompt, /a silver tree/);
         assert.equal(openai.body.n, 1);
+        assert.equal(openai.body.size, '1024x1024');
         assert.equal(openai.body.token, undefined);
+        await imagePage();
+        await page.getByLabel('常用输出尺寸', { exact: true }).selectOption('832x1216');
+        await generate('image-b-portrait', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'done');
+        assert.equal(requests.filter(item => item.method === 'POST').at(-1).body.size, '832x1216');
+        await imagePage();
+        await page.getByLabel('输出尺寸', { exact: true }).fill(' 768 × 1152 ');
+        await generate('image-b-custom', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'done');
+        assert.equal(requests.filter(item => item.method === 'POST').at(-1).body.size, '768x1152');
+        await imagePage();
+        await page.getByLabel('常用输出尺寸', { exact: true }).selectOption('');
+        await generate('image-b-server-default', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'done');
+        assert.equal(Object.hasOwn(requests.filter(item => item.method === 'POST').at(-1).body, 'size'), false,
+            'Server default must omit size rather than silently sending auto');
+        await imagePage();
+        await page.getByLabel('常用输出尺寸', { exact: true }).selectOption('auto');
+        await page.getByLabel('生图接口', { exact: true }).selectOption(a);
+        await page.getByLabel('生图接口', { exact: true }).selectOption(b);
+        assert.equal(await page.getByLabel('输出尺寸', { exact: true }).inputValue(), 'auto');
+        await generate('image-b-auto', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'done');
+        assert.equal(requests.filter(item => item.method === 'POST').at(-1).body.size, 'auto');
+        format = 'relative';
+        await generate('image-b-relative', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card img')?.naturalWidth > 0);
+        assert.ok(requests.some(item => item.url === 'https://images-b.test/result.png'));
+        format = 'url';
         const protocolRequest = page.waitForRequest('https://images-b.test/v1/api/jobs', { timeout: 3000 });
         await page.evaluate(async () => {
             __qa.settings.freezeGeneratedImagesExplicit = true;
@@ -158,10 +194,30 @@ fs.mkdirSync(output, { recursive: true });
         await page.waitForFunction(() => ['done', 'frozen'].includes(document.querySelector('.generated-image-card')?.dataset.imageJobState));
         await page.evaluate(() => __qa.imageApi.update('protocol', 'openai'));
         fail = true;
-        await generate('image-b-failed', b);
-        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.classList.contains('is-generation-error'));
+        const beforeFailure = requests.filter(item => item.method === 'POST').length;
+        card = await generate('image-b-failed', b);
+        await page.waitForFunction(element => element.classList.contains('is-generation-error'), await card.elementHandle());
         assert.match(await card.innerText(), /fixture key rejected/);
-        fail = false; base64 = true;
+        assert.equal(requests.filter(item => item.method === 'POST').length, beforeFailure + 1,
+            'An error must not trigger another billable request with different parameters');
+        fail = false;
+        await page.evaluate(a => { __qa.imageApi.select(a); __qa.imageApi.update('protocol', 'jobs'); }, a);
+        jobsFail = true;
+        const jobsPostCount = requests.filter(item => item.method === 'POST').length;
+        card = await generate('image-job-failed', a);
+        await page.waitForFunction(element => element.classList.contains('is-generation-error'), await card.elementHandle());
+        assert.equal(await card.locator('img').getAttribute('src'), null,
+            'A failed job with an id must not render its content endpoint as an image');
+        assert.equal(requests.filter(item => item.method === 'POST').length, jobsPostCount + 1,
+            'A failed job must not retry or submit a second billable request');
+        await page.waitForTimeout(1000);
+        assert.equal((await page.evaluate(() => RPHubImageGallery.records()))
+            .some(item => item.tag.includes('image-job-failed')), false,
+        'Failed placeholders must not be saved in the image gallery');
+        jobsFail = false; format = 'data-uri';
+        await generate('image-b-data-uri', b);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card img')?.naturalWidth > 0);
+        format = 'base64';
         await generate('image-b-base64', b);
         await page.waitForFunction(() => {
             const source = document.querySelector('.generated-image-card img')?.src || '';
@@ -216,6 +272,8 @@ fs.mkdirSync(output, { recursive: true });
         });
         await page.reload(); await ready(); await imagePage();
         assert.equal(await keyInput().inputValue(), '4343');
+        assert.equal(await page.getByLabel('输出尺寸', { exact: true }).inputValue(), 'auto',
+            'Explicit auto in an existing profile must survive reload and backup import');
         await page.getByLabel('生图接口', { exact: true }).selectOption(a);
         assert.equal(await keyInput().inputValue(), '1323');
         await page.getByLabel('生图接口', { exact: true }).selectOption('builtin');
@@ -256,6 +314,6 @@ fs.mkdirSync(output, { recursive: true });
         await page.getByRole('button', { name: '删除', exact: true }).last().click();
         assert.equal(await page.getByLabel('生图接口', { exact: true }).locator(`option[value="${b}"]`).count(), 0);
         assert.deepEqual(errors, []);
-        console.log('PASS per-site keys, selection/restart/import retention, custom jobs paths, OpenAI URL/base64/error, all skin modes');
+        console.log('PASS per-site configuration, explicit/custom/omitted/auto sizes, URL/base64/data URI, single-attempt errors, all skin modes');
     } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

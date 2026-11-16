@@ -55,7 +55,7 @@
             add() {
                 if (!api.ready) return;
                 const profile = { id: crypto.randomUUID(), name: '自定义接口', protocol: 'openai',
-                    url: '', key: '', model: '', size: 'auto' };
+                    url: '', key: '', model: '', size: '1024x1024' };
                 api.profiles.push(profile);
                 api.selectedId = profile.id;
                 return save();

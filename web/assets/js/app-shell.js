@@ -4,7 +4,8 @@
     const ImageProviderSettings = {
         props: { api: Object },
         emits: ['remove'],
-        setup: () => ({ fieldId: Vue.useId() }),
+        setup: () => ({ fieldId: Vue.useId(),
+            sizes: ['', '1024x1024', '832x1216', '1216x832', '1024x1536', '1536x1024', 'auto'] }),
         template: `<div class="mb-4">
           <label class="settings-label" :for="'image-provider-' + fieldId">生图接口</label>
           <div class="flex items-center gap-2">
@@ -35,8 +36,14 @@
                 </select>
                 <p v-if="api.modelsLoading || api.modelsError" class="mt-2 text-sm text-gray-500" role="status">{{api.modelsLoading ? '正在读取模型…' : api.modelsError}}</p>
               </div>
-              <label class="min-w-0"><span class="settings-label">输出尺寸</span>
-                <input class="settings-control" aria-label="输出尺寸" placeholder="auto" :value="api.current.size" @input="api.update('size', $event.target.value)"></label>
+              <div class="min-w-0">
+                <label class="settings-label" :for="'image-size-' + fieldId">输出尺寸</label>
+                <select class="settings-control mb-2" aria-label="常用输出尺寸" :value="sizes.includes(api.current.size) ? api.current.size : 'custom'" @change="api.update('size', $event.target.value)">
+                  <option v-if="!sizes.includes(api.current.size)" value="custom" disabled>自定义尺寸</option>
+                  <option v-for="size in sizes" :key="size" :value="size">{{size || '服务端默认'}}</option>
+                </select>
+                <input :id="'image-size-' + fieldId" class="settings-control" aria-label="输出尺寸" placeholder="服务端默认" :value="api.current.size" @input="api.update('size', $event.target.value)">
+              </div>
             </template>
           </div>
           <p v-if="api.error" class="mt-2 text-sm text-red-600" role="alert">{{api.error}}</p>

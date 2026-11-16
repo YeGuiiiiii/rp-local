@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
-const output = path.join(root, 'verification/alignment-1.23/suite');
+const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, 'verification/alignment-1.23/suite');
 fs.mkdirSync(output, { recursive: true });
 const jobs = fs.readdirSync(__dirname).filter(name => /^test-.*\.cjs$/.test(name) && name !== 'test-suite.cjs')
     .map(file => ({ file, args: file === 'test-original-backup.cjs' ? ['--118'] : [] }));
@@ -13,7 +13,12 @@ async function worker() {
         const started = Date.now();
         const log = fs.createWriteStream(path.join(output, file.replace('.cjs', '.txt')));
         const code = await new Promise(resolve => {
-            const child = spawn(process.execPath, [path.join(__dirname, file), ...args], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+            const child = spawn(process.execPath, [path.join(__dirname, file), ...args], {
+                cwd: root, stdio: ['ignore', 'pipe', 'pipe'],
+                env: process.env.RPHUB_TEST_OUTPUT_DIR ? {
+                    ...process.env, RPHUB_TEST_OUTPUT_DIR: path.join(output, file.replace('.cjs', ''))
+                } : process.env
+            });
             const timer = setTimeout(() => child.kill(), 240000);
             child.stdout.pipe(log, { end: false });
             child.stderr.pipe(log, { end: false });

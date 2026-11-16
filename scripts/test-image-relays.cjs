@@ -1,5 +1,5 @@
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const JSZip = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/jszip');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 (async () => {

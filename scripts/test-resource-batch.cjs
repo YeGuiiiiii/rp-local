@@ -1,5 +1,5 @@
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright.cjs');
 const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
 (async () => {
     const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -36,7 +36,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             assert.equal(await page.locator('.resource-batch-actions button').count(), 1);
             await page.getByRole('button', { name: '全选' + label, exact: true }).click();
             await page.getByRole('button', { name: '全不选' + label, exact: true }).click();
-            assert.equal(await checkboxes.count(), view === 'worldinfo' ? 100 : 125);
+            assert.equal(await checkboxes.count(), 125);
             const first = checkboxes.first();
             const box = await first.locator('..').boundingBox();
             assert.ok(box.width >= 44 && box.height >= 44, 'Selection needs a full touch target');
@@ -44,7 +44,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
             const secondRow = list.locator('[data-resource-index="0"]');
             await secondRow.locator('.resource-select input').check();
             assert.equal(await list.locator('.resource-select input:checked').count(), 2);
-            const output = path.join(root, '.impeccable/review/resource-batch');
+            const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, '.impeccable/review/resource-batch');
             fs.mkdirSync(output, { recursive: true });
             for (const skin of ['classic', 'chenyue', 'winter']) {
                 for (const mode of ['day', 'night']) {

@@ -198,8 +198,7 @@
     const normalizeKey = key => String(key || '').toUpperCase().replace(/[^0-9A-Z]/g, '')
         .replace(/O/g, '0').replace(/[IL]/g, '1');
 
-    // Sorts the backup's characters against this browser: a card identical to the local one is skipped with all its
-    // chats, the same character with a different card takes the backup's card and chats, the rest are added.
+    // Skip a character only after its card, chats and branch list all match.
     const fetchBackup = async (rawKey, onProgress) => {
         const key = normalizeKey(rawKey);
         if (key.length !== 16) throw new Error('密钥应为 16 位字母和数字');
@@ -237,7 +236,15 @@
                     continue;
                 }
             }
-            plan.skipped.push(item);
+            let sameEntries = true;
+            for (const entry of item.entries) {
+                const value = await storage().getScopedStoredValue(entry.name, entry.id);
+                if (value === undefined || await sha256(await encode(value)) !== entry.hash) {
+                    sameEntries = false;
+                    break;
+                }
+            }
+            (sameEntries ? plan.skipped : plan.replaced).push(item);
         }
         return plan;
     };
@@ -373,7 +380,7 @@
             setProgress({ label: '正在读取备份', percent: 0, detail: '' });
             const plan = await fetchBackup(cloudBackup.restoreKey, setProgress);
             if (!plan.added.length && !plan.replaced.length) {
-                toast('备份里的角色卡本机都有且完全相同，无需恢复', 'info');
+                toast('备份里的角色卡、聊天和分支本机都有且完全相同，无需恢复', 'info');
                 return;
             }
             await applyBackup(plan, setProgress, { saveAll, decode });
