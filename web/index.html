@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.116'; window.RP_LOCAL_RELEASE = 375;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.125'; window.RP_LOCAL_RELEASE = 384;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -244,7 +244,19 @@
             setTimeout(function () { if (!done && !isReady() && msg) { msg.textContent = '仍在加载…数据较多时启动需要一两分钟，请勿关闭'; } }, SOFT_MS);
             setTimeout(function () {
                 if (done || isReady() || !retry) { return; }
-                if (msg) { msg.textContent = '加载时间较长，可能网络或脚本异常'; }
+                // [rphub 2.9.117] 把卡在哪一步直接写在欢迎页上。
+                //   以前只有一句「可能网络或脚本异常」，用户截图也看不出是哪道闸门没过，
+                //   线上排查只能靠猜。这里把 isReady() 的四个条件逐个报出来。
+                if (msg) {
+                    var stuck = [];
+                    var root = document.getElementById('app');
+                    if (!root) stuck.push('页面结构缺失');
+                    if (typeof window.tailwind !== 'object') stuck.push('样式运行时未就绪');
+                    if (!window.__rpDataReady) stuck.push(window.__rpDataError ? '数据读取报错' : '数据加载未完成');
+                    if (root && !root.__vue_app__ && root.hasAttribute('v-cloak')) stuck.push('界面尚未挂载');
+                    var stage = window.__rpBootStage ? '（停在：' + window.__rpBootStage + '）' : '';
+                    msg.textContent = '加载时间较长：' + (stuck.join(' / ') || '未知环节') + stage;
+                }
                 retry.style.display = 'inline-block';
                 if (status) { status.style.pointerEvents = 'auto'; }
             }, HARD_MS);

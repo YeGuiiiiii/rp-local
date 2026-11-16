@@ -3118,6 +3118,14 @@
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
                     <div class="text-xs text-gray-500 mb-1">当前作用域</div>
                     <div class="text-xs font-mono text-gray-600 break-all">{{ memToolsScopeId || '未选择角色' }}</div>
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                        <button type="button" @click="runMemToolsDiag" :disabled="memToolsDiag.running"
+                            class="px-2.5 py-1 rounded-lg text-xs font-bold border border-primary-200 text-primary-700 bg-primary-50 active:scale-95 transition-all disabled:opacity-50">
+                            {{ memToolsDiag.running ? '读取中' : '存储诊断' }}
+                        </button>
+                        <span v-if="memToolsDiag.text" class="text-[11px] text-gray-500 leading-relaxed whitespace-pre-line break-all">{{ memToolsDiag.text }}</span>
+                        <span v-if="memToolsDiag.error" class="text-[11px] text-red-600 leading-relaxed">{{ memToolsDiag.error }}</span>
+                    </div>
                     <div class="mt-3 grid grid-cols-2 gap-2">
                         <div class="rounded-xl bg-gray-50 px-3 py-2">
                             <div class="text-xs text-gray-500">记忆条数</div>

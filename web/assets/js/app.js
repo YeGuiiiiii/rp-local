@@ -2215,6 +2215,66 @@ const app = createApp({
             const end = Math.max(start, Number(memory?.turnEnd) || fallback || start);
             return { start, end };
         };
+        // [rphub 2.9.124] 存储诊断：绕开记忆适配层，直接读原始记录，看清「到底有没有数据」。
+        //   起因：启动跳过记忆后界面显示 0 条，需要区分「库里真没有」和「读不出来」。
+        const memToolsDiag = reactive({ running: false, text: '', error: '' });
+        const runMemToolsDiag = async () => {
+            if (memToolsDiag.running) return;
+            const scopeId = memToolsScopeId.value || getCurrentStoryBranchScopeId();
+            if (!scopeId) { memToolsDiag.error = '先选一个角色'; return; }
+            memToolsDiag.running = true; memToolsDiag.text = ''; memToolsDiag.error = '';
+            const startedAt = Date.now();
+            try {
+                const dataKey = window.RPHubStorage.scopedStorageKeyFor('classic_memories', scopeId);
+                const metaKey = window.RPHubStorage.scopedStorageKeyFor('memory_state', scopeId);
+                const timeout = new Promise((_, reject) => setTimeout(
+                    () => reject(new Error('读取 15 秒无响应（数据库请求没有返回）')), 15000));
+                const records = await Promise.race([
+                    window.RPHubStorage.readStoredValueSet([dataKey, metaKey]), timeout
+                ]);
+                const dataValue = records[0] && records[0].value;
+                const metaValue = records[1] && records[1].value;
+                let sizeText = '0 B';
+                let countText = '—';
+                if (dataValue !== undefined) {
+                    const raw = JSON.stringify(dataValue);
+                    sizeText = raw.length > 1048576
+                        ? (raw.length / 1048576).toFixed(2) + ' MB'
+                        : (raw.length / 1024).toFixed(1) + ' KB';
+                    if (Array.isArray(dataValue)) countText = String(dataValue.length);
+                }
+                // 数据键不存在时，再列一遍库里的记忆键，确认是不是存到别的作用域去了
+                if (dataValue === undefined) {
+                    try {
+                        const allKeys = await window.RPHubStorage.listStorageKeys();
+                        const memoryKeys = allKeys.filter(key => String(key).indexOf('classic_memories_') === 0);
+                        if (memoryKeys.length) {
+                            const short = memoryKeys.slice(0, 4).map(key => {
+                                const suffix = String(key).slice('classic_memories_'.length);
+                                return suffix.length > 22 ? suffix.slice(0, 12) + '…' + suffix.slice(-6) : suffix;
+                            });
+                            window.__rpDiagMemoryKeys = '库内记忆键 ' + memoryKeys.length + ' 个：' + short.join(' | ');
+                        } else {
+                            window.__rpDiagMemoryKeys = '库内没有任何 classic_memories 键';
+                        }
+                    } catch (error) {
+                        window.__rpDiagMemoryKeys = '列举键失败：' + ((error && error.message) || error);
+                    }
+                } else {
+                    window.__rpDiagMemoryKeys = '';
+                }
+                memToolsDiag.text = '数据键 ' + (dataValue === undefined ? '不存在' : '存在')
+                    + ' · ' + sizeText + ' · 条数 ' + countText
+                    + ' · 元数据 ' + (metaValue === undefined ? '无' : '有')
+                    + ' · 耗时 ' + (Date.now() - startedAt) + ' ms'
+                    + (window.__rpDiagMemoryKeys ? '\n' + window.__rpDiagMemoryKeys : '');
+            } catch (error) {
+                memToolsDiag.error = (error && error.message) || String(error);
+            } finally {
+                memToolsDiag.running = false;
+            }
+        };
+
         const runMemToolsAudit = async () => {
             const issues = [];
             memToolsAudit.loading = true;
@@ -8102,8 +8162,21 @@ const app = createApp({
             //   否则第一次体积分析的基线会被它自己赋值（差值恒 0），污染判据永远不生效。
             markHeap('boot');
             getRestoreBudget();
+            // [rphub 2.9.118] 启动阶段标记：卡住时欢迎页会显示停在哪一步。
+            //   上一版只能看出「数据加载未完成」，等于把范围从整个 App 缩到 loadData，
+            //   但 loadData 里还有数据库、角色卡目录、设置、记忆四段等待。
+            // [rphub 2.9.120] 启动尝试计数：走到「就绪」才清零。
+            //   超时兜底依赖 setTimeout，而线程被占住时它不会准时跑（实测 25 秒都没触发），
+            //   所以再加一条不依赖定时器的判据：连续第二次启动仍未就绪，就跳过记忆加载。
+            try {
+                const attempts = Number(localStorage.getItem('rphub.bootAttempts') || 0) + 1;
+                localStorage.setItem('rphub.bootAttempts', String(attempts));
+                if (attempts >= 2) localStorage.setItem('rphub.memoryBootSkip', '1');
+            } catch (_) {}
+            window.__rpBootStage = '打开数据库';
             try {
                 await initDB();
+                window.__rpBootStage = '读取备份与角色卡目录';
                 // 2.7.85：读回备份范围开关（必须在 initDB 之后，否则主库还没开）。
                 try {
                     backupScope.value = normalizeBackupScope(await getStoredValue(BACKUP_SCOPE_KEY));
@@ -8140,6 +8213,7 @@ const app = createApp({
 
 
                 // Load from DB
+                window.__rpBootStage = '读取角色卡目录';
                 const savedChars = await window.RPHubStorage.readCharacterDirectory();
                 if (savedChars) {
                     // Migration: Ensure all characters have a UUID and createdAt
@@ -8181,6 +8255,7 @@ const app = createApp({
                 // [rphub 2.8.101] 角色卡是最大的一条（用户实测 186.93MB / 3 张卡挤一条）
                 markHeap('characters-loaded');
 
+                window.__rpBootStage = '读取设置与预设';
                 const savedSettings = await getStoredValue('settings');
                 if (savedSettings) {
                     retainedSettingsExtras = Object.fromEntries(Object.entries(savedSettings).filter(([key]) =>
@@ -15391,11 +15466,35 @@ const app = createApp({
         const loadCharacterMemories = async (characterId, errorContext = '') => {
             const loadEpoch = _characterSwitchEpoch;
             _classicMemoriesLoaded = false;
-            const loaded = await readCharacterMemories(characterId, errorContext);
+            // [rphub 2.9.119] 记忆读取必须有上限。
+            //   现象：启动页停在「载入角色记忆」不动，25 秒后提示「数据加载未完成」，
+            //   既不报错也进不去 —— 原因是 readMemoryState 的底层请求既不 resolve 也不 reject，
+            //   整个启动流程就挂在这一次 await 上。记忆是可选能力，不该拿它卡住开机。
+            //   这里 20 秒兜底：超时就放弃本次记忆加载，让启动继续，用户可在记忆工具里重试。
+            let timer = null;
+            const timeout = new Promise((_, reject) => {
+                timer = setTimeout(() => reject(Object.assign(new Error('记忆读取超时'), { name: 'MemoryLoadTimeout' })), 20000);
+            });
+            let loaded = null;
+            try {
+                loaded = await Promise.race([readCharacterMemories(characterId, errorContext), timeout]);
+            } catch (error) {
+                if (error && error.name === 'MemoryLoadTimeout') {
+                    window.__rpMemoryLoadSkipped = true;
+                    try { localStorage.setItem('rphub.memoryBootSkip', '1'); } catch (_) {}
+                    window.__rpBootStage = '载入角色记忆超时（已跳过）';
+                    console.error('[rphub] 记忆读取 20 秒无响应，跳过以完成启动' + errorContext);
+                    return;
+                }
+                throw error;
+            } finally {
+                if (timer) clearTimeout(timer);
+            }
             if (loadEpoch !== _characterSwitchEpoch || getCurrentStoryBranchScopeId() !== characterId) {
                 return;
             }
             adoptMemoryState(loaded.memoryState, loaded.summaryMemories);
+            try { localStorage.removeItem('rphub.memoryBootSkip'); } catch (_) {}
         };
 
         const selectCharacter = async (index, isNewImport = false, { silent = false } = {}) => {
@@ -15921,10 +16020,9 @@ const app = createApp({
                         return;
                     }
                     try {
-                        if (shouldWaitMemoryBeforeImport() && !await waitForMemoryLoaded(10000)) {
-                            showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
-                            return;
-                        }
+                        // [rphub 2.9.123] 记忆改成启动后台加载后，这里不能再「等不到就放弃导入」，
+                        //   否则记忆没加载完的用户会连卡都导不进来。等不到就直接往下走。
+                        if (shouldWaitMemoryBeforeImport()) await waitForMemoryLoaded(10000);
                         await importCharacterData(data, null, { sourceBytes: file.size });
                     } catch (err) {
                         console.error(err);
@@ -15950,10 +16048,9 @@ const app = createApp({
                     }
                     try {
                         // 仅当已选中角色（有记忆作用域）时才等，空列表直接导入
-                        if (shouldWaitMemoryBeforeImport() && !await waitForMemoryLoaded(10000)) {
-                            showToast('记忆还在加载，请等两秒再试一次', 'warning', 4000);
-                            return;
-                        }
+                        // [rphub 2.9.123] 记忆改成启动后台加载后，这里不能再「等不到就放弃导入」，
+                        //   否则记忆没加载完的用户会连卡都导不进来。等不到就直接往下走。
+                        if (shouldWaitMemoryBeforeImport()) await waitForMemoryLoaded(10000);
                         const blob = new Blob([buffer], { type: 'image/png' });
                         const avatarUrl = await cardUtils.blobToDataUrl(blob);
                         await importCharacterData(parsed.data, avatarUrl, { sourceBytes: file.size });
@@ -16564,7 +16661,14 @@ const app = createApp({
                 if (char.recentGenerationTimes) recentGenerationTimes.value = JSON.parse(JSON.stringify(char.recentGenerationTimes));
                 else recentGenerationTimes.value = [];
 
-                await loadCharacterMemories(getStoryBranchScopeId(char.uuid), ' on restore');
+                window.__rpBootStage = '载入角色记忆';
+                // [rphub 2.9.122] 启动不再 await 记忆加载。
+                //   实测三版兜底都没用：那个 await 会长时间占住主线程，
+                //   setTimeout(20s) 到 25 秒都没跑；持久化开关又依赖 localStorage 与定时器，
+                //   一样救不回来。既然记忆是可选能力，就别让它参与启动的先后顺序 ——
+                //   先记下要加载的作用域，等首屏渲染完再异步加载。
+                window.__rpBootPendingMemoryScope = getStoryBranchScopeId(char.uuid);
+                window.__rpBootStage = '应用角色资源';
 
                 // Enforce special rules (Nai画图正则 & 自动生图)
                 enforceSpecialRules();
@@ -16575,9 +16679,11 @@ const app = createApp({
                 }
 
             }
+            window.__rpBootStage = '确定首屏视图';
             currentView.value = currentCharacter.value && chatHistory.value.length ? 'chat' : 'characters';
             if (currentView.value === 'characters') hasOpenedCharacterManager.value = true;
             // Drain hydration watchers before enabling user-change autosaves.
+            window.__rpBootStage = '渲染首屏';
             await nextTick();
             _initComplete = true;
             window.rphubHandleBack = shellGoBack;
@@ -16585,6 +16691,20 @@ const app = createApp({
             window.addEventListener('rp:startup-finished', finishStartup, { once: true });
             window.__rpHasSavedChat = !!(currentCharacter.value && chatHistory.value.length);
             window.__rpDataReady = true;
+            try { localStorage.setItem('rphub.bootAttempts', '0'); } catch (_) {}
+            // 首屏就绪后再补记忆：卡住也只影响记忆功能本身，不影响使用
+            if (window.__rpBootPendingMemoryScope) {
+                const pendingScope = window.__rpBootPendingMemoryScope;
+                window.__rpBootPendingMemoryScope = null;
+                setTimeout(() => {
+                    loadCharacterMemories(pendingScope, ' (after boot)').catch(error => {
+                        console.error('[rphub] 后台记忆加载失败:', error);
+                    });
+                }, 1500);
+            }
+            if (window.__rpMemoryLoadSkipped) {
+                showToast('记忆读取超时已跳过，聊天与角色卡正常可用；可到「记忆工具」重试', 'warning', 7000);
+            }
             window.RPUpdates.start();
 
             fetchModels();
@@ -16993,7 +17113,7 @@ const app = createApp({
             currentUiTemplates, managedUiTemplates, activeUiTemplates, uiTemplateUpdateStatus, createUiTemplate, editUiTemplate, saveUiTemplate, deleteUiTemplate, importUiTemplates, updateUiTemplatesFromChat, renderEditingUiTemplatePreview, handleUiTemplateClick,
             isBatchDeleteMode, isNavigationOpen, selectedCharacterIndices, toggleBatchDeleteMode, toggleCharacterSelection, batchDeleteCharacters,
             handleAvatarUpload, importCharacter,
-            showMemTools, openMemTools, closeMemTools, memToolsScopeId, memToolsAudit, memToolsConfig, runMemToolsAudit, saveMemToolsConfig,
+            showMemTools, openMemTools, closeMemTools, memToolsScopeId, memToolsAudit, memToolsDiag, runMemToolsDiag, memToolsConfig, runMemToolsAudit, saveMemToolsConfig,
             memToolsVersions, loadMemToolsVersions, saveMemToolsSnapshot, restoreMemToolsSnapshot, deleteMemToolsSnapshot, memToolsTimeText,
             memToolsMerge, memToolsMergePickable, memToolsMergePickedList, memToolsMergeGap, memToolsMergeCanRun,
             openMemToolsMergePick, closeMemToolsMergePick, runMemToolsMerge, abortMemToolsMerge,

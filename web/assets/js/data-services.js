@@ -1339,6 +1339,11 @@
         compareAndWriteStoredValues,
         putStoredRecord,
         cloneForStorage,
+        // [rphub 2.9.125] 诊断用：列出库里所有键，便于确认记忆到底存在哪个作用域下
+        listStorageKeys: async () => {
+            if (!mainDb) await initDB();
+            return readStorageKeys(mainDb);
+        },
         readCharacterDirectory,
         refreshCharacterPreview,
         readCharacter,
