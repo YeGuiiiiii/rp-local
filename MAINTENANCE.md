@@ -4,6 +4,10 @@
 
 本轮工作分支：`hh/compatibility-maintenance`。以下“已完成”表示分支源码与浏览器验证完成，尚不表示已合并主线、发布 APK 或验证手机现场。详细复现记录见 [问题排查记录](问题排查-20261116.md)。
 
+## 发布认领
+
+- R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 发布，Codex 已认领，工作分支 `hh/compatibility-maintenance`。先比对现有正式包签名，验证 APK 内容和测试，再上传 APK 与 SHA256；不纳入更新服务的三处未提交改动，真机未核实项继续保留。
+
 ## 已完成
 
 未另注提交号的修复均在 **`a91d1f5`**，测试源码随同提交。认领与协作规则在根目录 `AGENTS.md` 和 `CONTRIBUTING.md`；后续维护者请先检查本表，不重复实现已划去项目。
