@@ -101,6 +101,93 @@
                 } catch (failure) { error.value = failure.message; }
                 finally { saving.value = false; }
             };
+            // ── [rphub 2.9.127] 长按多选 ──────────────────────────────
+            //   长按 450ms 进入选择模式并选中该张；选择模式下单击改为勾选/取消。
+            //   批量下载复用单张的下载通道，批量删除走本地文件 remove。
+            const selectMode = ref(false);
+            const picked = ref([]);
+            const notice = ref('');
+            let pressTimer = null, pressMoved = false, pressStart = null;
+            const isPicked = name => picked.value.indexOf(name) >= 0;
+            const enterSelect = photo => {
+                selectMode.value = true;
+                if (!isPicked(photo.name)) picked.value = [...picked.value, photo.name];
+            };
+            const togglePick = photo => {
+                picked.value = isPicked(photo.name)
+                    ? picked.value.filter(name => name !== photo.name)
+                    : [...picked.value, photo.name];
+                if (!picked.value.length) selectMode.value = false;
+            };
+            const selectAll = () => {
+                picked.value = photos.value.slice(0, limit.value).map(photo => photo.name);
+                selectMode.value = true;
+            };
+            const exitSelect = () => { selectMode.value = false; picked.value = []; };
+            const startPress = (photo, event) => {
+                if (selectMode.value) return;
+                pressMoved = false;
+                pressStart = { x: event.clientX, y: event.clientY };
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(() => {
+                    pressTimer = null;
+                    if (!pressMoved) enterSelect(photo);
+                }, 450);
+            };
+            const movePress = event => {
+                if (!pressStart) return;
+                if (Math.abs(event.clientX - pressStart.x) > 10 || Math.abs(event.clientY - pressStart.y) > 10) pressMoved = true;
+            };
+            const endPress = () => { clearTimeout(pressTimer); pressTimer = null; pressStart = null; };
+            const onPhotoClick = (photo, index) => {
+                if (selectMode.value) { togglePick(photo); return; }
+                previewIndex.value = index;
+                zoomed.value = false;
+            };
+            const removeBrowserPhoto = (key, owner) => new Promise((resolve, reject) => {
+                const request = indexedDB.open('RPHubImageVaultV1', 1);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction('images', 'readwrite');
+                    tx.objectStore('images').delete(key);
+                    tx.oncomplete = () => { db.close(); resolve(true); };
+                    tx.onerror = () => { db.close(); reject(tx.error); };
+                };
+                request.onerror = () => reject(request.error);
+            });
+            const batchSave = async () => {
+                if (!picked.value.length || saving.value) return;
+                saving.value = true; notice.value = '';
+                const targetName = selected.value?.importedName || selected.value?.name;
+                let ok = 0, fail = 0;
+                for (const name of [...picked.value]) {
+                    const photo = photos.value.find(item => item.name === name);
+                    if (!photo) continue;
+                    try { await window.RPImageDownload.run(photo.url, { name: targetName }); ok += 1; }
+                    catch (_) { fail += 1; }
+                }
+                saving.value = false;
+                notice.value = '已保存 ' + ok + ' 张' + (fail ? '，失败 ' + fail + ' 张' : '');
+                if (!fail) exitSelect();
+            };
+            const batchRemove = async () => {
+                if (!picked.value.length) return;
+                const list = [...picked.value];
+                if (!window.confirm('删除选中的 ' + list.length + ' 张图片？此操作不可撤销')) return;
+                const base = '图片/' + folder(selected.value);
+                let ok = 0, fail = 0;
+                for (const name of list) {
+                    try {
+                        if (local.available) local.call('remove', base + '/' + name);
+                        else await removeBrowserPhoto(name, selected.value.uuid);
+                        ok += 1;
+                    } catch (_) { fail += 1; }
+                }
+                photos.value = photos.value.filter(photo => list.indexOf(photo.name) < 0);
+                counts.value[selected.value.uuid] = photos.value.length;
+                notice.value = '已删除 ' + ok + ' 张' + (fail ? '，失败 ' + fail + ' 张' : '');
+                exitSelect();
+            };
             const keys = event => {
                 if (!props.active || !preview.value) return;
                 if (event.key === 'Escape') { event.preventDefault(); back(); }
@@ -118,6 +205,7 @@
             onBeforeUnmount(() => { sequence++; releaseUrls(); window.removeEventListener('keydown', keys); });
             expose({ back, open, selectedId });
             return { search, selected, albums, photos, counts, loading, error, limit, preview, previewIndex, zoomed, saving, open, back, move, save, coverLoaded,
+                selectMode, picked, notice, isPicked, togglePick, selectAll, exitSelect, startPress, movePress, endPress, onPhotoClick, batchSave, batchRemove,
                 gallerySurface, previewSurface, glassPointer: glass.pointer, glassReset: glass.reset };
         },
         template: `
@@ -125,7 +213,7 @@
             <mascot-header v-if="!selected" title="画廊" :active="active" :count="characters.length+' 本相簿'" pose="album"></mascot-header>
             <header v-else class="shell-page-header yy-album-heading">
               <div class="shell-album-title"><button type="button" class="shell-icon-button" aria-label="返回画廊" @click="back"><icon name="ArrowLeft"/></button><div><h1>{{selected.name}}</h1></div></div>
-              <span class="shell-count">{{photos.length}} 张</span>
+              <span class="shell-count">{{selectMode?'已选 '+picked.length+' 张':photos.length+' 张'}}</span>
             </header>
             <label v-if="!selected" class="shell-search"><icon name="Search"/><input v-model="search" type="search" aria-label="搜索角色相簿" placeholder="搜索角色相簿"></label>
             <p v-if="error" role="alert" class="shell-error">{{error}}</p>
@@ -141,7 +229,25 @@
             <template v-else>
               <p v-if="loading" role="status">正在读取本地图片…</p>
               <div v-else-if="!photos.length && !error" class="shell-empty"><theme-mascot class="yy-empty-mascot" pose="album" alt="抱着相簿的陈玥"></theme-mascot><h2>相簿还是空的</h2><p>这张角色卡生成并保存的图片会出现在这里。</p></div>
-              <div class="shell-photo-grid"><button v-for="(photo,index) in photos.slice(0,limit)" :key="photo.name" type="button" class="image-glass" @click="previewIndex=index;zoomed=false" :aria-label="'查看第 '+(index+1)+' 张图片'"><img :src="photo.url" alt="" loading="lazy"><small>{{Math.round(photo.bytes/1024)}} KB</small></button></div>
+              <p v-if="notice" class="shell-gallery-notice">{{notice}}</p>
+              <div class="shell-photo-grid" :class="{'is-selecting':selectMode}" @pointermove.passive="movePress" @pointerup="endPress" @pointercancel="endPress" @pointerleave="endPress">
+                <button v-for="(photo,index) in photos.slice(0,limit)" :key="photo.name" type="button"
+                  class="image-glass shell-photo-cell" :class="{'is-picked':isPicked(photo.name)}"
+                  @pointerdown="startPress(photo, $event)" @click="onPhotoClick(photo, index)"
+                  :aria-pressed="selectMode ? isPicked(photo.name) : null"
+                  :aria-label="'第 '+(index+1)+' 张图片'">
+                  <img :src="photo.url" alt="" loading="lazy">
+                  <small>{{Math.round(photo.bytes/1024)}} KB</small>
+                  <span v-if="selectMode" class="shell-photo-check" :class="{'is-on':isPicked(photo.name)}"><icon name="Check"/></span>
+                </button>
+              </div>
+              <div v-if="selectMode" class="shell-gallery-actions">
+                <span class="shell-gallery-count">已选 {{picked.length}} 张</span>
+                <button type="button" class="shell-gallery-action" @click="selectAll"><icon name="CheckCheck"/>全选</button>
+                <button type="button" class="shell-gallery-action" :disabled="!picked.length||saving" @click="batchSave"><icon name="Download"/>{{saving?'保存中':'下载'}}</button>
+                <button type="button" class="shell-gallery-action is-danger" :disabled="!picked.length" @click="batchRemove"><icon name="Trash2"/>删除</button>
+                <button type="button" class="shell-gallery-action" @click="exitSelect">取消</button>
+              </div>
               <button v-if="limit<photos.length" type="button" class="shell-button" @click="limit+=48">加载更多图片</button>
               <button v-if="error" type="button" class="shell-button" @click="open(selected)"><icon name="RefreshCw"/>重新读取</button>
             </template>

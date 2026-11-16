@@ -575,3 +575,25 @@
     background-image: linear-gradient(135deg, rgb(var(--primary-400) / 0.18), rgb(var(--primary-300) / 0.08));
     border-color: rgb(var(--primary-400) / 0.30);
 }
+
+/* [rphub 2.9.127] 图片管理：长按多选、批量操作条 */
+.shell-photo-cell{position:relative;transition:transform .18s ease;}
+.shell-photo-grid.is-selecting .shell-photo-cell{transform:scale(.97);}
+.shell-photo-cell.is-picked{outline:2px solid rgb(var(--primary-500));outline-offset:2px;}
+.shell-photo-check{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.9);background:rgba(0,0,0,.35);display:flex;align-items:center;
+  justify-content:center;color:#fff;transition:background .15s ease;}
+.shell-photo-check.is-on{background:rgb(var(--primary-500));border-color:rgb(var(--primary-500));}
+.shell-photo-check svg{width:14px;height:14px;}
+.shell-gallery-actions{position:sticky;bottom:0;z-index:2;display:flex;align-items:center;gap:8px;margin:12px 0 0;
+  padding:10px 12px;border-radius:18px;background:rgb(var(--primary-500) / .07);
+  border:1px solid rgb(var(--primary-500) / .18);backdrop-filter:blur(14px);}
+.shell-gallery-count{flex:1;font-size:12px;font-weight:700;color:rgb(var(--primary-500));}
+.shell-gallery-action{display:inline-flex;align-items:center;gap:4px;padding:7px 12px;border-radius:999px;
+  border:1px solid rgb(var(--primary-500) / .2);background:transparent;font-size:12px;font-weight:700;
+  color:rgb(var(--primary-500));cursor:pointer;}
+.shell-gallery-action:active{background:rgb(var(--primary-500) / .12);}
+.shell-gallery-action:disabled{opacity:.4;cursor:default;}
+.shell-gallery-action.is-danger{color:#dc2626;border-color:rgba(220,38,38,.28);}
+.shell-gallery-action svg{width:14px;height:14px;}
+.shell-gallery-notice{margin:8px 0 0;font-size:12px;font-weight:600;color:rgb(var(--primary-500));}

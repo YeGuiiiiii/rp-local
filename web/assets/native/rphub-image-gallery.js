@@ -596,15 +596,42 @@
             'background:var(--c-surface,#fff);color:var(--c-text,#1f2937);border-radius:10px;',
             'padding:6px 8px;font-size:12px;font-weight:600;cursor:pointer;}',
             '@media(min-width:640px){.rphub-gal-grid{grid-template-columns:repeat(5,1fr);}}',
-            '.rphub-gal-item{position:relative;padding-top:100%;border-radius:10px;overflow:hidden;',
-            'background:var(--c-surface,#fff);border:1px solid var(--c-border,#e5e7eb);cursor:pointer;}',
-            '.rphub-gal-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}',
+            '.rphub-gal-headtext{display:flex;flex-direction:column;gap:1px;min-width:0;}',
+            '.rphub-gal-dot{width:7px;height:7px;border-radius:50%;background:var(--primary-500,#6366f1);',
+            'box-shadow:0 0 0 3px color-mix(in srgb,var(--primary-500,#6366f1) 18%,transparent);display:inline-block;}',
+            '.rphub-gal-sub{font-size:11px;color:var(--c-text-2,#6b7280);}',
+            '.rphub-gal-item{position:relative;padding-top:100%;border-radius:14px;overflow:hidden;',
+            'background:var(--c-surface,#fff);border:1px solid var(--c-border,#e5e7eb);cursor:pointer;',
+            'touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}',
+            '.rphub-gal-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;',
+            'pointer-events:none;-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none;}',
             '.rphub-gal-item.is-picked{outline:3px solid var(--primary-500,#6366f1);outline-offset:-3px;}',
+            '.rphub-gal-tick{display:none;position:absolute;top:6px;right:6px;z-index:3;width:22px;height:22px;',
+            'border-radius:50%;background:#fff;color:#e5342b;font-size:14px;font-weight:900;',
+            'line-height:20px;text-align:center;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);}',
+            '.rphub-gal-item.is-picked .rphub-gal-tick{display:block;}',
+            '.rphub-gal-ring{position:absolute;inset:0;border-radius:10px;pointer-events:none;z-index:2;display:none;',
+            'background:radial-gradient(circle at center,rgba(255,255,255,.10),rgba(0,0,0,.16));}',
+            '.rphub-gal-item.is-holding .rphub-gal-ring{display:block;box-shadow:inset 0 0 0 3px rgba(229,52,43,.75);}',
+            '.rphub-gal-grid.is-selecting .rphub-gal-item:not(.is-picked){opacity:.42;}',
+            '.rphub-gal-item.is-picked{box-shadow:0 0 0 2.5px #e5342b;}',
             '.rphub-gal-badge{position:absolute;left:6px;bottom:6px;right:6px;font-size:10px;line-height:1.3;',
             'color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
             '.rphub-gal-empty{padding:48px 16px;text-align:center;color:var(--c-text-2,#6b7280);font-size:13px;line-height:1.9;}',
             '.rphub-gal-foot{flex:0 0 auto;padding:10px 16px;border-top:1px solid var(--c-border,#e5e7eb);',
             'background:var(--c-surface,#fff);font-size:12px;color:var(--c-text-2,#6b7280);}',
+            '.rphub-gal-count{flex:1;font-weight:700;color:var(--primary-500,#6366f1);font-size:12px;}',
+            '.rphub-gal-foot:has(.rphub-gal-count){display:flex;align-items:center;gap:8px;padding:8px 12px;',
+            'border-top:0;background:color-mix(in srgb,var(--primary-500,#6366f1) 7%,transparent);',
+            'border-radius:16px;margin:0 10px 10px;}',
+            '.rphub-gal-btn{border:1px solid color-mix(in srgb,var(--primary-500,#6366f1) 25%,transparent);',
+            'background:transparent;color:var(--primary-500,#6366f1);border-radius:999px;padding:6px 12px;',
+            'font-size:12px;font-weight:700;cursor:pointer;}',
+            '.rphub-gal-btn:active{background:color-mix(in srgb,var(--primary-500,#6366f1) 14%,transparent);}',
+            '.rphub-gal-btn.is-danger{color:#dc2626;border-color:rgba(220,38,38,.3);}',
+            '.rphub-gal-btn[disabled]{opacity:.4;pointer-events:none;}',
+            '.rphub-gal-exit{border:1px solid rgba(220,38,38,.32);background:rgba(220,38,38,.06);color:#dc2626;',
+            'border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;}',
             '.rphub-gal-viewer{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.92);',
             'display:flex;flex-direction:column;}',
             '.rphub-gal-viewer img{flex:1;min-height:0;width:100%;object-fit:contain;}',
@@ -842,12 +869,16 @@
         // 缩略图没生成成功时回落到远端原图：宁可慢一点，也别在格子里显示空白。
         else if (record.originUrl) img.src = resolveUrl(record.originUrl);
         item.appendChild(img);
-        if (record.tag) {
-            var badge = document.createElement('div');
-            badge.className = 'rphub-gal-badge';
-            badge.textContent = record.tag.split(',')[0];
-            item.appendChild(badge);
-        }
+        // [rphub 2.9.130] 勾选角标：白底圆形 + 红色对勾（真实元素，不依赖 SVG data URI）。
+        var tick = document.createElement('span');
+        tick.className = 'rphub-gal-tick';
+        tick.textContent = '✓';
+        item.appendChild(tick);
+        // [rphub 2.9.130] 长按进度环：按住时边缘填色，给「还要不要松手」一个反馈。
+        var ring = document.createElement('span');
+        ring.className = 'rphub-gal-ring';
+        item.appendChild(ring);
+        // 标签文字已按用户要求移除；record.tag 仍保留在数据里，供预览页「复制配方」使用。
         item.addEventListener('click', function () {
             if (selectedIds) {
                 if (selectedIds.has(record.id)) selectedIds.delete(record.id);
@@ -858,28 +889,81 @@
             }
             openViewer(record);
         });
-        var holdTimer = null;
-        item.addEventListener('touchstart', function () {
+        // [rphub 2.9.130] 长按与滑动分开判：
+        //   原来只有 touchstart 计时，touchmove 虽清了定时器，但滚动是浏览器接管的，
+        //   WebView 里常出现「手指在滑、480ms 到了照样触发」——于是长按变成拖动。
+        //   现在按住即显示进度环，位移超过 8px 立刻取消；松手/离开统一清理。
+        // [rphub 2.9.132] 用 touch 事件自己裁决，而不是交给浏览器。
+        //   上一版用 pointerdown + touch-action:manipulation：手指一动，浏览器就认为要滚动，
+        //   立刻发 pointercancel 把 480ms 的定时器掐掉 —— 表现就是「长按变拖动、永远选不中」。
+        //   现在：位移小于阈值时 preventDefault 压住滚动，让长按有机会到点；
+        //   一旦真拖动（超过阈值）就放手，滚动照常。
+        var HOLD_MS = 480, HOLD_SLOP = 9;
+        var holdTimer = null, holdStart = null, holdMoved = false;
+        var endHold = function (sideEffect) {
+            if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+            holdStart = null;
+            item.classList.remove('is-holding');
+        };
+        item.addEventListener('touchstart', function (event) {
+            if (selectedIds || event.touches.length !== 1) return;
+            var touch = event.touches[0];
+            holdMoved = false;
+            holdStart = { x: touch.clientX, y: touch.clientY };
+            item.classList.add('is-holding');
+            if (holdTimer) clearTimeout(holdTimer);
             holdTimer = setTimeout(function () {
+                holdTimer = null;
+                item.classList.remove('is-holding');
+                if (holdMoved) return;
                 if (!selectedIds) { selectedIds = new Set(); }
                 selectedIds.add(record.id);
                 item.classList.add('is-picked');
+                if (navigator.vibrate) { try { navigator.vibrate(12); } catch (error) { /* 忽略 */ } }
                 updateFoot(records || []);
-            }, 480);
+            }, HOLD_MS);
         }, { passive: true });
-        ['touchend', 'touchmove', 'touchcancel'].forEach(function (name) {
-            item.addEventListener(name, function () { if (holdTimer) clearTimeout(holdTimer); }, { passive: true });
+        item.addEventListener('touchmove', function (event) {
+            if (!holdStart) return;
+            var touch = event.touches[0];
+            if (!touch) return;
+            var dx = Math.abs(touch.clientX - holdStart.x);
+            var dy = Math.abs(touch.clientY - holdStart.y);
+            if (dx > HOLD_SLOP || dy > HOLD_SLOP) {
+                holdMoved = true;
+                endHold();
+                return;                       // 真拖动：立刻放手，让页面正常滚
+            }
+            if (!holdMoved && event.cancelable) event.preventDefault();   // 尚未拖动：压住滚动，保住长按
+        }, { passive: false });
+        ['touchend', 'touchcancel'].forEach(function (name) {
+            item.addEventListener(name, function () { endHold(); }, { passive: true });
         });
         return item;
     }
 
     function updateFoot(list) {
         var bar = document.querySelector('.rphub-gal-foot');
+        var gridEl = document.querySelector('#rphub-gal-body .rphub-gal-grid');
+        if (gridEl) gridEl.classList.toggle('is-selecting', !!selectedIds);
         if (!bar) return;
         var items = filteredRecords(list || []);
+        var exitBtn = document.querySelector('.rphub-gal-head .rphub-gal-exit');
+        if (exitBtn) exitBtn.hidden = !selectedIds;
+        var subEl = document.querySelector('.rphub-gal-head .rphub-gal-sub');
+        if (subEl) subEl.textContent = '已收录 ' + items.length + ' 张 · 长按可多选';
         var picked = selectedIds ? selectedIds.size : 0;
-        if (picked) {
-            bar.textContent = '已选 ' + picked + ' 张 · 点「导出」打包下载，或「删除」移出图库';
+        // [rphub 2.9.133] 判定从「已选张数 > 0」改成「处于多选态」。
+        //   原来把选中的最后一张取消勾选，操作条整条消失，连「取消」都没了 —— 只剩再点一张才能退出。
+        //   现在 0 张时操作条仍在，只是存相册 / 打包 / 删除置灰。
+        if (selectedIds) {
+            var noPick = picked === 0;
+            bar.innerHTML = '<span class="rphub-gal-count">已选 ' + picked + ' 张</span>'
+                + '<button type="button" class="rphub-gal-btn" data-act="pickall">全选</button>'
+                + '<button type="button" class="rphub-gal-btn"' + (noPick ? ' disabled' : '') + ' data-act="saveall">存相册</button>'
+                + '<button type="button" class="rphub-gal-btn"' + (noPick ? ' disabled' : '') + ' data-act="export">打包导出</button>'
+                + '<button type="button" class="rphub-gal-btn is-danger"' + (noPick ? ' disabled' : '') + ' data-act="remove">删除</button>'
+                + '<button type="button" class="rphub-gal-btn" data-act="clearpick">取消</button>';
             return;
         }
         var bytes = 0;
@@ -1021,6 +1105,42 @@
         });
     }
 
+    function saveSelected() {
+        if (!selectedIds || !selectedIds.size) { toast('先长按选中图片'); return; }
+        var list = (records || []).filter(function (item) { return selectedIds.has(item.id); });
+        if (!list.length) return;
+        var done = 0, failed = 0;
+        var queue = Promise.resolve();
+        list.forEach(function (record) {
+            queue = queue.then(function () {
+                return Promise.resolve(saveRecordToAlbum(record)).then(function () { done += 1; })
+                    .catch(function () { failed += 1; });
+            });
+        });
+        toast('正在保存 ' + list.length + ' 张…');
+        queue.then(function () {
+            toast('已保存 ' + done + ' 张' + (failed ? '，失败 ' + failed + ' 张' : ''));
+        });
+    }
+
+    function removeSelected() {
+        if (!selectedIds || !selectedIds.size) { toast('先长按选中图片'); return; }
+        var ids = Array.from(selectedIds);
+        if (!window.confirm('删除选中的 ' + ids.length + ' 张图片？此操作不可撤销')) return;
+        deleteRecords(ids).then(function () {
+            toast('已删除 ' + ids.length + ' 张');
+            renderGrid();
+        }).catch(function () { toast('删除失败'); });
+    }
+
+    function pickAllFiltered() {
+        var list = filteredRecords(records || []);
+        if (!list.length) return;
+        if (!selectedIds) selectedIds = new Set();
+        list.forEach(function (record) { selectedIds.add(record.id); });
+        renderGrid();
+    }
+
     function exportSelected() {
         if (!selectedIds || !selectedIds.size) { toast('先长按选中图片'); return; }
         var list = (records || []).filter(function (item) { return selectedIds.has(item.id); });
@@ -1070,8 +1190,12 @@
         overlay.id = OVERLAY_ID;
         overlay.innerHTML = [
             '<div class="rphub-gal-head">',
-            '  <div class="rphub-gal-title"><span style="margin-right:6px">▣</span>图片库</div>',
+            '  <div class="rphub-gal-headtext">',
+            '    <div class="rphub-gal-title"><span class="rphub-gal-dot"></span>图片库</div>',
+            '    <div class="rphub-gal-sub"></div>',
+            '  </div>',
             '  <select class="rphub-gal-pick" aria-label="按角色卡筛选"></select>',
+            '  <button type="button" class="rphub-gal-exit" data-act="clearpick" hidden>退出多选</button>',
             '  <button type="button" class="rphub-gal-act" data-act="export">导出</button>',
             '  <button type="button" class="rphub-gal-close" data-act="close">关闭</button>',
             '</div>',
@@ -1084,6 +1208,14 @@
         document.body.appendChild(overlay);
 
         overlay.addEventListener('click', function (event) {
+            var footAct = event.target && event.target.dataset ? event.target.dataset.act : '';
+            if (footAct) {
+                if (footAct === 'pickall') { pickAllFiltered(); return; }
+                if (footAct === 'saveall') { saveSelected(); return; }
+                if (footAct === 'remove') { removeSelected(); return; }
+                if (footAct === 'clearpick') { selectedIds = null; renderGrid(); return; }
+                if (footAct === 'export') { exportSelected(); return; }
+            }
             var target = event.target;
             if (!target || !target.dataset) return;
             if (target.dataset.act === 'close') { overlay.remove(); releaseObjectUrls(); return; }

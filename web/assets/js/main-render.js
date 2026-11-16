@@ -25956,20 +25956,33 @@ const _hoisted_15 = {
   key: 1,
   class: "shell-empty"
 }
-const _hoisted_16 = { class: "shell-photo-grid" }
-const _hoisted_17 = ["onClick", "aria-label"]
-const _hoisted_18 = ["src"]
-const _hoisted_19 = ["onClick"]
-const _hoisted_20 = ["onClick"]
-const _hoisted_21 = ["onClick", "onPointermovePassive", "onPointerleave"]
+const _hoisted_16 = {
+  key: 2,
+  class: "shell-gallery-notice"
+}
+const _hoisted_17 = ["onPointermovePassive", "onPointerup", "onPointercancel", "onPointerleave"]
+const _hoisted_18 = ["onPointerdown", "onClick", "aria-pressed", "aria-label"]
+const _hoisted_19 = ["src"]
+const _hoisted_20 = {
+  key: 3,
+  class: "shell-gallery-actions"
+}
+const _hoisted_21 = { class: "shell-gallery-count" }
 const _hoisted_22 = ["onClick"]
 const _hoisted_23 = ["disabled", "onClick"]
-const _hoisted_24 = { class: "shell-photo-glass image-glass" }
-const _hoisted_25 = ["src", "onClick"]
-const _hoisted_26 = ["disabled", "onClick"]
+const _hoisted_24 = ["disabled", "onClick"]
+const _hoisted_25 = ["onClick"]
+const _hoisted_26 = ["onClick"]
 const _hoisted_27 = ["onClick"]
-const _hoisted_28 = ["disabled", "onClick"]
-const _hoisted_29 = {
+const _hoisted_28 = ["onClick", "onPointermovePassive", "onPointerleave"]
+const _hoisted_29 = ["onClick"]
+const _hoisted_30 = ["disabled", "onClick"]
+const _hoisted_31 = { class: "shell-photo-glass image-glass" }
+const _hoisted_32 = ["src", "onClick"]
+const _hoisted_33 = ["disabled", "onClick"]
+const _hoisted_34 = ["onClick"]
+const _hoisted_35 = ["disabled", "onClick"]
+const _hoisted_36 = {
   key: 0,
   role: "alert",
   class: "shell-viewer-error"
@@ -25977,7 +25990,7 @@ const _hoisted_29 = {
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { resolveComponent: _resolveComponent, openBlock: _openBlock, createBlock: _createBlock, createCommentVNode: _createCommentVNode, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createElementBlock: _createElementBlock, vModelText: _vModelText, withDirectives: _withDirectives, renderList: _renderList, Fragment: _Fragment, createTextVNode: _createTextVNode, normalizeClass: _normalizeClass, withModifiers: _withModifiers, Teleport: _Teleport } = _Vue
+    const { resolveComponent: _resolveComponent, openBlock: _openBlock, createBlock: _createBlock, createCommentVNode: _createCommentVNode, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createElementBlock: _createElementBlock, vModelText: _vModelText, withDirectives: _withDirectives, renderList: _renderList, Fragment: _Fragment, normalizeClass: _normalizeClass, createTextVNode: _createTextVNode, withModifiers: _withModifiers, Teleport: _Teleport } = _Vue
 
     const _component_mascot_header = _resolveComponent("mascot-header")
     const _component_icon = _resolveComponent("icon")
@@ -26012,7 +26025,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("h1", null, _toDisplayString(selected.name), 1 /* TEXT */)
               ])
             ]),
-            _createElementVNode("span", _hoisted_5, _toDisplayString(photos.length) + " 张", 1 /* TEXT */)
+            _createElementVNode("span", _hoisted_5, _toDisplayString(selectMode?'已选 '+picked.length+' 张':photos.length+' 张'), 1 /* TEXT */)
           ])),
       (!selected)
         ? (_openBlock(), _createElementBlock("label", _hoisted_6, [
@@ -26089,42 +26102,97 @@ return function render(_ctx, _cache) {
                     _cache[1] || (_cache[1] = _createElementVNode("p", null, "这张角色卡生成并保存的图片会出现在这里。", -1 /* CACHED */))
                   ]))
                 : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_16, [
+            notice
+              ? (_openBlock(), _createElementBlock("p", _hoisted_16, _toDisplayString(notice), 1 /* TEXT */))
+              : _createCommentVNode("v-if", true),
+            _createElementVNode("div", {
+              class: _normalizeClass(["shell-photo-grid", {'is-selecting':selectMode}]),
+              onPointermovePassive: movePress,
+              onPointerup: endPress,
+              onPointercancel: endPress,
+              onPointerleave: endPress
+            }, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(photos.slice(0,limit), (photo, index) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: photo.name,
                   type: "button",
-                  class: "image-glass",
-                  onClick: $event => {previewIndex=index;zoomed=false},
-                  "aria-label": '查看第 '+(index+1)+' 张图片'
+                  class: _normalizeClass(["image-glass shell-photo-cell", {'is-picked':isPicked(photo.name)}]),
+                  onPointerdown: $event => (startPress(photo, $event)),
+                  onClick: $event => (onPhotoClick(photo, index)),
+                  "aria-pressed": selectMode ? isPicked(photo.name) : null,
+                  "aria-label": '第 '+(index+1)+' 张图片'
                 }, [
                   _createElementVNode("img", {
                     src: photo.url,
                     alt: "",
                     loading: "lazy"
-                  }, null, 8 /* PROPS */, _hoisted_18),
-                  _createElementVNode("small", null, _toDisplayString(Math.round(photo.bytes/1024)) + " KB", 1 /* TEXT */)
-                ], 8 /* PROPS */, _hoisted_17))
+                  }, null, 8 /* PROPS */, _hoisted_19),
+                  _createElementVNode("small", null, _toDisplayString(Math.round(photo.bytes/1024)) + " KB", 1 /* TEXT */),
+                  selectMode
+                    ? (_openBlock(), _createElementBlock("span", {
+                        key: 0,
+                        class: _normalizeClass(["shell-photo-check", {'is-on':isPicked(photo.name)}])
+                      }, [
+                        _createVNode(_component_icon, { name: "Check" })
+                      ], 2 /* CLASS */))
+                    : _createCommentVNode("v-if", true)
+                ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_18))
               }), 128 /* KEYED_FRAGMENT */))
-            ]),
+            ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_17),
+            selectMode
+              ? (_openBlock(), _createElementBlock("div", _hoisted_20, [
+                  _createElementVNode("span", _hoisted_21, "已选 " + _toDisplayString(picked.length) + " 张", 1 /* TEXT */),
+                  _createElementVNode("button", {
+                    type: "button",
+                    class: "shell-gallery-action",
+                    onClick: selectAll
+                  }, [
+                    _createVNode(_component_icon, { name: "CheckCheck" }),
+                    _cache[2] || (_cache[2] = _createTextVNode("全选", -1 /* CACHED */))
+                  ], 8 /* PROPS */, _hoisted_22),
+                  _createElementVNode("button", {
+                    type: "button",
+                    class: "shell-gallery-action",
+                    disabled: !picked.length||saving,
+                    onClick: batchSave
+                  }, [
+                    _createVNode(_component_icon, { name: "Download" }),
+                    _createTextVNode(_toDisplayString(saving?'保存中':'下载'), 1 /* TEXT */)
+                  ], 8 /* PROPS */, _hoisted_23),
+                  _createElementVNode("button", {
+                    type: "button",
+                    class: "shell-gallery-action is-danger",
+                    disabled: !picked.length,
+                    onClick: batchRemove
+                  }, [
+                    _createVNode(_component_icon, { name: "Trash2" }),
+                    _cache[3] || (_cache[3] = _createTextVNode("删除", -1 /* CACHED */))
+                  ], 8 /* PROPS */, _hoisted_24),
+                  _createElementVNode("button", {
+                    type: "button",
+                    class: "shell-gallery-action",
+                    onClick: exitSelect
+                  }, "取消", 8 /* PROPS */, _hoisted_25)
+                ]))
+              : _createCommentVNode("v-if", true),
             (limit<photos.length)
               ? (_openBlock(), _createElementBlock("button", {
-                  key: 2,
+                  key: 4,
                   type: "button",
                   class: "shell-button",
                   onClick: $event => (limit+=48)
-                }, "加载更多图片", 8 /* PROPS */, _hoisted_19))
+                }, "加载更多图片", 8 /* PROPS */, _hoisted_26))
               : _createCommentVNode("v-if", true),
             error
               ? (_openBlock(), _createElementBlock("button", {
-                  key: 3,
+                  key: 5,
                   type: "button",
                   class: "shell-button",
                   onClick: $event => (open(selected))
                 }, [
                   _createVNode(_component_icon, { name: "RefreshCw" }),
-                  _cache[2] || (_cache[2] = _createTextVNode("重新读取", -1 /* CACHED */))
-                ], 8 /* PROPS */, _hoisted_20))
+                  _cache[4] || (_cache[4] = _createTextVNode("重新读取", -1 /* CACHED */))
+                ], 8 /* PROPS */, _hoisted_27))
               : _createCommentVNode("v-if", true)
           ], 64 /* STABLE_FRAGMENT */)),
       (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
@@ -26148,7 +26216,7 @@ return function render(_ctx, _cache) {
                   onClick: back
                 }, [
                   _createVNode(_component_icon, { name: "X" })
-                ], 8 /* PROPS */, _hoisted_22),
+                ], 8 /* PROPS */, _hoisted_29),
                 _createElementVNode("span", null, _toDisplayString(previewIndex+1) + " / " + _toDisplayString(photos.length), 1 /* TEXT */),
                 _createElementVNode("button", {
                   type: "button",
@@ -26159,17 +26227,17 @@ return function render(_ctx, _cache) {
                   onClick: save
                 }, [
                   _createVNode(_component_icon, { name: "Download" })
-                ], 8 /* PROPS */, _hoisted_23)
+                ], 8 /* PROPS */, _hoisted_30)
               ]),
               _createElementVNode("div", {
                 class: _normalizeClass(["shell-photo-stage", {'is-zoomed':zoomed}])
               }, [
-                _createElementVNode("div", _hoisted_24, [
+                _createElementVNode("div", _hoisted_31, [
                   _createElementVNode("img", {
                     src: preview.url,
                     alt: "生成的图片",
                     onClick: $event => (zoomed=!zoomed)
-                  }, null, 8 /* PROPS */, _hoisted_25)
+                  }, null, 8 /* PROPS */, _hoisted_32)
                 ])
               ], 2 /* CLASS */),
               _createElementVNode("footer", null, [
@@ -26181,7 +26249,7 @@ return function render(_ctx, _cache) {
                   onClick: $event => (move(-1))
                 }, [
                   _createVNode(_component_icon, { name: "ChevronLeft" })
-                ], 8 /* PROPS */, _hoisted_26),
+                ], 8 /* PROPS */, _hoisted_33),
                 _createElementVNode("button", {
                   type: "button",
                   class: "shell-icon-button",
@@ -26189,7 +26257,7 @@ return function render(_ctx, _cache) {
                   onClick: $event => (zoomed=!zoomed)
                 }, [
                   _createVNode(_component_icon, { name: "Expand" })
-                ], 8 /* PROPS */, _hoisted_27),
+                ], 8 /* PROPS */, _hoisted_34),
                 _createElementVNode("button", {
                   type: "button",
                   class: "shell-icon-button",
@@ -26198,12 +26266,12 @@ return function render(_ctx, _cache) {
                   onClick: $event => (move(1))
                 }, [
                   _createVNode(_component_icon, { name: "ChevronRight" })
-                ], 8 /* PROPS */, _hoisted_28)
+                ], 8 /* PROPS */, _hoisted_35)
               ]),
               error
-                ? (_openBlock(), _createElementBlock("p", _hoisted_29, _toDisplayString(error), 1 /* TEXT */))
+                ? (_openBlock(), _createElementBlock("p", _hoisted_36, _toDisplayString(error), 1 /* TEXT */))
                 : _createCommentVNode("v-if", true)
-            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_21))
+            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_28))
           : _createCommentVNode("v-if", true)
       ]))
     ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1))
