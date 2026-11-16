@@ -2,13 +2,14 @@
 
 **所有维护成员开工前优先读取本清单。** 先同步远程信息，检查本表、工作分支和 `git status`；认领后提交并推送状态再动手，避免两边重复修。修复后先提交代码，再注明提交、验证结果并划线，不能删除记录。
 
-本轮工作分支：`hh/compatibility-maintenance`，本次修复与版本源码已同步 `main`。`2.9.117` APK 已上传独立下载分支，见下方交付记录；尚未创建 GitHub Release 或完成手机现场验证。详细复现记录见 [问题排查记录](问题排查-20261116.md)。
+本轮工作分支：`hh/compatibility-maintenance`，本次修复与版本源码已同步 `main`。`2.9.117` 已正式发布，同期维护者又发布了包含它的 `2.9.126`；手机现场验证尚未完成。实际更新服务器同步状态见下方记录。详细复现记录见 [问题排查记录](问题排查-20261116.md)。
 
 ## 发布认领
 
 - R02：补齐 `2.9.117` 正式 Release 与软件更新服务器同步，Codex 已认领，分支 `hh/compatibility-maintenance`。沿用已验证的 APK，补充可复用的标签发布流程；只有正式发布附件与线上 `latest.json`、APK 校验均匹配后才关闭。
+- R02 进度：发布流程提交 `811bad3`，GitHub Actions `43866527351` 成功；正式版 `v2.9.117` 的 APK 重新下载校验一致。随后 RFLinggg 发布 `v2.9.126`，其源码包含 `074328a` 和本轮其他修复；以该较新正式版继续核验服务器，不回退版本。未使用准备文件的手动发布标签会跳过此自动上传流程，避免干扰维护者原有发布方式。
 - ~~R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 完成。源码提交 `cf3b249` 已同步 `main`，APK 提交 `acfe20a` 位于独立下载分支 `codex/download-2.9.117`，SHA256 文件随包提供。已从 GitHub 公开下载链接重新下载，字节数与 SHA256 均匹配本地验证包。~~
-- [下载 2.9.117 APK](https://github.com/YeGuiiiiii/rp-local/raw/refs/heads/codex/download-2.9.117/dist/RP-local-2.9.117.apk)。未创建 GitHub Release，正式版自动更新源尚未切换；用户手动下载覆盖安装，仍需 Android 真机验收。
+- 历史 [2.9.117 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.117)，当前 [2.9.126 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.126)。仍需 Android 真机验收。
 - 2026-11-16 打包验证：APK `7,918,459` 字节，SHA256 `0f1d48d30018b5b7aa263f104116a7df352bb39f001d886adfa4e6203d9f1cd6`；与 GitHub `2.9.116` 正式包及历史 `0.1` 包证书相同，签名检查通过。`check-apk.py --version 2.9.117` 校验包名、版本、192 个网页文件、5 档图标、v2/v3 签名及无重复资源；本版全量测试 **68/68 通过**。三处更新服务未提交改动不纳入；未安装 Android 真机。
 
 ## 已完成

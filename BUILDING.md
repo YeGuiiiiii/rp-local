@@ -62,6 +62,12 @@ Copy-Item -LiteralPath LICENSE -Destination reference/RP-Hub/LICENSE
 
 自行构建的签名与官方 Release 不同，不能覆盖官方安装包。需要切换时先导出备份；不要为试编译直接卸载正在使用的软件。官方 Release 沿用原有维护者签名，可以覆盖旧本地版。
 
+## 正式发布
+
+使用仓库标签发布流程时，将已检查且使用原签名的 APK 放入 `codex/download-<版本号>` 分支的 `dist/`，校验文件 `dist/SHA256SUMS-<版本号>.txt` 和说明 `dist/RELEASE-<版本号>.md` 随源码提交主线，再推送对应的 `v<版本号>` 标签。
+
+`android-release.yml` 只处理备齐上述说明和校验文件的标签，其他标签保留维护者原有发布方式。它先核对 APK 的 SHA256，再上传草稿并回读验证附件，最后公开为正式版。软件更新服务器定时同步正式发布；还需核对 `https://121.40.147.125/updates/stable/latest.json` 的版本、大小、SHA256 及其 APK 下载，全部一致后才在维护清单关闭发布项。若同期已有包含修复的新正式版，以新版本核验，不回退。
+
 现有 `build.ps1` 还会调用资源检查，与历史 `dist/RP-local-0.3.apk` 比较；打包前需要从维护者获取此参考包，放入 `dist/`，目前尚未提供从全新下载到 Android 打包的一键环境安装。上面的网页编译与预览不需要参考 APK。
 
 本仓库提供已有的检查脚本；浏览器集成测试通过 `scripts/playwright.cjs` 加载 Playwright。可在项目本地安装 `playwright`，或通过 `RPHUB_PLAYWRIGHT_PATH` 指定已有模块路径。`check-apk.py` 还依赖历史安装包、androguard、Pillow 和 loguru，供维护者核对官方签名与资源。Android 真机行为仍需实际安装验证。

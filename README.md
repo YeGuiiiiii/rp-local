@@ -1,10 +1,10 @@
-# RP-Local 2.9.117
+# RP-Local 2.9.126
 
-本次安装包：[下载 2.9.117 APK](https://github.com/YeGuiiiiii/rp-local/raw/refs/heads/codex/download-2.9.117/dist/RP-local-2.9.117.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/blob/codex/download-2.9.117/dist/SHA256SUMS-2.9.117.txt)。按本次直接上传 Git 的要求，APK 单独保存在 `codex/download-2.9.117` 下载分支，主线不包含二进制安装包。历史正式包见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。同一包名和签名，可覆盖升级旧本地版，不要先卸载。
+当前安装包：[下载 2.9.126 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.126/RP-local-2.9.126.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.126/SHA256SUMS-2.9.126.txt)。正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；`2.9.117` 的历史发布与下载分支继续保留。同一包名和签名，可覆盖升级旧本地版，不要先卸载。
 
-本次版本为 **2.9.117**，Android versionCode 为 **376**。实际发布进度与待验证事项见 [维护清单](MAINTENANCE.md)。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+当前正式版本为 **2.9.126**，Android versionCode 为 **385**，包含本轮 `2.9.117` 修复。实际更新服务器同步结果与待验证事项见 [维护清单](MAINTENANCE.md)。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
-本次提供 Git 下载，尚未创建 GitHub Release，软件的正式版自动更新源不会据此自动切到 2.9.117。
+`2.9.117` 已正式发布，随后维护者发布了包含它的 `2.9.126`。软件更新服务器跟随最新正式版，不回退到旧版本。
 
 ## 2.9.118～2.9.126 启动诊断、存储诊断
 
