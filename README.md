@@ -1,6 +1,6 @@
 # RP-Local 2.9.134
 
-本版安装包：[下载已核验的 2.9.134 APK](https://raw.githubusercontent.com/YeGuiiiiii/rp-local/fcdbf5b393b1ffd60c5b5b7bed5587a76b52086e/dist/RP-local-2.9.134.apk)，[SHA256 校验文件](dist/SHA256SUMS-2.9.134.txt)。当前为下载分支已上传、正式 Release 待账户授权；软件内更新仍是 133，后续状态以 [维护清单](MAINTENANCE.md) 的 R04 验收为准；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
+当前安装包：[下载 2.9.134 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.134/RP-local-2.9.134.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.134/SHA256SUMS-2.9.134.txt)。已正式发布，软件内更新同步为 134，公网下载与正式包校验一致，详见 [维护清单](MAINTENANCE.md) 的 R04 验收；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
 
 本版为 **2.9.134**，Android versionCode 为 **393**，基于完整 `2.9.133` 主线，包含 `2.9.117` 等已有修复。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
