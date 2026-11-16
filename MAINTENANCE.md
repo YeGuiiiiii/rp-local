@@ -14,6 +14,11 @@
 - 本轮服务器同步首次因 GitHub 读取超时失败；通过已有 SSH 连接传入同一份已验证正式包，复用服务器 `sync.publish` 的完整性校验与原子发布，不直接改写版本清单。之后同步服务重跑 `Result=success` / `ExecMainStatus=0`，定时器保持 active。此次不等于保证外部 GitHub 网络永不超时；本地原有三处更新服务改动继续保留，未混入本轮提交。
 - ~~R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 完成。源码提交 `cf3b249` 已同步 `main`，APK 提交 `acfe20a` 位于独立下载分支 `codex/download-2.9.117`，SHA256 文件随包提供。已从 GitHub 公开下载链接重新下载，字节数与 SHA256 均匹配本地验证包。~~
 - 历史 [2.9.117 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.117)，当前 [2.9.126 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.126)。仍需 Android 真机验收。
+- RFLinggg 于 2026-11-17 00:14（Asia/Shanghai）发布 `2.9.133`（versionCode `392`）：源码提交 `fe1edf9`，标签 `v2.9.133`，随后与 `origin/main`（`cda8123`）合并为 `e7fafb4` 再推送。发布采用维护者手动上传：`RP-local-2.9.133.apk` `7,926,651` 字节，SHA256 `489bdeab67feb8deaf0a390b2ffebc7782d66201ba5bf4d4cd9188b59865fd05`，附件含 `SHA256SUMS-2.9.133.txt`。
+- `v2.9.133` 标签建立在合并前的 `fe1edf9`，该提交内的 `android-release.yml` 尚无「未准备则跳过」判断，因此 Actions 任务 `43905344676` 因缺少 `dist/RELEASE-2.9.133.md` 失败；正式发布由维护者手动上传完成，未依赖该任务。之后从包含保护步骤的提交打标签即可避免同类红叉，不移动旧标签。
+- 2026-11-17 00:26（Asia/Shanghai）线上核对：`latest.json` 返回 `2.9.133` / versionCode `392`，SHA256 前 16 位 `489bdeab67feb8de` 与本地发布包一致，`checkedAt` 为 `2026-11-16T16:26:29Z`。未做公网完整下载与真机安装验收。
+- 本轮改动集中在两处图片页面：图片管理（`web/assets/native/rphub-image-gallery.js`）与画廊（`web/assets/js/gallery-page.js`），版本 `2.9.127`～`2.9.133`。验证方式为包内字符串断言（`rphub-gal-tick`、`rphub-gal-exit`、`HOLD_SLOP`、`worldinfo-pager` 等）与本地/线上 SHA256 一致；多选、长按、批量存相册与删除**尚未**在真机逐项点击验证，由维护者自行安装试用。
+- 交接提示：发布流程新增根目录 [RELEASING.md](RELEASING.md)（来自维护方，本次随源码提交）。其中「`android-release.yml` 仅允许手动运行」「`scripts/check-release.py` 发布前检查」两项与 `origin/main` 现状不符——主线上该工作流仍是 `on: push`（branches / tags）触发，且仓库内没有 `check-release.py`；按文中 `gh workflow run` 命令当前无法执行。需维护方补齐后再据此调整。
 - 2026-11-16 打包验证：APK `7,918,459` 字节，SHA256 `0f1d48d30018b5b7aa263f104116a7df352bb39f001d886adfa4e6203d9f1cd6`；与 GitHub `2.9.116` 正式包及历史 `0.1` 包证书相同，签名检查通过。`check-apk.py --version 2.9.117` 校验包名、版本、192 个网页文件、5 档图标、v2/v3 签名及无重复资源；本版全量测试 **68/68 通过**。三处更新服务未提交改动不纳入；未安装 Android 真机。
 
 ## 已完成
