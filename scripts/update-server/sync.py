@@ -3,14 +3,15 @@
 import argparse
 from datetime import datetime, timezone
 import hashlib
+from http.client import HTTPException
 import json
-import os
 from pathlib import Path
 import re
 import subprocess
 import tempfile
 import time
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 
 API = "https://api.github.com/repos/YeGuiiiiii/rp-local"
@@ -19,20 +20,45 @@ API = "https://api.github.com/repos/YeGuiiiiii/rp-local"
 def fetch(url, binary=False):
     request = Request(url, headers={"User-Agent": "rp-local-updates",
                                    "Accept": "application/octet-stream" if binary else "application/vnd.github+json"})
-    deadline = time.monotonic() + 600
-    content = bytearray()
-    with urlopen(request, timeout=45) as response:
-        while True:
-            if time.monotonic() >= deadline:
-                raise TimeoutError("Release transfer exceeded ten minutes")
-            chunk = response.read(65536)
-            if not chunk:
-                break
-            content.extend(chunk)
-            if len(content) > 256 * 1024 * 1024:
-                raise ValueError("Release exceeds transfer limit")
-    content = bytes(content)
-    return content if binary else json.loads(content)
+    deadline = time.monotonic() + (3600 if binary else 600)
+    for attempt in range(1, 4):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("Release transfer exceeded its time limit")
+        print(f"Fetching {'release asset' if binary else 'metadata'}, attempt {attempt}/3", flush=True)
+        content = bytearray()
+        try:
+            with urlopen(request, timeout=min(45, remaining)) as response:
+                expected = int(getattr(response, "headers", {}).get("Content-Length", "0"))
+                read = getattr(response, "read1", response.read)
+                next_progress = 0
+                while True:
+                    now = time.monotonic()
+                    if now >= deadline:
+                        raise TimeoutError("Release transfer exceeded its time limit")
+                    chunk = read(65536)
+                    if not chunk:
+                        break
+                    content.extend(chunk)
+                    if len(content) > 256 * 1024 * 1024:
+                        raise ValueError("Release exceeds transfer limit")
+                    if now >= next_progress:
+                        print(f"Received {len(content)}/{expected or '?'} bytes", flush=True)
+                        next_progress = now + 15
+                if expected and len(content) != expected:
+                    raise OSError(f"Incomplete download: {len(content)}/{expected} bytes")
+        except (OSError, HTTPException) as error:
+            if isinstance(error, HTTPError):
+                if error.code not in (408, 429, 500, 502, 503, 504):
+                    raise
+                error.close()
+            print(f"Transfer attempt {attempt}/3 failed: {type(error).__name__}: {error}", flush=True)
+            if attempt == 3 or time.monotonic() >= deadline:
+                raise
+            time.sleep(attempt * 2)
+            continue
+        print(f"Received {len(content)}/{expected or '?'} bytes; transfer complete", flush=True)
+        return bytes(content) if binary else json.loads(content)
 
 
 def inspect_apk(path):
@@ -94,14 +120,19 @@ def main():
     parser.add_argument("--root", type=Path, default=Path("/srv/rp-updates/updates/stable"))
     parser.add_argument("--origin", default="https://121.40.147.125")
     args = parser.parse_args()
+    print("Checking latest GitHub stable release", flush=True)
     release = fetch(API + "/releases/latest")
     current = args.root / "latest.json"
     if current.exists() and json.loads(current.read_text())["versionName"] == release["tag_name"][1:]:
-        print("Release already mirrored: " + release["tag_name"])
+        print("Release already mirrored: " + release["tag_name"], flush=True)
         return
-    result = publish(release, args.root, args.origin, lambda asset: fetch(asset["url"], True), inspect_apk)
+    def download(asset):
+        print("Downloading " + asset["name"], flush=True)
+        return fetch(asset["url"], True)
+
+    result = publish(release, args.root, args.origin, download, inspect_apk)
     print(json.dumps({"version": result["versionName"], "versionCode": result["versionCode"],
-                      "sha256": result["sha256"]}))
+                      "sha256": result["sha256"]}), flush=True)
 
 
 if __name__ == "__main__":

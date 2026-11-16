@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-TimeoutStartSec=12min
+TimeoutStartSec=65min
 User=rp-updates
 Environment=TMPDIR=/srv/rp-updates/tmp
 Environment=PYTHONDONTWRITEBYTECODE=1
