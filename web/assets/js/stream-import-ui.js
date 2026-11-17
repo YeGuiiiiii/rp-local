@@ -322,7 +322,14 @@
                 let stream;
                 if (fileRef.url) {
                     readController = new AbortController();
-                    const content = await fetch(fileRef.url, { cache: 'no-store', signal: readController.signal });
+                    // [rphub 2.9.138] 原生读取令牌只能用一次：清点一趟、导入一趟，第二趟拿旧令牌必被拒
+                    //   （表现为「读取本地备份失败，请重新选择文件」）。这里在每趟 fetch 之前重新要一个。
+                    let target = fileRef.url;
+                    if (typeof fileRef.resolveUrl === 'function') {
+                        try { target = (await fileRef.resolveUrl()) || target; }
+                        catch (error) { throw new Error((error && error.message) || '读取本地备份失败，请重新选择文件'); }
+                    }
+                    const content = await fetch(target, { cache: 'no-store', signal: readController.signal });
                     if (!content.ok || !content.body) throw new Error('读取本地备份失败，请重新选择文件');
                     stream = content.body;
                 }
@@ -450,7 +457,7 @@
                 const isBlob = file instanceof Blob;
                 fileRef = isBlob
                     ? { file, name: String(file.name || ''), size: Number(file.size) || 0 }
-                    : { url: file.url, name: String(file.name || ''), size: Number(file.size) || 0 };
+                    : { url: file.url, name: String(file.name || ''), size: Number(file.size) || 0, resolveUrl: file.resolveUrl };
                 generation++;
                 Object.assign(state, { name: fileRef.name, bytes: fileRef.size, read: 0, error: '', errorPath: '',
                     summary: null, paused: false, items: [], picked: [], unitLimit: 0, legacyCount: 0, legacyTotal: 0,
@@ -570,7 +577,7 @@
             const resume = () => { state.recap = ''; input.value?.click(); };
             return { input, panel, art, state, busy, external, isApplying, isOpen, canClose, close, handleBack, trapFocus, percent, format, start, pause, cancel, apply, choose, resume, pickedBytes, pickAll, startImport,
                 reload: () => window.location.reload(),
-                startUrl: (url, name, bytes) => start({ target: { value: '', files: [{ url, name, size: bytes }] } }) };
+                startUrl: (url, name, bytes, options) => start({ target: { value: '', files: [{ url, name, size: bytes, resolveUrl: options && options.resolveUrl }] } }) };
         },
         template: `
             <input ref="input" type="file" accept=".json,application/json" hidden aria-label="选择流式导入文件" @change="start">

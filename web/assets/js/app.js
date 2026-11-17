@@ -5697,8 +5697,19 @@ const app = createApp({
                 try {
                     const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
                     if (!token || token.startsWith('ERR:')) throw new Error(token.slice(4) || '读取备份失败');
-                    await streamImportPanel.value.startUrl(new URL('__rphub_backup_read__?t=' + encodeURIComponent(token), location.href).href,
-                        record.fileName || record.name || '备份.json', Number(record.sizeBytes) || 0);
+                    // [rphub 2.9.138] 令牌是一次性的，而清点与导入要读两趟，所以每趟都得重新换令牌。
+                    //   只传 URL 的话第二趟会拿已失效令牌去 fetch，原生回 "Backup read expired"，
+                    //   界面显示「读取本地备份失败」。≥48MB 的备份必然走到这一步。
+                    const resolveUrl = () => {
+                        const fresh = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
+                        if (!fresh || fresh.startsWith('ERR:')) {
+                            throw new Error(fresh ? fresh.slice(4) : '读取备份失败，请重新选择文件');
+                        }
+                        return new URL('__rphub_backup_read__?t=' + encodeURIComponent(fresh), location.href).href;
+                    };
+                    await streamImportPanel.value.startUrl(resolveUrl(),
+                        record.fileName || record.name || '备份.json', Number(record.sizeBytes) || 0,
+                        { resolveUrl });
                 } catch (error) { showToast(error.message || '读取备份失败', 'error'); }
                 return;
             }
