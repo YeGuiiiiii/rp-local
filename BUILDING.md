@@ -64,9 +64,11 @@ Copy-Item -LiteralPath LICENSE -Destination reference/RP-Hub/LICENSE
 
 ## 正式发布
 
-使用仓库标签发布流程时，将已检查且使用原签名的 APK 放入 `codex/download-<版本号>` 分支的 `dist/`，校验文件 `dist/SHA256SUMS-<版本号>.txt` 和说明 `dist/RELEASE-<版本号>.md` 随源码提交主线，再推送对应的 `v<版本号>` 标签。
+维护者及其 AI 先阅读 [发布与更新维护必读](RELEASING.md)。可以继续手动上传正式 Release；仓库的 `android-release.yml` 改为仅从 `main` 手动启动，推送分支或标签不再自动上传。
 
-`android-release.yml` 只处理备齐上述说明和校验文件的标签，其他标签保留维护者原有发布方式。它先核对 APK 的 SHA256，再上传草稿并回读验证附件，最后公开为正式版。软件更新服务器定时同步正式发布；还需核对 `https://121.40.147.125/updates/stable/latest.json` 的版本、大小、SHA256 及其 APK 下载，全部一致后才在维护清单关闭发布项。若同期已有包含修复的新正式版，以新版本核验，不回退。
+使用仓库流程时，将已检查且使用原签名的 APK 放入 `codex/download-<版本号>` 分支的 `dist/`，校验文件 `dist/SHA256SUMS-<版本号>.txt` 和说明 `dist/RELEASE-<版本号>.md` 随源码合入主线，再建立对应的 `v<版本号>` 标签。标签必须包含当前发布规则；先用默认 `verify_only=true` 核验，再明确选择发布。已经公开的版本只核验，不覆盖、不重新设为最新版。
+
+软件更新服务器定时同步正式发布；还需核对 `https://121.40.147.125/updates/stable/latest.json` 的版本、大小、SHA256 及其 APK 下载，全部一致后才在维护清单关闭发布项。若同期已有包含修复的新正式版，以新版本核验，不回退。故障检查、专项测试和交接要求见 `RELEASING.md`。
 
 现有 `build.ps1` 还会调用资源检查，与历史 `dist/RP-local-0.3.apk` 比较；打包前需要从维护者获取此参考包，放入 `dist/`，目前尚未提供从全新下载到 Android 打包的一键环境安装。上面的网页编译与预览不需要参考 APK。
 

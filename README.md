@@ -1,10 +1,14 @@
-# RP-Local 2.9.126
+# RP-Local 2.9.134
 
-当前安装包：[下载 2.9.126 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.126/RP-local-2.9.126.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.126/SHA256SUMS-2.9.126.txt)。正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；`2.9.117` 的历史发布与下载分支继续保留。同一包名和签名，可覆盖升级旧本地版，不要先卸载。
+当前安装包：[下载 2.9.134 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.134/RP-local-2.9.134.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.134/SHA256SUMS-2.9.134.txt)。已正式发布，软件内更新同步为 134，公网下载与正式包校验一致，详见 [维护清单](MAINTENANCE.md) 的 R04 验收；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
 
-当前正式版本为 **2.9.126**，Android versionCode 为 **385**，包含本轮 `2.9.117` 修复。实际更新服务器同步结果与待验证事项见 [维护清单](MAINTENANCE.md)。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+本版为 **2.9.134**，Android versionCode 为 **393**，基于完整 `2.9.133` 主线，包含 `2.9.117` 等已有修复。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
-`2.9.117` 已正式发布，随后维护者发布了包含它的 `2.9.126`。2026-11-16 已核验软件内更新源返回 `2.9.126`，公网下载与正式包校验一致；旧版更新检查正常，新版不会重复提示更新。
+## 2.9.134 旧版 WebView 记忆模式按钮修复
+
+修复部分旧版 WebView 下「增强模式」点不动、向量模型入口无法显示的问题，覆盖默认与经典布局。仅调整按钮点击范围，保留现有记忆、向量配置、补录流程和 133 的图片管理功能。
+
+Chromium 97、98 与当前 Edge 的触摸切换、说明按钮、键盘切换及模拟向量补录已通过。全量测试 66/69 通过，三项既有图库入口测试超时仍列在 U12；报告手机的覆盖安装与真实 API 补录仍待现场验证，详见 [维护清单](MAINTENANCE.md)。
 
 ## 2.9.118～2.9.126 启动诊断、存储诊断
 

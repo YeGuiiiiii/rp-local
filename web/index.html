@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.133'; window.RP_LOCAL_RELEASE = 392;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.134'; window.RP_LOCAL_RELEASE = 393;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -3068,7 +3068,7 @@
                                 <div class="segmented-switch__option"
                                     :class="{ 'is-active': memorySettings.mode === 'classic' }">
                                     <button type="button" @click="memorySettings.mode = 'classic'; settingsHelpTopic = ''"
-                                        class="absolute inset-0 rounded-lg" aria-label="切换到基础模式"></button>
+                                        class="absolute inset-0 w-full h-full rounded-lg" aria-label="切换到基础模式"></button>
                                     <span class="relative z-10 pointer-events-none">基础模式</span>
                                     <settings-help topic="summaryMode" :open-topic="settingsHelpTopic"
                                         label="查看基础模式说明" trigger-class="relative z-20" icon-class=""
@@ -3079,7 +3079,7 @@
                                 <div class="segmented-switch__option"
                                     :class="{ 'is-active': memorySettings.mode === 'enhanced' }">
                                     <button type="button" @click="memorySettings.mode = 'enhanced'; settingsHelpTopic = ''"
-                                        class="absolute inset-0 rounded-lg" aria-label="切换到增强模式"></button>
+                                        class="absolute inset-0 w-full h-full rounded-lg" aria-label="切换到增强模式"></button>
                                     <span class="relative z-10 pointer-events-none">增强模式</span>
                                     <settings-help topic="enhancedMode" :open-topic="settingsHelpTopic"
                                         label="查看增强模式说明" trigger-class="relative z-20" icon-class=""

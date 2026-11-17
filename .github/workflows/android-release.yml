@@ -1,11 +1,17 @@
 name: Publish verified Android APK
+run-name: Android ${{ inputs.version }} / ${{ inputs.verify_only && 'verify only' || 'publish' }}
 
 on:
-  push:
-    branches:
-      - hh/compatibility-maintenance
-    tags:
-      - 'v[0-9]*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without v, for example 2.9.134'
+        required: true
+        type: string
+      verify_only:
+        description: 'Only verify; do not create or edit a release'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -20,43 +26,59 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Select prepared package
-        id: package
-        shell: bash
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          if [[ -f "dist/RELEASE-$version.md" && -f "dist/SHA256SUMS-$version.txt" ]]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No prepared package for $GITHUB_REF_NAME; retain the maintainer's release." >> "$GITHUB_STEP_SUMMARY"
-          fi
+        with:
+          ref: main
+          fetch-depth: 0
       - name: Verify and publish signed APK
-        if: steps.package.outputs.ready == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          VERIFY_ONLY: ${{ inputs.verify_only }}
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+            echo "::error::Run this workflow from main."
+            exit 1
+          fi
+          version="$RELEASE_VERSION"
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]{3}$ ]]
+          tag="v$version"
+          git merge-base --is-ancestor "refs/tags/$tag" origin/main
           apk="RP-local-$version.apk"
           checksum="SHA256SUMS-$version.txt"
-          notes="dist/RELEASE-$version.md"
-          test -f "dist/$checksum"
-          test -f "$notes"
+          verification="$RUNNER_TEMP/release-verification"
+          if gh release view "$tag" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-state"; then
+            if grep -qx false "$RUNNER_TEMP/release-state"; then
+              gh release download "$tag" --pattern "$apk" --pattern "$checksum" --dir "$verification"
+              (cd "$verification" && sha256sum --check "$checksum")
+              echo "Verified existing $tag; the published release was left unchanged." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          fi
+          latest="$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name)"
+          python3 scripts/check-release.py "$version" --latest "$latest"
+          prepared="$RUNNER_TEMP/release-prepared"
+          mkdir -p "$prepared"
+          notes="$prepared/RELEASE-$version.md"
+          git show "$tag:dist/$checksum" > "$prepared/$checksum"
+          git show "$tag:dist/RELEASE-$version.md" > "$notes"
           source="$(gh api "repos/$GH_REPO/commits/codex/download-$version" --jq .sha)"
           curl --fail --location --retry 3 \
-            "https://raw.githubusercontent.com/$GH_REPO/$source/dist/$apk" -o "dist/$apk"
-          (cd dist && sha256sum --check "$checksum")
-          if gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-state"; then
+            "https://raw.githubusercontent.com/$GH_REPO/$source/dist/$apk" -o "$prepared/$apk"
+          (cd "$prepared" && sha256sum --check "$checksum")
+          if [[ "$VERIFY_ONLY" == true ]]; then
+            echo "Prepared $tag passed verification; no release was created or edited." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if gh release view "$tag" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-state"; then
             grep -qx true "$RUNNER_TEMP/release-state"
-            gh release upload "$GITHUB_REF_NAME" "dist/$apk" "dist/$checksum" --clobber
+            gh release upload "$tag" "$prepared/$apk" "$prepared/$checksum" --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "dist/$apk" "dist/$checksum" \
+            gh release create "$tag" "$prepared/$apk" "$prepared/$checksum" \
               --verify-tag --draft --title "$version" --notes-file "$notes"
           fi
-          gh release download "$GITHUB_REF_NAME" --pattern "$apk" --pattern "$checksum" \
-            --dir "$RUNNER_TEMP/release-verification"
-          (cd "$RUNNER_TEMP/release-verification" && sha256sum --check "$checksum")
-          gh release edit "$GITHUB_REF_NAME" --draft=false --latest --title "$version" --notes-file "$notes"
+          gh release download "$tag" --pattern "$apk" --pattern "$checksum" --dir "$verification"
+          (cd "$verification" && sha256sum --check "$checksum")
+          gh release edit "$tag" --draft=false --latest --title "$version" --notes-file "$notes"

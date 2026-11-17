@@ -1,0 +1,60 @@
+name: Check release maintenance
+
+on:
+  push:
+    branches:
+      - main
+      - codex/release-maintenance
+    paths:
+      - '.github/workflows/android-release.yml'
+      - '.github/workflows/release-checks.yml'
+      - 'scripts/check-release.py'
+      - 'scripts/test_release_preflight.py'
+      - 'scripts/update-server/**'
+  pull_request:
+    paths:
+      - '.github/workflows/android-release.yml'
+      - '.github/workflows/release-checks.yml'
+      - 'scripts/check-release.py'
+      - 'scripts/test_release_preflight.py'
+      - 'scripts/update-server/**'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Test preflight and update downloads
+        run: |
+          python3 -B -m unittest discover -s scripts -p test_release_preflight.py -v
+          python3 -B -m unittest discover -s scripts/update-server -p test_sync.py -v
+      - name: Install workflow parser
+        run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
+      - name: Verify current published APK with the actual release script
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import yaml
+
+          workflow = yaml.load(Path(".github/workflows/android-release.yml").read_text(), Loader=yaml.BaseLoader)
+          if set(workflow["on"]) != {"workflow_dispatch"}:
+              raise ValueError("APK publishing must only start with workflow_dispatch")
+          script = next(step["run"] for step in workflow["jobs"]["publish"]["steps"]
+                        if step.get("name") == "Verify and publish signed APK")
+          latest = subprocess.check_output(
+              ["gh", "api", "repos/" + os.environ["GH_REPO"] + "/releases/latest", "--jq", ".tag_name"],
+              text=True).strip()
+          env = dict(os.environ, GITHUB_REF="refs/heads/main", RELEASE_VERSION=latest[1:], VERIFY_ONLY="true")
+          subprocess.run(["bash", "-e", "-c", script], env=env, check=True)
+          PY
