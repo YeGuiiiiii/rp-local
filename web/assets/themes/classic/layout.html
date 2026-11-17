@@ -162,7 +162,7 @@
                     </div>
 
                     <template v-if="currentCharacter &amp;&amp; chatHistory.length > 0">
-                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="index">
+                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="msg.id || ('idx-' + index)">
                     <div ref="messageElements" :data-role="msg.role" :data-chat-index="index" v-show="!(msg.role === 'assistant' &amp;&amp; index === chatHistory.length - 1 &amp;&amp; isThinking &amp;&amp; !(msg.reasoning || messageCot(msg).cot || messageCot(msg).main || (msg.toolCalls &amp;&amp; msg.toolCalls.length)))" :class="['flex w-full scroll-reveal-container', settings.immersiveMode ? 'immersive-message-row' : 'standard-message-row', msg.isSelf ? 'justify-end' : 'justify-start', msg.skipReveal ? 'reveal-active' : (settings.immersiveMode ? 'scroll-reveal-center' : (msg.isSelf ? 'scroll-reveal-right' : 'scroll-reveal-left'))]" :style="{ transitionDelay: (displayIndex % 5) * 50 + 'ms' }">
                         <div :class="['flex centered-message-shell max-w-[99%]', settings.immersiveMode ? 'immersive-message-shell' : 'standard-message-shell', messageUsesWideLayout(msg) || msg.isEditing_Message ? 'w-full' : '', msg.isSelf ? 'flex-row-reverse' : 'flex-row']">
                             <!-- Avatar -->
@@ -235,7 +235,7 @@
                                                     </button>
                                                     <div class="cot-body native-thinking-body" :class="{ 'is-open': isThinkingSummaryOpen(msg) }">
                                                         <div class="cot-inner native-thinking-inner">
-                                                            <div class="relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4">
+                                                            <div v-if="isThinkingSummaryOpen(msg) || msg.hasOpenedSummaryDetail || isMessageThinkingOrRunning(msg)" class="relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4">
                                                                 <div v-for="step in getTimelineSteps(msg)" :key="step.id" class="relative group/step">
                                                                     <!-- Marker Node -->
                                                                     <div class="absolute -left-[38px] top-0 flex items-center justify-center w-7 h-5">
@@ -269,7 +269,7 @@
                                                                                 </span>
                                                                             </summary>
                                                                             <div class="mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text" :class="{ 'timeline-thinking-detail': step.type === 'thinking' }">
-                                                                                <div v-if="step.type === 'thinking'" class="markdown-body" :style="settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}" v-html="renderMarkdown(step.text, 'assistant', true, false)">
+                                                                                <div v-if="step.type === 'thinking'" class="markdown-body" :style="settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}" v-html="step.renderedHtml ?? renderMarkdown(step.text, 'assistant', true, false)">
                                                                                 </div>
                                                                                 <div v-else="" class="tool-call-detail flex flex-col gap-3 text-[13px]">
                                                                                     <div class="flex justify-between items-center text-[13px] border-b border-gray-200 pb-2">
@@ -305,7 +305,7 @@
                                                 <generation-timer v-if="isGenerating" :wait-time="currentWaitTime" :estimated-time="estimatedGenerationTime"></generation-timer>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; msg.uiTemplateBlocks &amp;&amp; msg.uiTemplateBlocks.top &amp;&amp; msg.uiTemplateBlocks.top.length" class="ui-template-message-block ui-template-message-block-top">
-                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.top" :key="'msg-ui-top-' + index + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
+                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.top" :key="'msg-ui-top-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; uiTemplateUpdateStatus.state === 'running' &amp;&amp; uiTemplateUpdateStatus.targetMessageId === msg.id &amp;&amp; activeUiTemplates.some(t => t.placement === 'top')" class="ui-template-message-block ui-template-message-block-top">
                                                 <ui-template-pending></ui-template-pending>
@@ -328,7 +328,7 @@
                                             </template>
 
                                             <div v-if="msg.role === 'assistant' &amp;&amp; msg.uiTemplateBlocks &amp;&amp; msg.uiTemplateBlocks.bottom &amp;&amp; msg.uiTemplateBlocks.bottom.length" class="ui-template-message-block ui-template-message-block-bottom">
-                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.bottom" :key="'msg-ui-bottom-' + index + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
+                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.bottom" :key="'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; uiTemplateUpdateStatus.state === 'running' &amp;&amp; uiTemplateUpdateStatus.targetMessageId === msg.id &amp;&amp; activeUiTemplates.some(t => t.placement === 'bottom')" class="ui-template-message-block ui-template-message-block-bottom">
                                                 <ui-template-pending></ui-template-pending>

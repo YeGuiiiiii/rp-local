@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.136'; window.RP_LOCAL_RELEASE = 395;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.137'; window.RP_LOCAL_RELEASE = 396;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -660,7 +660,7 @@
                     </div>
 
                     <template v-if="currentCharacter && chatHistory.length > 0">
-                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="index">
+                    <template v-for="({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) in displayedChatMessages" :key="msg.id || ('idx-' + index)">
                     <div ref="messageElements"
                         :data-role="msg.role"
                         :data-chat-index="index"
@@ -775,7 +775,7 @@
                                                     <div class="cot-body native-thinking-body"
                                                         :class="{ 'is-open': isThinkingSummaryOpen(msg) }">
                                                         <div class="cot-inner native-thinking-inner">
-                                                            <div class="relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4">
+                                                            <div v-if="isThinkingSummaryOpen(msg) || msg.hasOpenedSummaryDetail || isMessageThinkingOrRunning(msg)" class="relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4">
                                                                 <div v-for="step in getTimelineSteps(msg)" :key="step.id" class="relative group/step">
                                                                     <!-- Marker Node -->
                                                                     <div class="absolute -left-[38px] top-0 flex items-center justify-center w-7 h-5">
@@ -813,7 +813,7 @@
                                                                                 :class="{ 'timeline-thinking-detail': step.type === 'thinking' }">
                                                                                 <div v-if="step.type === 'thinking'" class="markdown-body"
                                                                                     :style="settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}"
-                                                                                    v-html="renderMarkdown(step.text, 'assistant', true, false)">
+                                                                                    v-html="step.renderedHtml ?? renderMarkdown(step.text, 'assistant', true, false)">
                                                                                 </div>
                                                                                 <div v-else class="tool-call-detail flex flex-col gap-3 text-[13px]">
                                                                                     <div class="flex justify-between items-center text-[13px] border-b border-gray-200 pb-2">
@@ -853,7 +853,7 @@
                                             <div v-if="msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.top && msg.uiTemplateBlocks.top.length"
                                                 class="ui-template-message-block ui-template-message-block-top">
                                                 <div v-for="(html, tIndex) in msg.uiTemplateBlocks.top"
-                                                    :key="'msg-ui-top-' + index + '-' + tIndex"
+                                                    :key="'msg-ui-top-' + (msg.id || index) + '-' + tIndex"
                                                     class="w-full ui-template-render" @click="handleUiTemplateClick"
                                                     v-html="replaceUserNamePlaceholder(html)"></div>
                                             </div>
@@ -889,7 +889,7 @@
                                             <div v-if="msg.role === 'assistant' && msg.uiTemplateBlocks && msg.uiTemplateBlocks.bottom && msg.uiTemplateBlocks.bottom.length"
                                                 class="ui-template-message-block ui-template-message-block-bottom">
                                                 <div v-for="(html, tIndex) in msg.uiTemplateBlocks.bottom"
-                                                    :key="'msg-ui-bottom-' + index + '-' + tIndex"
+                                                    :key="'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex"
                                                     class="w-full ui-template-render" @click="handleUiTemplateClick"
                                                     v-html="replaceUserNamePlaceholder(html)"></div>
                                             </div>

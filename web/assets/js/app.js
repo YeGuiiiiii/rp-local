@@ -870,8 +870,12 @@ const app = createApp({
             avatar: '',
             person: 'second', //记录人称偏好：second 或 third
         });
-        const replaceUserNamePlaceholder = (value) => String(value ?? '')
-            .replace(/\{\{\s*user\s*\}\}/gi, () => String(user.name || '').trim());
+        const replaceUserNamePlaceholder = (value) => {
+            const text = String(value ?? '');
+            return text.includes('{{')
+                ? text.replace(/\{\{\s*user\s*\}\}/gi, () => String(user.name || '').trim())
+                : text;
+        };
         const buildUserInfoPrompt = () => BUILTIN_PROMPTS.buildUserInfoPrompt(user);
         const getCurrentCharacterPrompt = () => BUILTIN_PROMPTS.buildCharacterPrompt(currentCharacter.value);
 
@@ -1049,7 +1053,7 @@ const app = createApp({
             // selectApiProvider 会做模型记忆迁移与密钥同步，比自己赋值稳。
             const created = customApiProviderOptions.find(provider => provider.id === id);
             if (created) selectApiProvider(created);
-            saveData({ saveMemories: false, saveCharacters: false });
+            saveConfigNow();
             return id;
         };
         const removeCustomApiProvider = (id) => {
@@ -1071,7 +1075,7 @@ const app = createApp({
                 }
             }
             refreshCustomApiProviderOptions();
-            saveData({ saveMemories: false, saveCharacters: false });
+            saveConfigNow();
         };
         // [rphub 2.9.059] 下拉里的「自定义」不再是可选的空站点，点它就是新增一个站点。
         //   原来它只是个占位项，选中后要自己去改地址；而唯一的「新增」入口（+ 按钮）
@@ -1095,12 +1099,12 @@ const app = createApp({
             provider[field] = String(value || '');
             if (field === 'apiUrl' && settings.apiProviderId === id) settings.apiUrl = provider.apiUrl;
             refreshCustomApiProviderOptions();
-            saveData({ saveMemories: false, saveCharacters: false });
+            saveConfigNow();
         };
         const updateCustomApiKey = (id, value) => {
             if (!settings.apiProviderKeys || typeof settings.apiProviderKeys !== 'object' || Array.isArray(settings.apiProviderKeys)) settings.apiProviderKeys = {};
             settings.apiProviderKeys[id] = String(value || '');
-            saveData({ saveMemories: false, saveCharacters: false });
+            saveConfigNow();
         };
         const normalizeApiProviderUrl = (url) => String(url || '').replace(/\/+$/, '').toLowerCase();
         const getApiProviderById = (id) => apiProviderOptions.find(provider => provider.id === id);
@@ -1663,7 +1667,7 @@ const app = createApp({
             }
             presetGroupNames.value = [...new Set([...presetGroupNames.value, name])];
             openPresetGroup(name);
-            saveData();
+            saveConfigNow();
         };
         // 同组一键开关：COT 在抗截断开启时被强制停用，不参与批量开关
         const presetGroupToggleableItems = (group) => (group && group.items ? group.items : [])
@@ -1677,7 +1681,7 @@ const app = createApp({
             if (!items.length) return;
             const next = !isPresetGroupAllEnabled(group);
             items.forEach(({ preset }) => { preset.enabled = next; });
-            saveData();
+            saveConfigNow();
         };
         // --- 预设批量管理模式（方案 A）---
         const isPresetBatchManaging = ref(false);
@@ -1755,7 +1759,7 @@ const app = createApp({
                 }
             });
             const pruned = pruneEmptyPresetGroups(sourceGroups);
-            saveData();
+            saveConfigNow();
             showPresetBatchMoveModal.value = false;
             selectedPresetIndices.value = [];
             showToast('已将 ' + count + ' 项预设移动到「' + targetGroup + '」'
@@ -1772,7 +1776,7 @@ const app = createApp({
                     preset.enabled = enable;
                 }
             });
-            saveData();
+            saveConfigNow();
             showToast('已批量' + (enable ? '开启 ' : '关闭 ') + count + ' 项预设', 'success');
         };
         // --- 2.8.87 预设删除：多选批量删除 / 整组删除 ---
@@ -1821,7 +1825,7 @@ const app = createApp({
             confirmAction(`确定要删除选中的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
                 const removed = removePresetsAt(indices);
                 const pruned = pruneEmptyPresetGroups(affectedGroups);
-                saveData();
+                saveConfigNow();
                 showToast(pruned.length
                     ? `已删除 ${removed} 项预设，${pruned.length} 个空分组已移除`
                     : '已删除 ' + removed + ' 项预设', 'success');
@@ -1837,7 +1841,7 @@ const app = createApp({
             // 组里已经没有可删条目时，删的就是这个空分组本身。
             if (!indices.length) {
                 if (pruneEmptyPresetGroups([key]).length) {
-                    saveData();
+                    saveConfigNow();
                     showToast(`已删除空分组「${label}」`, 'success');
                 }
                 return;
@@ -1845,7 +1849,7 @@ const app = createApp({
             confirmAction(`确定要删除「${label}」分组的 ${indices.length} 项预设吗？此操作无法撤销。`, () => {
                 const removed = removePresetsAt(indices);
                 const pruned = pruneEmptyPresetGroups([key]);
-                saveData();
+                saveConfigNow();
                 showToast(pruned.length
                     ? `已删除「${label}」分组的 ${removed} 项预设，分组已清空移除`
                     : `已删除「${label}」分组的 ${removed} 项预设`, 'success');
@@ -2107,7 +2111,7 @@ const app = createApp({
             confirm: showVueConfirmModal,
             deleted: () => {
                 // [编辑保存 2.9.032] 批量删除后立即落库，避免 1s 防抖窗口内退出回档。
-                saveData();
+                saveConfigAndCardsNow();
                 showToast('所选条目已删除', 'success');
             }
         });
@@ -7621,7 +7625,7 @@ const app = createApp({
                         const moved = reordered.splice(oldIndex, 1)[0];
                         reordered.splice(newIndex, 0, moved);
                         slots.forEach((index, offset) => { items.value[index] = reordered[offset]; });
-                        saveData();
+                        saveConfigAndCardsNow();
                     }
                 });
             });
@@ -7650,7 +7654,7 @@ const app = createApp({
             const items = order.map(i => presets.value[i]);
             if (items.some(item => !item)) return;
             slots.forEach((slot, k) => { presets.value[slot] = items[k]; });
-            saveData();
+            saveConfigNow();
         };
         const initializePresetGroupSortables = () => {
             nextTick(() => {
@@ -7886,11 +7890,11 @@ const app = createApp({
         };
         // 维护代次推进后，已提交基线失效。允许在「意图起点」重读：此时 payload 还没算，
         // 用新基线不构成旧结果覆盖；只有视图与基线逐字一致才换，否则要求重载。
-        const refreshMemoryBaseline = async scopeId => {
+        const refreshMemoryBaseline = async (scopeId, { checkedView = false } = {}) => {
             const writeState = window.RPHubStorage.getStorageWriteState();
             if (writeState.paused) throw memoryOperationError('StoragePausedError', '存储维护期间不接收记忆写入');
             if (_b1MemoryState && _b1MemoryState.writeEpoch === writeState.epoch) return _b1MemoryState;
-            if (memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) {
+            if (!checkedView && memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) {
                 throw memoryOperationError('MemoryProtocolError', '检测到未经提交的记忆改动，已阻止覆盖');
             }
             const viewKey = _b1MemoryViewKey;
@@ -7912,7 +7916,7 @@ const app = createApp({
             if (!scopeId) throw memoryOperationError('MemoryScopeError', '记忆作用域不存在，未执行保存');
             if (_b1MemoryState.scopeId !== scopeId) throw memoryOperationError('MemoryNotLoadedError', '记忆尚未加载完成，请重新载入');
             if (memoryContentKey(classicMemories.value) !== _b1MemoryViewKey) throw memoryOperationError('MemoryProtocolError', '检测到未经提交的记忆改动，已阻止覆盖');
-            const state = await refreshMemoryBaseline(scopeId);
+            const state = await refreshMemoryBaseline(scopeId, { checkedView: true });
             const writeState = window.RPHubStorage.getStorageWriteState();
             if (writeState.paused || writeState.epoch !== state.writeEpoch) throw memoryOperationError('StoragePausedError', '存储维护后需要重新载入记忆');
             return Object.freeze({ label, scopeId, scopeEpoch: _b1ScopeEpoch, state,
@@ -7987,7 +7991,7 @@ const app = createApp({
         // config = one transaction (all or nothing); chat = its own intent queue; memory = revision protocol.
         // The returned object reports each group separately, so a partial save is never reported as success.
         const saveData = async (options = {}) => {
-            const { saveMemories = true, saveCharacters = true, startupConfigOnly = false } = options;
+            const { saveMemories = true, saveCharacters = true, saveChat = true, startupConfigOnly = false } = options;
             const outcome = { ok: true, config: 'skipped', chat: 'skipped', memory: 'skipped', error: null };
             const failed = (group, error) => {
                 outcome.ok = false;
@@ -8075,7 +8079,7 @@ const app = createApp({
                 //   normalizeActiveToolAggressivenessSettings() 会改 settings，进而排上一个 1000ms 的
                 //   debouncedSave()；那个 timer 走的是全量分支，到点时大归档（几百条）可能还没读完。
                 //   只判 startupConfigOnly 挡不住它 —— 这就是 2.8.109 出包后仍然每次启动弹提示的原因。
-                if (!startupConfigOnly && _chatHydrated && currentCharacterIndex.value >= 0) {
+                if (saveChat && !startupConfigOnly && _chatHydrated && currentCharacterIndex.value >= 0) {
                     const chatOk = await saveChatHistoryNow();
                     outcome.chat = chatOk ? 'committed' : 'error';
                     if (!chatOk) {
@@ -8095,6 +8099,16 @@ const app = createApp({
                 if (!outcome.error) failed('config', error);
             }
             return outcome;
+        };
+        // [rphub 2.9.137] 纯配置/预设/人设/世界书编辑只落对应分组，不再顺带克隆并重写数百 MB 聊天与记忆。
+        let _cancelDebouncedConfigSave = null;
+        const saveConfigNow = () => {
+            if (_cancelDebouncedConfigSave) _cancelDebouncedConfigSave();
+            return saveData({ saveMemories: false, saveCharacters: false, saveChat: false });
+        };
+        const saveConfigAndCardsNow = () => {
+            if (_cancelDebouncedConfigSave) _cancelDebouncedConfigSave();
+            return saveData({ saveMemories: false, saveCharacters: true, saveChat: false });
         };
 
         // 记忆尚未加载（例如关掉记忆系统）时，对话变更只写聊天，不凭空造一份记忆。
@@ -8542,13 +8556,13 @@ const app = createApp({
                 const changed = setAutoImageGenEnabled(enabled);
                 if (!changed && event?.target) event.target.checked = isAutoImageGenEnabled.value;
         // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-                saveData();
+                saveConfigAndCardsNow();
                 return;
             }
 
             if (entry) entry.enabled = enabled;
         // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-            if (entry) saveData();
+            if (entry) saveConfigAndCardsNow();
         };
 
         const generatedImageTasks = new Map();
@@ -9437,8 +9451,9 @@ const app = createApp({
 
         // Debounced Save
         const debouncedSave = debounce(() => {
-            saveData({ saveMemories: false, saveCharacters: false });
+            saveData({ saveMemories: false, saveCharacters: false, saveChat: false });
         }, 1000);
+        _cancelDebouncedConfigSave = () => debouncedSave.cancel();
         const debouncedCharacterSave = debounce(() => {
             saveCharactersNow().catch(error => console.error('Save characters failed:', error));
         }, 1000);
@@ -10174,18 +10189,23 @@ const app = createApp({
                 || (Array.isArray(message.uiTemplateBlocks.bottom) && message.uiTemplateBlocks.bottom.length))
         );
 
+        const lazyDisplayMessageCache = new WeakMap();
         const buildMobileUiTemplateDisplayMessage = (message, index, retention) => {
             if (retention?.keptIndexes?.has(index)) return message;
             if (!hasMobileUiTemplateBlocks(message) || activeUiTemplates.value.length === 0) return message;
-            return {
+            const raw = Vue.toRaw(message);
+            const cached = lazyDisplayMessageCache.get(raw);
+            if (cached && cached.index === index && cached.source === message) return cached.wrapped;
+            const wrapped = {
                 ...message,
                 uiTemplateBlocks: {
                     top: [buildMobileUiLazyBlock(index, 'top')],
                     bottom: [buildMobileUiLazyBlock(index, 'bottom')],
-                    lazy: true,
-                    updatedAt: Date.now()
+                    lazy: true
                 }
             };
+            lazyDisplayMessageCache.set(raw, { index, source: message, wrapped });
+            return wrapped;
         };
 
         // [rphub 2.9.053] 懒加载 UI 改成「先读后写 + 迟滞回收」。
@@ -10990,7 +11010,7 @@ const app = createApp({
         const messageUsesHtmlFrame = (msg) => {
             if (!msg || !msg.content) return false;
             if (msg.isTriggered) return msg.showRaw && contentUsesHtmlFrame(msg.content, msg.role);
-            const parsed = parseCot(msg.content);
+            const parsed = messageCot(msg);
             return contentUsesHtmlFrame(parsed.main || msg.content, msg.role);
         };
 
@@ -11012,7 +11032,7 @@ const app = createApp({
             if (!msg) return false;
             return !!(
                 msg.reasoning
-                || parseCot(msg.content || '').cot
+                || messageCot(msg).cot
                 || (Array.isArray(msg.toolCalls) && msg.toolCalls.length > 0)
                 || messageUsesHtmlFrame(msg)
                 || messageHasUiTemplateBlocks(msg)
@@ -12017,8 +12037,8 @@ const app = createApp({
                 //   顶部就多渲染进一条更早的消息。而那条消息的 UI 面板在窗口外时是懒加载
                 //   占位符（几十像素），一旦被填成真实面板（几百像素），它下面的所有内容
                 //   整体被顶下去 —— 用户看到的就是「上移两次对话」。删几条就把渲染条数减几条。
-                if (chatRenderLimit.value > CHAT_RENDER_MIN_LIMIT) {
-                    chatRenderLimit.value = Math.max(CHAT_RENDER_MIN_LIMIT, chatRenderLimit.value - removedIndexes.size);
+                if (chatRenderLimit.value > 1) {
+                    chatRenderLimit.value = Math.max(1, chatRenderLimit.value - removedIndexes.size);
                 }
                 // [rphub 2.9.055] 先把界面改掉，再落库。
                 //   原来要等「整份快照 3 次 + 记忆重绑定 + 记忆写库 + 聊天写库」全跑完
@@ -14161,7 +14181,7 @@ const app = createApp({
             return !!(
                 getAssistantReasoningText(message)
                 || (Array.isArray(message.toolCalls) && message.toolCalls.length > 0)
-                || (parseCot(message.content || '').cot)
+                || messageCot(message).cot
             );
         };
 
@@ -14169,7 +14189,7 @@ const app = createApp({
             const isLast = chatHistory.value[chatHistory.value.length - 1] === message;
             if (isLast && isThinking.value) return true;
             if (getCurrentThinkingToolCall(message)) return true;
-            const cotInfo = parseCot(message.content || '');
+            const cotInfo = messageCot(message);
             if (isLast && isGenerating.value && cotInfo.cot && !cotInfo.isFinished) {
                 return true;
             }
@@ -14184,7 +14204,7 @@ const app = createApp({
         const toggleThinkingSummary = (message) => {
             if (!message) return;
             message.isSummaryOpen = !isThinkingSummaryOpen(message);
-            saveChatHistoryNow();
+            scheduleChatHistorySave();
         };
 
         const markThinkingSummaryDetailOpened = (message, event) => {
@@ -14193,7 +14213,7 @@ const app = createApp({
             if (message.isSummaryOpen === undefined && isMessageThinkingOrRunning(message)) {
                 message.isSummaryOpen = true;
             }
-            saveChatHistoryNow();
+            scheduleChatHistorySave();
         };
 
         const getToolCallStepText = (toolCall) => {
@@ -14203,11 +14223,33 @@ const app = createApp({
 
         const getTimelineCharCount = (text) => Array.from(String(text || '')).length;
 
+        const timelineStepsCache = new WeakMap();
         const getTimelineSteps = (message) => {
-            const steps = [];
+            if (!message) return [];
+            const rawMessage = Vue.toRaw(message);
             const isLastMessage = chatHistory.value[chatHistory.value.length - 1] === message;
             const isGeneratingMessage = isLastMessage && isGenerating.value;
-            const cotInfo = parseCot(message.content || '');
+            const isLiveThinking = isLastMessage && isThinking.value;
+            const toolCalls = Array.isArray(message.toolCalls) ? message.toolCalls : null;
+            const hasLiveTool = !!(toolCalls && toolCalls.some(tc => {
+                const st = getToolCallEffectiveStatus(tc);
+                return st !== 'done' && st !== 'error';
+            }));
+            const canCache = !isGeneratingMessage && !isLiveThinking && !hasLiveTool;
+            const content = typeof message.content === 'string' ? message.content : '';
+            const rawReasoning = typeof message.reasoning === 'string' ? message.reasoning : '';
+            const toolSig = toolCalls && toolCalls.length
+                ? toolCalls.map(tc => `${tc?.id || ''}:${tc?.status || ''}:${(tc?.resultText || '').length}:${tc?.error || ''}`).join('|')
+                : '';
+            if (canCache) {
+                const hit = timelineStepsCache.get(rawMessage);
+                if (hit && hit.generation === messageBodyGeneration
+                    && hit.content === content && hit.rawReasoning === rawReasoning && hit.toolSig === toolSig) {
+                    return hit.steps;
+                }
+            }
+            const steps = [];
+            const cotInfo = messageCot(message);
 
             // 1. 初始原生思考
             const reasoningText = getAssistantReasoningText(message);
@@ -14216,15 +14258,16 @@ const app = createApp({
                     id: 'init-reasoning',
                     type: 'thinking',
                     text: reasoningText,
+                    renderedHtml: canCache ? renderMarkdown(reasoningText, 'assistant', true, false) : null,
                     title: '原生思考',
                     charCount: getTimelineCharCount(reasoningText),
-                    isLive: isLastMessage && isThinking.value
+                    isLive: isLiveThinking
                 });
             }
 
             // 2. 工具调用列表
-            if (Array.isArray(message.toolCalls) && message.toolCalls.length > 0) {
-                message.toolCalls.forEach((toolCall, idx) => {
+            if (toolCalls && toolCalls.length > 0) {
+                toolCalls.forEach((toolCall, idx) => {
                     const status = getToolCallEffectiveStatus(toolCall);
                     const reason = cleanActiveToolCallReason(toolCall?.reason);
                     if (reason) {
@@ -14254,12 +14297,22 @@ const app = createApp({
                     id: 'cot-reasoning',
                     type: 'thinking',
                     text: cotText,
+                    renderedHtml: canCache ? renderMarkdown(cotText, 'assistant', true, false) : null,
                     title: '分析过程',
                     charCount: getTimelineCharCount(cotText),
                     isLive: isGeneratingMessage && !cotInfo.isFinished
                 });
             }
 
+            if (canCache) {
+                timelineStepsCache.set(rawMessage, {
+                    generation: messageBodyGeneration,
+                    content,
+                    rawReasoning,
+                    toolSig,
+                    steps
+                });
+            }
             return steps;
         };
 
@@ -14717,7 +14770,7 @@ const app = createApp({
                 list.push(template);
             }
             showUiTemplateEditor.value = false;
-            saveData({ saveMemories: false });
+            saveConfigAndCardsNow();
             showToast('UI模板已保存', 'success');
         };
 
@@ -14727,7 +14780,7 @@ const app = createApp({
                 const list = getUiTemplateListByScope(template?.scope);
                 const targetIndex = list.findIndex(item => item.id === template?.id);
                 if (targetIndex !== -1) list.splice(targetIndex, 1);
-                saveData();
+                saveConfigAndCardsNow();
                 showToast('UI模板已删除', 'success');
             });
         };
@@ -14786,7 +14839,7 @@ const app = createApp({
             }
             ensureGlobalUiTemplates().push(...globalTemplates);
             ensureCurrentUiTemplates().push(...characterTemplates);
-            saveData();
+            saveConfigAndCardsNow();
             showToast(`成功导入 ${normalized.length} 个UI模板`, 'success');
         }, error => showToast(`UI模板导入失败: ${error.message}`, 'error'));
 
@@ -16531,7 +16584,7 @@ const app = createApp({
                 const imported = groups.flatMap(group => group.presets.map(preset => normalizePreset({ ...preset, group: group.name })));
                 presetGroupNames.value = [...new Set([...presetGroupNames.value, ...groups.map(group => group.name)])];
                 presets.value = [...presets.value, ...imported];
-                saveData();
+                saveConfigNow();
                 showToast(`成功导入 ${imported.length} 条预设`, 'success');
             }, error => showToast('导入失败：' + error.message, 'error'));
         };
@@ -16900,7 +16953,7 @@ const app = createApp({
             if (profile) {
                 activeProfileId.value = id;
                 Object.assign(user, { preferences: '', ...JSON.parse(JSON.stringify(profile)) });
-                saveData();
+                saveConfigNow();
                 showToast(`已切换为人设: ${user.name}`, 'success');
             }
         };
@@ -16933,7 +16986,7 @@ const app = createApp({
                     if (activeProfileId.value === id) {
                         switchProfile(userProfiles.value[0].uuid);
                     } else {
-                        saveData();
+                        saveConfigNow();
                     }
                     showToast('人设已删除', 'success');
                 }
@@ -17330,7 +17383,7 @@ const app = createApp({
                     regexScripts.value.push(data);
                 }
                 // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-                saveData();
+                saveConfigAndCardsNow();
                 showRegexEditor.value = false;
                 resourceScope.value = data.scope;
             },
@@ -17338,7 +17391,7 @@ const app = createApp({
                 confirmAction('确定要删除这个正则脚本吗？此操作无法撤销。', () => {
                     regexScripts.value.splice(index, 1);
                     // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-                    saveData();
+                    saveConfigAndCardsNow();
                     showToast('正则脚本已删除', 'success');
                 });
             },
@@ -17453,7 +17506,7 @@ const app = createApp({
                 syncWorldInfoToCurrentCharacter();
                 resourceScope.value = data.scope;
                 // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-                saveData();
+                saveConfigAndCardsNow();
                 showWorldInfoEditor.value = false;
 
             },
@@ -17462,7 +17515,7 @@ const app = createApp({
                     worldInfo.value.splice(index, 1);
                     syncWorldInfoToCurrentCharacter();
                     // [编辑保存 2.9.032] 上游遗漏：此操作不落库，改完立即退出程序会回档。
-                    saveData();
+                    saveConfigAndCardsNow();
                     showToast('世界书条目已删除', 'success');
                 });
             },
@@ -17484,7 +17537,7 @@ const app = createApp({
                         } catch (err) {
                             user.avatar = e.target.result;
                         }
-                        saveData();
+                        saveConfigNow();
                     };
                     reader.readAsDataURL(file);
                 }
@@ -17498,7 +17551,7 @@ const app = createApp({
                 applyPersonPresetSelection(tempUserSetup.person);
 
                 showUserSetupModal.value = false;
-                saveData();
+                saveConfigNow();
                 showToast('用户信息已保存', 'success');
             },
 
@@ -17507,7 +17560,7 @@ const app = createApp({
             togglePerson: (person) => {
                 applyPersonPresetSelection(person);
                 showToast(user.person === 'second' ? '已切换至第二人称视角' : '已切换至第三人称视角', 'success');
-                saveData();
+                saveConfigNow();
             },
 
             // Auto Image Gen Inquiry
@@ -17521,7 +17574,7 @@ const app = createApp({
                     showToast(enabled ? '自动生图已开启' : '已保持关闭状态', enabled ? 'success' : 'info');
                 }
                 showAutoImageGenModal.value = false;
-                saveData();
+                saveConfigAndCardsNow();
             }
         };
     }

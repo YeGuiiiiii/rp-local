@@ -200,25 +200,90 @@
         };
     };
 
-    // [rphub 2.9.052] 聊天写入从「每次整份重写」改成「块级增量」。
-    //   原来任何一次改动（发一条、删一条）都会先删掉全部 61 个 4MB 块再逐块重写，
-    //   242MB 的卡等于每次操作写 242MB 盘；实测 JS 侧序列化只占 0.4 秒，卡顿主体是这笔写盘。
-    //   现在：目录里多记 sizes（每块条数）与 edge（每块首尾消息 id），写入前先定位
-    //   「从第几块开始真的变了」，保留的块一个字节都不动，只重写变化的那些。
-    //   目录仍保留 rphubChat: 1 —— 旧版本按 parts 循环 flat 读回，多出来的字段会被忽略，
-    //   所以降级安装也不会读坏；新版本读到没有 sizes/edge 的旧目录时退化为整份重写。
+    // [rphub 2.9.052 / 2.9.137] 聊天块级增量写入（覆盖增删楼层与等长局部修改）。
+    //   1) 分块大小改用零分配属性遍历估算，避免 cloneForStorage 生成新引用后对数百 MB 聊天全量 JSON.stringify。
+    //   2) 按 revision:seq 缓存已提交分块的只读快照，等长改动（如展开思维链、单条编辑）只重写实际变化的分块，
+    //      未变化分块零序列化、零 IDB 写入、零原生文件桥同步。
+    const CHAT_BASELINE_LIMIT = 8;
+    const chatDirectoryBaselines = new Map();
+    const rememberChatBaseline = (directory, groups) => {
+        if (!isChatDirectory(directory) || !Array.isArray(groups)) return;
+        const key = directory.revision + ':' + (directory.seq || 0);
+        if (chatDirectoryBaselines.has(key)) chatDirectoryBaselines.delete(key);
+        chatDirectoryBaselines.set(key, groups);
+        while (chatDirectoryBaselines.size > CHAT_BASELINE_LIMIT) {
+            const oldest = chatDirectoryBaselines.keys().next().value;
+            chatDirectoryBaselines.delete(oldest);
+        }
+    };
+    const estimateStorableBytes = (item, depth = 0) => {
+        if (item === null || item === undefined) return 8;
+        const type = typeof item;
+        if (type === 'string') return item.length * 2 + 4;
+        if (type === 'number' || type === 'boolean') return 16;
+        if (type !== 'object' || depth > 64) return 32;
+        if (Array.isArray(item)) {
+            let sum = 16;
+            for (let i = 0; i < item.length; i++) sum += estimateStorableBytes(item[i], depth + 1) + 2;
+            return sum;
+        }
+        let sum = 16;
+        const keys = Object.keys(item);
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            const v = item[k];
+            if (typeof v === 'function' || v === undefined) continue;
+            sum += k.length * 2 + 6 + estimateStorableBytes(v, depth + 1);
+        }
+        return sum;
+    };
     const chatSizeCache = new WeakMap();
     const chatMessageBytes = (message) => {
         if (!message || typeof message !== 'object') return 64;
-        // content 的 length 一变就重算：流式生成时最后一条每帧都在长，缓存必须失效。
+        const uiBlocks = message.uiTemplateBlocks;
+        const uiStamp = uiBlocks && typeof uiBlocks === 'object'
+            ? ((Array.isArray(uiBlocks.top) ? uiBlocks.top.length : 0) + ':' + (Array.isArray(uiBlocks.bottom) ? uiBlocks.bottom.length : 0))
+            : -1;
         const stamp = (typeof message.content === 'string' ? message.content.length : -1)
-            + '|' + (Array.isArray(message.uiTemplateBlocks) ? message.uiTemplateBlocks.length : -1)
+            + '|' + (typeof message.reasoning === 'string' ? message.reasoning.length : -1)
+            + '|' + uiStamp
             + '|' + (message.avatar ? 1 : 0);
         const hit = chatSizeCache.get(message);
         if (hit && hit.stamp === stamp) return hit.bytes;
-        const bytes = JSON.stringify(message).length * 2 + 64;
+        const bytes = estimateStorableBytes(message) + 64;
         chatSizeCache.set(message, { stamp, bytes });
         return bytes;
+    };
+    const sameStorableValue = (left, right, depth = 0) => {
+        if (Object.is(left, right)) return true;
+        if (depth > 64 || left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
+        const leftArray = Array.isArray(left);
+        if (leftArray !== Array.isArray(right)) return false;
+        if (leftArray) {
+            if (left.length !== right.length) return false;
+            for (let i = 0; i < left.length; i++) {
+                const lv = left[i] === undefined ? null : left[i];
+                const rv = right[i] === undefined ? null : right[i];
+                if (!sameStorableValue(lv, rv, depth + 1)) return false;
+            }
+            return true;
+        }
+        const leftKeys = Object.keys(left).filter(k => left[k] !== undefined && typeof left[k] !== 'function');
+        const rightKeys = Object.keys(right).filter(k => right[k] !== undefined && typeof right[k] !== 'function');
+        if (leftKeys.length !== rightKeys.length) return false;
+        for (let i = 0; i < leftKeys.length; i++) {
+            const k = leftKeys[i];
+            if (!Object.prototype.hasOwnProperty.call(right, k)) return false;
+            if (!sameStorableValue(left[k], right[k], depth + 1)) return false;
+        }
+        return true;
+    };
+    const sameMessageSlice = (value, start, group) => {
+        if (!Array.isArray(group) || start + group.length > value.length) return false;
+        for (let i = 0; i < group.length; i++) {
+            if (!sameStorableValue(value[start + i], group[i])) return false;
+        }
+        return true;
     };
     const chatIdOf = (message) => (message && typeof message === 'object'
         && typeof message.id === 'string' && message.id) || null;
@@ -258,6 +323,7 @@
         const directory = {
             rphubChat: 1,
             revision: crypto.randomUUID().replace(/-/g, ''),
+            seq: 1,
             parts: groups.length,
             length: value.length,
             sizes: groups.map(group => group.length),
@@ -265,14 +331,48 @@
         };
         groups.forEach((items, index) => store.put(items, chatPartKey(directory, index)));
         chatVersions.set(value, directory);
+        rememberChatBaseline(directory, groups);
         return store.put(directory, key);
     };
 
-    // 定位「第一块真的变了的」下标。返回 { first, keep }：0..first-1 块原样保留，
-    // value.slice(keep) 之后的内容重新切块并从 first 开始写。返回 null 表示无法增量。
+    // 定位变化分块：支持「仅局部块等长更新（如展开思维链）」「一字未改幂等写」与「尾部增删重排」。
     const planChatWrite = (directory, value) => {
         if (!chatDirectoryIndexed(directory)) return null;
-        // 等长就是编辑（条数不变、内容可能变），保守走整份重写 —— 编辑场景很少，不值得冒漏写的风险。
+        const baseline = chatDirectoryBaselines.get(directory.revision + ':' + (directory.seq || 0));
+        if (baseline && baseline.length === directory.parts) {
+            if (value.length === directory.length) {
+                const dirtyParts = [];
+                let offset = 0;
+                for (let index = 0; index < directory.parts; index++) {
+                    const count = directory.sizes[index];
+                    if (!sameMessageSlice(value, offset, baseline[index])) {
+                        const slice = value.slice(offset, offset + count);
+                        let sliceBytes = 0;
+                        for (let i = 0; i < slice.length; i++) sliceBytes += chatMessageBytes(slice[i]);
+                        // 单块编辑后若超出分块阈值，则从该块起走尾部重切块。
+                        if (sliceBytes > CHAT_PART_BYTES && slice.length > 1) {
+                            return { mode: 'tail', first: index, keep: offset, baseline };
+                        }
+                        dirtyParts.push({ index, items: slice });
+                    }
+                    offset += count;
+                }
+                return { mode: 'patch', dirtyParts, baseline };
+            }
+            // 增删消息：直接按已提交分块基线做精确前缀复用，不依赖 system/旧消息必须带唯一 id。
+            let offset = 0;
+            for (let index = 0; index < directory.parts; index++) {
+                const count = directory.sizes[index];
+                if (!sameMessageSlice(value, offset, baseline[index])) {
+                    return { mode: 'tail', first: index, keep: offset, baseline };
+                }
+                offset += count;
+            }
+            if (offset === directory.length && value.length > directory.length) {
+                const last = directory.parts - 1;
+                return { mode: 'tail', first: last, keep: offset - directory.sizes[last], baseline };
+            }
+        }
         if (value.length === directory.length) return null;
         const position = new Map();
         for (let index = 0; index < value.length; index++) {
@@ -286,22 +386,44 @@
             if (count === 0) continue;
             const [firstId, lastId] = directory.edge[index];
             if (firstId === null || lastId === null) return null;
-            // 双锚点：首条仍落在该块应在的起点、末条仍是同一条，且间距等于原块长度。
-            // 只要块内少了一条，末条位置就会前移，这里立刻对不上。
             if (position.get(firstId) !== offset || position.get(lastId) !== offset + count - 1) {
-                return { first: index, keep: offset };
+                return { mode: 'tail', first: index, keep: offset, baseline: null };
             }
             offset += count;
         }
-        // 全部块都没变、只是变长 => 纯追加：连最后一块一起重排，新消息能塞进末块就别开新块。
         if (offset === directory.length && value.length > directory.length) {
             const last = directory.parts - 1;
-            return { first: last, keep: offset - directory.sizes[last] };
+            return { mode: 'tail', first: last, keep: offset - directory.sizes[last], baseline: null };
         }
         return null;
     };
 
     const writeChatIncremental = (store, key, value, directory, plan) => {
+        if (plan.mode === 'patch') {
+            if (plan.dirtyParts.length === 0) {
+                chatVersions.set(value, directory);
+                return store.put(directory, key);
+            }
+            const nextGroups = plan.baseline.slice();
+            const nextEdge = directory.edge.slice();
+            for (const dirty of plan.dirtyParts) {
+                nextGroups[dirty.index] = dirty.items;
+                nextEdge[dirty.index] = chatEdgeOf(dirty.items);
+                store.put(dirty.items, chatPartKey(directory, dirty.index));
+            }
+            const next = {
+                rphubChat: 1,
+                revision: directory.revision,
+                seq: (directory.seq || 0) + 1,
+                parts: directory.parts,
+                length: value.length,
+                sizes: directory.sizes,
+                edge: nextEdge
+            };
+            chatVersions.set(value, next);
+            rememberChatBaseline(next, nextGroups);
+            return store.put(next, key);
+        }
         const first = plan.first;
         const groups = chunkChatMessages(value.slice(plan.keep));
         const parts = first + groups.length;
@@ -316,6 +438,7 @@
         const next = {
             rphubChat: 1,
             revision: directory.revision,
+            seq: (directory.seq || 0) + 1,
             parts,
             length: value.length,
             sizes: directory.sizes.slice(0, first).concat(groups.map(group => group.length)),
@@ -323,6 +446,9 @@
         };
         groups.forEach((items, offset) => store.put(items, chatPartKey(next, first + offset)));
         chatVersions.set(value, next);
+        if (plan.baseline && plan.baseline.length >= first) {
+            rememberChatBaseline(next, plan.baseline.slice(0, first).concat(groups));
+        }
         return store.put(next, key);
     };
 
@@ -350,7 +476,9 @@
         return store.delete(key);
     };
     const storageComparisonKey = (key, value) => storageContentKey(
-        isChatKey(key) && Array.isArray(value) ? chatVersions.get(value) || value : value
+        isChatKey(key)
+            ? (isChatDirectory(value) ? value : (Array.isArray(value) ? chatVersions.get(value) || value : value))
+            : value
     );
 
     const runStorageWriteTransaction = (targetDb, schedule, options = {}) => new Promise((resolve, reject) => {
@@ -793,7 +921,11 @@
 
     // B1 storage CAS primitives. Callers must capture expected values when intent is created.
     // This layer neither invents a current revision for an old payload nor publishes UI state.
+    const immutableFingerprints = new WeakMap();
     const storageContentKey = (value) => {
+        if (value !== null && typeof value === 'object' && immutableFingerprints.has(value)) {
+            return immutableFingerprints.get(value);
+        }
         const ancestors = new Set();
         const encode = (item, depth) => {
             if (depth > 256) throw storageWriteError('StorageDataError', '存储结构过深，未执行写入');
@@ -814,7 +946,12 @@
         };
         return JSON.stringify(encode(value, 0));
     };
-    const readStoredValueSetFrom = (targetDb, keys) => {
+    const sealImmutableFingerprint = (value) => {
+        const fp = storageContentKey(value);
+        if (value !== null && typeof value === 'object') immutableFingerprints.set(value, fp);
+        return fp;
+    };
+    const readStoredValueSetFrom = (targetDb, keys, { verifyOnly = false } = {}) => {
         const names = [...keys];
         if (!names.length || names.some(key => typeof key !== 'string' || !key) || new Set(names).size !== names.length) {
             throw storageWriteError('StorageDataError', '读取键必须非空且不重复');
@@ -851,6 +988,24 @@
                             transaction.abort();
                             return;
                         }
+                        // [rphub 2.9.137] 事务提交后的核对只验证目录与各分块键在库中真实存在，
+                        //   不再把数百 MB 的全部分块正文反序列化拉回内存再丢弃。
+                        if (verifyOnly) {
+                            let remaining = directory.parts;
+                            for (let part = 0; part < directory.parts; part++) {
+                                const checkReq = store.count(chatPartKey(directory, part));
+                                checkReq.onsuccess = () => {
+                                    if (checkReq.result !== 1) {
+                                        failure = storageWriteError('StorageDataError', '聊天存档分块不完整，已停止读取');
+                                        transaction.abort();
+                                        return;
+                                    }
+                                    if (--remaining) return;
+                                    records[index] = { key, value: directory };
+                                };
+                            }
+                            return;
+                        }
                         const parts = new Array(directory.parts);
                         let remaining = directory.parts;
                         for (let part = 0; part < directory.parts; part++) {
@@ -870,6 +1025,7 @@
                                     return;
                                 }
                                 chatVersions.set(value, directory);
+                                rememberChatBaseline(directory, parts.map(items => unwrapForStorage(items)));
                                 records[index] = { key, value };
                             };
                         }
@@ -906,6 +1062,10 @@
         if (!mainDb) await initDB();
         return readStoredValueSetFrom(mainDb, keys);
     };
+    const readStoredVerificationSet = async (keys) => {
+        if (!mainDb) await initDB();
+        return readStoredValueSetFrom(mainDb, keys, { verifyOnly: true });
+    };
     const compareAndWriteStoredValues = async (command = {}) => {
         const writeEpoch = command.writeEpoch ?? storageWriteEpoch;
         let committed = false;
@@ -934,7 +1094,7 @@
                 const value = item.plain === true ? item.value : cloneForStorage(item.value);
                 if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                 if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
-                return {key: item.key, operation: 'set', value, fingerprint: isChatKey(item.key) ? null : storageContentKey(value)};
+                return {key: item.key, operation: 'set', value, fingerprint: isChatKey(item.key) ? null : sealImmutableFingerprint(value)};
             });
             if (new Set(changes.map(item => item.key)).size !== changes.length) throw storageWriteError('StorageDataError', '变更键重复');
             if (!mainDb) await initDB();
@@ -969,7 +1129,7 @@
             }
             committed = true;
             if (!changes.length) return {status: 'unchanged', committed: false, writeEpoch};
-            const actual = await readStoredValueSet(changes.map(item => item.key));
+            const actual = await readStoredVerificationSet(changes.map(item => item.key));
             if (actual.some((item, i) => storageComparisonKey(item.key, item.value) !==
                 (changes[i].fingerprint ?? storageComparisonKey(item.key, changes[i].value)))) {
                 throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');
@@ -1013,11 +1173,17 @@
         storageContentKey(data);
     };
     const makeMemoryState = (scopeId, data, metadata, writeEpoch) => {
-        validateMemoryRecords(data, metadata);
-        const frozenData = data === undefined ? undefined : cloneForStorage(data);
-        const frozenMeta = metadata === undefined ? undefined : cloneForStorage(metadata);
+        const frozenData = data === undefined
+            ? undefined
+            : (immutableFingerprints.has(data) ? data : cloneForStorage(data));
+        const frozenMeta = metadata === undefined
+            ? undefined
+            : (immutableFingerprints.has(metadata) ? metadata : cloneForStorage(metadata));
+        validateMemoryRecords(frozenData, frozenMeta);
+        if (frozenData !== undefined) sealImmutableFingerprint(frozenData);
+        if (frozenMeta !== undefined) sealImmutableFingerprint(frozenMeta);
         const state = Object.freeze({ scopeId, revision: metadata?.revision || null, deleted: metadata?.deleted === true,
-            exists: data !== undefined, list: cloneForStorage(data || []), writeEpoch });
+            exists: data !== undefined, list: cloneForStorage(frozenData || []), writeEpoch });
         // The public list is a detached working copy; mutating it cannot change the captured baseline.
         memoryStates.set(state, { scopeId, data: frozenData, metadata: frozenMeta, writeEpoch });
         return state;
@@ -1044,9 +1210,16 @@
         const { scopeId, data, metadata, writeEpoch } = captured;
         try {
             if (metadata?.deleted && !options.delete && options.recreate !== true) throw storageWriteError('MemoryDeletedError', '作用域已删除，不能由旧任务复活');
-            if (!options.delete) validateMemoryRecords(nextList, undefined);
+            if (!options.delete && !Array.isArray(nextList)) {
+                throw storageWriteError('StorageDataError', '记忆数据不是数组，已阻止覆盖');
+            }
             const nextMeta = { schema: 1, revision: newMemoryRevision(), deleted: options.delete === true };
             const nextData = options.delete ? undefined : cloneForStorage(nextList);
+            if (!options.delete) {
+                validateMemoryRecords(nextData, undefined);
+                sealImmutableFingerprint(nextData);
+            }
+            sealImmutableFingerprint(nextMeta);
             const dataKey = scopedStorageKey('classic_memories', scopeId), metaKey = memoryStateKey(scopeId);
             const extraExpected = options.expected || [], extraChanges = options.changes || [];
             // Extra keys ride in this transaction, so they must never touch any memory body or sidecar:
@@ -1060,8 +1233,8 @@
             const unchanged = !options.delete && extraChanges.length === 0 && storageContentKey(data) === storageContentKey(nextData);
             const result = await compareAndWriteStoredValues({
                 expected: [{ key: dataKey, value: data }, { key: metaKey, value: metadata }, ...extraExpected],
-                changes: unchanged ? [] : [options.delete ? { key: dataKey, operation: 'delete' } : { key: dataKey, operation: 'set', value: nextData },
-                    { key: metaKey, operation: 'set', value: nextMeta }, ...extraChanges],
+                changes: unchanged ? [] : [options.delete ? { key: dataKey, operation: 'delete' } : { key: dataKey, operation: 'set', value: nextData, plain: true },
+                    { key: metaKey, operation: 'set', value: nextMeta, plain: true }, ...extraChanges],
                 guard: options.guard, signal: options.signal, writeEpoch, memoryPermit: memoryProtocolPermit
             });
             if (result.status === 'committed') result.state = makeMemoryState(scopeId, nextData, nextMeta, writeEpoch);
@@ -1168,7 +1341,7 @@
                 const value = cloneForStorage(item.value);
                 if (item.key === 'rp_hub_characters' && Array.isArray(value)) window.RPLocalStore?.assignFolders(value);
                 if (value === undefined) throw storageWriteError('StorageDataError', '删除键须显式使用delete');
-                return { key: item.key, operation, value, fingerprint: isChatKey(item.key) ? null : storageContentKey(value) };
+                return { key: item.key, operation, value, fingerprint: isChatKey(item.key) ? null : sealImmutableFingerprint(value) };
             });
             if (new Set(changes.map(item => item.key)).size !== changes.length) {
                 throw storageWriteError('StorageDataError', '分组提交键重复');
@@ -1210,7 +1383,7 @@
                 await perform();
             }
             committed = true;
-            const actual = await readStoredValueSet(changes.map(item => item.key));
+            const actual = await readStoredVerificationSet(changes.map(item => item.key));
             if (actual.some((item, index) => storageComparisonKey(item.key, item.value) !==
                 (changes[index].fingerprint ?? storageComparisonKey(item.key, changes[index].value)))) {
                 throw storageWriteError('StorageVerificationError', '事务已提交，但回读内容已变化；请重新载入核对');

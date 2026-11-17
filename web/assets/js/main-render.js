@@ -148,7 +148,10 @@ const _hoisted_71 = {
   viewBox: "0 0 24 24"
 }
 const _hoisted_72 = { class: "cot-inner native-thinking-inner" }
-const _hoisted_73 = { class: "relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4" }
+const _hoisted_73 = {
+  key: 0,
+  class: "relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4"
+}
 const _hoisted_74 = { class: "absolute -left-[38px] top-0 flex items-center justify-center w-7 h-5" }
 const _hoisted_75 = { class: "flex flex-col min-w-0" }
 const _hoisted_76 = {
@@ -1990,7 +1993,7 @@ return function render(_ctx, _cache) {
                 (currentCharacter && chatHistory.length > 0)
                   ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) => {
                       return _withDirectives((_openBlock(), _createElementBlock("div", {
-                        key: index,
+                        key: msg.id || ('idx-' + index),
                         ref_for: true,
                         ref: "messageElements",
                         "data-role": msg.role,
@@ -2179,111 +2182,113 @@ return function render(_ctx, _cache) {
                                                     class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
                                                   }, [
                                                     _createElementVNode("div", _hoisted_72, [
-                                                      _createElementVNode("div", _hoisted_73, [
-                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
-                                                          return (_openBlock(), _createElementBlock("div", {
-                                                            key: step.id,
-                                                            class: "relative group/step"
-                                                          }, [
-                                                            _createCommentVNode(" Marker Node "),
-                                                            _createElementVNode("div", _hoisted_74, [
-                                                              _createElementVNode("div", {
-                                                                class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
-                                                              }, null, 2 /* CLASS */)
-                                                            ]),
-                                                            _createCommentVNode(" Content Box "),
-                                                            _createElementVNode("div", _hoisted_75, [
-                                                              (step.isReason)
-                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_76, _toDisplayString(step.title), 1 /* TEXT */))
-                                                                : (_openBlock(), _createElementBlock("details", {
-                                                                    key: 1,
-                                                                    class: "group/detail",
-                                                                    onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
-                                                                  }, [
-                                                                    _createElementVNode("summary", _hoisted_78, [
-                                                                      _createElementVNode("div", _hoisted_79, [
-                                                                        _createElementVNode("span", _hoisted_80, [
-                                                                          _createElementVNode("span", _hoisted_81, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                          (step.type === 'thinking')
-                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_82, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                            : _createCommentVNode("v-if", true),
-                                                                          (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
-                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_83, [
-                                                                                _createElementVNode("span", _hoisted_84, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                                (step.type === 'thinking')
-                                                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_85, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                                  : _createCommentVNode("v-if", true)
-                                                                              ]))
-                                                                            : _createCommentVNode("v-if", true)
-                                                                        ]),
-                                                                        (step.status === 'done')
-                                                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_86, [...(_cache[20] || (_cache[20] = [
+                                                      (isThinkingSummaryOpen(msg) || msg.hasOpenedSummaryDetail || isMessageThinkingOrRunning(msg))
+                                                        ? (_openBlock(), _createElementBlock("div", _hoisted_73, [
+                                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
+                                                              return (_openBlock(), _createElementBlock("div", {
+                                                                key: step.id,
+                                                                class: "relative group/step"
+                                                              }, [
+                                                                _createCommentVNode(" Marker Node "),
+                                                                _createElementVNode("div", _hoisted_74, [
+                                                                  _createElementVNode("div", {
+                                                                    class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
+                                                                  }, null, 2 /* CLASS */)
+                                                                ]),
+                                                                _createCommentVNode(" Content Box "),
+                                                                _createElementVNode("div", _hoisted_75, [
+                                                                  (step.isReason)
+                                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_76, _toDisplayString(step.title), 1 /* TEXT */))
+                                                                    : (_openBlock(), _createElementBlock("details", {
+                                                                        key: 1,
+                                                                        class: "group/detail",
+                                                                        onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
+                                                                      }, [
+                                                                        _createElementVNode("summary", _hoisted_78, [
+                                                                          _createElementVNode("div", _hoisted_79, [
+                                                                            _createElementVNode("span", _hoisted_80, [
+                                                                              _createElementVNode("span", _hoisted_81, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                              (step.type === 'thinking')
+                                                                                ? (_openBlock(), _createElementBlock("span", _hoisted_82, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                : _createCommentVNode("v-if", true),
+                                                                              (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
+                                                                                ? (_openBlock(), _createElementBlock("span", _hoisted_83, [
+                                                                                    _createElementVNode("span", _hoisted_84, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                                    (step.type === 'thinking')
+                                                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_85, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                      : _createCommentVNode("v-if", true)
+                                                                                  ]))
+                                                                                : _createCommentVNode("v-if", true)
+                                                                            ]),
+                                                                            (step.status === 'done')
+                                                                              ? (_openBlock(), _createElementBlock("svg", _hoisted_86, [...(_cache[20] || (_cache[20] = [
+                                                                                  _createElementVNode("path", {
+                                                                                    "stroke-linecap": "round",
+                                                                                    "stroke-linejoin": "round",
+                                                                                    "stroke-width": "3",
+                                                                                    d: "M5 13l4 4L19 7"
+                                                                                  }, null, -1 /* CACHED */)
+                                                                                ]))]))
+                                                                              : _createCommentVNode("v-if", true),
+                                                                            (step.status === 'error')
+                                                                              ? (_openBlock(), _createElementBlock("span", _hoisted_87, "失败"))
+                                                                              : _createCommentVNode("v-if", true)
+                                                                          ]),
+                                                                          _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
+                                                                            _createTextVNode(" 详情 "),
+                                                                            _createElementVNode("svg", {
+                                                                              class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
+                                                                              fill: "none",
+                                                                              stroke: "currentColor",
+                                                                              viewBox: "0 0 24 24"
+                                                                            }, [
                                                                               _createElementVNode("path", {
                                                                                 "stroke-linecap": "round",
                                                                                 "stroke-linejoin": "round",
-                                                                                "stroke-width": "3",
-                                                                                d: "M5 13l4 4L19 7"
-                                                                              }, null, -1 /* CACHED */)
-                                                                            ]))]))
-                                                                          : _createCommentVNode("v-if", true),
-                                                                        (step.status === 'error')
-                                                                          ? (_openBlock(), _createElementBlock("span", _hoisted_87, "失败"))
-                                                                          : _createCommentVNode("v-if", true)
-                                                                      ]),
-                                                                      _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
-                                                                        _createTextVNode(" 详情 "),
-                                                                        _createElementVNode("svg", {
-                                                                          class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
-                                                                          fill: "none",
-                                                                          stroke: "currentColor",
-                                                                          viewBox: "0 0 24 24"
+                                                                                "stroke-width": "2",
+                                                                                d: "M19 9l-7 7-7-7"
+                                                                              })
+                                                                            ])
+                                                                          ], -1 /* CACHED */))
+                                                                        ]),
+                                                                        _createElementVNode("div", {
+                                                                          class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
                                                                         }, [
-                                                                          _createElementVNode("path", {
-                                                                            "stroke-linecap": "round",
-                                                                            "stroke-linejoin": "round",
-                                                                            "stroke-width": "2",
-                                                                            d: "M19 9l-7 7-7-7"
-                                                                          })
-                                                                        ])
-                                                                      ], -1 /* CACHED */))
-                                                                    ]),
-                                                                    _createElementVNode("div", {
-                                                                      class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
-                                                                    }, [
-                                                                      (step.type === 'thinking')
-                                                                        ? (_openBlock(), _createElementBlock("div", {
-                                                                            key: 0,
-                                                                            class: "markdown-body",
-                                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
-                                                                            innerHTML: renderMarkdown(step.text, 'assistant', true, false)
-                                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_88))
-                                                                        : (_openBlock(), _createElementBlock("div", _hoisted_89, [
-                                                                            _createElementVNode("div", _hoisted_90, [
-                                                                              _createElementVNode("span", null, [
-                                                                                _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
-                                                                                _createElementVNode("code", _hoisted_91, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
-                                                                              ]),
-                                                                              _createElementVNode("span", _hoisted_92, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
-                                                                            ]),
-                                                                            _createElementVNode("div", _hoisted_93, [
-                                                                              _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
-                                                                              _createElementVNode("pre", _hoisted_94, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
-                                                                            ]),
-                                                                            (step.toolCall.error)
-                                                                              ? (_openBlock(), _createElementBlock("div", _hoisted_95, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
-                                                                              : (step.toolCall.resultText)
-                                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_96, [
-                                                                                    _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
-                                                                                    _createElementVNode("pre", _hoisted_97, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
-                                                                                  ]))
-                                                                                : _createCommentVNode("v-if", true)
-                                                                          ]))
-                                                                    ], 2 /* CLASS */)
-                                                                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_77))
-                                                            ])
+                                                                          (step.type === 'thinking')
+                                                                            ? (_openBlock(), _createElementBlock("div", {
+                                                                                key: 0,
+                                                                                class: "markdown-body",
+                                                                                style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
+                                                                                innerHTML: step.renderedHtml ?? renderMarkdown(step.text, 'assistant', true, false)
+                                                                              }, null, 12 /* STYLE, PROPS */, _hoisted_88))
+                                                                            : (_openBlock(), _createElementBlock("div", _hoisted_89, [
+                                                                                _createElementVNode("div", _hoisted_90, [
+                                                                                  _createElementVNode("span", null, [
+                                                                                    _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
+                                                                                    _createElementVNode("code", _hoisted_91, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
+                                                                                  ]),
+                                                                                  _createElementVNode("span", _hoisted_92, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
+                                                                                ]),
+                                                                                _createElementVNode("div", _hoisted_93, [
+                                                                                  _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
+                                                                                  _createElementVNode("pre", _hoisted_94, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
+                                                                                ]),
+                                                                                (step.toolCall.error)
+                                                                                  ? (_openBlock(), _createElementBlock("div", _hoisted_95, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
+                                                                                  : (step.toolCall.resultText)
+                                                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_96, [
+                                                                                        _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
+                                                                                        _createElementVNode("pre", _hoisted_97, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
+                                                                                      ]))
+                                                                                    : _createCommentVNode("v-if", true)
+                                                                              ]))
+                                                                        ], 2 /* CLASS */)
+                                                                      ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_77))
+                                                                ])
+                                                              ]))
+                                                            }), 128 /* KEYED_FRAGMENT */))
                                                           ]))
-                                                        }), 128 /* KEYED_FRAGMENT */))
-                                                      ])
+                                                        : _createCommentVNode("v-if", true)
                                                     ])
                                                   ], 2 /* CLASS */)
                                                 ], 2 /* CLASS */)
@@ -2310,7 +2315,7 @@ return function render(_ctx, _cache) {
                                             ? (_openBlock(), _createElementBlock("div", _hoisted_99, [
                                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
                                                   return (_openBlock(), _createElementBlock("div", {
-                                                    key: 'msg-ui-top-' + index + '-' + tIndex,
+                                                    key: 'msg-ui-top-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
                                                     innerHTML: replaceUserNamePlaceholder(html)
@@ -2362,7 +2367,7 @@ return function render(_ctx, _cache) {
                                             ? (_openBlock(), _createElementBlock("div", _hoisted_105, [
                                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
                                                   return (_openBlock(), _createElementBlock("div", {
-                                                    key: 'msg-ui-bottom-' + index + '-' + tIndex,
+                                                    key: 'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
                                                     innerHTML: replaceUserNamePlaceholder(html)
@@ -8277,7 +8282,10 @@ const _hoisted_70 = {
   viewBox: "0 0 24 24"
 }
 const _hoisted_71 = { class: "cot-inner native-thinking-inner" }
-const _hoisted_72 = { class: "relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4" }
+const _hoisted_72 = {
+  key: 0,
+  class: "relative pl-6 border-l border-gray-300/90 space-y-7 py-1 ml-3.5 pt-4 pb-4 pr-4"
+}
 const _hoisted_73 = { class: "absolute -left-[38px] top-0 flex items-center justify-center w-7 h-5" }
 const _hoisted_74 = { class: "flex flex-col min-w-0" }
 const _hoisted_75 = {
@@ -10427,7 +10435,7 @@ return function render(_ctx, _cache) {
                 (currentCharacter && chatHistory.length > 0)
                   ? (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(displayedChatMessages, ({ msg, index, hasUserBefore, hasSelfAfter }, displayIndex) => {
                       return _withDirectives((_openBlock(), _createElementBlock("div", {
-                        key: index,
+                        key: msg.id || ('idx-' + index),
                         ref_for: true,
                         ref: "messageElements",
                         "data-role": msg.role,
@@ -10616,111 +10624,113 @@ return function render(_ctx, _cache) {
                                                     class: _normalizeClass(["cot-body native-thinking-body", { 'is-open': isThinkingSummaryOpen(msg) }])
                                                   }, [
                                                     _createElementVNode("div", _hoisted_71, [
-                                                      _createElementVNode("div", _hoisted_72, [
-                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
-                                                          return (_openBlock(), _createElementBlock("div", {
-                                                            key: step.id,
-                                                            class: "relative group/step"
-                                                          }, [
-                                                            _createCommentVNode(" Marker Node "),
-                                                            _createElementVNode("div", _hoisted_73, [
-                                                              _createElementVNode("div", {
-                                                                class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
-                                                              }, null, 2 /* CLASS */)
-                                                            ]),
-                                                            _createCommentVNode(" Content Box "),
-                                                            _createElementVNode("div", _hoisted_74, [
-                                                              (step.isReason)
-                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_75, _toDisplayString(step.title), 1 /* TEXT */))
-                                                                : (_openBlock(), _createElementBlock("details", {
-                                                                    key: 1,
-                                                                    class: "group/detail",
-                                                                    onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
-                                                                  }, [
-                                                                    _createElementVNode("summary", _hoisted_77, [
-                                                                      _createElementVNode("div", _hoisted_78, [
-                                                                        _createElementVNode("span", _hoisted_79, [
-                                                                          _createElementVNode("span", _hoisted_80, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                          (step.type === 'thinking')
-                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_81, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                            : _createCommentVNode("v-if", true),
-                                                                          (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
-                                                                            ? (_openBlock(), _createElementBlock("span", _hoisted_82, [
-                                                                                _createElementVNode("span", _hoisted_83, _toDisplayString(step.title), 1 /* TEXT */),
-                                                                                (step.type === 'thinking')
-                                                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_84, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
-                                                                                  : _createCommentVNode("v-if", true)
-                                                                              ]))
-                                                                            : _createCommentVNode("v-if", true)
-                                                                        ]),
-                                                                        (step.status === 'done')
-                                                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_85, [...(_cache[20] || (_cache[20] = [
+                                                      (isThinkingSummaryOpen(msg) || msg.hasOpenedSummaryDetail || isMessageThinkingOrRunning(msg))
+                                                        ? (_openBlock(), _createElementBlock("div", _hoisted_72, [
+                                                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(getTimelineSteps(msg), (step) => {
+                                                              return (_openBlock(), _createElementBlock("div", {
+                                                                key: step.id,
+                                                                class: "relative group/step"
+                                                              }, [
+                                                                _createCommentVNode(" Marker Node "),
+                                                                _createElementVNode("div", _hoisted_73, [
+                                                                  _createElementVNode("div", {
+                                                                    class: _normalizeClass(["timeline-marker group-hover/step:border-primary-500", { 'is-error': step.status === 'error', 'is-live': step.isLive || step.status === 'running' || step.status === 'receiving' }])
+                                                                  }, null, 2 /* CLASS */)
+                                                                ]),
+                                                                _createCommentVNode(" Content Box "),
+                                                                _createElementVNode("div", _hoisted_74, [
+                                                                  (step.isReason)
+                                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_75, _toDisplayString(step.title), 1 /* TEXT */))
+                                                                    : (_openBlock(), _createElementBlock("details", {
+                                                                        key: 1,
+                                                                        class: "group/detail",
+                                                                        onToggle: $event => (markThinkingSummaryDetailOpened(msg, $event))
+                                                                      }, [
+                                                                        _createElementVNode("summary", _hoisted_77, [
+                                                                          _createElementVNode("div", _hoisted_78, [
+                                                                            _createElementVNode("span", _hoisted_79, [
+                                                                              _createElementVNode("span", _hoisted_80, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                              (step.type === 'thinking')
+                                                                                ? (_openBlock(), _createElementBlock("span", _hoisted_81, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                : _createCommentVNode("v-if", true),
+                                                                              (step.isLive || (step.type === 'tool' && step.status !== 'done' && step.status !== 'error'))
+                                                                                ? (_openBlock(), _createElementBlock("span", _hoisted_82, [
+                                                                                    _createElementVNode("span", _hoisted_83, _toDisplayString(step.title), 1 /* TEXT */),
+                                                                                    (step.type === 'thinking')
+                                                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_84, _toDisplayString(step.charCount) + " 字", 1 /* TEXT */))
+                                                                                      : _createCommentVNode("v-if", true)
+                                                                                  ]))
+                                                                                : _createCommentVNode("v-if", true)
+                                                                            ]),
+                                                                            (step.status === 'done')
+                                                                              ? (_openBlock(), _createElementBlock("svg", _hoisted_85, [...(_cache[20] || (_cache[20] = [
+                                                                                  _createElementVNode("path", {
+                                                                                    "stroke-linecap": "round",
+                                                                                    "stroke-linejoin": "round",
+                                                                                    "stroke-width": "3",
+                                                                                    d: "M5 13l4 4L19 7"
+                                                                                  }, null, -1 /* CACHED */)
+                                                                                ]))]))
+                                                                              : _createCommentVNode("v-if", true),
+                                                                            (step.status === 'error')
+                                                                              ? (_openBlock(), _createElementBlock("span", _hoisted_86, "失败"))
+                                                                              : _createCommentVNode("v-if", true)
+                                                                          ]),
+                                                                          _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
+                                                                            _createTextVNode(" 详情 "),
+                                                                            _createElementVNode("svg", {
+                                                                              class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
+                                                                              fill: "none",
+                                                                              stroke: "currentColor",
+                                                                              viewBox: "0 0 24 24"
+                                                                            }, [
                                                                               _createElementVNode("path", {
                                                                                 "stroke-linecap": "round",
                                                                                 "stroke-linejoin": "round",
-                                                                                "stroke-width": "3",
-                                                                                d: "M5 13l4 4L19 7"
-                                                                              }, null, -1 /* CACHED */)
-                                                                            ]))]))
-                                                                          : _createCommentVNode("v-if", true),
-                                                                        (step.status === 'error')
-                                                                          ? (_openBlock(), _createElementBlock("span", _hoisted_86, "失败"))
-                                                                          : _createCommentVNode("v-if", true)
-                                                                      ]),
-                                                                      _cache[21] || (_cache[21] = _createElementVNode("span", { class: "text-[10px] text-primary-500 opacity-60 group-hover/detail:opacity-100 flex items-center gap-0.5 font-bold whitespace-nowrap flex-shrink-0 ml-auto" }, [
-                                                                        _createTextVNode(" 详情 "),
-                                                                        _createElementVNode("svg", {
-                                                                          class: "w-2.5 h-2.5 transform group-open/detail:rotate-180 transition-transform",
-                                                                          fill: "none",
-                                                                          stroke: "currentColor",
-                                                                          viewBox: "0 0 24 24"
+                                                                                "stroke-width": "2",
+                                                                                d: "M19 9l-7 7-7-7"
+                                                                              })
+                                                                            ])
+                                                                          ], -1 /* CACHED */))
+                                                                        ]),
+                                                                        _createElementVNode("div", {
+                                                                          class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
                                                                         }, [
-                                                                          _createElementVNode("path", {
-                                                                            "stroke-linecap": "round",
-                                                                            "stroke-linejoin": "round",
-                                                                            "stroke-width": "2",
-                                                                            d: "M19 9l-7 7-7-7"
-                                                                          })
-                                                                        ])
-                                                                      ], -1 /* CACHED */))
-                                                                    ]),
-                                                                    _createElementVNode("div", {
-                                                                      class: _normalizeClass(["mt-2 bg-gray-50 border border-gray-100/60 rounded-xl p-3 text-[13px] text-gray-700 overflow-x-auto custom-scrollbar shadow-inner select-text", { 'timeline-thinking-detail': step.type === 'thinking' }])
-                                                                    }, [
-                                                                      (step.type === 'thinking')
-                                                                        ? (_openBlock(), _createElementBlock("div", {
-                                                                            key: 0,
-                                                                            class: "markdown-body",
-                                                                            style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
-                                                                            innerHTML: renderMarkdown(step.text, 'assistant', true, false)
-                                                                          }, null, 12 /* STYLE, PROPS */, _hoisted_87))
-                                                                        : (_openBlock(), _createElementBlock("div", _hoisted_88, [
-                                                                            _createElementVNode("div", _hoisted_89, [
-                                                                              _createElementVNode("span", null, [
-                                                                                _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
-                                                                                _createElementVNode("code", _hoisted_90, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
-                                                                              ]),
-                                                                              _createElementVNode("span", _hoisted_91, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
-                                                                            ]),
-                                                                            _createElementVNode("div", _hoisted_92, [
-                                                                              _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
-                                                                              _createElementVNode("pre", _hoisted_93, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
-                                                                            ]),
-                                                                            (step.toolCall.error)
-                                                                              ? (_openBlock(), _createElementBlock("div", _hoisted_94, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
-                                                                              : (step.toolCall.resultText)
-                                                                                ? (_openBlock(), _createElementBlock("div", _hoisted_95, [
-                                                                                    _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
-                                                                                    _createElementVNode("pre", _hoisted_96, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
-                                                                                  ]))
-                                                                                : _createCommentVNode("v-if", true)
-                                                                          ]))
-                                                                    ], 2 /* CLASS */)
-                                                                  ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_76))
-                                                            ])
+                                                                          (step.type === 'thinking')
+                                                                            ? (_openBlock(), _createElementBlock("div", {
+                                                                                key: 0,
+                                                                                class: "markdown-body",
+                                                                                style: _normalizeStyle(settings.fontSize ? { fontSize: (settings.fontSize - 1.5) + 'px' } : {}),
+                                                                                innerHTML: step.renderedHtml ?? renderMarkdown(step.text, 'assistant', true, false)
+                                                                              }, null, 12 /* STYLE, PROPS */, _hoisted_87))
+                                                                            : (_openBlock(), _createElementBlock("div", _hoisted_88, [
+                                                                                _createElementVNode("div", _hoisted_89, [
+                                                                                  _createElementVNode("span", null, [
+                                                                                    _cache[22] || (_cache[22] = _createTextVNode("调用工具: ", -1 /* CACHED */)),
+                                                                                    _createElementVNode("code", _hoisted_90, "<" + _toDisplayString(step.toolCall.callName) + ">", 1 /* TEXT */)
+                                                                                  ]),
+                                                                                  _createElementVNode("span", _hoisted_91, _toDisplayString(getToolCallModeText(step.toolCall)), 1 /* TEXT */)
+                                                                                ]),
+                                                                                _createElementVNode("div", _hoisted_92, [
+                                                                                  _cache[23] || (_cache[23] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "参数输入:", -1 /* CACHED */)),
+                                                                                  _createElementVNode("pre", _hoisted_93, _toDisplayString(step.toolCall.query), 1 /* TEXT */)
+                                                                                ]),
+                                                                                (step.toolCall.error)
+                                                                                  ? (_openBlock(), _createElementBlock("div", _hoisted_94, _toDisplayString(step.toolCall.error), 1 /* TEXT */))
+                                                                                  : (step.toolCall.resultText)
+                                                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_95, [
+                                                                                        _cache[24] || (_cache[24] = _createElementVNode("span", { class: "text-xs font-semibold text-gray-500" }, "执行输出:", -1 /* CACHED */)),
+                                                                                        _createElementVNode("pre", _hoisted_96, _toDisplayString(step.toolCall.resultText), 1 /* TEXT */)
+                                                                                      ]))
+                                                                                    : _createCommentVNode("v-if", true)
+                                                                              ]))
+                                                                        ], 2 /* CLASS */)
+                                                                      ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_76))
+                                                                ])
+                                                              ]))
+                                                            }), 128 /* KEYED_FRAGMENT */))
                                                           ]))
-                                                        }), 128 /* KEYED_FRAGMENT */))
-                                                      ])
+                                                        : _createCommentVNode("v-if", true)
                                                     ])
                                                   ], 2 /* CLASS */)
                                                 ], 2 /* CLASS */)
@@ -10747,7 +10757,7 @@ return function render(_ctx, _cache) {
                                             ? (_openBlock(), _createElementBlock("div", _hoisted_98, [
                                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.top, (html, tIndex) => {
                                                   return (_openBlock(), _createElementBlock("div", {
-                                                    key: 'msg-ui-top-' + index + '-' + tIndex,
+                                                    key: 'msg-ui-top-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
                                                     innerHTML: replaceUserNamePlaceholder(html)
@@ -10799,7 +10809,7 @@ return function render(_ctx, _cache) {
                                             ? (_openBlock(), _createElementBlock("div", _hoisted_104, [
                                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(msg.uiTemplateBlocks.bottom, (html, tIndex) => {
                                                   return (_openBlock(), _createElementBlock("div", {
-                                                    key: 'msg-ui-bottom-' + index + '-' + tIndex,
+                                                    key: 'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
                                                     innerHTML: replaceUserNamePlaceholder(html)
