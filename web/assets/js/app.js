@@ -8678,6 +8678,37 @@ const app = createApp({
                 identity: imageFreezeScopeKey() + '::' + (imageFreezeKeysOf(card)[0] || ''),
             };
         };
+        // [rphub 2.9.135] 会话内已生成记录：键 = 冻结键，值 = 图片地址。
+        //   固定表只认远端 URL，遇到 data: / blob: 会直接跳过（见 captureImageFreezeEntry 的 2.8.64 注释）。
+        //   而 OpenAI 兼容接口常直接回 b64_json 或走本地仓库换 blob:，于是「重新生成」回写正文后
+        //   重渲染算不出命中，又发一次 POST —— 用户看到的就是两次调用、两次扣费。
+        //   这张表只在内存里活一次会话，专门兜住这种「刚生成完、几秒后又要一次」的场景。
+        const recentImageResults = new Map();
+        const rememberRecentImage = (card, requestUrl) => {
+            const keys = imageFreezeKeysOf(card);
+            const src = card?.querySelector?.('img')?.getAttribute('src') || '';
+            if (!keys.length || !src) return;
+            const now = Date.now();
+            keys.forEach(key => recentImageResults.set(key, { url: src, requestUrl, ts: now }));
+            if (recentImageResults.size > 200) {
+                [...recentImageResults.entries()]
+                    .sort((a, b) => a[1].ts - b[1].ts)
+                    .slice(0, recentImageResults.size - 200)
+                    .forEach(([key]) => recentImageResults.delete(key));
+            }
+        };
+        const recallRecentImage = (card) => {
+            const keys = imageFreezeKeysOf(card);
+            for (const key of keys) {
+                const hit = recentImageResults.get(key);
+                if (!hit || Date.now() - hit.ts >= 10 * 60 * 1000) continue;
+                // blob: 不能复用：它绑在旧卡片那次 objectURL 上，卡片重渲染时就被 revoke 了，
+                //   拿它顶上去只会得到一张裂图 —— 那比多一次请求更糟。http(s) 与 data: 才安全。
+                if (/^blob:/i.test(hit.url)) continue;
+                return hit;
+            }
+            return null;
+        };
         const recordImageFreezeEntry = (card, requestUrl) => {
             // [rphub 2.8.64] 去掉 isImageFreezeEnabled() 门控。
             //   原实现「关着就一条不记」，导致用户事后再打开开关也救不回历史图
@@ -8978,7 +9009,10 @@ const app = createApp({
             card.classList.remove('is-generating', 'is-generation-error', 'is-waiting');
             card.dataset.imageJobState = job.status;
             // [rphub 2.7.70] 生成完成：若开着固定，记下这张图，供切换画师串后复用。
-            if (job.status === 'done') recordImageFreezeEntry(card, task.requestUrl);
+            if (job.status === 'done') {
+                recordImageFreezeEntry(card, task.requestUrl);
+                rememberRecentImage(card, task.requestUrl);
+            }
         };
 
         // 同一提示词的结果缓存：10 分钟内不再重复生成（仅非 fresh 生效）
@@ -9123,6 +9157,17 @@ const app = createApp({
                 generatedImageTasks.forEach(task => task.cards.delete(card));
                 return Promise.resolve({ status: 'done', frozen: true });
             }
+            if (options.fresh !== true) {
+                const recent = recallRecentImage(card);
+                if (recent) {
+                    const image = card.querySelector('img');
+                    if (image) image.src = recent.url;
+                    card.dataset.imageJobState = 'done';
+                    card.classList.remove('is-generating', 'is-waiting', 'is-generation-error');
+                    generatedImageTasks.forEach(task => task.cards.delete(card));
+                    return Promise.resolve({ status: 'done', replayed: true });
+                }
+            }
             if (!card.isConnected) return { status: 'failed', cancelled: true };
             ensureGeneratedImageProgressUi(card);
             generatedImageTasks.forEach(task => task.cards.delete(card));
@@ -9254,6 +9299,7 @@ const app = createApp({
                     canonical.searchParams.delete('nocache');
                     recordImageFreezeEntry(card, canonical.href);
                     recordImageFreezeEntry(card, nextImageUrl.href);
+                    rememberRecentImage(card, nextImageUrl.href);
                 } catch (error) { console.warn('[rphub] 重生成图登记冻结失败', error); }
                 scheduleChatHistorySave();
                 showToast('已重新生成图片', 'success');

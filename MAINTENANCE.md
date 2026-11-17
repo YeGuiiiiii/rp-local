@@ -24,6 +24,7 @@
 - 2026-11-17 00:26（Asia/Shanghai）线上核对：`latest.json` 返回 `2.9.133` / versionCode `392`，SHA256 前 16 位 `489bdeab67feb8de` 与本地发布包一致，`checkedAt` 为 `2026-11-16T16:26:29Z`。未做公网完整下载与真机安装验收。
 - 本轮改动集中在两处图片页面：图片管理（`web/assets/native/rphub-image-gallery.js`）与画廊（`web/assets/js/gallery-page.js`），版本 `2.9.127`～`2.9.133`。验证方式为包内字符串断言（`rphub-gal-tick`、`rphub-gal-exit`、`HOLD_SLOP`、`worldinfo-pager` 等）与本地/线上 SHA256 一致；多选、长按、批量存相册与删除**尚未**在真机逐项点击验证，由维护者自行安装试用。
 - 交接提示：发布流程新增根目录 [RELEASING.md](RELEASING.md)（来自维护方，本次随源码提交）。其中「`android-release.yml` 仅允许手动运行」「`scripts/check-release.py` 发布前检查」两项与 `origin/main` 现状不符——主线上该工作流仍是 `on: push`（branches / tags）触发，且仓库内没有 `check-release.py`；按文中 `gh workflow run` 命令当前无法执行。需维护方补齐后再据此调整。
+- 2026-11-17 12:32（Asia/Shanghai）发布 `2.9.135`（versionCode `394`）：修复 OpenAI 兼容生图接口下「重新生成」发两次请求。根因是 `captureImageFreezeEntry` 对 `data:` / `blob:` 地址一律不记（2.8.64 防死链），而 OpenAI 兼容接口常直接返回 base64，正文令牌顺序一变即被当作新图重发 POST。修法是新增会话内结果表 `recentImageResults`（键沿用 `imageFreezeKeysOf`），生成完成与重新生成成功时各记一条，重渲染先查固定表再查此表；`blob:` 地址不复用以免裂图。验证方式：包内断言 `recentImageResults` / `recallRecentImage` / blob 排除分支存在；真实接口的调用次数需在服务商后台核对，尚未验证。
 - 2026-11-16 打包验证：APK `7,918,459` 字节，SHA256 `0f1d48d30018b5b7aa263f104116a7df352bb39f001d886adfa4e6203d9f1cd6`；与 GitHub `2.9.116` 正式包及历史 `0.1` 包证书相同，签名检查通过。`check-apk.py --version 2.9.117` 校验包名、版本、192 个网页文件、5 档图标、v2/v3 签名及无重复资源；本版全量测试 **68/68 通过**。三处更新服务未提交改动不纳入；未安装 Android 真机。
 
 ## 已完成
