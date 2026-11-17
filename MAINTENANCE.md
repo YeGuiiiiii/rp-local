@@ -21,6 +21,10 @@
 - 更新控制器使用真实线上接口验证：安装序号 `375`（2.9.116）、`376`（2.9.117）均提供 `2.9.126`，下载参数中的地址和 SHA256 正确；`385` 显示已是最新版。仅拦截原生下载调用核对参数，没有代用户安装。
 - 本轮服务器同步首次因 GitHub 读取超时失败；通过已有 SSH 连接传入同一份已验证正式包，复用服务器 `sync.publish` 的完整性校验与原子发布，不直接改写版本清单。之后同步服务重跑 `Result=success` / `ExecMainStatus=0`，定时器保持 active。此次不等于保证外部 GitHub 网络永不超时；本地原有三处更新服务改动继续保留，未混入本轮提交。
 - ~~R01：`2.9.117`（Android versionCode `376`）打包与 GitHub 上传，Codex 完成。源码提交 `cf3b249` 已同步 `main`，APK 提交 `acfe20a` 位于独立下载分支 `codex/download-2.9.117`，SHA256 文件随包提供。已从 GitHub 公开下载链接重新下载，字节数与 SHA256 均匹配本地验证包。~~
+- 2026-11-17 18:08（Asia/Shanghai）RFLinggg 发布 `2.9.137`（versionCode `396`）：源码提交 `11ff074`（作者 qq1049323397，高楼层展开思维链 / 切换叙事视角 / 删除对话卡顿）。APK `7,951,325` 字节，SHA256 `b69d395393924521a08e36a614189c41377485d39ad344e81c1e341f49fc2f71`，附件含 `SHA256SUMS-2.9.137.txt`；已回读 Release 资产 digest，与本地包一致。标签 `v2.9.137` 指向 `11ff074`。
+- 本次标签经 GitHub API 创建（`POST /git/refs`），未用 `git push`：本机代理拒绝 `github.com:443` 的 CONNECT（502），仅 `api.github.com` 可达。主线本身已含 `11ff074`，故无需推送代码。本地同时存在同名 annotated tag，下次 `git fetch --tags` 可能提示 would clobber，可 `git tag -d v2.9.137` 后重新拉取。
+- 构建依赖坑：`scripts/ui-build/package.json` 新增 `@noble/hashes@1.8.0`（2.9.136 的 `stream-import/cloud.mjs` 引用 `@noble/hashes/sha2.js`），本机 `node_modules` 未安装时构建报 `Could not resolve`。拉上游代码后若该文件有变动，先在该目录 `npm install`。
+- 待办：软件内更新源在发布后仍返回 `2.9.136 / 395`（`checkedAt` `2026-11-17T06:34:58Z`），需等 `rp-update-sync.timer` 下一轮同步后复核为 `2.9.137 / 396`，并核对字节数与 SHA256。
 - 历史 [2.9.117 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.117)，当前 [2.9.126 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.126)。仍需 Android 真机验收。
 - RFLinggg 于 2026-11-17 00:14（Asia/Shanghai）发布 `2.9.133`（versionCode `392`）：源码提交 `fe1edf9`，标签 `v2.9.133`，随后与 `origin/main`（`cda8123`）合并为 `e7fafb4` 再推送。发布采用维护者手动上传：`RP-local-2.9.133.apk` `7,926,651` 字节，SHA256 `489bdeab67feb8deaf0a390b2ffebc7782d66201ba5bf4d4cd9188b59865fd05`，附件含 `SHA256SUMS-2.9.133.txt`。
 - `v2.9.133` 标签建立在合并前的 `fe1edf9`，该提交内的 `android-release.yml` 尚无「未准备则跳过」判断，因此 Actions 任务 `43905344676` 因缺少 `dist/RELEASE-2.9.133.md` 失败；正式发布由维护者手动上传完成，未依赖该任务。之后从包含保护步骤的提交打标签即可避免同类红叉，不移动旧标签。
