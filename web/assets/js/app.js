@@ -8552,6 +8552,7 @@ const app = createApp({
         };
 
         const generatedImageTasks = new Map();
+        const historicalImageCounts = new WeakMap();
         let generatedImageObserver = null;
 
         // [rphub 2.7.70 / 2.7.72] 生图固定（设置页可开关）。
@@ -9170,6 +9171,22 @@ const app = createApp({
             }
             if (!card.isConnected) return { status: 'failed', cancelled: true };
             ensureGeneratedImageProgressUi(card);
+            const size = new URL(requestUrl, window.location.href).searchParams.get('size');
+            card.style.aspectRatio = size && size.includes('横') ? '1216 / 832'
+                : size && size.includes('方') ? '1'
+                : '832 / 1216';
+            // Loading saved image tokens is a read operation, even when their files were not migrated.
+            const messageEl = card.closest('[data-chat-index]');
+            const message = messageEl && chatHistory.value[Number(messageEl.dataset.chatIndex)];
+            const position = messageEl ? [...messageEl.querySelectorAll('.generated-image-card')].indexOf(card) : -1;
+            if (options.fresh !== true && position >= 0
+                && position < (historicalImageCounts.get(Vue.toRaw(message)) || 0)) {
+                card.dataset.imageJobState = 'history';
+                card.classList.remove('is-generating', 'is-waiting');
+                card.classList.add('is-generation-error');
+                card.querySelector('.generated-image-progress-label').textContent = '历史图片未找到，可手动重新生成';
+                return { status: 'history' };
+            }
             generatedImageTasks.forEach(task => task.cards.delete(card));
             card.querySelector('img')?.setAttribute('alt', '');
             const animationTime = performance.now();
@@ -9187,12 +9204,6 @@ const app = createApp({
             card.dataset.imageJobState = 'loading';
             card.classList.add('is-generating');
             card.classList.remove('is-generation-error');
-            const size = new URL(requestUrl, window.location.href).searchParams.get('size');
-            // [rphub 2.8.65] 尺寸档位扩到 9 档后不能再用全等匹配：2K横图 / 4K方图 等
-            //   会落到 else 分支拿到竖图比例，占位框先竖后横，图一到就跳。
-            card.style.aspectRatio = size && size.includes('横') ? '1216 / 832'
-                : size && size.includes('方') ? '1'
-                : '832 / 1216';
             if (task.job) renderGeneratedImageJob(card, task, task.job);
             return task.promise;
         };
@@ -15049,6 +15060,8 @@ const app = createApp({
         const prepareLoadedChatHistoryForDisplay = (messages = []) => messages
             .filter(msg => msg !== null && msg !== undefined)
             .map(msg => {
+                historicalImageCounts.set(Vue.toRaw(msg),
+                    cardUtils.findUnprotectedMatches(String(msg.content || ''), getImageTagRegex()).length);
                 // [rphub 2.8.16] 编辑态是瞬态 UI 状态，不该跨会话存活。
                 // 官网 saveChatHistoryNow 用 cloneForStorage(history) 全量落库、不剥离 isEditing_Message，
                 // 本函数加载时也不清理 ⇒ 一旦落库，isAnyMessageEditing 恒为 true，
