@@ -1,5 +1,6 @@
 import { upgrade, database, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate } from './storage.mjs';
 import { profile, profiles } from './profiles.mjs';
+import { verifyChunks, decodeChat } from './cloud.mjs';
 
 const readSession = (db, id) => resultOf(db.transaction('restore_sessions').objectStore('restore_sessions').get(id));
 const webText = value => String(value ?? '');
@@ -289,4 +290,4 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
         }
     }
 }
-window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles };
+window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles, verifyChunks, decodeChat };

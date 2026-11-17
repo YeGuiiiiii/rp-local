@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {
     "@babel/parser": "7.29.13",
+    "@noble/hashes": "1.8.0",
     "@streamparser/json": "0.0.22",
     "@vue/compiler-dom": "3.5.41",
     "esbuild": "0.25.12",

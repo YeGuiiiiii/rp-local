@@ -54,35 +54,44 @@
     // The server sends pieces gzipped and the browser unpacks them, so the bytes counted here match a piece's size.
     const downloadPiece = async (key, piece, onBytes = () => {}) => {
         const response = await request(`/v1/backup/${key}/blobs/${piece.hash}`);
-        const maxBytes = window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile')).collectionBytes;
+        const limits = window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile'));
+        const chat = !piece.uuid && piece.name === 'chat';
+        const maxBytes = chat ? MAX_BACKUP_BYTES : limits.collectionBytes;
+        if (piece.size > maxBytes) throw new Error('云端数据超过当前读取档位');
         if (Number(response.headers.get('content-length')) > maxBytes) throw new Error('云端数据超过当前读取档位');
-        const reader = response.body?.getReader?.();
-        const chunks = [];
-        let received = 0;
-        if (reader) {
-            try {
-                for (;;) {
-                    let timer;
-                    const { done, value } = await Promise.race([reader.read(), new Promise((_, reject) => {
-                        timer = setTimeout(() => reject(new Error('下载超时，请重试')), 45000);
-                    })]).finally(() => clearTimeout(timer));
-                    if (done) break;
+        const chunks = async function* () {
+            const reader = response.body?.getReader?.();
+            let received = 0;
+            if (reader) {
+                try {
+                    for (;;) {
+                        let timer;
+                        const { done, value } = await Promise.race([reader.read(), new Promise((_, reject) => {
+                            timer = setTimeout(() => reject(new Error('下载超时，请重试')), 45000);
+                        })]).finally(() => clearTimeout(timer));
+                        if (done) break;
+                        received += value.length;
+                        if (received > maxBytes || received > piece.size) throw new Error('云端数据大小异常，原数据未改动');
+                        onBytes(received);
+                        yield value;
+                    }
+                } finally { await reader.cancel().catch(() => {}); }
+            } else {
+                const blob = await response.blob();
+                if (blob.size > maxBytes || blob.size > piece.size) throw new Error('云端数据大小异常，原数据未改动');
+                for (let offset = 0; offset < blob.size; offset += limits.chunkBytes) {
+                    const value = new Uint8Array(await blob.slice(offset, offset + limits.chunkBytes).arrayBuffer());
                     received += value.length;
-                    if (received > maxBytes || received > piece.size) throw new Error('云端数据大小异常，原数据未改动');
-                    chunks.push(value);
                     onBytes(received);
+                    yield value;
                 }
-            } finally { await reader.cancel().catch(() => {}); }
-        } else {
-            const blob = await response.blob();
-            received = blob.size;
-            if (received > maxBytes) throw new Error('云端数据超过当前读取档位');
-            chunks.push(blob);
-            onBytes(received);
-        }
-        const blob = new Blob(chunks);
-        if (blob.size !== piece.size || await sha256(await blob.arrayBuffer()) !== piece.hash)
-            throw new Error('云端数据校验失败，原数据未改动，请重新上传备份');
+            }
+        };
+        const verified = window.RPStreamImport.verifyChunks(chunks(), piece);
+        if (chat) return window.RPStreamImport.decodeChat(verified, limits);
+        const buffers = [];
+        for await (const chunk of verified) buffers.push(chunk);
+        const blob = new Blob(buffers);
         try { return JSON.parse(await blob.text()); }
         catch (_) { throw new Error('云端文件内容不完整，请重新上传备份'); }
     };
@@ -269,7 +278,10 @@
         const download = async (piece) => {
             const value = await downloadPiece(key, piece, report);
             if (piece.uuid && (!value || value.uuid !== piece.uuid || Array.isArray(value))) throw new Error('云端角色卡内容与目录不符');
-            if (piece.name === 'chat' && !Array.isArray(value)) throw new Error('云端聊天内容不完整');
+            if (!piece.uuid && piece.name === 'chat') return (async function* () {
+                yield* value;
+                finish(piece);
+            })();
             finish(piece);
             return value;
         };
