@@ -28,6 +28,9 @@
 - 本次标签经 GitHub API 创建（`POST /git/refs`），未用 `git push`：本机代理拒绝 `github.com:443` 的 CONNECT（502），仅 `api.github.com` 可达。主线本身已含 `11ff074`，故无需推送代码。本地同时存在同名 annotated tag，下次 `git fetch --tags` 可能提示 would clobber，可 `git tag -d v2.9.137` 后重新拉取。
 - 构建依赖坑：`scripts/ui-build/package.json` 新增 `@noble/hashes@1.8.0`（2.9.136 的 `stream-import/cloud.mjs` 引用 `@noble/hashes/sha2.js`），本机 `node_modules` 未安装时构建报 `Could not resolve`。拉上游代码后若该文件有变动，先在该目录 `npm install`。
 - 待办：软件内更新源在发布后仍返回 `2.9.136 / 395`（`checkedAt` `2026-11-17T06:34:58Z`），需等 `rp-update-sync.timer` 下一轮同步后复核为 `2.9.137 / 396`，并核对字节数与 SHA256。
+- 2026-11-17 19:22（Asia/Shanghai）RFLinggg 发布 `2.9.139`（versionCode `398`）：修「恢复文件夹档案」对大备份完全不可用。根因：原生 `prepareBackupFileRead` 发放的一次性令牌被清点（survey）与导入两趟读取共用，≥48MB（`SURVEY_MIN = 48 * 1048576`）必然两趟，第二趟 fetch 拿到 `Backup read expired`，界面报「读取本地备份失败，请重新选择文件」。修法：`stream-import-ui.js` 的 `launch()` 每趟 fetch 前调用 `fileRef.resolveUrl()` 重新申请令牌，`startUrl` 增加 `options.resolveUrl` 透传，`app.js` 提供该回调。**原生端未改动，也未看到 Java 源码**（`android/smali` 为 2.8.x 基线，无该方法），若原生对同一文件只允许发一次令牌则本修复无效，需真机验证。
+- 同一版并入上游 `2.9.138`（记忆读取超时后允许切换角色卡，提交 `a9d154f`，测试 `scripts/test-memory-switch-timeout.cjs`）。上游 138 亦为 versionCode 397，与本机先做的 138 撞号，故本地改动顺延到 139 / 398；未回退上游版本号。
+- 待办：软件内更新源在发布后需复核为 `2.9.139 / 398`；大备份恢复（≥48MB）两趟读取需在真机用真实备份验证，验证前不要把该修复当作已确认。
 - 历史 [2.9.117 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.117)，当前 [2.9.126 正式发布](https://github.com/YeGuiiiiii/rp-local/releases/tag/v2.9.126)。仍需 Android 真机验收。
 - RFLinggg 于 2026-11-17 00:14（Asia/Shanghai）发布 `2.9.133`（versionCode `392`）：源码提交 `fe1edf9`，标签 `v2.9.133`，随后与 `origin/main`（`cda8123`）合并为 `e7fafb4` 再推送。发布采用维护者手动上传：`RP-local-2.9.133.apk` `7,926,651` 字节，SHA256 `489bdeab67feb8deaf0a390b2ffebc7782d66201ba5bf4d4cd9188b59865fd05`，附件含 `SHA256SUMS-2.9.133.txt`。
 - `v2.9.133` 标签建立在合并前的 `fe1edf9`，该提交内的 `android-release.yml` 尚无「未准备则跳过」判断，因此 Actions 任务 `43905344676` 因缺少 `dist/RELEASE-2.9.133.md` 失败；正式发布由维护者手动上传完成，未依赖该任务。之后从包含保护步骤的提交打标签即可避免同类红叉，不移动旧标签。
