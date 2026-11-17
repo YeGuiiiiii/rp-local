@@ -7899,6 +7899,17 @@ const app = createApp({
             classicMemories.value = list;
             _classicMemoriesLoaded = true;
         };
+        const adoptCharacterMemories = (loaded, notify = true) => {
+            if (loaded.memoryState) {
+                adoptMemoryState(loaded.memoryState, loaded.summaryMemories);
+                return;
+            }
+            _classicMemoriesLoaded = false;
+            _b1MemoryState = null;
+            _b1MemoryViewKey = '';
+            classicMemories.value = [];
+            if (notify) showToast('当前角色记忆读取超时，已保留原记忆；聊天可继续使用', 'warning', 7000);
+        };
         // 维护代次推进后，已提交基线失效。允许在「意图起点」重读：此时 payload 还没算，
         // 用新基线不构成旧结果覆盖；只有视图与基线逐字一致才换，否则要求重载。
         const refreshMemoryBaseline = async (scopeId, { checkedView = false } = {}) => {
@@ -15318,7 +15329,8 @@ const app = createApp({
             };
             saveGlobalUiTemplateRuntimeForCharacter();
             if (!await saveChatHistoryNow(storyScopeId, historySource)) return false;
-            await saveClassicMemoriesNow(storyScopeId, classicMemorySource);
+            // 没有读到基线就保留库内记忆；已有基线失效时仍按原保护拒绝保存。
+            if (_b1MemoryState) await saveClassicMemoriesNow(storyScopeId, classicMemorySource);
             if (!isCurrentRequest()) return false;
             await saveStoryBranchesAndRuntime(char, branchState);
             return true;
@@ -15577,7 +15589,7 @@ const app = createApp({
                 activeStoryBranchId.value = branchId;
                 resetChatRenderWindow();
                 chatHistory.value = loadedChatHistory;
-                adoptMemoryState(savedClassicMemories.memoryState, savedClassicMemories.summaryMemories);
+                adoptCharacterMemories(savedClassicMemories);
                 loadGlobalUiTemplateRuntimeForCharacter(char);
                 clearStoryBranchTransientContext();
                 updateCurrentStoryBranchSummary();
@@ -15610,43 +15622,41 @@ const app = createApp({
         };
 
         const readCharacterMemories = async (characterId, errorContext = '') => {
-            const memoryState = await window.RPHubStorage.readMemoryState(characterId);
-            const summaryMemories = numberClassicMemories(prepareClassicMemoriesForRuntime(memoryState.list));
-            return { summaryMemories, summaryLoaded: true, memoryState };
-        };
-
-        const loadCharacterMemories = async (characterId, errorContext = '') => {
-            const loadEpoch = _characterSwitchEpoch;
-            _classicMemoriesLoaded = false;
-            // [rphub 2.9.119] 记忆读取必须有上限。
-            //   现象：启动页停在「载入角色记忆」不动，25 秒后提示「数据加载未完成」，
-            //   既不报错也进不去 —— 原因是 readMemoryState 的底层请求既不 resolve 也不 reject，
-            //   整个启动流程就挂在这一次 await 上。记忆是可选能力，不该拿它卡住开机。
-            //   这里 20 秒兜底：超时就放弃本次记忆加载，让启动继续，用户可在记忆工具里重试。
+            // 启动、切卡和切分支共用同一超时；迟到的读取结果不能改动当前界面。
             let timer = null;
             const timeout = new Promise((_, reject) => {
                 timer = setTimeout(() => reject(Object.assign(new Error('记忆读取超时'), { name: 'MemoryLoadTimeout' })), 20000);
             });
-            let loaded = null;
             try {
-                loaded = await Promise.race([readCharacterMemories(characterId, errorContext), timeout]);
+                const memoryState = await Promise.race([window.RPHubStorage.readMemoryState(characterId), timeout]);
+                const summaryMemories = numberClassicMemories(prepareClassicMemoriesForRuntime(memoryState.list));
+                return { summaryMemories, summaryLoaded: true, memoryState };
             } catch (error) {
                 if (error && error.name === 'MemoryLoadTimeout') {
-                    window.__rpMemoryLoadSkipped = true;
-                    try { localStorage.setItem('rphub.memoryBootSkip', '1'); } catch (_) {}
-                    window.__rpBootStage = '载入角色记忆超时（已跳过）';
-                    console.error('[rphub] 记忆读取 20 秒无响应，跳过以完成启动' + errorContext);
-                    return;
+                    console.error('[rphub] 记忆读取 20 秒无响应，保留原记忆并继续' + errorContext);
+                    return { summaryMemories: [], summaryLoaded: false, memoryState: null };
                 }
                 throw error;
             } finally {
                 if (timer) clearTimeout(timer);
             }
+        };
+
+        const loadCharacterMemories = async (characterId, errorContext = '') => {
+            const loadEpoch = _characterSwitchEpoch;
+            _classicMemoriesLoaded = false;
+            const loaded = await readCharacterMemories(characterId, errorContext);
             if (loadEpoch !== _characterSwitchEpoch || getCurrentStoryBranchScopeId() !== characterId) {
                 return;
             }
-            adoptMemoryState(loaded.memoryState, loaded.summaryMemories);
-            try { localStorage.removeItem('rphub.memoryBootSkip'); } catch (_) {}
+            adoptCharacterMemories(loaded, false);
+            if (loaded.summaryLoaded) {
+                try { localStorage.removeItem('rphub.memoryBootSkip'); } catch (_) {}
+            } else {
+                window.__rpMemoryLoadSkipped = true;
+                try { localStorage.setItem('rphub.memoryBootSkip', '1'); } catch (_) {}
+                window.__rpBootStage = '载入角色记忆超时（已跳过）';
+            }
         };
 
         const selectCharacter = async (index, isNewImport = false, { silent = false } = {}) => {
@@ -15748,7 +15758,7 @@ const app = createApp({
                 loadGlobalUiTemplateRuntimeForCharacter(char);
             }
             chatHistory.value = loadedChatHistory;
-            adoptMemoryState(loadedMemories.memoryState, loadedMemories.summaryMemories);
+            adoptCharacterMemories(loadedMemories);
 
             // Load Character Specific Data
             applyCharacterScopedResources(char);
