@@ -1622,8 +1622,26 @@
         const turnEnd = secondaryCompressed
             ? Math.max(turnStart, Number(memory.turnEnd) || fallbackTurn)
             : fallbackTurn;
+        // [rphub 2.9.140] 没有 id 的记忆在这里补一个稳定 id。
+        //   转移/导入过来的旧数据常常缺 id（normalize 之前只保证 classicMemory 与 summary）。
+        //   缺 id 的后果是连锁的：二次压缩按 id 核对「这组原总结还在不在库里」，
+        //   一条都对不上就把整批组静默跳过，进度永远停在 0/N。
+        //   这里用轮次 + 摘要哈希生成，同一条记忆每次加载得到同一个 id，重启也不会漂。
+        const stableId = (() => {
+            const existing = String(memory.id || '').trim();
+            if (existing) return existing;
+            const text = String(memory.summary || '');
+            let hash = 2166136261;
+            for (let index = 0; index < text.length; index += 1) {
+                hash ^= text.charCodeAt(index);
+                hash = Math.imul(hash, 16777619) >>> 0;
+            }
+            const no = Number.isInteger(memory.no) ? memory.no : '';
+            return 'cm-' + turnStart + '-' + turnEnd + '-' + no + '-' + hash.toString(16);
+        })();
         const normalized = {
             ...memoryData,
+            id: stableId,
             turn: secondaryCompressed ? turnEnd : fallbackTurn,
             summary: String(memory.summary || '').trim(),
             sourceUserIds: Array.isArray(memory.sourceUserIds) ? memory.sourceUserIds.filter(Boolean) : [],

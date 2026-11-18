@@ -9042,6 +9042,43 @@ const app = createApp({
                     card.style.aspectRatio = image.naturalWidth + ' / ' + image.naturalHeight;
             }, { once: true });
             image.style.height = '100%';
+            // [rphub 2.9.141] 加载失败必须说出来。
+            //   之前这里只设 src：地址过期、需要鉴权、被拦跨域时，img 静默失败，
+            //   卡片就剩一块黑，用户以为「生成了黑图」，其实是根本没加载出来。
+            image.onerror = () => {
+                if (card.dataset.imageJobState === 'failed') return;
+                card.dataset.imageJobState = 'failed';
+                card.classList.remove('is-generating', 'is-waiting');
+                card.classList.add('is-generation-error');
+                const progressLabel = card.querySelector('.generated-image-progress-label');
+                if (progressLabel) {
+                    progressLabel.textContent = '图片加载失败：地址可能已过期或不支持直接访问，点右下角重新生成';
+                }
+            };
+            image.onload = () => {
+                if (!image.naturalWidth || !image.naturalHeight) return;
+                card.classList.remove('is-generation-error');
+                // [rphub 2.9.141] 区分「真的黑图」和「没加载出来」：
+                //   部分接口对敏感提示词会回一张纯黑占位图，HTTP 与解码都正常，
+                //   用户看到的就是一块黑。这里缩到 8×8 采样，判断整幅是否接近全黑。
+                //   跨域图片会污染画布，取不到像素就静默跳过，不误报。
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = canvas.height = 8;
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
+                    context.drawImage(image, 0, 0, 8, 8);
+                    const pixels = context.getImageData(0, 0, 8, 8).data;
+                    let lum = 0;
+                    for (let index = 0; index < pixels.length; index += 4) {
+                        lum += 0.2126 * pixels[index] + 0.7152 * pixels[index + 1] + 0.0722 * pixels[index + 2];
+                    }
+                    if (lum / (pixels.length / 4) < 6) {
+                        card.classList.add('is-generation-error');
+                        const progressLabel = card.querySelector('.generated-image-progress-label');
+                        if (progressLabel) progressLabel.textContent = '接口返回的是一张纯黑图，可能被服务端内容过滤，可换模型或调整提示词后重新生成';
+                    }
+                } catch (error) { /* 画布被污染就跳过检测 */ }
+            };
             image.src = imageUrl;
             card.classList.remove('is-generating', 'is-generation-error', 'is-waiting');
             card.dataset.imageJobState = job.status;
@@ -9198,11 +9235,27 @@ const app = createApp({
                 const recent = recallRecentImage(card);
                 if (recent) {
                     const image = card.querySelector('img');
-                    if (image) image.src = recent.url;
-                    card.dataset.imageJobState = 'done';
-                    card.classList.remove('is-generating', 'is-waiting', 'is-generation-error');
-                    generatedImageTasks.forEach(task => task.cards.delete(card));
-                    return Promise.resolve({ status: 'done', replayed: true });
+                    if (image) {
+                        // 复用前先探一次：地址过期就作废这条记录，别把一块黑图顶上屏幕。
+                        const probe = new Image();
+                        const verdict = await new Promise(resolve => {
+                            const settle = ok => resolve(ok);
+                            const timer = setTimeout(() => settle(false), 6000);
+                            probe.onload = () => { clearTimeout(timer); settle(true); };
+                            probe.onerror = () => { clearTimeout(timer); settle(false); };
+                            probe.src = recent.url;
+                        });
+                        if (verdict) {
+                            image.src = recent.url;
+                            card.dataset.imageJobState = 'done';
+                            card.classList.remove('is-generating', 'is-waiting', 'is-generation-error');
+                            generatedImageTasks.forEach(task => task.cards.delete(card));
+                            return Promise.resolve({ status: 'done', replayed: true });
+                        }
+                        recentImageResults.forEach((value, key) => {
+                            if (value.url === recent.url) recentImageResults.delete(key);
+                        });
+                    }
                 }
             }
             if (!card.isConnected) return { status: 'failed', cancelled: true };
@@ -13209,7 +13262,11 @@ const app = createApp({
             const storyScopeId = getCurrentStoryBranchScopeId();
             const epoch = _classicExtractionEpoch;
             const concurrency = normalizeClassicMemoryConcurrency(memorySettings.classicConcurrency);
-            let completed = 0;
+            let completed = 0, skipped = 0, merged = 0;
+            // [rphub 2.9.140] 跳过必须计入进度。
+            //   原来两条 `continue` 都不推进 completed：二次压缩若整批命中跳过，
+            //   进度就永远停在「0 / N 组 · 等待中」，用户以为卡死，停止再开始也一样。
+            const advance = () => { completed += 1; onProgress?.(completed, groups.length); };
             onProgress?.(0, groups.length);
             try {
                 for (let offset = 0; offset < groups.length; offset += concurrency) {
@@ -13258,12 +13315,21 @@ const app = createApp({
                             } else {
                                 console.warn('Classic memory secondary compression failed:', result.error);
                                 failed = true;
+                                skipped += 1;
+                                advance();
                                 continue;
                             }
                         }
                         const { group, summary } = result;
-                        const sourceIds = new Set(group.map(memory => String(memory.id)));
-                        if (!group.every(memory => classicMemories.value.some(item => item.id === memory.id))) continue;
+                        // 用 id 集合比对，不再比较对象引用：导入后状态可能被重新接管，
+                        //   同一批记忆会换成新对象，引用比对会整批判「不在库里」而静默跳过。
+                        const liveIds = new Set(classicMemories.value.map(item => String(item.id)));
+                        if (!group.every(memory => liveIds.has(String(memory.id)))) {
+                            console.warn('[记忆补录] 一组原始总结已不在库中，跳过', group[0]?.turn);
+                            skipped += 1;
+                            advance();
+                            continue;
+                        }
                         const startTurn = Number(group[0].turn);
                         const endTurn = Number(group[group.length - 1].turn);
                         const sourceMemories = group.map(memory => cloneForStorage(memory));
@@ -13293,6 +13359,7 @@ const app = createApp({
                             validate: (current, before) => [...sourceIds].every(id => sameMemorySources(current, before, [id]))
                         });
                         if (!merged.published) break;
+                        merged += 1;
                         completed++;
                         onProgress?.(completed, groups.length);
                     }
@@ -13301,6 +13368,7 @@ const app = createApp({
             } finally {
                 // 每组已在提交成功时就落盘，不再需要整表补写
             }
+            return { total: groups.length, merged, skipped };
         };
 
         const restoreSecondaryClassicMemoriesForTurnCount = (totalTurns, source = classicMemories.value) => {
@@ -14500,6 +14568,7 @@ const app = createApp({
             };
 
             let vectorSkippedNoSource = 0;
+            let secondarySkipped = 0;
             const emptyTargets = new Set();
             try {
                 while (_classicBatchExtractAbort === batchController && !batchController.signal.aborted) {
@@ -14592,12 +14661,15 @@ const app = createApp({
                         vectorSkippedNoSource = indexed.skippedNoSource;
                     }
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
-                    await compressEligibleClassicMemories(
+                    const secondaryResult = await compressEligibleClassicMemories(
                         currentTurnCount,
                         batchController.signal,
                         manual,
                         stageProgress('secondary')
                     );
+                    if (secondaryResult && secondaryResult.skipped) {
+                        secondarySkipped += secondaryResult.skipped;
+                    }
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
                     if (isConversationBusy.value) {
                         progress.message = '等待当前回复结束后继续补录。';
@@ -14617,8 +14689,11 @@ const app = createApp({
                     progress.status = incomplete ? 'error' : 'done';
                     const noSourceNote = vectorSkippedNoSource > 0
                         ? `${vectorSkippedNoSource} 条总结找不到对应原文，未建立向量；补齐对话后可再次补录。` : '';
+                    const secondaryNote = secondarySkipped > 0
+                        ? `${secondarySkipped} 组二次压缩被跳过：这些组的原始逐轮总结不在当前角色卡的记忆里，需要先补齐逐轮总结。` : '';
                     progress.message = incomplete ? '部分任务未完成，已完成的记忆已保留，可再次补录。'
-                        : noSourceNote || (progress.stages.some(stage => stage.total > 0) ? '' : '当前没有需要补录的记忆。');
+                        : [noSourceNote, secondaryNote].filter(Boolean).join(' ')
+                            || (progress.stages.some(stage => stage.total > 0) ? '' : '当前没有需要补录的记忆。');
                 }
             } catch (error) {
                 if (_classicBatchExtractAbort !== batchController) return;
