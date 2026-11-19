@@ -1114,426 +1114,433 @@ const _hoisted_635 = {
   key: 0,
   class: "mt-2 flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5"
 }
-const _hoisted_636 = { class: "list-card" }
-const _hoisted_637 = { class: "memory-browse" }
-const _hoisted_638 = { class: "memory-browse__head" }
-const _hoisted_639 = { key: 0 }
-const _hoisted_640 = { key: 1 }
-const _hoisted_641 = ["aria-label"]
-const _hoisted_642 = {
+const _hoisted_636 = {
+  key: 0,
+  class: "empty-state",
+  role: "status"
+}
+const _hoisted_637 = { key: 0 }
+const _hoisted_638 = ["onClick"]
+const _hoisted_639 = { class: "list-card" }
+const _hoisted_640 = { class: "memory-browse" }
+const _hoisted_641 = { class: "memory-browse__head" }
+const _hoisted_642 = { key: 0 }
+const _hoisted_643 = { key: 1 }
+const _hoisted_644 = ["aria-label"]
+const _hoisted_645 = {
   class: "memory-compression__labels",
   "aria-hidden": "true"
 }
-const _hoisted_643 = { class: "memory-timeline" }
-const _hoisted_644 = { class: "memory-item__head" }
-const _hoisted_645 = { class: "memory-item__turn" }
-const _hoisted_646 = {
+const _hoisted_646 = { class: "memory-timeline" }
+const _hoisted_647 = { class: "memory-item__head" }
+const _hoisted_648 = { class: "memory-item__turn" }
+const _hoisted_649 = {
   class: "memory-item__chars",
   title: "本轮原始正文 → 使用总结后的正文"
 }
-const _hoisted_647 = ["onClick", "disabled", "title", "aria-label"]
-const _hoisted_648 = ["onClick", "disabled"]
-const _hoisted_649 = {
+const _hoisted_650 = ["onClick", "disabled", "title", "aria-label"]
+const _hoisted_651 = ["onClick", "disabled"]
+const _hoisted_652 = {
   key: 0,
   class: "memory-item__editor"
 }
-const _hoisted_650 = ["onUpdate:modelValue"]
-const _hoisted_651 = { class: "memory-item__editor-actions" }
-const _hoisted_652 = ["onClick"]
-const _hoisted_653 = ["onClick", "disabled"]
-const _hoisted_654 = {
+const _hoisted_653 = ["onUpdate:modelValue"]
+const _hoisted_654 = { class: "memory-item__editor-actions" }
+const _hoisted_655 = ["onClick"]
+const _hoisted_656 = ["onClick", "disabled"]
+const _hoisted_657 = {
   key: 1,
   class: "memory-item__text"
 }
-const _hoisted_655 = {
-  key: 1,
+const _hoisted_658 = {
+  key: 2,
   class: "empty-state"
 }
-const _hoisted_656 = {
-  key: 1,
-  class: "empty-state"
-}
-const _hoisted_657 = ["onScrollPassive"]
-const _hoisted_658 = ["onClick"]
 const _hoisted_659 = {
+  key: 1,
+  class: "empty-state"
+}
+const _hoisted_660 = ["onScrollPassive"]
+const _hoisted_661 = ["onClick"]
+const _hoisted_662 = {
   class: "settings-icon-button cursor-pointer",
   title: "导入"
 }
-const _hoisted_660 = ["onChange"]
-const _hoisted_661 = ["onClick"]
-const _hoisted_662 = {
+const _hoisted_663 = ["onChange"]
+const _hoisted_664 = ["onClick"]
+const _hoisted_665 = {
   key: 0,
   class: "resource-batch-status",
   role: "status"
 }
-const _hoisted_663 = ["disabled", "onClick"]
-const _hoisted_664 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
-const _hoisted_665 = ["onClick", "aria-expanded"]
-const _hoisted_666 = { class: "flex items-center" }
-const _hoisted_667 = ["aria-hidden", "inert"]
-const _hoisted_668 = { class: "settings-collapse__inner" }
-const _hoisted_669 = { class: "settings-collapse__content px-4 pb-4 pt-3 border-t border-gray-100" }
-const _hoisted_670 = { class: "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm" }
-const _hoisted_671 = { class: "flex justify-between items-center mb-2" }
-const _hoisted_672 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_673 = ["onChange", "onUpdate:modelValue"]
+const _hoisted_666 = ["disabled", "onClick"]
+const _hoisted_667 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
+const _hoisted_668 = ["onClick", "aria-expanded"]
+const _hoisted_669 = { class: "flex items-center" }
+const _hoisted_670 = ["aria-hidden", "inert"]
+const _hoisted_671 = { class: "settings-collapse__inner" }
+const _hoisted_672 = { class: "settings-collapse__content px-4 pb-4 pt-3 border-t border-gray-100" }
+const _hoisted_673 = { class: "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm" }
 const _hoisted_674 = { class: "flex justify-between items-center mb-2" }
 const _hoisted_675 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
 const _hoisted_676 = ["onChange", "onUpdate:modelValue"]
-const _hoisted_677 = {
+const _hoisted_677 = { class: "flex justify-between items-center mb-2" }
+const _hoisted_678 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
+const _hoisted_679 = ["onChange", "onUpdate:modelValue"]
+const _hoisted_680 = {
   key: 1,
   class: "worldinfo-pager worldinfo-pager--top"
 }
-const _hoisted_678 = ["disabled", "onClick"]
-const _hoisted_679 = { class: "worldinfo-pager-info" }
-const _hoisted_680 = ["disabled", "onClick"]
-const _hoisted_681 = ["onPointerdownCapture", "onPointermoveCapturePassive", "onPointercancelCapture", "onClickCapture"]
-const _hoisted_682 = ["data-resource-index"]
-const _hoisted_683 = { class: "sortable-item-main" }
-const _hoisted_684 = {
+const _hoisted_681 = ["disabled", "onClick"]
+const _hoisted_682 = { class: "worldinfo-pager-info" }
+const _hoisted_683 = ["disabled", "onClick"]
+const _hoisted_684 = ["onPointerdownCapture", "onPointermoveCapturePassive", "onPointercancelCapture", "onClickCapture"]
+const _hoisted_685 = ["data-resource-index"]
+const _hoisted_686 = { class: "sortable-item-main" }
+const _hoisted_687 = {
   key: 0,
   class: "resource-select"
 }
-const _hoisted_685 = ["aria-label", "checked", "onChange"]
-const _hoisted_686 = {
+const _hoisted_688 = ["aria-label", "checked", "onChange"]
+const _hoisted_689 = {
   key: 1,
   class: "sortable-list-handle",
   title: "拖动排序"
 }
-const _hoisted_687 = { class: "min-w-0" }
-const _hoisted_688 = { class: "sortable-item-heading" }
-const _hoisted_689 = { class: "truncate" }
-const _hoisted_690 = ["aria-label", "onClick"]
-const _hoisted_691 = { class: "sortable-item-actions" }
-const _hoisted_692 = { class: "relative inline-flex items-center cursor-pointer" }
-const _hoisted_693 = ["checked", "onChange"]
-const _hoisted_694 = { class: "sortable-item-buttons" }
-const _hoisted_695 = ["onClick"]
-const _hoisted_696 = ["onClick"]
-const _hoisted_697 = {
+const _hoisted_690 = { class: "min-w-0" }
+const _hoisted_691 = { class: "sortable-item-heading" }
+const _hoisted_692 = { class: "truncate" }
+const _hoisted_693 = ["aria-label", "onClick"]
+const _hoisted_694 = { class: "sortable-item-actions" }
+const _hoisted_695 = { class: "relative inline-flex items-center cursor-pointer" }
+const _hoisted_696 = ["checked", "onChange"]
+const _hoisted_697 = { class: "sortable-item-buttons" }
+const _hoisted_698 = ["onClick"]
+const _hoisted_699 = ["onClick"]
+const _hoisted_700 = {
   key: 2,
   class: "worldinfo-pager worldinfo-pager--bottom"
 }
-const _hoisted_698 = ["disabled", "onClick"]
-const _hoisted_699 = { class: "worldinfo-pager-info" }
-const _hoisted_700 = ["disabled", "onClick"]
-const _hoisted_701 = ["onClick"]
-const _hoisted_702 = {
+const _hoisted_701 = ["disabled", "onClick"]
+const _hoisted_702 = { class: "worldinfo-pager-info" }
+const _hoisted_703 = ["disabled", "onClick"]
+const _hoisted_704 = ["onClick"]
+const _hoisted_705 = {
   key: 3,
   class: "fixed inset-0 z-[95] bg-gray-50 flex flex-col"
 }
-const _hoisted_703 = { class: "flex items-center gap-2 px-3 py-2.5 border-b border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0" }
-const _hoisted_704 = ["onClick"]
-const _hoisted_705 = ["onClick", "disabled"]
-const _hoisted_706 = { class: "flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-3" }
-const _hoisted_707 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_708 = { class: "text-xs font-mono text-gray-600 break-all" }
-const _hoisted_709 = { class: "mt-3 grid grid-cols-2 gap-2" }
-const _hoisted_710 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_711 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_712 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_713 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_714 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_715 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_716 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_717 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_718 = { class: "mt-3 flex items-center gap-2 flex-wrap" }
-const _hoisted_719 = ["onUpdate:modelValue", "onChange"]
-const _hoisted_720 = ["onUpdate:modelValue", "onChange"]
-const _hoisted_721 = ["onClick"]
-const _hoisted_722 = {
+const _hoisted_706 = { class: "flex items-center gap-2 px-3 py-2.5 border-b border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0" }
+const _hoisted_707 = ["onClick"]
+const _hoisted_708 = ["onClick", "disabled"]
+const _hoisted_709 = { class: "flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-3" }
+const _hoisted_710 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_711 = { class: "text-xs font-mono text-gray-600 break-all" }
+const _hoisted_712 = { class: "mt-3 grid grid-cols-2 gap-2" }
+const _hoisted_713 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_714 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_715 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_716 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_717 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_718 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_719 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_720 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_721 = { class: "mt-3 flex items-center gap-2 flex-wrap" }
+const _hoisted_722 = ["onUpdate:modelValue", "onChange"]
+const _hoisted_723 = ["onUpdate:modelValue", "onChange"]
+const _hoisted_724 = ["onClick"]
+const _hoisted_725 = {
   key: 0,
   class: "mt-3 text-xs font-bold text-red-600"
 }
-const _hoisted_723 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_724 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_725 = ["onClick", "disabled"]
-const _hoisted_726 = {
+const _hoisted_726 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_727 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_728 = ["onClick", "disabled"]
+const _hoisted_729 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_727 = {
+const _hoisted_730 = {
   key: 1,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_728 = {
+const _hoisted_731 = {
   key: 2,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_729 = {
+const _hoisted_732 = {
   key: 3,
   class: "mt-3 space-y-2"
 }
-const _hoisted_730 = {
+const _hoisted_733 = {
   key: 0,
   class: "rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] font-bold text-amber-700 leading-relaxed"
 }
-const _hoisted_731 = { class: "flex-1 min-w-0" }
-const _hoisted_732 = { class: "text-xs font-bold text-gray-700 truncate" }
-const _hoisted_733 = {
+const _hoisted_734 = { class: "flex-1 min-w-0" }
+const _hoisted_735 = { class: "text-xs font-bold text-gray-700 truncate" }
+const _hoisted_736 = {
   key: 0,
   class: "text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary-100 text-primary-700 mr-1"
 }
-const _hoisted_734 = { class: "text-[11px] text-gray-400 truncate" }
-const _hoisted_735 = {
+const _hoisted_737 = { class: "text-[11px] text-gray-400 truncate" }
+const _hoisted_738 = {
   key: 0,
   class: "text-amber-600"
 }
-const _hoisted_736 = ["onClick", "disabled"]
-const _hoisted_737 = ["onClick", "disabled"]
-const _hoisted_738 = ["onClick", "title"]
-const _hoisted_739 = {
+const _hoisted_739 = ["onClick", "disabled"]
+const _hoisted_740 = ["onClick", "disabled"]
+const _hoisted_741 = ["onClick", "title"]
+const _hoisted_742 = {
   key: 0,
   class: "w-full flex flex-wrap gap-2 pt-1"
 }
-const _hoisted_740 = ["onClick"]
-const _hoisted_741 = ["onClick"]
-const _hoisted_742 = ["onClick"]
 const _hoisted_743 = ["onClick"]
-const _hoisted_744 = {
+const _hoisted_744 = ["onClick"]
+const _hoisted_745 = ["onClick"]
+const _hoisted_746 = ["onClick"]
+const _hoisted_747 = {
   key: 4,
   class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 p-3"
 }
-const _hoisted_745 = { class: "flex items-center justify-between gap-2 mb-1" }
-const _hoisted_746 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_747 = { class: "flex gap-2" }
-const _hoisted_748 = ["onClick"]
-const _hoisted_749 = ["onClick"]
-const _hoisted_750 = { class: "text-[11px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar" }
-const _hoisted_751 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_752 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_753 = ["onClick"]
-const _hoisted_754 = {
+const _hoisted_748 = { class: "flex items-center justify-between gap-2 mb-1" }
+const _hoisted_749 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_750 = { class: "flex gap-2" }
+const _hoisted_751 = ["onClick"]
+const _hoisted_752 = ["onClick"]
+const _hoisted_753 = { class: "text-[11px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar" }
+const _hoisted_754 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_755 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_756 = ["onClick"]
+const _hoisted_757 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_755 = {
+const _hoisted_758 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_756 = {
+const _hoisted_759 = {
   key: 2,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_757 = {
+const _hoisted_760 = {
   key: 3,
   class: "mt-3 max-h-80 overflow-y-auto custom-scrollbar space-y-1.5"
 }
-const _hoisted_758 = {
+const _hoisted_761 = {
   key: 0,
   class: "text-xs text-gray-400"
 }
-const _hoisted_759 = { class: "flex items-start gap-2" }
-const _hoisted_760 = { class: "flex-1 min-w-0" }
-const _hoisted_761 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_762 = { key: 0 }
-const _hoisted_763 = {
+const _hoisted_762 = { class: "flex items-start gap-2" }
+const _hoisted_763 = { class: "flex-1 min-w-0" }
+const _hoisted_764 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_765 = { key: 0 }
+const _hoisted_766 = {
   key: 1,
   class: "ml-1 text-[11px] font-normal text-primary-600"
 }
-const _hoisted_764 = { class: "ml-1 text-[11px] font-normal text-gray-400" }
-const _hoisted_765 = { class: "text-[11px] text-gray-500 leading-relaxed break-words" }
-const _hoisted_766 = {
+const _hoisted_767 = { class: "ml-1 text-[11px] font-normal text-gray-400" }
+const _hoisted_768 = { class: "text-[11px] text-gray-500 leading-relaxed break-words" }
+const _hoisted_769 = {
   key: 0,
   class: "mt-1.5 flex gap-1.5"
 }
-const _hoisted_767 = ["onClick"]
-const _hoisted_768 = ["onClick", "disabled"]
-const _hoisted_769 = ["onClick"]
 const _hoisted_770 = ["onClick"]
-const _hoisted_771 = ["onClick"]
-const _hoisted_772 = {
+const _hoisted_771 = ["onClick", "disabled"]
+const _hoisted_772 = ["onClick"]
+const _hoisted_773 = ["onClick"]
+const _hoisted_774 = ["onClick"]
+const _hoisted_775 = {
   key: 1,
   class: "mt-1.5"
 }
-const _hoisted_773 = ["onUpdate:modelValue"]
-const _hoisted_774 = { class: "mt-1.5 flex gap-2" }
-const _hoisted_775 = ["onClick", "disabled"]
-const _hoisted_776 = ["onClick", "disabled"]
-const _hoisted_777 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_778 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_776 = ["onUpdate:modelValue"]
+const _hoisted_777 = { class: "mt-1.5 flex gap-2" }
+const _hoisted_778 = ["onClick", "disabled"]
 const _hoisted_779 = ["onClick", "disabled"]
-const _hoisted_780 = ["onClick"]
-const _hoisted_781 = { class: "mt-3 grid grid-cols-2 gap-2" }
-const _hoisted_782 = { class: "block" }
-const _hoisted_783 = ["onUpdate:modelValue", "onChange", "disabled"]
-const _hoisted_784 = { class: "block" }
-const _hoisted_785 = ["onUpdate:modelValue", "onChange", "disabled"]
-const _hoisted_786 = { class: "mt-2 text-xs text-gray-500 leading-relaxed" }
-const _hoisted_787 = { class: "font-bold text-gray-700" }
-const _hoisted_788 = {
+const _hoisted_780 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_781 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_782 = ["onClick", "disabled"]
+const _hoisted_783 = ["onClick"]
+const _hoisted_784 = { class: "mt-3 grid grid-cols-2 gap-2" }
+const _hoisted_785 = { class: "block" }
+const _hoisted_786 = ["onUpdate:modelValue", "onChange", "disabled"]
+const _hoisted_787 = { class: "block" }
+const _hoisted_788 = ["onUpdate:modelValue", "onChange", "disabled"]
+const _hoisted_789 = { class: "mt-2 text-xs text-gray-500 leading-relaxed" }
+const _hoisted_790 = { class: "font-bold text-gray-700" }
+const _hoisted_791 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-primary-600"
 }
-const _hoisted_789 = { key: 0 }
-const _hoisted_790 = { key: 1 }
-const _hoisted_791 = {
+const _hoisted_792 = { key: 0 }
+const _hoisted_793 = { key: 1 }
+const _hoisted_794 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_792 = {
+const _hoisted_795 = {
   key: 2,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_793 = {
+const _hoisted_796 = {
   key: 3,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_794 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_795 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_796 = ["onClick"]
-const _hoisted_797 = {
+const _hoisted_797 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_798 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_799 = ["onClick"]
+const _hoisted_800 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_798 = {
+const _hoisted_801 = {
   key: 1,
   class: "mt-3"
 }
-const _hoisted_799 = { class: "text-xs text-gray-500 mb-2" }
-const _hoisted_800 = { key: 0 }
-const _hoisted_801 = {
+const _hoisted_802 = { class: "text-xs text-gray-500 mb-2" }
+const _hoisted_803 = { key: 0 }
+const _hoisted_804 = {
   key: 0,
   class: "mb-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700 leading-relaxed"
 }
-const _hoisted_802 = {
+const _hoisted_805 = {
   key: 1,
   class: "text-xs text-gray-400"
 }
-const _hoisted_803 = {
+const _hoisted_806 = {
   key: 2,
   class: "max-h-64 overflow-y-auto custom-scrollbar space-y-1.5"
 }
-const _hoisted_804 = ["value", "onUpdate:modelValue"]
-const _hoisted_805 = { class: "flex-1 min-w-0" }
-const _hoisted_806 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_807 = {
+const _hoisted_807 = ["value", "onUpdate:modelValue"]
+const _hoisted_808 = { class: "flex-1 min-w-0" }
+const _hoisted_809 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_810 = {
   key: 0,
   class: "ml-1 text-[11px] font-normal text-primary-600"
 }
-const _hoisted_808 = { class: "text-[11px] text-gray-400" }
-const _hoisted_809 = ["onClick", "disabled"]
-const _hoisted_810 = ["onClick"]
-const _hoisted_811 = {
+const _hoisted_811 = { class: "text-[11px] text-gray-400" }
+const _hoisted_812 = ["onClick", "disabled"]
+const _hoisted_813 = ["onClick"]
+const _hoisted_814 = {
   key: 2,
   class: "mt-3"
 }
-const _hoisted_812 = { class: "text-xs text-gray-500 mb-1" }
-const _hoisted_813 = ["onUpdate:modelValue"]
-const _hoisted_814 = { class: "mt-2 flex gap-2" }
-const _hoisted_815 = ["onClick", "disabled"]
-const _hoisted_816 = ["onClick", "disabled"]
-const _hoisted_817 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_818 = { class: "mt-1 flex items-center gap-2 flex-wrap" }
-const _hoisted_819 = { class: "text-[11px] text-gray-500 leading-relaxed" }
-const _hoisted_820 = ["onClick"]
-const _hoisted_821 = ["onClick", "disabled"]
-const _hoisted_822 = ["onChange"]
-const _hoisted_823 = { class: "text-xs text-gray-500 leading-relaxed" }
-const _hoisted_824 = { key: 0 }
-const _hoisted_825 = { key: 1 }
-const _hoisted_826 = { class: "mt-3 flex gap-2" }
-const _hoisted_827 = ["onClick", "disabled"]
-const _hoisted_828 = ["onClick", "disabled"]
-const _hoisted_829 = ["onClick"]
-const _hoisted_830 = {
+const _hoisted_815 = { class: "text-xs text-gray-500 mb-1" }
+const _hoisted_816 = ["onUpdate:modelValue"]
+const _hoisted_817 = { class: "mt-2 flex gap-2" }
+const _hoisted_818 = ["onClick", "disabled"]
+const _hoisted_819 = ["onClick", "disabled"]
+const _hoisted_820 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_821 = { class: "mt-1 flex items-center gap-2 flex-wrap" }
+const _hoisted_822 = { class: "text-[11px] text-gray-500 leading-relaxed" }
+const _hoisted_823 = ["onClick"]
+const _hoisted_824 = ["onClick", "disabled"]
+const _hoisted_825 = ["onChange"]
+const _hoisted_826 = { class: "text-xs text-gray-500 leading-relaxed" }
+const _hoisted_827 = { key: 0 }
+const _hoisted_828 = { key: 1 }
+const _hoisted_829 = { class: "mt-3 flex gap-2" }
+const _hoisted_830 = ["onClick", "disabled"]
+const _hoisted_831 = ["onClick", "disabled"]
+const _hoisted_832 = ["onClick"]
+const _hoisted_833 = {
   key: 1,
   class: "mt-2 flex gap-2"
 }
-const _hoisted_831 = ["onClick", "disabled"]
-const _hoisted_832 = ["onClick", "disabled"]
-const _hoisted_833 = {
+const _hoisted_834 = ["onClick", "disabled"]
+const _hoisted_835 = ["onClick", "disabled"]
+const _hoisted_836 = {
   key: 2,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_834 = {
+const _hoisted_837 = {
   key: 3,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_835 = {
+const _hoisted_838 = {
   key: 4,
   class: "mt-3"
 }
-const _hoisted_836 = { class: "text-xs text-gray-500 mb-2" }
-const _hoisted_837 = { key: 0 }
-const _hoisted_838 = { class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar" }
-const _hoisted_839 = { class: "flex items-center gap-2 mb-1.5" }
-const _hoisted_840 = ["onUpdate:modelValue"]
-const _hoisted_841 = ["onUpdate:modelValue"]
-const _hoisted_842 = { class: "mt-1.5 flex gap-2" }
-const _hoisted_843 = ["onClick"]
-const _hoisted_844 = ["onClick"]
-const _hoisted_845 = { class: "mt-2 flex gap-2" }
+const _hoisted_839 = { class: "text-xs text-gray-500 mb-2" }
+const _hoisted_840 = { key: 0 }
+const _hoisted_841 = { class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar" }
+const _hoisted_842 = { class: "flex items-center gap-2 mb-1.5" }
+const _hoisted_843 = ["onUpdate:modelValue"]
+const _hoisted_844 = ["onUpdate:modelValue"]
+const _hoisted_845 = { class: "mt-1.5 flex gap-2" }
 const _hoisted_846 = ["onClick"]
 const _hoisted_847 = ["onClick"]
-const _hoisted_848 = ["onClick"]
-const _hoisted_849 = { class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2" }
-const _hoisted_850 = { class: "mt-2" }
-const _hoisted_851 = ["onUpdate:modelValue"]
-const _hoisted_852 = { class: "mt-1 flex gap-2" }
-const _hoisted_853 = ["onClick"]
-const _hoisted_854 = ["onClick"]
-const _hoisted_855 = { class: "mt-3" }
-const _hoisted_856 = ["onUpdate:modelValue"]
-const _hoisted_857 = { class: "mt-1 flex gap-2" }
-const _hoisted_858 = ["onClick"]
-const _hoisted_859 = ["onClick"]
-const _hoisted_860 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_861 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_848 = { class: "mt-2 flex gap-2" }
+const _hoisted_849 = ["onClick"]
+const _hoisted_850 = ["onClick"]
+const _hoisted_851 = ["onClick"]
+const _hoisted_852 = { class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2" }
+const _hoisted_853 = { class: "mt-2" }
+const _hoisted_854 = ["onUpdate:modelValue"]
+const _hoisted_855 = { class: "mt-1 flex gap-2" }
+const _hoisted_856 = ["onClick"]
+const _hoisted_857 = ["onClick"]
+const _hoisted_858 = { class: "mt-3" }
+const _hoisted_859 = ["onUpdate:modelValue"]
+const _hoisted_860 = { class: "mt-1 flex gap-2" }
+const _hoisted_861 = ["onClick"]
 const _hoisted_862 = ["onClick"]
-const _hoisted_863 = {
+const _hoisted_863 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_864 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_865 = ["onClick"]
+const _hoisted_866 = {
   key: 0,
   class: "mt-3"
 }
-const _hoisted_864 = {
+const _hoisted_867 = {
   key: 0,
   class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar mb-2"
 }
-const _hoisted_865 = { class: "text-[11px] font-bold text-gray-500 mb-1" }
-const _hoisted_866 = { class: "text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words" }
-const _hoisted_867 = ["onClick"]
-const _hoisted_868 = ["onUpdate:modelValue", "disabled"]
-const _hoisted_869 = { class: "mt-2 flex gap-2" }
-const _hoisted_870 = ["onClick", "disabled"]
-const _hoisted_871 = ["onClick"]
-const _hoisted_872 = ["onClick"]
-const _hoisted_873 = {
+const _hoisted_868 = { class: "text-[11px] font-bold text-gray-500 mb-1" }
+const _hoisted_869 = { class: "text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words" }
+const _hoisted_870 = ["onClick"]
+const _hoisted_871 = ["onUpdate:modelValue", "disabled"]
+const _hoisted_872 = { class: "mt-2 flex gap-2" }
+const _hoisted_873 = ["onClick", "disabled"]
+const _hoisted_874 = ["onClick"]
+const _hoisted_875 = ["onClick"]
+const _hoisted_876 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_874 = {
+const _hoisted_877 = {
   key: 2,
   class: "mt-2 text-[11px] text-gray-400 leading-relaxed"
 }
-const _hoisted_875 = {
+const _hoisted_878 = {
   key: 0,
   class: "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-sm font-bold text-emerald-700"
 }
-const _hoisted_876 = { class: "flex items-center gap-2 mb-1" }
-const _hoisted_877 = { class: "text-xs text-gray-400 truncate" }
-const _hoisted_878 = { class: "text-sm text-gray-700 leading-relaxed" }
-const _hoisted_879 = { class: "choice-modal" }
-const _hoisted_880 = { class: "choice-modal__head" }
-const _hoisted_881 = ["onClick", "disabled"]
-const _hoisted_882 = {
+const _hoisted_879 = { class: "flex items-center gap-2 mb-1" }
+const _hoisted_880 = { class: "text-xs text-gray-400 truncate" }
+const _hoisted_881 = { class: "text-sm text-gray-700 leading-relaxed" }
+const _hoisted_882 = { class: "choice-modal" }
+const _hoisted_883 = { class: "choice-modal__head" }
+const _hoisted_884 = ["onClick", "disabled"]
+const _hoisted_885 = {
   key: 0,
   class: "mt-5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-center"
 }
-const _hoisted_883 = { class: "mt-1 font-mono text-xl font-bold tracking-widest text-gray-900 select-all" }
-const _hoisted_884 = { class: "mt-1 text-xs text-gray-400" }
-const _hoisted_885 = ["onClick"]
-const _hoisted_886 = ["onUpdate:modelValue", "disabled", "onKeydown"]
-const _hoisted_887 = {
+const _hoisted_886 = { class: "mt-1 font-mono text-xl font-bold tracking-widest text-gray-900 select-all" }
+const _hoisted_887 = { class: "mt-1 text-xs text-gray-400" }
+const _hoisted_888 = ["onClick"]
+const _hoisted_889 = ["onUpdate:modelValue", "disabled", "onKeydown"]
+const _hoisted_890 = {
   key: 2,
   class: "mt-5"
 }
-const _hoisted_888 = { class: "mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-gray-600" }
-const _hoisted_889 = { class: "tabular-nums" }
-const _hoisted_890 = { class: "h-2 overflow-hidden rounded-full bg-primary-50" }
-const _hoisted_891 = { class: "mt-2 h-4 text-xs tabular-nums text-gray-400" }
-const _hoisted_892 = { class: "mt-5 flex gap-2" }
-const _hoisted_893 = ["onClick", "disabled"]
-const _hoisted_894 = ["onClick", "disabled"]
+const _hoisted_891 = { class: "mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-gray-600" }
+const _hoisted_892 = { class: "tabular-nums" }
+const _hoisted_893 = { class: "h-2 overflow-hidden rounded-full bg-primary-50" }
+const _hoisted_894 = { class: "mt-2 h-4 text-xs tabular-nums text-gray-400" }
+const _hoisted_895 = { class: "mt-5 flex gap-2" }
+const _hoisted_896 = ["onClick", "disabled"]
+const _hoisted_897 = ["onClick", "disabled"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -6501,167 +6508,182 @@ return function render(_ctx, _cache) {
               _createCommentVNode(" Memory overview and timeline "),
               (memorySettings.enabled)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                    (displayedClassicMemories.length)
-                      ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                          _createElementVNode("div", _hoisted_636, [
-                            _createElementVNode("header", _hoisted_637, [
-                              _createElementVNode("div", _hoisted_638, [
-                                _cache[229] || (_cache[229] = _createElementVNode("h3", null, "记忆浏览", -1 /* CACHED */)),
-                                (summaryCompressionRate === null)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_639, "未压缩"))
-                                  : (_openBlock(), _createElementBlock("span", _hoisted_640, [
-                                      _cache[228] || (_cache[228] = _createTextVNode("压缩率", -1 /* CACHED */)),
-                                      _createElementVNode("b", null, _toDisplayString(summaryCompressionRate) + "%", 1 /* TEXT */)
-                                    ]))
-                              ]),
-                              _createCommentVNode(" Solid = what the context keeps, gray stripes = what the summaries saved. "),
-                              (summaryCompressionRate !== null && conversationBodyLength > 0)
-                                ? (_openBlock(), _createElementBlock("div", {
-                                    key: 0,
-                                    class: "memory-compression",
-                                    role: "img",
-                                    "aria-label": '正文压缩前 ' + conversationBodyLength.toLocaleString() + ' 字，使用总结后 ' + summaryCompressedBodyLength.toLocaleString() + ' 字',
-                                    title: "按当前对话正文统计，压缩后包含保留的原文",
-                                    style: _normalizeStyle({ '--summary-retained': Math.min(100, summaryCompressedBodyLength / conversationBodyLength * 100) + '%' })
-                                  }, [
-                                    _cache[235] || (_cache[235] = _createElementVNode("div", {
-                                      class: "memory-compression__track",
-                                      "aria-hidden": "true"
+                    (currentCharacter && classicMemoryLoad.status !== 'ready')
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_636, [
+                          _createElementVNode("p", null, _toDisplayString(classicMemoryLoad.status === 'loading' ? '正在读取记忆…' : '记忆尚未读取成功'), 1 /* TEXT */),
+                          (classicMemoryLoad.error)
+                            ? (_openBlock(), _createElementBlock("small", _hoisted_637, _toDisplayString(classicMemoryLoad.error), 1 /* TEXT */))
+                            : _createCommentVNode("v-if", true),
+                          (classicMemoryLoad.status !== 'loading')
+                            ? (_openBlock(), _createElementBlock("button", {
+                                key: 1,
+                                type: "button",
+                                class: "rphub-composer-btn mt-3",
+                                onClick: $event => (ensureCurrentCharacterMemories())
+                              }, "重新读取记忆", 8 /* PROPS */, _hoisted_638))
+                            : _createCommentVNode("v-if", true)
+                        ]))
+                      : (displayedClassicMemories.length)
+                        ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
+                            _createElementVNode("div", _hoisted_639, [
+                              _createElementVNode("header", _hoisted_640, [
+                                _createElementVNode("div", _hoisted_641, [
+                                  _cache[229] || (_cache[229] = _createElementVNode("h3", null, "记忆浏览", -1 /* CACHED */)),
+                                  (summaryCompressionRate === null)
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_642, "未压缩"))
+                                    : (_openBlock(), _createElementBlock("span", _hoisted_643, [
+                                        _cache[228] || (_cache[228] = _createTextVNode("压缩率", -1 /* CACHED */)),
+                                        _createElementVNode("b", null, _toDisplayString(summaryCompressionRate) + "%", 1 /* TEXT */)
+                                      ]))
+                                ]),
+                                _createCommentVNode(" Solid = what the context keeps, gray stripes = what the summaries saved. "),
+                                (summaryCompressionRate !== null && conversationBodyLength > 0)
+                                  ? (_openBlock(), _createElementBlock("div", {
+                                      key: 0,
+                                      class: "memory-compression",
+                                      role: "img",
+                                      "aria-label": '正文压缩前 ' + conversationBodyLength.toLocaleString() + ' 字，使用总结后 ' + summaryCompressedBodyLength.toLocaleString() + ' 字',
+                                      title: "按当前对话正文统计，压缩后包含保留的原文",
+                                      style: _normalizeStyle({ '--summary-retained': Math.min(100, summaryCompressedBodyLength / conversationBodyLength * 100) + '%' })
                                     }, [
-                                      _createElementVNode("div", { class: "memory-compression__fill" })
-                                    ], -1 /* CACHED */)),
-                                    _createElementVNode("div", _hoisted_642, [
-                                      _createElementVNode("span", null, [
-                                        _cache[230] || (_cache[230] = _createElementVNode("i", { class: "is-kept" }, null, -1 /* CACHED */)),
-                                        _cache[231] || (_cache[231] = _createTextVNode("后 ", -1 /* CACHED */)),
-                                        _createElementVNode("strong", null, _toDisplayString(summaryCompressedBodyLength.toLocaleString()), 1 /* TEXT */),
-                                        _cache[232] || (_cache[232] = _createTextVNode(" 字", -1 /* CACHED */))
-                                      ]),
-                                      _createElementVNode("span", null, [
-                                        _cache[233] || (_cache[233] = _createTextVNode("原 ", -1 /* CACHED */)),
-                                        _createElementVNode("strong", null, _toDisplayString(conversationBodyLength.toLocaleString()), 1 /* TEXT */),
-                                        _cache[234] || (_cache[234] = _createTextVNode(" 字", -1 /* CACHED */))
+                                      _cache[235] || (_cache[235] = _createElementVNode("div", {
+                                        class: "memory-compression__track",
+                                        "aria-hidden": "true"
+                                      }, [
+                                        _createElementVNode("div", { class: "memory-compression__fill" })
+                                      ], -1 /* CACHED */)),
+                                      _createElementVNode("div", _hoisted_645, [
+                                        _createElementVNode("span", null, [
+                                          _cache[230] || (_cache[230] = _createElementVNode("i", { class: "is-kept" }, null, -1 /* CACHED */)),
+                                          _cache[231] || (_cache[231] = _createTextVNode("后 ", -1 /* CACHED */)),
+                                          _createElementVNode("strong", null, _toDisplayString(summaryCompressedBodyLength.toLocaleString()), 1 /* TEXT */),
+                                          _cache[232] || (_cache[232] = _createTextVNode(" 字", -1 /* CACHED */))
+                                        ]),
+                                        _createElementVNode("span", null, [
+                                          _cache[233] || (_cache[233] = _createTextVNode("原 ", -1 /* CACHED */)),
+                                          _createElementVNode("strong", null, _toDisplayString(conversationBodyLength.toLocaleString()), 1 /* TEXT */),
+                                          _cache[234] || (_cache[234] = _createTextVNode(" 字", -1 /* CACHED */))
+                                        ])
                                       ])
-                                    ])
-                                  ], 12 /* STYLE, PROPS */, _hoisted_641))
-                                : _createCommentVNode("v-if", true)
-                            ]),
-                            _createElementVNode("ol", _hoisted_643, [
-                              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(displayedClassicMemories, (memory) => {
-                                return (_openBlock(), _createElementBlock("li", {
-                                  key: memory.id,
-                                  class: "memory-item"
-                                }, [
-                                  _createElementVNode("div", _hoisted_644, [
-                                    _createElementVNode("span", _hoisted_645, "第 " + _toDisplayString(memory.displayTurnStart === memory.displayTurnEnd
+                                    ], 12 /* STYLE, PROPS */, _hoisted_644))
+                                  : _createCommentVNode("v-if", true)
+                              ]),
+                              _createElementVNode("ol", _hoisted_646, [
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(displayedClassicMemories, (memory) => {
+                                  return (_openBlock(), _createElementBlock("li", {
+                                    key: memory.id,
+                                    class: "memory-item"
+                                  }, [
+                                    _createElementVNode("div", _hoisted_647, [
+                                      _createElementVNode("span", _hoisted_648, "第 " + _toDisplayString(memory.displayTurnStart === memory.displayTurnEnd
                                             ? memory.displayTurnStart
                                             : memory.displayTurnStart + '-' + memory.displayTurnEnd) + " 轮", 1 /* TEXT */),
-                                    _createElementVNode("span", _hoisted_646, [
-                                      _createTextVNode(_toDisplayString(Number(memory.originalChars || 0).toLocaleString()) + " → ", 1 /* TEXT */),
-                                      _createElementVNode("b", null, _toDisplayString(Number(memory.compressedChars || 0).toLocaleString()), 1 /* TEXT */),
-                                      _cache[236] || (_cache[236] = _createTextVNode(" 字", -1 /* CACHED */))
-                                    ]),
-                                    _createElementVNode("button", {
-                                      type: "button",
-                                      onClick: $event => (retryClassicMemory(memory)),
-                                      disabled: Boolean(retryingClassicMemoryId) || isActiveBatchExtracting,
-                                      class: "memory-item__retry",
-                                      title: retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结',
-                                      "aria-label": retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结'
-                                    }, [
-                                      (_openBlock(), _createElementBlock("svg", {
-                                        class: _normalizeClass({ 'animate-spin': retryingClassicMemoryId === memory.id }),
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24",
-                                        "aria-hidden": "true"
-                                      }, [...(_cache[237] || (_cache[237] = [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M4 4v6h6M20 20v-6h-6M5.1 15a7 7 0 0011.3 2.4L20 14M4 10l3.6-3.4A7 7 0 0118.9 9"
-                                        }, null, -1 /* CACHED */)
-                                      ]))], 2 /* CLASS */))
-                                    ], 8 /* PROPS */, _hoisted_647),
-                                    _createCommentVNode(" [rphub 2.8.65] 编辑这条总结 "),
-                                    _createElementVNode("button", {
-                                      type: "button",
-                                      onClick: $event => (startEditClassicMemory(memory)),
-                                      disabled: Boolean(retryingClassicMemoryId) || savingClassicMemoryId === memory.id,
-                                      class: "memory-item__retry",
-                                      title: "编辑这条总结",
-                                      "aria-label": "编辑这条总结"
-                                    }, [...(_cache[238] || (_cache[238] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-4 h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
+                                      _createElementVNode("span", _hoisted_649, [
+                                        _createTextVNode(_toDisplayString(Number(memory.originalChars || 0).toLocaleString()) + " → ", 1 /* TEXT */),
+                                        _createElementVNode("b", null, _toDisplayString(Number(memory.compressedChars || 0).toLocaleString()), 1 /* TEXT */),
+                                        _cache[236] || (_cache[236] = _createTextVNode(" 字", -1 /* CACHED */))
+                                      ]),
+                                      _createElementVNode("button", {
+                                        type: "button",
+                                        onClick: $event => (retryClassicMemory(memory)),
+                                        disabled: Boolean(retryingClassicMemoryId) || isActiveBatchExtracting,
+                                        class: "memory-item__retry",
+                                        title: retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结',
+                                        "aria-label": retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结'
                                       }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_648)
-                                  ]),
-                                  (editingClassicMemoryId === memory.id)
-                                    ? (_openBlock(), _createElementBlock("div", _hoisted_649, [
-                                        _withDirectives(_createElementVNode("textarea", {
-                                          "onUpdate:modelValue": $event => ((editingClassicMemoryText) = $event),
-                                          rows: "6",
-                                          class: "memory-item__editor-input",
-                                          placeholder: "这条总结的正文"
-                                        }, null, 8 /* PROPS */, _hoisted_650), [
-                                          [_vModelText, editingClassicMemoryText]
-                                        ]),
-                                        _createElementVNode("div", _hoisted_651, [
-                                          _createElementVNode("button", {
-                                            type: "button",
-                                            onClick: $event => (cancelEditClassicMemory()),
-                                            class: "rphub-composer-btn"
-                                          }, "取消", 8 /* PROPS */, _hoisted_652),
-                                          _createElementVNode("button", {
-                                            type: "button",
-                                            onClick: $event => (saveEditClassicMemory()),
-                                            disabled: savingClassicMemoryId === memory.id,
-                                            class: "rphub-composer-btn rphub-composer-btn--primary"
-                                          }, "保存", 8 /* PROPS */, _hoisted_653)
-                                        ])
-                                      ]))
-                                    : (_openBlock(), _createElementBlock("p", _hoisted_654, _toDisplayString(memory.summary), 1 /* TEXT */))
-                                ]))
-                              }), 128 /* KEYED_FRAGMENT */))
-                            ])
-                          ]),
-                          _createVNode(_component_pagination_controls, {
-                            class: "mt-4",
-                            current: classicMemoryPage,
-                            total: classicMemoryPageCount,
-                            label: "基础模式记忆分页",
-                            onChange: $event => (classicMemoryPage = $event)
-                          }, null, 8 /* PROPS */, ["current", "total", "onChange"])
-                        ], 64 /* STABLE_FRAGMENT */))
-                      : (_openBlock(), _createElementBlock("div", _hoisted_655, [...(_cache[239] || (_cache[239] = [
-                          _createElementVNode("svg", {
-                            fill: "none",
-                            stroke: "currentColor",
-                            "stroke-width": "1.5",
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            viewBox: "0 0 24 24",
-                            "aria-hidden": "true"
-                          }, [
-                            _createElementVNode("path", { d: "M8 6h8M8 10h8M8 14h5m-7 7h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" })
-                          ], -1 /* CACHED */),
-                          _createElementVNode("p", null, "还没有记忆", -1 /* CACHED */),
-                          _createElementVNode("small", null, "继续对话会自动生成，也可以在上方设置里点\"补录记忆\"", -1 /* CACHED */)
-                        ]))]))
+                                        (_openBlock(), _createElementBlock("svg", {
+                                          class: _normalizeClass({ 'animate-spin': retryingClassicMemoryId === memory.id }),
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24",
+                                          "aria-hidden": "true"
+                                        }, [...(_cache[237] || (_cache[237] = [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M4 4v6h6M20 20v-6h-6M5.1 15a7 7 0 0011.3 2.4L20 14M4 10l3.6-3.4A7 7 0 0118.9 9"
+                                          }, null, -1 /* CACHED */)
+                                        ]))], 2 /* CLASS */))
+                                      ], 8 /* PROPS */, _hoisted_650),
+                                      _createCommentVNode(" [rphub 2.8.65] 编辑这条总结 "),
+                                      _createElementVNode("button", {
+                                        type: "button",
+                                        onClick: $event => (startEditClassicMemory(memory)),
+                                        disabled: Boolean(retryingClassicMemoryId) || savingClassicMemoryId === memory.id,
+                                        class: "memory-item__retry",
+                                        title: "编辑这条总结",
+                                        "aria-label": "编辑这条总结"
+                                      }, [...(_cache[238] || (_cache[238] = [
+                                        _createElementVNode("svg", {
+                                          class: "w-4 h-4",
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24"
+                                        }, [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                          })
+                                        ], -1 /* CACHED */)
+                                      ]))], 8 /* PROPS */, _hoisted_651)
+                                    ]),
+                                    (editingClassicMemoryId === memory.id)
+                                      ? (_openBlock(), _createElementBlock("div", _hoisted_652, [
+                                          _withDirectives(_createElementVNode("textarea", {
+                                            "onUpdate:modelValue": $event => ((editingClassicMemoryText) = $event),
+                                            rows: "6",
+                                            class: "memory-item__editor-input",
+                                            placeholder: "这条总结的正文"
+                                          }, null, 8 /* PROPS */, _hoisted_653), [
+                                            [_vModelText, editingClassicMemoryText]
+                                          ]),
+                                          _createElementVNode("div", _hoisted_654, [
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              onClick: $event => (cancelEditClassicMemory()),
+                                              class: "rphub-composer-btn"
+                                            }, "取消", 8 /* PROPS */, _hoisted_655),
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              onClick: $event => (saveEditClassicMemory()),
+                                              disabled: savingClassicMemoryId === memory.id,
+                                              class: "rphub-composer-btn rphub-composer-btn--primary"
+                                            }, "保存", 8 /* PROPS */, _hoisted_656)
+                                          ])
+                                        ]))
+                                      : (_openBlock(), _createElementBlock("p", _hoisted_657, _toDisplayString(memory.summary), 1 /* TEXT */))
+                                  ]))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ])
+                            ]),
+                            _createVNode(_component_pagination_controls, {
+                              class: "mt-4",
+                              current: classicMemoryPage,
+                              total: classicMemoryPageCount,
+                              label: "基础模式记忆分页",
+                              onChange: $event => (classicMemoryPage = $event)
+                            }, null, 8 /* PROPS */, ["current", "total", "onChange"])
+                          ], 64 /* STABLE_FRAGMENT */))
+                        : (_openBlock(), _createElementBlock("div", _hoisted_658, [...(_cache[239] || (_cache[239] = [
+                            _createElementVNode("svg", {
+                              fill: "none",
+                              stroke: "currentColor",
+                              "stroke-width": "1.5",
+                              "stroke-linecap": "round",
+                              "stroke-linejoin": "round",
+                              viewBox: "0 0 24 24",
+                              "aria-hidden": "true"
+                            }, [
+                              _createElementVNode("path", { d: "M8 6h8M8 10h8M8 14h5m-7 7h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" })
+                            ], -1 /* CACHED */),
+                            _createElementVNode("p", null, "还没有记忆", -1 /* CACHED */),
+                            _createElementVNode("small", null, "继续对话会自动生成，也可以在上方设置里点\"补录记忆\"", -1 /* CACHED */)
+                          ]))]))
                   ], 64 /* STABLE_FRAGMENT */))
-                : (_openBlock(), _createElementBlock("div", _hoisted_656, [...(_cache[240] || (_cache[240] = [
+                : (_openBlock(), _createElementBlock("div", _hoisted_659, [...(_cache[240] || (_cache[240] = [
                     _createElementVNode("svg", {
                       fill: "none",
                       stroke: "currentColor",
@@ -6724,8 +6746,8 @@ return function render(_ctx, _cache) {
                           }, [
                             _createElementVNode("use", { href: "#icon-export" })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_658),
-                        _createElementVNode("label", _hoisted_659, [
+                        ]))], 8 /* PROPS */, _hoisted_661),
+                        _createElementVNode("label", _hoisted_662, [
                           _cache[243] || (_cache[243] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
@@ -6739,7 +6761,7 @@ return function render(_ctx, _cache) {
                             accept: ".json",
                             onChange: importWorldInfo,
                             class: "hidden"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_660)
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_663)
                         ]),
                         _createElementVNode("button", {
                           onClick: createWorldInfo,
@@ -6759,25 +6781,25 @@ return function render(_ctx, _cache) {
                               d: "M12 4v16m8-8H4"
                             })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_661)
+                        ]))], 8 /* PROPS */, _hoisted_664)
                       ], 64 /* STABLE_FRAGMENT */))
                     : _createCommentVNode("v-if", true)
                 ]),
                 _: 1 /* STABLE */
               }, 8 /* PROPS */, ["onMenu"]),
               (resourceBatch.active)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_662, [
+                ? (_openBlock(), _createElementBlock("div", _hoisted_665, [
                     _createElementVNode("span", null, "已选 " + _toDisplayString(resourceBatch.count) + " / " + _toDisplayString(resourceBatch.total) + " 条", 1 /* TEXT */),
                     _createElementVNode("button", {
                       type: "button",
                       class: "resource-batch-remove",
                       disabled: !resourceBatch.count,
                       onClick: $event => (resourceBatch.remove())
-                    }, "删除所选", 8 /* PROPS */, _hoisted_663)
+                    }, "删除所选", 8 /* PROPS */, _hoisted_666)
                   ]))
                 : _createCommentVNode("v-if", true),
               _createCommentVNode(" Activation Settings "),
-              _createElementVNode("div", _hoisted_664, [
+              _createElementVNode("div", _hoisted_667, [
                 _createElementVNode("button", {
                   onClick: $event => (showWorldInfoSettings = !showWorldInfoSettings),
                   class: _normalizeClass(["settings-collapse-trigger", ['w-full flex justify-between items-center px-4 py-3 rounded-xl font-bold',
@@ -6785,7 +6807,7 @@ return function render(_ctx, _cache) {
                   "aria-controls": "worldinfo-settings-panel",
                   "aria-expanded": showWorldInfoSettings
                 }, [
-                  _createElementVNode("span", _hoisted_666, [
+                  _createElementVNode("span", _hoisted_669, [
                     _createElementVNode("div", {
                       class: _normalizeClass(['p-1.5 rounded-lg mr-3 transition-colors', showWorldInfoSettings ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500'])
                     }, [...(_cache[245] || (_cache[245] = [
@@ -6818,24 +6840,24 @@ return function render(_ctx, _cache) {
                       d: "M19 9l-7 7-7-7"
                     }, null, -1 /* CACHED */)
                   ]))], 2 /* CLASS */))
-                ], 10 /* CLASS, PROPS */, _hoisted_665),
+                ], 10 /* CLASS, PROPS */, _hoisted_668),
                 _createElementVNode("div", {
                   id: "worldinfo-settings-panel",
                   class: _normalizeClass(["settings-collapse", { 'is-open': showWorldInfoSettings }]),
                   "aria-hidden": !showWorldInfoSettings,
                   inert: !showWorldInfoSettings
                 }, [
-                  _createElementVNode("div", _hoisted_668, [
-                    _createElementVNode("div", _hoisted_669, [
-                      _createElementVNode("div", _hoisted_670, [
+                  _createElementVNode("div", _hoisted_671, [
+                    _createElementVNode("div", _hoisted_672, [
+                      _createElementVNode("div", _hoisted_673, [
                         _createCommentVNode(" Scan Depth "),
                         _createElementVNode("div", null, [
-                          _createElementVNode("div", _hoisted_671, [
+                          _createElementVNode("div", _hoisted_674, [
                             _cache[248] || (_cache[248] = _createElementVNode("label", {
                               for: "worldinfo-scan-depth",
                               class: "font-semibold text-gray-700"
                             }, "扫描深度", -1 /* CACHED */)),
-                            _createElementVNode("span", _hoisted_672, _toDisplayString(worldInfoSettings.scanDepth), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_675, _toDisplayString(worldInfoSettings.scanDepth), 1 /* TEXT */)
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-scan-depth",
@@ -6846,7 +6868,7 @@ return function render(_ctx, _cache) {
                             max: "20",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_673), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_676), [
                             [
                               _vModelText,
                               worldInfoSettings.scanDepth,
@@ -6857,12 +6879,12 @@ return function render(_ctx, _cache) {
                         ]),
                         _createCommentVNode(" Max Scan Depth "),
                         _createElementVNode("div", null, [
-                          _createElementVNode("div", _hoisted_674, [
+                          _createElementVNode("div", _hoisted_677, [
                             _cache[249] || (_cache[249] = _createElementVNode("label", {
                               for: "worldinfo-max-depth",
                               class: "font-semibold text-gray-700"
                             }, "最大扫描深度", -1 /* CACHED */)),
-                            _createElementVNode("span", _hoisted_675, _toDisplayString(worldInfoSettings.maxDepth), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_678, _toDisplayString(worldInfoSettings.maxDepth), 1 /* TEXT */)
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-max-depth",
@@ -6873,7 +6895,7 @@ return function render(_ctx, _cache) {
                             max: "50",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_676), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_679), [
                             [
                               _vModelText,
                               worldInfoSettings.maxDepth,
@@ -6885,10 +6907,10 @@ return function render(_ctx, _cache) {
                       ])
                     ])
                   ])
-                ], 10 /* CLASS, PROPS */, _hoisted_667)
+                ], 10 /* CLASS, PROPS */, _hoisted_670)
               ]),
               (worldInfoPageCount > 1)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_677, [
+                ? (_openBlock(), _createElementBlock("div", _hoisted_680, [
                     _createElementVNode("button", {
                       type: "button",
                       class: "worldinfo-pager-btn",
@@ -6897,8 +6919,8 @@ return function render(_ctx, _cache) {
                     }, [...(_cache[250] || (_cache[250] = [
                       _createElementVNode("span", { "aria-hidden": "true" }, "‹", -1 /* CACHED */),
                       _createTextVNode(" 上一页", -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_678),
-                    _createElementVNode("span", _hoisted_679, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
+                    ]))], 8 /* PROPS */, _hoisted_681),
+                    _createElementVNode("span", _hoisted_682, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
                     _createElementVNode("button", {
                       type: "button",
                       class: "worldinfo-pager-btn",
@@ -6907,7 +6929,7 @@ return function render(_ctx, _cache) {
                     }, [...(_cache[251] || (_cache[251] = [
                       _createTextVNode("下一页 ", -1 /* CACHED */),
                       _createElementVNode("span", { "aria-hidden": "true" }, "›", -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_680)
+                    ]))], 8 /* PROPS */, _hoisted_683)
                   ]))
                 : _createCommentVNode("v-if", true),
               _createElementVNode("div", {
@@ -6924,17 +6946,17 @@ return function render(_ctx, _cache) {
                     "data-resource-index": index,
                     class: _normalizeClass(["sortable-list-item", { 'is-off': !entry.enabled }])
                   }, [
-                    _createElementVNode("div", _hoisted_683, [
+                    _createElementVNode("div", _hoisted_686, [
                       (resourceBatch.active)
-                        ? (_openBlock(), _createElementBlock("label", _hoisted_684, [
+                        ? (_openBlock(), _createElementBlock("label", _hoisted_687, [
                             _createElementVNode("input", {
                               type: "checkbox",
                               "aria-label": '选择世界书：'+(entry.comment || '未命名条目'),
                               checked: resourceBatch.selected.has(entry),
                               onChange: $event => (resourceBatch.toggle(entry))
-                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_685)
+                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_688)
                           ]))
-                        : (_openBlock(), _createElementBlock("div", _hoisted_686, [...(_cache[252] || (_cache[252] = [
+                        : (_openBlock(), _createElementBlock("div", _hoisted_689, [...(_cache[252] || (_cache[252] = [
                             _createElementVNode("svg", {
                               class: "w-6 h-6",
                               fill: "none",
@@ -6949,15 +6971,15 @@ return function render(_ctx, _cache) {
                               })
                             ], -1 /* CACHED */)
                           ]))])),
-                      _createElementVNode("div", _hoisted_687, [
-                        _createElementVNode("div", _hoisted_688, [
-                          _createElementVNode("h3", _hoisted_689, [
+                      _createElementVNode("div", _hoisted_690, [
+                        _createElementVNode("div", _hoisted_691, [
+                          _createElementVNode("h3", _hoisted_692, [
                             _createElementVNode("button", {
                               type: "button",
                               class: "resource-open",
                               "aria-label": '查看'+(entry.comment || '未命名条目'),
                               onClick: $event => (editWorldInfo(index))
-                            }, _toDisplayString(entry.comment || '未命名条目'), 9 /* TEXT, PROPS */, _hoisted_690)
+                            }, _toDisplayString(entry.comment || '未命名条目'), 9 /* TEXT, PROPS */, _hoisted_693)
                           ]),
                           _createElementVNode("span", {
                             class: _normalizeClass(["meta-badge meta-badge--desktop", entry.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'])
@@ -6965,17 +6987,17 @@ return function render(_ctx, _cache) {
                         ])
                       ])
                     ]),
-                    _createElementVNode("div", _hoisted_691, [
-                      _createElementVNode("label", _hoisted_692, [
+                    _createElementVNode("div", _hoisted_694, [
+                      _createElementVNode("label", _hoisted_695, [
                         _createElementVNode("input", {
                           type: "checkbox",
                           checked: entry.enabled,
                           onChange: $event => (setWorldInfoEnabled(entry, $event.target.checked, $event)),
                           class: "settings-toggle-input sr-only"
-                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_693),
+                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_696),
                         _cache[253] || (_cache[253] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                       ]),
-                      _createElementVNode("div", _hoisted_694, [
+                      _createElementVNode("div", _hoisted_697, [
                         _createElementVNode("button", {
                           onClick: $event => (editWorldInfo(index)),
                           class: "item-action-button item-action-button--edit",
@@ -6988,7 +7010,7 @@ return function render(_ctx, _cache) {
                           }, [
                             _createElementVNode("use", { href: "#icon-edit" })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_695),
+                        ]))], 8 /* PROPS */, _hoisted_698),
                         _createElementVNode("button", {
                           onClick: $event => (deleteWorldInfo(index)),
                           class: "item-action-button item-action-button--delete",
@@ -7007,14 +7029,14 @@ return function render(_ctx, _cache) {
                               d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                             })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_696)
+                        ]))], 8 /* PROPS */, _hoisted_699)
                       ])
                     ])
-                  ], 10 /* CLASS, PROPS */, _hoisted_682))
+                  ], 10 /* CLASS, PROPS */, _hoisted_685))
                 }), 128 /* KEYED_FRAGMENT */))
-              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_681),
+              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_684),
               (worldInfoPageCount > 1)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_697, [
+                ? (_openBlock(), _createElementBlock("div", _hoisted_700, [
                     _createElementVNode("button", {
                       type: "button",
                       class: "worldinfo-pager-btn",
@@ -7023,8 +7045,8 @@ return function render(_ctx, _cache) {
                     }, [...(_cache[256] || (_cache[256] = [
                       _createElementVNode("span", { "aria-hidden": "true" }, "‹", -1 /* CACHED */),
                       _createTextVNode(" 上一页", -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_698),
-                    _createElementVNode("span", _hoisted_699, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
+                    ]))], 8 /* PROPS */, _hoisted_701),
+                    _createElementVNode("span", _hoisted_702, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
                     _createElementVNode("button", {
                       type: "button",
                       class: "worldinfo-pager-btn",
@@ -7033,10 +7055,10 @@ return function render(_ctx, _cache) {
                     }, [...(_cache[257] || (_cache[257] = [
                       _createTextVNode("下一页 ", -1 /* CACHED */),
                       _createElementVNode("span", { "aria-hidden": "true" }, "›", -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_700)
+                    ]))], 8 /* PROPS */, _hoisted_703)
                   ]))
                 : _createCommentVNode("v-if", true)
-            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_657))
+            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_660))
           : _createCommentVNode("v-if", true)
       ], 10 /* CLASS, PROPS */, _hoisted_5),
       (currentView === 'worldinfo' && worldInfoScrolled)
@@ -7049,7 +7071,7 @@ return function render(_ctx, _cache) {
             onClick: scrollWorldInfoTop
           }, [
             _createVNode(_component_shell_icon, { name: "ChevronUp" })
-          ], 8 /* PROPS */, _hoisted_701))
+          ], 8 /* PROPS */, _hoisted_704))
         : _createCommentVNode("v-if", true),
       _createCommentVNode(" Modals "),
       _createVNode(_component_memory_backfill_modal, {
@@ -7233,8 +7255,8 @@ return function render(_ctx, _cache) {
       _createVNode(_component_retry_confirm_modal, { state: globalConfirmModal }, null, 8 /* PROPS */, ["state"]),
       _createCommentVNode(" 记忆工具：只读审计浮层。与记忆系统主流程完全隔离，不写任何记忆数据。 "),
       showMemTools
-        ? (_openBlock(), _createElementBlock("div", _hoisted_702, [
-            _createElementVNode("div", _hoisted_703, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_705, [
+            _createElementVNode("div", _hoisted_706, [
               _createElementVNode("button", {
                 type: "button",
                 onClick: closeMemTools,
@@ -7254,38 +7276,38 @@ return function render(_ctx, _cache) {
                     d: "M15 19l-7-7 7-7"
                   })
                 ], -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_704),
+              ]))], 8 /* PROPS */, _hoisted_707),
               _cache[259] || (_cache[259] = _createElementVNode("h2", { class: "text-base font-bold text-gray-800 flex-1 min-w-0 truncate" }, "记忆工具", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: runMemToolsAudit,
                 disabled: memToolsAudit.loading,
                 class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-              }, _toDisplayString(memToolsAudit.loading ? '检查中' : '重新检查'), 9 /* TEXT, PROPS */, _hoisted_705)
+              }, _toDisplayString(memToolsAudit.loading ? '检查中' : '重新检查'), 9 /* TEXT, PROPS */, _hoisted_708)
             ]),
-            _createElementVNode("div", _hoisted_706, [
-              _createElementVNode("div", _hoisted_707, [
+            _createElementVNode("div", _hoisted_709, [
+              _createElementVNode("div", _hoisted_710, [
                 _cache[266] || (_cache[266] = _createElementVNode("div", { class: "text-xs text-gray-500 mb-1" }, "当前作用域", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_708, _toDisplayString(memToolsScopeId || '未选择角色'), 1 /* TEXT */),
-                _createElementVNode("div", _hoisted_709, [
-                  _createElementVNode("div", _hoisted_710, [
+                _createElementVNode("div", _hoisted_711, _toDisplayString(memToolsScopeId || '未选择角色'), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_712, [
+                  _createElementVNode("div", _hoisted_713, [
                     _cache[260] || (_cache[260] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "记忆条数", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_711, _toDisplayString(memToolsAudit.memoryCount), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_714, _toDisplayString(memToolsAudit.memoryCount), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_712, [
+                  _createElementVNode("div", _hoisted_715, [
                     _cache[261] || (_cache[261] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "库内条数", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_713, _toDisplayString(memToolsAudit.storedCount < 0 ? '读不到' : memToolsAudit.storedCount), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_716, _toDisplayString(memToolsAudit.storedCount < 0 ? '读不到' : memToolsAudit.storedCount), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_714, [
+                  _createElementVNode("div", _hoisted_717, [
                     _cache[262] || (_cache[262] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "已覆盖轮次", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_715, _toDisplayString(memToolsAudit.coveredTurns), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_718, _toDisplayString(memToolsAudit.coveredTurns), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_716, [
+                  _createElementVNode("div", _hoisted_719, [
                     _cache[263] || (_cache[263] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "应覆盖到", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_717, _toDisplayString(memToolsAudit.auditableMaxTurn), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_720, _toDisplayString(memToolsAudit.auditableMaxTurn), 1 /* TEXT */)
                   ])
                 ]),
-                _createElementVNode("div", _hoisted_718, [
+                _createElementVNode("div", _hoisted_721, [
                   _cache[264] || (_cache[264] = _createElementVNode("label", { class: "text-xs text-gray-500 flex-shrink-0" }, "字数下限", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("input", {
                     "onUpdate:modelValue": $event => ((memToolsConfig.minChars) = $event),
@@ -7294,7 +7316,7 @@ return function render(_ctx, _cache) {
                     step: "10",
                     onChange: $event => {saveMemToolsConfig(); runMemToolsAudit()},
                     class: "w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-700"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_719), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_722), [
                     [
                       _vModelText,
                       memToolsConfig.minChars,
@@ -7310,7 +7332,7 @@ return function render(_ctx, _cache) {
                     step: "1",
                     onChange: $event => {saveMemToolsConfig(); runMemToolsAudit()},
                     class: "w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-700"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_720), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_723), [
                     [
                       _vModelText,
                       memToolsConfig.keepFloors,
@@ -7323,32 +7345,32 @@ return function render(_ctx, _cache) {
                   type: "button",
                   onClick: $event => (memToolsExportConversation()),
                   class: "mt-3 w-full py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                }, " 导出当前记忆 TXT ", 8 /* PROPS */, _hoisted_721),
+                }, " 导出当前记忆 TXT ", 8 /* PROPS */, _hoisted_724),
                 (memToolsAudit.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_722, _toDisplayString(memToolsAudit.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_725, _toDisplayString(memToolsAudit.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_723, [
-                _createElementVNode("div", _hoisted_724, [
+              _createElementVNode("div", _hoisted_726, [
+                _createElementVNode("div", _hoisted_727, [
                   _cache[267] || (_cache[267] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "存档与回滚", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (saveMemToolsSnapshot()),
                     disabled: memToolsVersions.saving,
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsVersions.saving ? '存档中' : '立即存档'), 9 /* TEXT, PROPS */, _hoisted_725)
+                  }, _toDisplayString(memToolsVersions.saving ? '存档中' : '立即存档'), 9 /* TEXT, PROPS */, _hoisted_728)
                 ]),
                 _cache[268] || (_cache[268] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 存档只写自己的存储键，不动记忆本身。回滚前会自动先存一份当前状态。 ", -1 /* CACHED */)),
                 (memToolsVersions.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_726, _toDisplayString(memToolsVersions.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_729, _toDisplayString(memToolsVersions.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsVersions.loading)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_727, "读取中"))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_730, "读取中"))
                   : (!memToolsVersions.list.length)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_728, "还没有存档"))
-                    : (_openBlock(), _createElementBlock("div", _hoisted_729, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_731, "还没有存档"))
+                    : (_openBlock(), _createElementBlock("div", _hoisted_732, [
                         memToolsVersionsDrifted
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_730, " 当前记忆和「当前」那一版已经不一样了，再存档会从它分出一条新支。 "))
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_733, " 当前记忆和「当前」那一版已经不一样了，再存档会从它分出一条新支。 "))
                           : _createCommentVNode("v-if", true),
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsVersions.list, (version) => {
                           return (_openBlock(), _createElementBlock("div", {
@@ -7356,17 +7378,17 @@ return function render(_ctx, _cache) {
                             class: _normalizeClass(["flex items-center gap-2 flex-wrap rounded-xl bg-gray-50 px-3 py-2", String(version.versionId || version.id) === String(memToolsVersionsCurrentId) ? 'ring-1 ring-primary-300' : '']),
                             style: _normalizeStyle({ marginLeft: Math.min(memToolsNodeDepth(version), 5) * 12 + 'px' })
                           }, [
-                            _createElementVNode("div", _hoisted_731, [
-                              _createElementVNode("div", _hoisted_732, [
+                            _createElementVNode("div", _hoisted_734, [
+                              _createElementVNode("div", _hoisted_735, [
                                 (String(version.versionId || version.id) === String(memToolsVersionsCurrentId))
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_733, "当前"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_736, "当前"))
                                   : _createCommentVNode("v-if", true),
                                 _createTextVNode(" " + _toDisplayString(memToolsTimeText(version.createdAt)) + " · " + _toDisplayString(version.count) + " 条 · " + _toDisplayString(version.chars) + " 字 ", 1 /* TEXT */)
                               ]),
-                              _createElementVNode("div", _hoisted_734, [
+                              _createElementVNode("div", _hoisted_737, [
                                 _createTextVNode(_toDisplayString(version.label), 1 /* TEXT */),
                                 (version.rebasedFromVersionId)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_735, " · 已重挂"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_738, " · 已重挂"))
                                   : _createCommentVNode("v-if", true)
                               ])
                             ]),
@@ -7375,174 +7397,174 @@ return function render(_ctx, _cache) {
                               onClick: $event => (restoreMemToolsSnapshot(version.id)),
                               disabled: !!memToolsVersions.restoring,
                               class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                            }, _toDisplayString(memToolsVersions.restoring === version.id ? '回滚中' : '回滚'), 9 /* TEXT, PROPS */, _hoisted_736),
+                            }, _toDisplayString(memToolsVersions.restoring === version.id ? '回滚中' : '回滚'), 9 /* TEXT, PROPS */, _hoisted_739),
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (deleteMemToolsSnapshot(version.id)),
                               disabled: !!memToolsVersions.restoring,
                               class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                            }, " 删 ", 8 /* PROPS */, _hoisted_737),
+                            }, " 删 ", 8 /* PROPS */, _hoisted_740),
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (toggleMemToolsVersionOpen(version.versionId || version.id)),
                               class: "px-2 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-500 border border-gray-200 active:scale-95",
                               title: memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '更多操作'
-                            }, _toDisplayString(memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '…'), 9 /* TEXT, PROPS */, _hoisted_738),
+                            }, _toDisplayString(memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '…'), 9 /* TEXT, PROPS */, _hoisted_741),
                             (memToolsVersionOpenId === String(version.versionId || version.id))
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_739, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_742, [
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (copyMemToolsVersion(version)),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                  }, " 复制正文 ", 8 /* PROPS */, _hoisted_740),
+                                  }, " 复制正文 ", 8 /* PROPS */, _hoisted_743),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (openMemToolsVersionView(version.versionId || version.id, 'self')),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                  }, " 看这一版 ", 8 /* PROPS */, _hoisted_741),
+                                  }, " 看这一版 ", 8 /* PROPS */, _hoisted_744),
                                   (version.parentVersionId)
                                     ? (_openBlock(), _createElementBlock("button", {
                                         key: 0,
                                         type: "button",
                                         onClick: $event => (openMemToolsVersionView(version.versionId || version.id, 'parent')),
                                         class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                      }, " 看上一版 ", 8 /* PROPS */, _hoisted_742))
+                                      }, " 看上一版 ", 8 /* PROPS */, _hoisted_745))
                                     : _createCommentVNode("v-if", true),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (memToolsExportVersion(version)),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                  }, " 导出 TXT ", 8 /* PROPS */, _hoisted_743)
+                                  }, " 导出 TXT ", 8 /* PROPS */, _hoisted_746)
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ], 6 /* CLASS, STYLE */))
                         }), 128 /* KEYED_FRAGMENT */))
                       ])),
                 (memToolsVersionView.open)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_744, [
-                      _createElementVNode("div", _hoisted_745, [
-                        _createElementVNode("div", _hoisted_746, _toDisplayString(memToolsVersionView.title), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_747, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_747, [
+                      _createElementVNode("div", _hoisted_748, [
+                        _createElementVNode("div", _hoisted_749, _toDisplayString(memToolsVersionView.title), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_750, [
                           _createElementVNode("button", {
                             type: "button",
                             onClick: $event => (copyMemToolsVersionView()),
                             class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                          }, " 复制 ", 8 /* PROPS */, _hoisted_748),
+                          }, " 复制 ", 8 /* PROPS */, _hoisted_751),
                           _createElementVNode("button", {
                             type: "button",
                             onClick: $event => (closeMemToolsVersionView()),
                             class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                          }, " 关闭 ", 8 /* PROPS */, _hoisted_749)
+                          }, " 关闭 ", 8 /* PROPS */, _hoisted_752)
                         ])
                       ]),
-                      _createElementVNode("pre", _hoisted_750, _toDisplayString(memToolsVersionView.text), 1 /* TEXT */)
+                      _createElementVNode("pre", _hoisted_753, _toDisplayString(memToolsVersionView.text), 1 /* TEXT */)
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_751, [
-                _createElementVNode("div", _hoisted_752, [
+              _createElementVNode("div", _hoisted_754, [
+                _createElementVNode("div", _hoisted_755, [
                   _cache[269] || (_cache[269] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "逐条查看与修改", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsEdit.listOpen = !memToolsEdit.listOpen),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsEdit.listOpen ? '收起列表' : '展开列表'), 9 /* TEXT, PROPS */, _hoisted_753)
+                  }, _toDisplayString(memToolsEdit.listOpen ? '收起列表' : '展开列表'), 9 /* TEXT, PROPS */, _hoisted_756)
                 ]),
                 _cache[271] || (_cache[271] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 可以改单条正文、用原文重新总结这一条、或撤销回到上一版存档。改完增强模式下会自动重建这一条的向量。 ", -1 /* CACHED */)),
                 (memToolsEdit.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_754, _toDisplayString(memToolsEdit.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_757, _toDisplayString(memToolsEdit.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsEdit.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_755, _toDisplayString(memToolsEdit.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_758, _toDisplayString(memToolsEdit.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (!memToolsEdit.listOpen)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_756, "共 " + _toDisplayString(memToolsRows.length) + " 条", 1 /* TEXT */))
-                  : (_openBlock(), _createElementBlock("div", _hoisted_757, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_759, "共 " + _toDisplayString(memToolsRows.length) + " 条", 1 /* TEXT */))
+                  : (_openBlock(), _createElementBlock("div", _hoisted_760, [
                       (!memToolsRows.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_758, "这个角色还没有记忆"))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_761, "这个角色还没有记忆"))
                         : _createCommentVNode("v-if", true),
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsRows, (row) => {
                         return (_openBlock(), _createElementBlock("div", {
                           key: row.memory.id,
                           class: "rounded-xl bg-gray-50 px-3 py-2"
                         }, [
-                          _createElementVNode("div", _hoisted_759, [
-                            _createElementVNode("div", _hoisted_760, [
-                              _createElementVNode("div", _hoisted_761, [
+                          _createElementVNode("div", _hoisted_762, [
+                            _createElementVNode("div", _hoisted_763, [
+                              _createElementVNode("div", _hoisted_764, [
                                 _createTextVNode(" 第 " + _toDisplayString(row.start), 1 /* TEXT */),
                                 (row.end !== row.start)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_762, "–" + _toDisplayString(row.end), 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_765, "–" + _toDisplayString(row.end), 1 /* TEXT */))
                                   : _createCommentVNode("v-if", true),
                                 _cache[270] || (_cache[270] = _createTextVNode(" 轮 ", -1 /* CACHED */)),
                                 (row.memory.secondaryCompressed)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_763, "已合并"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_766, "已合并"))
                                   : _createCommentVNode("v-if", true),
-                                _createElementVNode("span", _hoisted_764, _toDisplayString(row.len) + " 字", 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_767, _toDisplayString(row.len) + " 字", 1 /* TEXT */)
                               ]),
-                              _createElementVNode("div", _hoisted_765, _toDisplayString(row.preview), 1 /* TEXT */)
+                              _createElementVNode("div", _hoisted_768, _toDisplayString(row.preview), 1 /* TEXT */)
                             ])
                           ]),
                           (memToolsEdit.id !== row.memory.id)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_766, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_769, [
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (openMemToolsMemoryEdit(row)),
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                }, "改", 8 /* PROPS */, _hoisted_767),
+                                }, "改", 8 /* PROPS */, _hoisted_770),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (retryMemToolsMemory(row)),
                                   disabled: !!memToolsEdit.running,
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                                }, _toDisplayString(memToolsEdit.running === row.memory.id ? '总结中' : '重试'), 9 /* TEXT, PROPS */, _hoisted_768),
+                                }, _toDisplayString(memToolsEdit.running === row.memory.id ? '总结中' : '重试'), 9 /* TEXT, PROPS */, _hoisted_771),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (undoMemToolsMemory(row)),
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                                }, "撤销", 8 /* PROPS */, _hoisted_769),
+                                }, "撤销", 8 /* PROPS */, _hoisted_772),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (toggleMemToolsPin(row)),
                                   class: _normalizeClass(["px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white border border-gray-200 active:scale-95", memToolsRangePinned(row.start, row.end) ? 'text-gray-400' : 'text-primary-600'])
-                                }, _toDisplayString(memToolsRangePinned(row.start, row.end) ? '已钉住' : '钉住'), 11 /* TEXT, CLASS, PROPS */, _hoisted_770),
+                                }, _toDisplayString(memToolsRangePinned(row.start, row.end) ? '已钉住' : '钉住'), 11 /* TEXT, CLASS, PROPS */, _hoisted_773),
                                 (memToolsEdit.running === row.memory.id)
                                   ? (_openBlock(), _createElementBlock("button", {
                                       key: 0,
                                       type: "button",
                                       onClick: $event => (abortMemToolsEdit()),
                                       class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                    }, "停止", 8 /* PROPS */, _hoisted_771))
+                                    }, "停止", 8 /* PROPS */, _hoisted_774))
                                   : _createCommentVNode("v-if", true)
                               ]))
-                            : (_openBlock(), _createElementBlock("div", _hoisted_772, [
+                            : (_openBlock(), _createElementBlock("div", _hoisted_775, [
                                 _withDirectives(_createElementVNode("textarea", {
                                   "onUpdate:modelValue": $event => ((memToolsEdit.text) = $event),
                                   rows: "6",
                                   class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                                }, null, 8 /* PROPS */, _hoisted_773), [
+                                }, null, 8 /* PROPS */, _hoisted_776), [
                                   [_vModelText, memToolsEdit.text]
                                 ]),
-                                _createElementVNode("div", _hoisted_774, [
+                                _createElementVNode("div", _hoisted_777, [
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (saveMemToolsMemoryEdit(row)),
                                     disabled: memToolsEdit.writing,
                                     class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-primary-600 text-white active:scale-95 disabled:opacity-50"
-                                  }, _toDisplayString(memToolsEdit.writing ? '保存中' : '保存'), 9 /* TEXT, PROPS */, _hoisted_775),
+                                  }, _toDisplayString(memToolsEdit.writing ? '保存中' : '保存'), 9 /* TEXT, PROPS */, _hoisted_778),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (cancelMemToolsMemoryEdit()),
                                     disabled: memToolsEdit.writing,
                                     class: "px-4 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                  }, "取消", 8 /* PROPS */, _hoisted_776)
+                                  }, "取消", 8 /* PROPS */, _hoisted_779)
                                 ])
                               ]))
                         ]))
                       }), 128 /* KEYED_FRAGMENT */))
                     ]))
               ]),
-              _createElementVNode("div", _hoisted_777, [
-                _createElementVNode("div", _hoisted_778, [
+              _createElementVNode("div", _hoisted_780, [
+                _createElementVNode("div", _hoisted_781, [
                   _cache[272] || (_cache[272] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "自动总结与批量压缩", -1 /* CACHED */)),
                   (!memToolsAuto.running)
                     ? (_openBlock(), _createElementBlock("button", {
@@ -7551,17 +7573,17 @@ return function render(_ctx, _cache) {
                         onClick: $event => (runMemToolsAuto()),
                         disabled: !memToolsAutoPlan.groups.length,
                         class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                      }, " 开始 ", 8 /* PROPS */, _hoisted_779))
+                      }, " 开始 ", 8 /* PROPS */, _hoisted_782))
                     : (_openBlock(), _createElementBlock("button", {
                         key: 1,
                         type: "button",
                         onClick: $event => (abortMemToolsAuto()),
                         class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                      }, _toDisplayString(memToolsAuto.stopping ? '正在停止…' : '停止'), 9 /* TEXT, PROPS */, _hoisted_780))
+                      }, _toDisplayString(memToolsAuto.stopping ? '正在停止…' : '停止'), 9 /* TEXT, PROPS */, _hoisted_783))
                 ]),
                 _cache[276] || (_cache[276] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 把保留线之前的旧总结按连续性分组合并。已钉住的区间会跳过，跑完一段会自动钉住。开跑前会自动存档，停止后已保存的部分会保留。 ", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_781, [
-                  _createElementVNode("label", _hoisted_782, [
+                _createElementVNode("div", _hoisted_784, [
+                  _createElementVNode("label", _hoisted_785, [
                     _cache[273] || (_cache[273] = _createElementVNode("span", { class: "text-[11px] font-bold text-gray-500" }, "保留最近几轮", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("input", {
                       "onUpdate:modelValue": $event => ((memToolsAuto.keepTurns) = $event),
@@ -7571,7 +7593,7 @@ return function render(_ctx, _cache) {
                       onChange: $event => (saveMemToolsAuto()),
                       disabled: memToolsAuto.running,
                       class: "mt-1 w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none disabled:opacity-50"
-                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_783), [
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_786), [
                       [
                         _vModelText,
                         memToolsAuto.keepTurns,
@@ -7580,7 +7602,7 @@ return function render(_ctx, _cache) {
                       ]
                     ])
                   ]),
-                  _createElementVNode("label", _hoisted_784, [
+                  _createElementVNode("label", _hoisted_787, [
                     _cache[274] || (_cache[274] = _createElementVNode("span", { class: "text-[11px] font-bold text-gray-500" }, "每组几条", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("input", {
                       "onUpdate:modelValue": $event => ((memToolsAuto.groupSize) = $event),
@@ -7590,7 +7612,7 @@ return function render(_ctx, _cache) {
                       onChange: $event => (saveMemToolsAuto()),
                       disabled: memToolsAuto.running,
                       class: "mt-1 w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none disabled:opacity-50"
-                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_785), [
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_788), [
                       [
                         _vModelText,
                         memToolsAuto.groupSize,
@@ -7600,59 +7622,59 @@ return function render(_ctx, _cache) {
                     ])
                   ])
                 ]),
-                _createElementVNode("div", _hoisted_786, [
+                _createElementVNode("div", _hoisted_789, [
                   _createTextVNode(" 当前对话共 " + _toDisplayString(memToolsAutoPlan.totalTurns) + " 轮，保留最近 " + _toDisplayString(memToolsAutoPlan.keep) + " 轮；可压缩 " + _toDisplayString(memToolsAutoPlan.eligibleCount) + " 条，其中 " + _toDisplayString(memToolsAutoPlan.pinnedCount) + " 条已被钉住，分成 ", 1 /* TEXT */),
-                  _createElementVNode("span", _hoisted_787, _toDisplayString(memToolsAutoPlan.groups.length), 1 /* TEXT */),
+                  _createElementVNode("span", _hoisted_790, _toDisplayString(memToolsAutoPlan.groups.length), 1 /* TEXT */),
                   _cache[275] || (_cache[275] = _createTextVNode(" 组。 ", -1 /* CACHED */))
                 ]),
                 (memToolsAuto.total)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_788, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_791, [
                       _createTextVNode(" 已完成 " + _toDisplayString(memToolsAuto.done) + "/" + _toDisplayString(memToolsAuto.total) + " 段", 1 /* TEXT */),
                       (memToolsAuto.current)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_789, " · " + _toDisplayString(memToolsAuto.current), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_792, " · " + _toDisplayString(memToolsAuto.current), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (memToolsAuto.retryLeft)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_790, " · " + _toDisplayString(memToolsAuto.retryLeft) + " 秒后重试", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_793, " · " + _toDisplayString(memToolsAuto.retryLeft) + " 秒后重试", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsPinned.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_791, _toDisplayString(memToolsPinned.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_794, _toDisplayString(memToolsPinned.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsAuto.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_792, _toDisplayString(memToolsAuto.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_795, _toDisplayString(memToolsAuto.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsAuto.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_793, _toDisplayString(memToolsAuto.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_796, _toDisplayString(memToolsAuto.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_794, [
-                _createElementVNode("div", _hoisted_795, [
+              _createElementVNode("div", _hoisted_797, [
+                _createElementVNode("div", _hoisted_798, [
                   _cache[277] || (_cache[277] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "合并记忆", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsMerge.picking ? closeMemToolsMergePick() : openMemToolsMergePick()),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsMerge.picking ? '退出选择' : '选择记忆'), 9 /* TEXT, PROPS */, _hoisted_796)
+                  }, _toDisplayString(memToolsMerge.picking ? '退出选择' : '选择记忆'), 9 /* TEXT, PROPS */, _hoisted_799)
                 ]),
                 _cache[278] || (_cache[278] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 勾选首尾相接的两条以上，合成一条。合并前会自动存档，结果不满意可以回滚。 ", -1 /* CACHED */)),
                 (memToolsMerge.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_797, _toDisplayString(memToolsMerge.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_800, _toDisplayString(memToolsMerge.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsMerge.picking)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_798, [
-                      _createElementVNode("div", _hoisted_799, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_801, [
+                      _createElementVNode("div", _hoisted_802, [
                         _createTextVNode(" 已选 " + _toDisplayString(memToolsMergePickedList.length) + " 条 ", 1 /* TEXT */),
                         (memToolsMergePickedList.length >= 2)
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_800, "· 第 " + _toDisplayString(memToolsMergePickedList[0].start) + "–" + _toDisplayString(memToolsMergePickedList[memToolsMergePickedList.length - 1].end) + " 轮", 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_803, "· 第 " + _toDisplayString(memToolsMergePickedList[0].start) + "–" + _toDisplayString(memToolsMergePickedList[memToolsMergePickedList.length - 1].end) + " 轮", 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
                       ]),
                       memToolsMergeGap
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_801, " 选中的记忆之间有空隙，第 " + _toDisplayString(memToolsMergeGap.from) + "–" + _toDisplayString(memToolsMergeGap.to) + " 轮没有被覆盖。请补齐或去掉一端。 ", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_804, " 选中的记忆之间有空隙，第 " + _toDisplayString(memToolsMergeGap.from) + "–" + _toDisplayString(memToolsMergeGap.to) + " 轮没有被覆盖。请补齐或去掉一端。 ", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (!memToolsMergePickable.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_802, "这个角色还没有记忆"))
-                        : (_openBlock(), _createElementBlock("div", _hoisted_803, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_805, "这个角色还没有记忆"))
+                        : (_openBlock(), _createElementBlock("div", _hoisted_806, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsMergePickable, (item) => {
                               return (_openBlock(), _createElementBlock("label", {
                                 key: item.memory.id,
@@ -7663,17 +7685,17 @@ return function render(_ctx, _cache) {
                                   value: item.memory.id,
                                   "onUpdate:modelValue": $event => ((memToolsMerge.selected) = $event),
                                   class: "w-4 h-4 flex-shrink-0 accent-primary-600"
-                                }, null, 8 /* PROPS */, _hoisted_804), [
+                                }, null, 8 /* PROPS */, _hoisted_807), [
                                   [_vModelCheckbox, memToolsMerge.selected]
                                 ]),
-                                _createElementVNode("div", _hoisted_805, [
-                                  _createElementVNode("div", _hoisted_806, [
+                                _createElementVNode("div", _hoisted_808, [
+                                  _createElementVNode("div", _hoisted_809, [
                                     _createTextVNode(_toDisplayString(item.start === item.end ? '第 ' + item.start + ' 轮' : '第 ' + item.start + '–' + item.end + ' 轮') + " ", 1 /* TEXT */),
                                     (item.memory.secondaryCompressed)
-                                      ? (_openBlock(), _createElementBlock("span", _hoisted_807, "已合并"))
+                                      ? (_openBlock(), _createElementBlock("span", _hoisted_810, "已合并"))
                                       : _createCommentVNode("v-if", true)
                                   ]),
-                                  _createElementVNode("div", _hoisted_808, _toDisplayString(item.len) + " 字", 1 /* TEXT */)
+                                  _createElementVNode("div", _hoisted_811, _toDisplayString(item.len) + " 字", 1 /* TEXT */)
                                 ])
                               ]))
                             }), 128 /* KEYED_FRAGMENT */))
@@ -7683,89 +7705,89 @@ return function render(_ctx, _cache) {
                         onClick: $event => (runMemToolsMerge()),
                         disabled: !memToolsMergeCanRun,
                         class: "mt-3 w-full py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                      }, _toDisplayString(memToolsMerge.running ? '合并中' : ('合并选中的 ' + memToolsMergePickedList.length + ' 条')), 9 /* TEXT, PROPS */, _hoisted_809),
+                      }, _toDisplayString(memToolsMerge.running ? '合并中' : ('合并选中的 ' + memToolsMergePickedList.length + ' 条')), 9 /* TEXT, PROPS */, _hoisted_812),
                       (memToolsMerge.running)
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 3,
                             type: "button",
                             onClick: $event => (abortMemToolsMerge()),
                             class: "mt-2 w-full py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                          }, " 取消 ", 8 /* PROPS */, _hoisted_810))
+                          }, " 取消 ", 8 /* PROPS */, _hoisted_813))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsMerge.previewOpen)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_811, [
-                      _createElementVNode("div", _hoisted_812, " 合并结果 · " + _toDisplayString(memToolsMerge.preview.replace(/\s+/g, '').length) + " 字 · 可以改 ", 1 /* TEXT */),
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_814, [
+                      _createElementVNode("div", _hoisted_815, " 合并结果 · " + _toDisplayString(memToolsMerge.preview.replace(/\s+/g, '').length) + " 字 · 可以改 ", 1 /* TEXT */),
                       _withDirectives(_createElementVNode("textarea", {
                         "onUpdate:modelValue": $event => ((memToolsMerge.preview) = $event),
                         rows: "8",
                         class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                      }, null, 8 /* PROPS */, _hoisted_813), [
+                      }, null, 8 /* PROPS */, _hoisted_816), [
                         [_vModelText, memToolsMerge.preview]
                       ]),
-                      _createElementVNode("div", _hoisted_814, [
+                      _createElementVNode("div", _hoisted_817, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (confirmMemToolsMergeWrite()),
                           disabled: memToolsMerge.writing,
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                        }, _toDisplayString(memToolsMerge.writing ? '写入中' : '确认写入'), 9 /* TEXT, PROPS */, _hoisted_815),
+                        }, _toDisplayString(memToolsMerge.writing ? '写入中' : '确认写入'), 9 /* TEXT, PROPS */, _hoisted_818),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (cancelMemToolsMergePreview()),
                           disabled: memToolsMerge.writing,
                           class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                        }, " 取消 ", 8 /* PROPS */, _hoisted_816)
+                        }, " 取消 ", 8 /* PROPS */, _hoisted_819)
                       ])
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_817, [
+              _createElementVNode("div", _hoisted_820, [
                 _cache[283] || (_cache[283] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800 mb-2" }, "提炼人物档案 / 故事纪事", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_818, [
-                  _createElementVNode("span", _hoisted_819, _toDisplayString(memToolsImportLabel), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_821, [
+                  _createElementVNode("span", _hoisted_822, _toDisplayString(memToolsImportLabel), 1 /* TEXT */),
                   (memToolsImport.name && !memToolsImport.busy)
                     ? (_openBlock(), _createElementBlock("button", {
                         key: 0,
                         type: "button",
                         onClick: $event => (clearMemToolsImport()),
                         class: "px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                      }, "清除", 8 /* PROPS */, _hoisted_820))
+                      }, "清除", 8 /* PROPS */, _hoisted_823))
                     : (_openBlock(), _createElementBlock("button", {
                         key: 1,
                         type: "button",
                         onClick: $event => (pickMemToolsImportFile()),
                         disabled: memToolsImport.busy,
                         class: "px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                      }, _toDisplayString(memToolsImport.busy ? '读取中' : '选择对话文件'), 9 /* TEXT, PROPS */, _hoisted_821)),
+                      }, _toDisplayString(memToolsImport.busy ? '读取中' : '选择对话文件'), 9 /* TEXT, PROPS */, _hoisted_824)),
                   _createElementVNode("input", {
                     id: "rphub-memtools-import-file",
                     type: "file",
                     accept: ".jsonl,.json,.txt,.html,.htm",
                     class: "hidden",
                     onChange: $event => (readMemToolsImportFile($event))
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_822)
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_825)
                 ]),
-                _createElementVNode("div", _hoisted_823, [
+                _createElementVNode("div", _hoisted_826, [
                   (memToolsImport.name)
-                    ? (_openBlock(), _createElementBlock("span", _hoisted_824, "把导入的 " + _toDisplayString(memToolsImport.turns.length) + " 轮对话原文（" + _toDisplayString(memToolsImport.chars) + " 字）发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
-                    : (_openBlock(), _createElementBlock("span", _hoisted_825, "把 " + _toDisplayString(memToolsExtractSource.count) + " 条记忆（" + _toDisplayString(memToolsExtractSource.chars) + " 字）连同最近两轮原文一起发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("span", _hoisted_827, "把导入的 " + _toDisplayString(memToolsImport.turns.length) + " 轮对话原文（" + _toDisplayString(memToolsImport.chars) + " 字）发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
+                    : (_openBlock(), _createElementBlock("span", _hoisted_828, "把 " + _toDisplayString(memToolsExtractSource.count) + " 条记忆（" + _toDisplayString(memToolsExtractSource.chars) + " 字）连同最近两轮原文一起发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
                 ]),
                 _cache[284] || (_cache[284] = _createElementVNode("div", { class: "mt-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-700 leading-relaxed" }, " 生成可能要几分钟，字数越多越久。存下来不会自动进上下文，也不参与向量召回，要你自己复制到世界书或人设里。 ", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_826, [
+                _createElementVNode("div", _hoisted_829, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (runMemToolsExtract('character')),
                     disabled: !!memToolsExtract.running || !memToolsExtractSource.count,
                     class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsExtract.running === 'character' ? '生成中' : '生成人物档案'), 9 /* TEXT, PROPS */, _hoisted_827),
+                  }, _toDisplayString(memToolsExtract.running === 'character' ? '生成中' : '生成人物档案'), 9 /* TEXT, PROPS */, _hoisted_830),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (runMemToolsExtract('story')),
                     disabled: !!memToolsExtract.running || !memToolsExtractSource.count,
                     class: "flex-1 py-2 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsExtract.running === 'story' ? '生成中' : '生成故事纪事'), 9 /* TEXT, PROPS */, _hoisted_828)
+                  }, _toDisplayString(memToolsExtract.running === 'story' ? '生成中' : '生成故事纪事'), 9 /* TEXT, PROPS */, _hoisted_831)
                 ]),
                 (memToolsExtract.running)
                   ? (_openBlock(), _createElementBlock("button", {
@@ -7773,10 +7795,10 @@ return function render(_ctx, _cache) {
                       type: "button",
                       onClick: $event => (abortMemToolsExtract()),
                       class: "mt-2 w-full py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                    }, " 取消 ", 8 /* PROPS */, _hoisted_829))
+                    }, " 取消 ", 8 /* PROPS */, _hoisted_832))
                   : _createCommentVNode("v-if", true),
                 (!memToolsExtract.running && (memToolsExtractNeedsContinue('character') || memToolsExtractNeedsContinue('story')))
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_830, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_833, [
                       (memToolsExtractNeedsContinue('character'))
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 0,
@@ -7784,7 +7806,7 @@ return function render(_ctx, _cache) {
                             onClick: $event => (continueMemToolsExtract('character')),
                             disabled: !memToolsExtractContinueLeft('character'),
                             class: "flex-1 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white active:scale-95 transition-all disabled:opacity-50"
-                          }, " 继续补写人物" + _toDisplayString(memToolsExtractContinueLeft('character') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_831))
+                          }, " 继续补写人物" + _toDisplayString(memToolsExtractContinueLeft('character') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_834))
                         : _createCommentVNode("v-if", true),
                       (memToolsExtractNeedsContinue('story'))
                         ? (_openBlock(), _createElementBlock("button", {
@@ -7793,31 +7815,31 @@ return function render(_ctx, _cache) {
                             onClick: $event => (continueMemToolsExtract('story')),
                             disabled: !memToolsExtractContinueLeft('story'),
                             class: "flex-1 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white active:scale-95 transition-all disabled:opacity-50"
-                          }, " 继续补写故事" + _toDisplayString(memToolsExtractContinueLeft('story') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_832))
+                          }, " 继续补写故事" + _toDisplayString(memToolsExtractContinueLeft('story') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_835))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_833, _toDisplayString(memToolsExtract.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_836, _toDisplayString(memToolsExtract.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_834, _toDisplayString(memToolsExtract.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_837, _toDisplayString(memToolsExtract.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.entries.length)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_835, [
-                      _createElementVNode("div", _hoisted_836, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_838, [
+                      _createElementVNode("div", _hoisted_839, [
                         _createTextVNode(_toDisplayString(memToolsExtract.entries.length) + " 条 · " + _toDisplayString(memToolsExtractTotal) + " 字 ", 1 /* TEXT */),
                         (memToolsExtract.savedAt)
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_837, "· 上次保存 " + _toDisplayString(memToolsTimeText(memToolsExtract.savedAt)), 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_840, "· 上次保存 " + _toDisplayString(memToolsTimeText(memToolsExtract.savedAt)), 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_838, [
+                      _createElementVNode("div", _hoisted_841, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsExtract.entries, (entry) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: entry.id,
                             class: "rounded-xl bg-gray-50 border border-gray-200 p-3"
                           }, [
-                            _createElementVNode("div", _hoisted_839, [
+                            _createElementVNode("div", _hoisted_842, [
                               _createElementVNode("span", {
                                 class: _normalizeClass(["text-[11px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0", entry.kind === 'story' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'])
                               }, _toDisplayString(entry.kind === 'story' ? '故事' : '人物'), 3 /* TEXT, CLASS */),
@@ -7825,7 +7847,7 @@ return function render(_ctx, _cache) {
                                 "onUpdate:modelValue": $event => ((entry.label) = $event),
                                 type: "text",
                                 class: "flex-1 min-w-0 bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                              }, null, 8 /* PROPS */, _hoisted_840), [
+                              }, null, 8 /* PROPS */, _hoisted_843), [
                                 [_vModelText, entry.label]
                               ])
                             ]),
@@ -7833,122 +7855,122 @@ return function render(_ctx, _cache) {
                               "onUpdate:modelValue": $event => ((entry.text) = $event),
                               rows: "6",
                               class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                            }, null, 8 /* PROPS */, _hoisted_841), [
+                            }, null, 8 /* PROPS */, _hoisted_844), [
                               [_vModelText, entry.text]
                             ]),
-                            _createElementVNode("div", _hoisted_842, [
+                            _createElementVNode("div", _hoisted_845, [
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (copyMemToolsExtract(entry)),
                                 class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                              }, " 复制正文 ", 8 /* PROPS */, _hoisted_843),
+                              }, " 复制正文 ", 8 /* PROPS */, _hoisted_846),
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (removeMemToolsExtractEntry(entry.id)),
                                 class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                              }, " 删 ", 8 /* PROPS */, _hoisted_844)
+                              }, " 删 ", 8 /* PROPS */, _hoisted_847)
                             ])
                           ]))
                         }), 128 /* KEYED_FRAGMENT */))
                       ]),
-                      _createElementVNode("div", _hoisted_845, [
+                      _createElementVNode("div", _hoisted_848, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (saveMemToolsExtract()),
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all"
-                        }, " 保存到本机 ", 8 /* PROPS */, _hoisted_846),
+                        }, " 保存到本机 ", 8 /* PROPS */, _hoisted_849),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (clearMemToolsExtract()),
                           class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                        }, " 清空 ", 8 /* PROPS */, _hoisted_847)
+                        }, " 清空 ", 8 /* PROPS */, _hoisted_850)
                       ]),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (memToolsExportEntries()),
                         class: "mt-2 w-full py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, " 导出 JSON ", 8 /* PROPS */, _hoisted_848)
+                      }, " 导出 JSON ", 8 /* PROPS */, _hoisted_851)
                     ]))
                   : _createCommentVNode("v-if", true),
-                _createElementVNode("details", _hoisted_849, [
+                _createElementVNode("details", _hoisted_852, [
                   _cache[281] || (_cache[281] = _createElementVNode("summary", { class: "text-xs font-bold text-gray-600 cursor-pointer" }, "提示词（可以改，改完只影响以后生成）", -1 /* CACHED */)),
                   _cache[282] || (_cache[282] = _createElementVNode("div", { class: "mt-2 text-[11px] text-gray-500 leading-relaxed" }, " 留空就用默认那一份。改坏了点「恢复默认」清掉，不会丢东西。 ", -1 /* CACHED */)),
-                  _createElementVNode("div", _hoisted_850, [
+                  _createElementVNode("div", _hoisted_853, [
                     _cache[279] || (_cache[279] = _createElementVNode("div", { class: "text-[11px] font-bold text-gray-600 mb-1" }, "人物档案", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("textarea", {
                       "onUpdate:modelValue": $event => ((memToolsExtractPrompt.character) = $event),
                       rows: "4",
                       placeholder: "留空用默认提示词",
                       class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[11px] text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                    }, null, 8 /* PROPS */, _hoisted_851), [
+                    }, null, 8 /* PROPS */, _hoisted_854), [
                       [_vModelText, memToolsExtractPrompt.character]
                     ]),
-                    _createElementVNode("div", _hoisted_852, [
+                    _createElementVNode("div", _hoisted_855, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (saveMemToolsExtractPrompt('character')),
                         class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                      }, "保存这份", 8 /* PROPS */, _hoisted_853),
+                      }, "保存这份", 8 /* PROPS */, _hoisted_856),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (resetMemToolsExtractPrompt('character')),
                         class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, "恢复默认", 8 /* PROPS */, _hoisted_854)
+                      }, "恢复默认", 8 /* PROPS */, _hoisted_857)
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_855, [
+                  _createElementVNode("div", _hoisted_858, [
                     _cache[280] || (_cache[280] = _createElementVNode("div", { class: "text-[11px] font-bold text-gray-600 mb-1" }, "故事纪事", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("textarea", {
                       "onUpdate:modelValue": $event => ((memToolsExtractPrompt.story) = $event),
                       rows: "4",
                       placeholder: "留空用默认提示词",
                       class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[11px] text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                    }, null, 8 /* PROPS */, _hoisted_856), [
+                    }, null, 8 /* PROPS */, _hoisted_859), [
                       [_vModelText, memToolsExtractPrompt.story]
                     ]),
-                    _createElementVNode("div", _hoisted_857, [
+                    _createElementVNode("div", _hoisted_860, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (saveMemToolsExtractPrompt('story')),
                         class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                      }, "保存这份", 8 /* PROPS */, _hoisted_858),
+                      }, "保存这份", 8 /* PROPS */, _hoisted_861),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (resetMemToolsExtractPrompt('story')),
                         class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, "恢复默认", 8 /* PROPS */, _hoisted_859)
+                      }, "恢复默认", 8 /* PROPS */, _hoisted_862)
                     ])
                   ])
                 ])
               ]),
-              _createElementVNode("div", _hoisted_860, [
-                _createElementVNode("div", _hoisted_861, [
+              _createElementVNode("div", _hoisted_863, [
+                _createElementVNode("div", _hoisted_864, [
                   _cache[285] || (_cache[285] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "自由提问", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsAsk.open ? closeMemToolsAsk() : openMemToolsAsk()),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsAsk.open ? '收起' : '展开'), 9 /* TEXT, PROPS */, _hoisted_862)
+                  }, _toDisplayString(memToolsAsk.open ? '收起' : '展开'), 9 /* TEXT, PROPS */, _hoisted_865)
                 ]),
                 _cache[286] || (_cache[286] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 拿现有记忆回答具体问题。只发记忆条目和最近两轮原文，不发全部对话；回答不会写进记忆。 ", -1 /* CACHED */)),
                 (memToolsAsk.open)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_863, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_866, [
                       (memToolsAsk.rounds.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_864, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_867, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsAsk.rounds, (item) => {
                               return (_openBlock(), _createElementBlock("div", {
                                 key: item.id,
                                 class: "rounded-xl bg-gray-50 border border-gray-200 p-3"
                               }, [
-                                _createElementVNode("div", _hoisted_865, "问：" + _toDisplayString(item.question), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_866, _toDisplayString(item.pending ? '思考中…' : item.answer), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_868, "问：" + _toDisplayString(item.question), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_869, _toDisplayString(item.pending ? '思考中…' : item.answer), 1 /* TEXT */),
                                 (!item.pending)
                                   ? (_openBlock(), _createElementBlock("button", {
                                       key: 0,
                                       type: "button",
                                       onClick: $event => (copyMemToolsAskAnswer(item)),
                                       class: "mt-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                    }, " 复制回答 ", 8 /* PROPS */, _hoisted_867))
+                                    }, " 复制回答 ", 8 /* PROPS */, _hoisted_870))
                                   : _createCommentVNode("v-if", true)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */))
@@ -7960,23 +7982,23 @@ return function render(_ctx, _cache) {
                         disabled: memToolsAsk.running,
                         placeholder: "例如：她左手腕上的伤是怎么来的",
                         class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                      }, null, 8 /* PROPS */, _hoisted_868), [
+                      }, null, 8 /* PROPS */, _hoisted_871), [
                         [_vModelText, memToolsAsk.question]
                       ]),
-                      _createElementVNode("div", _hoisted_869, [
+                      _createElementVNode("div", _hoisted_872, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (runMemToolsAsk()),
                           disabled: memToolsAsk.running || !memToolsExtractSource.count,
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                        }, _toDisplayString(memToolsAsk.running ? '生成中' : '提问'), 9 /* TEXT, PROPS */, _hoisted_870),
+                        }, _toDisplayString(memToolsAsk.running ? '生成中' : '提问'), 9 /* TEXT, PROPS */, _hoisted_873),
                         (memToolsAsk.running)
                           ? (_openBlock(), _createElementBlock("button", {
                               key: 0,
                               type: "button",
                               onClick: $event => (abortMemToolsAsk()),
                               class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                            }, " 取消 ", 8 /* PROPS */, _hoisted_871))
+                            }, " 取消 ", 8 /* PROPS */, _hoisted_874))
                           : _createCommentVNode("v-if", true),
                         (!memToolsAsk.running && memToolsAsk.rounds.length)
                           ? (_openBlock(), _createElementBlock("button", {
@@ -7984,33 +8006,33 @@ return function render(_ctx, _cache) {
                               type: "button",
                               onClick: $event => (clearMemToolsAsk()),
                               class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                            }, " 清空 ", 8 /* PROPS */, _hoisted_872))
+                            }, " 清空 ", 8 /* PROPS */, _hoisted_875))
                           : _createCommentVNode("v-if", true)
                       ]),
                       (memToolsAsk.error)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_873, _toDisplayString(memToolsAsk.error), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_876, _toDisplayString(memToolsAsk.error), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (memToolsAsk.running)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_874, " 输入越长越久，回答也可能被模型长度上限截断；被截断就缩小问题范围重问。 "))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_877, " 输入越长越久，回答也可能被模型长度上限截断；被截断就缩小问题范围重问。 "))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
               (!memToolsAudit.loading && !memToolsAudit.issues.length && !memToolsAudit.error)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_875, " 没发现问题 "))
+                ? (_openBlock(), _createElementBlock("div", _hoisted_878, " 没发现问题 "))
                 : _createCommentVNode("v-if", true),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsAudit.issues, (issue, idx) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: idx,
                   class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4"
                 }, [
-                  _createElementVNode("div", _hoisted_876, [
+                  _createElementVNode("div", _hoisted_879, [
                     _createElementVNode("span", {
                       class: _normalizeClass(["text-[11px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0", issue.level === 'warn' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'])
                     }, _toDisplayString(issue.tag), 3 /* TEXT, CLASS */),
-                    _createElementVNode("span", _hoisted_877, _toDisplayString(issue.where), 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_880, _toDisplayString(issue.where), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_878, _toDisplayString(issue.text), 1 /* TEXT */)
+                  _createElementVNode("div", _hoisted_881, _toDisplayString(issue.text), 1 /* TEXT */)
                 ]))
               }), 128 /* KEYED_FRAGMENT */))
             ])
@@ -8025,8 +8047,8 @@ return function render(_ctx, _cache) {
         "panel-class": "compact-modal-panel"
       }, {
         default: _withCtx(() => [
-          _createElementVNode("div", _hoisted_879, [
-            _createElementVNode("div", _hoisted_880, [
+          _createElementVNode("div", _hoisted_882, [
+            _createElementVNode("div", _hoisted_883, [
               _createElementVNode("div", null, [
                 _createElementVNode("h3", null, _toDisplayString(cloudBackup.mode === 'upload' ? '上传备份' : '下载备份'), 1 /* TEXT */),
                 _createElementVNode("p", null, _toDisplayString(cloudBackup.mode === 'upload' ? '全部角色卡和对应的聊天记录' : '输入上传时得到的密钥，把角色卡和聊天合并到本机'), 1 /* TEXT */)
@@ -8052,7 +8074,7 @@ return function render(_ctx, _cache) {
                     d: "M6 18L18 6M6 6l12 12"
                   })
                 ], -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_881)
+              ]))], 8 /* PROPS */, _hoisted_884)
             ]),
             (cloudBackup.mode === 'upload')
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
@@ -8063,15 +8085,15 @@ return function render(_ctx, _cache) {
                     _createElementVNode("li", null, "密钥相当于取件码，拿到的人都能下载这份备份，请勿外传")
                   ], -1 /* CACHED */)),
                   (cloudBackup.key && !cloudBackup.progress)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_882, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_885, [
                         _cache[288] || (_cache[288] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "备份密钥", -1 /* CACHED */)),
-                        _createElementVNode("div", _hoisted_883, _toDisplayString(cloudBackup.key), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_884, "有效期至 " + _toDisplayString(formatCloudBackupTime(cloudBackup.expiresAt)), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_886, _toDisplayString(cloudBackup.key), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_887, "有效期至 " + _toDisplayString(formatCloudBackupTime(cloudBackup.expiresAt)), 1 /* TEXT */),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: copyCloudBackupKey,
                           class: "settings-action mt-3"
-                        }, "复制密钥", 8 /* PROPS */, _hoisted_885)
+                        }, "复制密钥", 8 /* PROPS */, _hoisted_888)
                       ]))
                     : _createCommentVNode("v-if", true)
                 ], 64 /* STABLE_FRAGMENT */))
@@ -8092,26 +8114,26 @@ return function render(_ctx, _cache) {
                     disabled: cloudBackup.busy,
                     onKeydown: _withKeys(startCloudRestore, ["enter"]),
                     class: "mt-4 w-full bg-gray-50/60 border border-gray-300 rounded-lg px-4 py-3 text-center font-mono text-lg tracking-widest uppercase text-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-all"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_886), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_889), [
                     [_vModelText, cloudBackup.restoreKey]
                   ])
                 ], 64 /* STABLE_FRAGMENT */)),
             (cloudBackup.progress)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_887, [
-                  _createElementVNode("div", _hoisted_888, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_890, [
+                  _createElementVNode("div", _hoisted_891, [
                     _createElementVNode("span", null, _toDisplayString(cloudBackup.progress.label), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_889, _toDisplayString(Math.floor(cloudBackup.progress.percent)) + "%", 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_892, _toDisplayString(Math.floor(cloudBackup.progress.percent)) + "%", 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_890, [
+                  _createElementVNode("div", _hoisted_893, [
                     _createElementVNode("div", {
                       class: "h-full rounded-full bg-primary-500 transition-[width] duration-300",
                       style: _normalizeStyle({ width: cloudBackup.progress.percent + '%' })
                     }, null, 4 /* STYLE */)
                   ]),
-                  _createElementVNode("p", _hoisted_891, _toDisplayString(cloudBackup.progress.detail), 1 /* TEXT */)
+                  _createElementVNode("p", _hoisted_894, _toDisplayString(cloudBackup.progress.detail), 1 /* TEXT */)
                 ]))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_892, [
+            _createElementVNode("div", _hoisted_895, [
               (cloudBackup.mode === 'upload')
                 ? (_openBlock(), _createElementBlock("button", {
                     key: 0,
@@ -8119,14 +8141,14 @@ return function render(_ctx, _cache) {
                     onClick: startCloudBackup,
                     disabled: cloudBackup.busy,
                     class: "modal-primary-button flex-1 justify-center disabled:opacity-60"
-                  }, _toDisplayString(cloudBackup.busy ? '上传中...' : (cloudBackup.key ? '重新上传' : '开始上传')), 9 /* TEXT, PROPS */, _hoisted_893))
+                  }, _toDisplayString(cloudBackup.busy ? '上传中...' : (cloudBackup.key ? '重新上传' : '开始上传')), 9 /* TEXT, PROPS */, _hoisted_896))
                 : (_openBlock(), _createElementBlock("button", {
                     key: 1,
                     type: "button",
                     onClick: startCloudRestore,
                     disabled: cloudBackup.busy || !cloudBackup.restoreKey.trim(),
                     class: "modal-primary-button flex-1 justify-center disabled:opacity-60"
-                  }, _toDisplayString(cloudBackup.busy ? '下载中...' : '开始下载'), 9 /* TEXT, PROPS */, _hoisted_894))
+                  }, _toDisplayString(cloudBackup.busy ? '下载中...' : '开始下载'), 9 /* TEXT, PROPS */, _hoisted_897))
             ])
           ])
         ]),
@@ -9287,343 +9309,347 @@ const _hoisted_651 = {
   key: 0,
   class: "mt-2 flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5"
 }
-const _hoisted_652 = { class: "list-card" }
-const _hoisted_653 = { class: "memory-browse" }
-const _hoisted_654 = { class: "memory-browse__head" }
-const _hoisted_655 = { key: 0 }
-const _hoisted_656 = { key: 1 }
-const _hoisted_657 = ["aria-label"]
-const _hoisted_658 = {
+const _hoisted_652 = {
+  key: 0,
+  class: "empty-state",
+  role: "status"
+}
+const _hoisted_653 = { key: 0 }
+const _hoisted_654 = ["onClick"]
+const _hoisted_655 = { class: "list-card" }
+const _hoisted_656 = { class: "memory-browse" }
+const _hoisted_657 = { class: "memory-browse__head" }
+const _hoisted_658 = { key: 0 }
+const _hoisted_659 = { key: 1 }
+const _hoisted_660 = ["aria-label"]
+const _hoisted_661 = {
   class: "memory-compression__labels",
   "aria-hidden": "true"
 }
-const _hoisted_659 = { class: "memory-timeline" }
-const _hoisted_660 = { class: "memory-item__head" }
-const _hoisted_661 = { class: "memory-item__turn" }
-const _hoisted_662 = {
+const _hoisted_662 = { class: "memory-timeline" }
+const _hoisted_663 = { class: "memory-item__head" }
+const _hoisted_664 = { class: "memory-item__turn" }
+const _hoisted_665 = {
   class: "memory-item__chars",
   title: "本轮原始正文 → 使用总结后的正文"
 }
-const _hoisted_663 = ["onClick", "disabled", "title", "aria-label"]
-const _hoisted_664 = ["onClick", "disabled"]
-const _hoisted_665 = {
+const _hoisted_666 = ["onClick", "disabled", "title", "aria-label"]
+const _hoisted_667 = ["onClick", "disabled"]
+const _hoisted_668 = {
   key: 0,
   class: "memory-item__editor"
 }
-const _hoisted_666 = ["onUpdate:modelValue"]
-const _hoisted_667 = { class: "memory-item__editor-actions" }
-const _hoisted_668 = ["onClick"]
-const _hoisted_669 = ["onClick", "disabled"]
-const _hoisted_670 = {
+const _hoisted_669 = ["onUpdate:modelValue"]
+const _hoisted_670 = { class: "memory-item__editor-actions" }
+const _hoisted_671 = ["onClick"]
+const _hoisted_672 = ["onClick", "disabled"]
+const _hoisted_673 = {
   key: 1,
   class: "memory-item__text"
 }
-const _hoisted_671 = {
-  key: 1,
+const _hoisted_674 = {
+  key: 2,
   class: "empty-state"
 }
-const _hoisted_672 = {
-  key: 1,
-  class: "empty-state"
-}
-const _hoisted_673 = ["onScrollPassive"]
-const _hoisted_674 = ["onClick"]
 const _hoisted_675 = {
+  key: 1,
+  class: "empty-state"
+}
+const _hoisted_676 = ["onScrollPassive"]
+const _hoisted_677 = ["onClick"]
+const _hoisted_678 = {
   class: "settings-icon-button cursor-pointer",
   title: "导入"
 }
-const _hoisted_676 = ["onChange"]
-const _hoisted_677 = ["onClick"]
-const _hoisted_678 = {
+const _hoisted_679 = ["onChange"]
+const _hoisted_680 = ["onClick"]
+const _hoisted_681 = {
   key: 0,
   class: "resource-batch-status",
   role: "status"
 }
-const _hoisted_679 = ["disabled", "onClick"]
-const _hoisted_680 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
-const _hoisted_681 = ["onClick", "aria-expanded"]
-const _hoisted_682 = { class: "flex items-center" }
-const _hoisted_683 = ["aria-hidden", "inert"]
-const _hoisted_684 = { class: "settings-collapse__inner" }
-const _hoisted_685 = { class: "settings-collapse__content px-4 pb-4 pt-3 border-t border-gray-100" }
-const _hoisted_686 = { class: "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm" }
-const _hoisted_687 = { class: "flex justify-between items-center mb-2" }
-const _hoisted_688 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_689 = ["onChange", "onUpdate:modelValue"]
+const _hoisted_682 = ["disabled", "onClick"]
+const _hoisted_683 = { class: "bg-white/70 backdrop-blur-sm p-1 rounded-2xl border border-gray-200 shadow-sm mb-4 overflow-hidden" }
+const _hoisted_684 = ["onClick", "aria-expanded"]
+const _hoisted_685 = { class: "flex items-center" }
+const _hoisted_686 = ["aria-hidden", "inert"]
+const _hoisted_687 = { class: "settings-collapse__inner" }
+const _hoisted_688 = { class: "settings-collapse__content px-4 pb-4 pt-3 border-t border-gray-100" }
+const _hoisted_689 = { class: "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm" }
 const _hoisted_690 = { class: "flex justify-between items-center mb-2" }
 const _hoisted_691 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
 const _hoisted_692 = ["onChange", "onUpdate:modelValue"]
-const _hoisted_693 = { class: "worldinfo-toolbar" }
-const _hoisted_694 = { class: "worldinfo-search" }
-const _hoisted_695 = ["onUpdate:modelValue"]
-const _hoisted_696 = { class: "worldinfo-search-count" }
-const _hoisted_697 = { class: "worldinfo-pager worldinfo-pager--top" }
-const _hoisted_698 = ["disabled", "onClick"]
-const _hoisted_699 = { class: "worldinfo-pager-info" }
-const _hoisted_700 = ["disabled", "onClick"]
-const _hoisted_701 = ["onPointerdownCapture", "onPointermoveCapturePassive", "onPointercancelCapture", "onClickCapture"]
-const _hoisted_702 = ["data-resource-index"]
-const _hoisted_703 = { class: "sortable-item-main" }
-const _hoisted_704 = {
+const _hoisted_693 = { class: "flex justify-between items-center mb-2" }
+const _hoisted_694 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
+const _hoisted_695 = ["onChange", "onUpdate:modelValue"]
+const _hoisted_696 = { class: "worldinfo-toolbar" }
+const _hoisted_697 = { class: "worldinfo-search" }
+const _hoisted_698 = ["onUpdate:modelValue"]
+const _hoisted_699 = { class: "worldinfo-search-count" }
+const _hoisted_700 = { class: "worldinfo-pager worldinfo-pager--top" }
+const _hoisted_701 = ["disabled", "onClick"]
+const _hoisted_702 = { class: "worldinfo-pager-info" }
+const _hoisted_703 = ["disabled", "onClick"]
+const _hoisted_704 = ["onPointerdownCapture", "onPointermoveCapturePassive", "onPointercancelCapture", "onClickCapture"]
+const _hoisted_705 = ["data-resource-index"]
+const _hoisted_706 = { class: "sortable-item-main" }
+const _hoisted_707 = {
   key: 0,
   class: "resource-select"
 }
-const _hoisted_705 = ["aria-label", "checked", "onChange"]
-const _hoisted_706 = {
+const _hoisted_708 = ["aria-label", "checked", "onChange"]
+const _hoisted_709 = {
   key: 1,
   class: "sortable-list-handle",
   title: "拖动排序"
 }
-const _hoisted_707 = { class: "min-w-0" }
-const _hoisted_708 = { class: "sortable-item-heading" }
-const _hoisted_709 = { class: "truncate" }
-const _hoisted_710 = ["aria-label", "onClick"]
-const _hoisted_711 = { class: "sortable-item-actions" }
-const _hoisted_712 = { class: "relative inline-flex items-center cursor-pointer" }
-const _hoisted_713 = ["checked", "onChange"]
-const _hoisted_714 = { class: "sortable-item-buttons" }
-const _hoisted_715 = ["onClick"]
-const _hoisted_716 = ["onClick"]
-const _hoisted_717 = { class: "worldinfo-pager worldinfo-pager--bottom" }
-const _hoisted_718 = ["disabled", "onClick"]
-const _hoisted_719 = { class: "worldinfo-pager-info" }
-const _hoisted_720 = ["disabled", "onClick"]
-const _hoisted_721 = ["data-section"]
-const _hoisted_722 = { class: "settings-stack" }
-const _hoisted_723 = {
+const _hoisted_710 = { class: "min-w-0" }
+const _hoisted_711 = { class: "sortable-item-heading" }
+const _hoisted_712 = { class: "truncate" }
+const _hoisted_713 = ["aria-label", "onClick"]
+const _hoisted_714 = { class: "sortable-item-actions" }
+const _hoisted_715 = { class: "relative inline-flex items-center cursor-pointer" }
+const _hoisted_716 = ["checked", "onChange"]
+const _hoisted_717 = { class: "sortable-item-buttons" }
+const _hoisted_718 = ["onClick"]
+const _hoisted_719 = ["onClick"]
+const _hoisted_720 = { class: "worldinfo-pager worldinfo-pager--bottom" }
+const _hoisted_721 = ["disabled", "onClick"]
+const _hoisted_722 = { class: "worldinfo-pager-info" }
+const _hoisted_723 = ["disabled", "onClick"]
+const _hoisted_724 = ["data-section"]
+const _hoisted_725 = { class: "settings-stack" }
+const _hoisted_726 = {
   key: 1,
   class: "settings-card"
 }
-const _hoisted_724 = { class: "settings-card__header settings-profile-toolbar" }
-const _hoisted_725 = { class: "relative profile-dropdown-container" }
-const _hoisted_726 = ["onClick"]
-const _hoisted_727 = { class: "truncate" }
-const _hoisted_728 = {
+const _hoisted_727 = { class: "settings-card__header settings-profile-toolbar" }
+const _hoisted_728 = { class: "relative profile-dropdown-container" }
+const _hoisted_729 = ["onClick"]
+const _hoisted_730 = { class: "truncate" }
+const _hoisted_731 = {
   key: 0,
   class: "absolute top-full right-0 mt-2 z-50 min-w-[220px] max-w-[280px] transform-gpu origin-top-right"
 }
-const _hoisted_729 = { class: "bg-white/95 backdrop-blur-xl border border-gray-200 shadow-2xl rounded-xl p-1.5 flex flex-col gap-0.5 ring-1 ring-black/5 max-h-[260px] overflow-y-auto custom-scrollbar" }
-const _hoisted_730 = ["onClick"]
-const _hoisted_731 = { class: "flex-1 min-w-0" }
-const _hoisted_732 = { class: "font-bold truncate text-[13px]" }
-const _hoisted_733 = { key: 0 }
-const _hoisted_734 = {
+const _hoisted_732 = { class: "bg-white/95 backdrop-blur-xl border border-gray-200 shadow-2xl rounded-xl p-1.5 flex flex-col gap-0.5 ring-1 ring-black/5 max-h-[260px] overflow-y-auto custom-scrollbar" }
+const _hoisted_733 = ["onClick"]
+const _hoisted_734 = { class: "flex-1 min-w-0" }
+const _hoisted_735 = { class: "font-bold truncate text-[13px]" }
+const _hoisted_736 = { key: 0 }
+const _hoisted_737 = {
   key: 0,
   class: "w-4 h-4 text-primary-500 flex-shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_735 = ["onClick"]
-const _hoisted_736 = ["onClick"]
-const _hoisted_737 = { class: "settings-card__body" }
-const _hoisted_738 = { class: "settings-profile-layout" }
-const _hoisted_739 = { class: "relative group mx-auto md:mx-0 flex-shrink-0" }
-const _hoisted_740 = ["onClick"]
-const _hoisted_741 = ["onClick"]
-const _hoisted_742 = ["onChange"]
-const _hoisted_743 = { class: "flex-1 min-w-0 w-full space-y-5" }
-const _hoisted_744 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
-const _hoisted_745 = { class: "group" }
-const _hoisted_746 = { class: "relative" }
-const _hoisted_747 = ["onUpdate:modelValue"]
-const _hoisted_748 = { class: "segmented-switch" }
-const _hoisted_749 = ["onClick"]
-const _hoisted_750 = ["onClick"]
-const _hoisted_751 = { class: "text-xs font-normal opacity-80" }
-const _hoisted_752 = { class: "group" }
-const _hoisted_753 = ["onUpdate:modelValue"]
-const _hoisted_754 = { class: "group" }
-const _hoisted_755 = ["onUpdate:modelValue"]
-const _hoisted_756 = {
+const _hoisted_738 = ["onClick"]
+const _hoisted_739 = ["onClick"]
+const _hoisted_740 = { class: "settings-card__body" }
+const _hoisted_741 = { class: "settings-profile-layout" }
+const _hoisted_742 = { class: "relative group mx-auto md:mx-0 flex-shrink-0" }
+const _hoisted_743 = ["onClick"]
+const _hoisted_744 = ["onClick"]
+const _hoisted_745 = ["onChange"]
+const _hoisted_746 = { class: "flex-1 min-w-0 w-full space-y-5" }
+const _hoisted_747 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
+const _hoisted_748 = { class: "group" }
+const _hoisted_749 = { class: "relative" }
+const _hoisted_750 = ["onUpdate:modelValue"]
+const _hoisted_751 = { class: "segmented-switch" }
+const _hoisted_752 = ["onClick"]
+const _hoisted_753 = ["onClick"]
+const _hoisted_754 = { class: "text-xs font-normal opacity-80" }
+const _hoisted_755 = { class: "group" }
+const _hoisted_756 = ["onUpdate:modelValue"]
+const _hoisted_757 = { class: "group" }
+const _hoisted_758 = ["onUpdate:modelValue"]
+const _hoisted_759 = {
   key: 2,
   class: "settings-card shell-api-card"
 }
-const _hoisted_757 = { class: "settings-card__body space-y-6" }
-const _hoisted_758 = { class: "pb-6 border-b border-gray-100" }
-const _hoisted_759 = { class: "settings-subheading mb-3 flex items-center justify-between" }
-const _hoisted_760 = ["onClick"]
-const _hoisted_761 = { class: "grid grid-cols-1 md:grid-cols-2 gap-3" }
-const _hoisted_762 = { class: "model-setting-row" }
-const _hoisted_763 = { class: "flex-1 min-w-0" }
-const _hoisted_764 = { class: "flex justify-between items-center mb-0.5" }
-const _hoisted_765 = {
+const _hoisted_760 = { class: "settings-card__body space-y-6" }
+const _hoisted_761 = { class: "pb-6 border-b border-gray-100" }
+const _hoisted_762 = { class: "settings-subheading mb-3 flex items-center justify-between" }
+const _hoisted_763 = ["onClick"]
+const _hoisted_764 = { class: "grid grid-cols-1 md:grid-cols-2 gap-3" }
+const _hoisted_765 = { class: "model-setting-row" }
+const _hoisted_766 = { class: "flex-1 min-w-0" }
+const _hoisted_767 = { class: "flex justify-between items-center mb-0.5" }
+const _hoisted_768 = {
   key: 0,
   class: "text-xs font-mono font-medium text-primary-600"
 }
-const _hoisted_766 = { class: "model-setting-row" }
-const _hoisted_767 = { class: "flex-1 min-w-0" }
-const _hoisted_768 = { class: "flex justify-between items-center mb-0.5" }
-const _hoisted_769 = { class: "flex items-center gap-1.5 min-w-0 text-xs font-bold text-gray-700 truncate" }
-const _hoisted_770 = { class: "text-gray-500 font-medium whitespace-nowrap" }
-const _hoisted_771 = {
+const _hoisted_769 = { class: "model-setting-row" }
+const _hoisted_770 = { class: "flex-1 min-w-0" }
+const _hoisted_771 = { class: "flex justify-between items-center mb-0.5" }
+const _hoisted_772 = { class: "flex items-center gap-1.5 min-w-0 text-xs font-bold text-gray-700 truncate" }
+const _hoisted_773 = { class: "text-gray-500 font-medium whitespace-nowrap" }
+const _hoisted_774 = {
   key: 0,
   class: "text-xs font-mono font-medium text-primary-600"
 }
-const _hoisted_772 = { class: "grid grid-cols-1 gap-5" }
-const _hoisted_773 = { class: "group" }
-const _hoisted_774 = { class: "relative mb-2 api-provider-selector-container" }
-const _hoisted_775 = ["onClick"]
-const _hoisted_776 = { class: "flex items-center min-w-0" }
-const _hoisted_777 = { class: "w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden" }
-const _hoisted_778 = ["src", "alt", "onError"]
-const _hoisted_779 = {
+const _hoisted_775 = { class: "grid grid-cols-1 gap-5" }
+const _hoisted_776 = { class: "group" }
+const _hoisted_777 = { class: "relative mb-2 api-provider-selector-container" }
+const _hoisted_778 = ["onClick"]
+const _hoisted_779 = { class: "flex items-center min-w-0" }
+const _hoisted_780 = { class: "w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 overflow-hidden" }
+const _hoisted_781 = ["src", "alt", "onError"]
+const _hoisted_782 = {
   key: 1,
   class: "w-4 h-4 text-gray-400",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_780 = { class: "block min-w-0 text-sm font-bold text-gray-700 truncate" }
-const _hoisted_781 = {
+const _hoisted_783 = { class: "block min-w-0 text-sm font-bold text-gray-700 truncate" }
+const _hoisted_784 = {
   key: 0,
   class: "absolute left-0 right-0 top-full z-40 mt-2 w-full max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl p-2"
 }
-const _hoisted_782 = ["onClick"]
-const _hoisted_783 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
-const _hoisted_784 = ["src", "alt", "onError"]
-const _hoisted_785 = { class: "min-w-0 flex-1" }
-const _hoisted_786 = { class: "block text-sm font-bold truncate" }
-const _hoisted_787 = { class: "block text-xs text-gray-400 font-mono truncate" }
-const _hoisted_788 = {
+const _hoisted_785 = ["onClick"]
+const _hoisted_786 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0 overflow-hidden" }
+const _hoisted_787 = ["src", "alt", "onError"]
+const _hoisted_788 = { class: "min-w-0 flex-1" }
+const _hoisted_789 = { class: "block text-sm font-bold truncate" }
+const _hoisted_790 = { class: "block text-xs text-gray-400 font-mono truncate" }
+const _hoisted_791 = {
   key: 0,
   class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_789 = ["onKeydown", "onClick"]
-const _hoisted_790 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }
-const _hoisted_791 = {
+const _hoisted_792 = ["onKeydown", "onClick"]
+const _hoisted_793 = { class: "w-8 h-8 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-3 shrink-0" }
+const _hoisted_794 = {
   key: 0,
   class: "w-5 h-5 text-primary-600",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_792 = {
+const _hoisted_795 = {
   key: 1,
   class: "w-5 h-5 text-gray-500",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_793 = { class: "min-w-0 flex-1" }
-const _hoisted_794 = { class: "block text-sm font-bold truncate" }
-const _hoisted_795 = { class: "block text-xs text-gray-400 truncate" }
-const _hoisted_796 = {
+const _hoisted_796 = { class: "min-w-0 flex-1" }
+const _hoisted_797 = { class: "block text-sm font-bold truncate" }
+const _hoisted_798 = { class: "block text-xs text-gray-400 truncate" }
+const _hoisted_799 = {
   key: 0,
   class: "w-4 h-4 ml-2 text-primary-600 shrink-0",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_797 = ["onClick"]
-const _hoisted_798 = {
+const _hoisted_800 = ["onClick"]
+const _hoisted_801 = {
   key: 0,
   class: "mb-2"
 }
-const _hoisted_799 = ["value", "onInput"]
-const _hoisted_800 = {
+const _hoisted_802 = ["value", "onInput"]
+const _hoisted_803 = {
   key: 1,
   class: "relative"
 }
-const _hoisted_801 = ["onUpdate:modelValue"]
-const _hoisted_802 = { class: "group" }
-const _hoisted_803 = { class: "relative" }
-const _hoisted_804 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
-const _hoisted_805 = { class: "group md:col-span-2" }
-const _hoisted_806 = { class: "flex items-center justify-between mb-1.5" }
-const _hoisted_807 = ["onClick"]
-const _hoisted_808 = { class: "relative group" }
-const _hoisted_809 = ["onClick"]
-const _hoisted_810 = { class: "truncate mr-2 text-sm" }
-const _hoisted_811 = { class: "pt-6 border-t border-gray-100 mt-6 shell-image-section" }
-const _hoisted_812 = { class: "mb-4 flex items-center justify-end gap-3" }
-const _hoisted_813 = {
+const _hoisted_804 = ["onUpdate:modelValue"]
+const _hoisted_805 = { class: "group" }
+const _hoisted_806 = { class: "relative" }
+const _hoisted_807 = { class: "grid grid-cols-1 md:grid-cols-2 gap-5" }
+const _hoisted_808 = { class: "group md:col-span-2" }
+const _hoisted_809 = { class: "flex items-center justify-between mb-1.5" }
+const _hoisted_810 = ["onClick"]
+const _hoisted_811 = { class: "relative group" }
+const _hoisted_812 = ["onClick"]
+const _hoisted_813 = { class: "truncate mr-2 text-sm" }
+const _hoisted_814 = { class: "pt-6 border-t border-gray-100 mt-6 shell-image-section" }
+const _hoisted_815 = { class: "mb-4 flex items-center justify-end gap-3" }
+const _hoisted_816 = {
   key: 0,
   href: "https://www.qianxun1688.com/links/D07F549B",
   target: "_blank",
   rel: "noopener noreferrer",
   class: "text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium"
 }
-const _hoisted_814 = { class: "grid grid-cols-1 md:grid-cols-2 gap-4" }
-const _hoisted_815 = { class: "min-w-0" }
-const _hoisted_816 = {
+const _hoisted_817 = { class: "grid grid-cols-1 md:grid-cols-2 gap-4" }
+const _hoisted_818 = { class: "min-w-0" }
+const _hoisted_819 = {
   key: 0,
   class: "image-quota"
 }
-const _hoisted_817 = {
+const _hoisted_820 = {
   role: "status",
   "aria-live": "polite"
 }
-const _hoisted_818 = ["disabled", "onClick"]
-const _hoisted_819 = {
+const _hoisted_821 = ["disabled", "onClick"]
+const _hoisted_822 = {
   key: 0,
   class: "min-w-0"
 }
-const _hoisted_820 = { class: "min-w-0" }
-const _hoisted_821 = {
+const _hoisted_823 = { class: "min-w-0" }
+const _hoisted_824 = {
   key: 0,
   class: "mt-3 custom-artist-editor-container rounded-2xl border border-gray-200/80 bg-white/60 dark:bg-gray-800/60 shadow-sm backdrop-blur-sm overflow-hidden transition-all"
 }
-const _hoisted_822 = ["onClick"]
-const _hoisted_823 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
-const _hoisted_824 = { class: "min-w-0 flex-1" }
-const _hoisted_825 = { class: "flex items-center gap-1.5" }
-const _hoisted_826 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
-const _hoisted_827 = { class: "mt-0.5 block truncate text-[11px] text-gray-400 dark:text-gray-400" }
-const _hoisted_828 = { class: "font-medium text-gray-600 dark:text-gray-300" }
-const _hoisted_829 = {
+const _hoisted_825 = ["onClick"]
+const _hoisted_826 = { class: "flex items-center gap-2.5 min-w-0 flex-1" }
+const _hoisted_827 = { class: "min-w-0 flex-1" }
+const _hoisted_828 = { class: "flex items-center gap-1.5" }
+const _hoisted_829 = { class: "px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-600 border border-primary-100/80" }
+const _hoisted_830 = { class: "mt-0.5 block truncate text-[11px] text-gray-400 dark:text-gray-400" }
+const _hoisted_831 = { class: "font-medium text-gray-600 dark:text-gray-300" }
+const _hoisted_832 = {
   key: 0,
   class: "border-t border-gray-100 dark:border-gray-700/60 bg-gradient-to-b from-gray-50/50 to-white/80 dark:from-gray-800/80 dark:to-gray-900/60 p-3 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"
 }
-const _hoisted_830 = { class: "flex items-center justify-between gap-2" }
-const _hoisted_831 = ["onClick"]
-const _hoisted_832 = {
+const _hoisted_833 = { class: "flex items-center justify-between gap-2" }
+const _hoisted_834 = ["onClick"]
+const _hoisted_835 = {
   key: 0,
   class: "w-1.5 h-1.5 rounded-full bg-white"
 }
-const _hoisted_833 = {
+const _hoisted_836 = {
   key: 0,
   class: "flex-shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-primary-600 text-white shadow-2xs"
 }
-const _hoisted_834 = ["onClick"]
-const _hoisted_835 = ["onUpdate:modelValue"]
-const _hoisted_836 = ["onUpdate:modelValue", "placeholder"]
-const _hoisted_837 = ["onUpdate:modelValue", "placeholder"]
-const _hoisted_838 = ["onClick"]
-const _hoisted_839 = ["aria-pressed", "onClick"]
-const _hoisted_840 = { class: "settings-toggle-status flex-none text-xs font-bold" }
-const _hoisted_841 = {
+const _hoisted_837 = ["onClick"]
+const _hoisted_838 = ["onUpdate:modelValue"]
+const _hoisted_839 = ["onUpdate:modelValue", "placeholder"]
+const _hoisted_840 = ["onUpdate:modelValue", "placeholder"]
+const _hoisted_841 = ["onClick"]
+const _hoisted_842 = ["aria-pressed", "onClick"]
+const _hoisted_843 = { class: "settings-toggle-status flex-none text-xs font-bold" }
+const _hoisted_844 = {
   key: 1,
   class: "min-w-0"
 }
-const _hoisted_842 = { class: "min-w-0" }
-const _hoisted_843 = {
+const _hoisted_845 = { class: "min-w-0" }
+const _hoisted_846 = {
   key: 2,
   class: "col-span-1 md:col-span-2 rounded-xl border border-gray-200/80 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/50 px-3 py-2"
 }
-const _hoisted_844 = { class: "mt-3 grid grid-cols-1 md:grid-cols-2 gap-3" }
-const _hoisted_845 = { class: "min-w-0" }
-const _hoisted_846 = { class: "min-w-0" }
-const _hoisted_847 = { class: "min-w-0" }
-const _hoisted_848 = ["value", "onChange"]
+const _hoisted_847 = { class: "mt-3 grid grid-cols-1 md:grid-cols-2 gap-3" }
+const _hoisted_848 = { class: "min-w-0" }
 const _hoisted_849 = { class: "min-w-0" }
-const _hoisted_850 = ["value", "onChange"]
-const _hoisted_851 = { class: "min-w-0" }
-const _hoisted_852 = ["value", "onChange"]
-const _hoisted_853 = { class: "min-w-0 flex items-end" }
-const _hoisted_854 = ["onClick"]
-const _hoisted_855 = {
+const _hoisted_850 = { class: "min-w-0" }
+const _hoisted_851 = ["value", "onChange"]
+const _hoisted_852 = { class: "min-w-0" }
+const _hoisted_853 = ["value", "onChange"]
+const _hoisted_854 = { class: "min-w-0" }
+const _hoisted_855 = ["value", "onChange"]
+const _hoisted_856 = { class: "min-w-0 flex items-end" }
+const _hoisted_857 = ["onClick"]
+const _hoisted_858 = {
   key: 3,
   class: "settings-card"
 }
-const _hoisted_856 = { class: "settings-card__body space-y-6" }
-const _hoisted_857 = { class: "grid grid-cols-1 md:grid-cols-2 gap-3" }
-const _hoisted_858 = { class: "settings-toggle-row group" }
-const _hoisted_859 = { class: "relative inline-flex flex-none items-center" }
-const _hoisted_860 = ["onUpdate:modelValue"]
+const _hoisted_859 = { class: "settings-card__body space-y-6" }
+const _hoisted_860 = { class: "grid grid-cols-1 md:grid-cols-2 gap-3" }
 const _hoisted_861 = { class: "settings-toggle-row group" }
 const _hoisted_862 = { class: "relative inline-flex flex-none items-center" }
 const _hoisted_863 = ["onUpdate:modelValue"]
@@ -9633,14 +9659,17 @@ const _hoisted_866 = ["onUpdate:modelValue"]
 const _hoisted_867 = { class: "settings-toggle-row group" }
 const _hoisted_868 = { class: "relative inline-flex flex-none items-center" }
 const _hoisted_869 = ["onUpdate:modelValue"]
-const _hoisted_870 = { class: "pt-5 border-t border-gray-100 mt-5" }
-const _hoisted_871 = { class: "grid grid-cols-1 md:grid-cols-2 gap-4" }
-const _hoisted_872 = { class: "min-w-0 md:col-span-2" }
-const _hoisted_873 = { class: "min-w-0" }
-const _hoisted_874 = { class: "flex justify-between items-center mb-2" }
-const _hoisted_875 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_876 = ["onClick", "aria-pressed", "title"]
-const _hoisted_877 = {
+const _hoisted_870 = { class: "settings-toggle-row group" }
+const _hoisted_871 = { class: "relative inline-flex flex-none items-center" }
+const _hoisted_872 = ["onUpdate:modelValue"]
+const _hoisted_873 = { class: "pt-5 border-t border-gray-100 mt-5" }
+const _hoisted_874 = { class: "grid grid-cols-1 md:grid-cols-2 gap-4" }
+const _hoisted_875 = { class: "min-w-0 md:col-span-2" }
+const _hoisted_876 = { class: "min-w-0" }
+const _hoisted_877 = { class: "flex justify-between items-center mb-2" }
+const _hoisted_878 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
+const _hoisted_879 = ["onClick", "aria-pressed", "title"]
+const _hoisted_880 = {
   key: 0,
   class: "w-3.5 h-3.5",
   fill: "none",
@@ -9649,7 +9678,7 @@ const _hoisted_877 = {
   viewBox: "0 0 24 24",
   "aria-hidden": "true"
 }
-const _hoisted_878 = {
+const _hoisted_881 = {
   key: 1,
   class: "w-3.5 h-3.5",
   fill: "none",
@@ -9658,12 +9687,12 @@ const _hoisted_878 = {
   viewBox: "0 0 24 24",
   "aria-hidden": "true"
 }
-const _hoisted_879 = ["onUpdate:modelValue", "disabled"]
-const _hoisted_880 = { class: "min-w-0" }
-const _hoisted_881 = { class: "flex justify-between items-center mb-2" }
-const _hoisted_882 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
-const _hoisted_883 = ["onClick", "aria-pressed", "title"]
-const _hoisted_884 = {
+const _hoisted_882 = ["onUpdate:modelValue", "disabled"]
+const _hoisted_883 = { class: "min-w-0" }
+const _hoisted_884 = { class: "flex justify-between items-center mb-2" }
+const _hoisted_885 = { class: "text-xs font-mono font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 whitespace-nowrap" }
+const _hoisted_886 = ["onClick", "aria-pressed", "title"]
+const _hoisted_887 = {
   key: 0,
   class: "w-3.5 h-3.5",
   fill: "none",
@@ -9672,7 +9701,7 @@ const _hoisted_884 = {
   viewBox: "0 0 24 24",
   "aria-hidden": "true"
 }
-const _hoisted_885 = {
+const _hoisted_888 = {
   key: 1,
   class: "w-3.5 h-3.5",
   fill: "none",
@@ -9681,364 +9710,364 @@ const _hoisted_885 = {
   viewBox: "0 0 24 24",
   "aria-hidden": "true"
 }
-const _hoisted_886 = ["onUpdate:modelValue", "disabled"]
-const _hoisted_887 = { class: "settings-card" }
-const _hoisted_888 = { class: "settings-card__body" }
-const _hoisted_889 = ["onClick"]
-const _hoisted_890 = { class: "settings-card__body space-y-3" }
-const _hoisted_891 = { class: "text-xs space-y-2" }
-const _hoisted_892 = { class: "flex gap-2" }
-const _hoisted_893 = { class: "flex-1 break-all font-mono" }
-const _hoisted_894 = { class: "flex gap-2" }
-const _hoisted_895 = { class: "flex-1" }
-const _hoisted_896 = { class: "flex gap-2" }
-const _hoisted_897 = { class: "flex-1" }
-const _hoisted_898 = { class: "flex gap-2" }
-const _hoisted_899 = { class: "flex-1" }
-const _hoisted_900 = { class: "flex gap-2" }
-const _hoisted_901 = { class: "flex-1" }
-const _hoisted_902 = { class: "flex gap-2" }
-const _hoisted_903 = { class: "flex-1" }
-const _hoisted_904 = { class: "flex gap-2" }
-const _hoisted_905 = { class: "flex-1" }
-const _hoisted_906 = { class: "flex gap-2" }
-const _hoisted_907 = { class: "flex-1 break-all font-mono text-gray-400" }
-const _hoisted_908 = ["onClick"]
-const _hoisted_909 = {
+const _hoisted_889 = ["onUpdate:modelValue", "disabled"]
+const _hoisted_890 = { class: "settings-card" }
+const _hoisted_891 = { class: "settings-card__body" }
+const _hoisted_892 = ["onClick"]
+const _hoisted_893 = { class: "settings-card__body space-y-3" }
+const _hoisted_894 = { class: "text-xs space-y-2" }
+const _hoisted_895 = { class: "flex gap-2" }
+const _hoisted_896 = { class: "flex-1 break-all font-mono" }
+const _hoisted_897 = { class: "flex gap-2" }
+const _hoisted_898 = { class: "flex-1" }
+const _hoisted_899 = { class: "flex gap-2" }
+const _hoisted_900 = { class: "flex-1" }
+const _hoisted_901 = { class: "flex gap-2" }
+const _hoisted_902 = { class: "flex-1" }
+const _hoisted_903 = { class: "flex gap-2" }
+const _hoisted_904 = { class: "flex-1" }
+const _hoisted_905 = { class: "flex gap-2" }
+const _hoisted_906 = { class: "flex-1" }
+const _hoisted_907 = { class: "flex gap-2" }
+const _hoisted_908 = { class: "flex-1" }
+const _hoisted_909 = { class: "flex gap-2" }
+const _hoisted_910 = { class: "flex-1 break-all font-mono text-gray-400" }
+const _hoisted_911 = ["onClick"]
+const _hoisted_912 = {
   key: 1,
   class: "text-xs text-gray-400"
 }
-const _hoisted_910 = {
+const _hoisted_913 = {
   key: 16,
   class: "management-view shell-settings-detail"
 }
-const _hoisted_911 = ["onClick"]
-const _hoisted_912 = {
+const _hoisted_914 = ["onClick"]
+const _hoisted_915 = {
   key: 2,
   class: "fixed inset-0 z-[95] bg-gray-50 flex flex-col"
 }
-const _hoisted_913 = { class: "flex items-center gap-2 px-3 py-2.5 border-b border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0" }
-const _hoisted_914 = ["onClick"]
-const _hoisted_915 = ["onClick", "disabled"]
-const _hoisted_916 = { class: "flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-3" }
-const _hoisted_917 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_918 = { class: "text-xs font-mono text-gray-600 break-all" }
-const _hoisted_919 = { class: "mt-3 flex flex-wrap items-center gap-2" }
-const _hoisted_920 = ["onClick", "disabled"]
-const _hoisted_921 = {
+const _hoisted_916 = { class: "flex items-center gap-2 px-3 py-2.5 border-b border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0" }
+const _hoisted_917 = ["onClick"]
+const _hoisted_918 = ["onClick", "disabled"]
+const _hoisted_919 = { class: "flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-3" }
+const _hoisted_920 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_921 = { class: "text-xs font-mono text-gray-600 break-all" }
+const _hoisted_922 = { class: "mt-3 flex flex-wrap items-center gap-2" }
+const _hoisted_923 = ["onClick", "disabled"]
+const _hoisted_924 = {
   key: 0,
   class: "text-[11px] text-gray-500 leading-relaxed whitespace-pre-line break-all"
 }
-const _hoisted_922 = {
+const _hoisted_925 = {
   key: 1,
   class: "text-[11px] text-red-600 leading-relaxed"
 }
-const _hoisted_923 = { class: "mt-3 grid grid-cols-2 gap-2" }
-const _hoisted_924 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_925 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_926 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_927 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_928 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_929 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_930 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
-const _hoisted_931 = { class: "text-base font-bold text-gray-800" }
-const _hoisted_932 = { class: "mt-3 flex items-center gap-2 flex-wrap" }
-const _hoisted_933 = ["onUpdate:modelValue", "onChange"]
-const _hoisted_934 = ["onUpdate:modelValue", "onChange"]
-const _hoisted_935 = ["onClick"]
-const _hoisted_936 = {
+const _hoisted_926 = { class: "mt-3 grid grid-cols-2 gap-2" }
+const _hoisted_927 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_928 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_929 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_930 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_931 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_932 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_933 = { class: "rounded-xl bg-gray-50 px-3 py-2" }
+const _hoisted_934 = { class: "text-base font-bold text-gray-800" }
+const _hoisted_935 = { class: "mt-3 flex items-center gap-2 flex-wrap" }
+const _hoisted_936 = ["onUpdate:modelValue", "onChange"]
+const _hoisted_937 = ["onUpdate:modelValue", "onChange"]
+const _hoisted_938 = ["onClick"]
+const _hoisted_939 = {
   key: 0,
   class: "mt-3 text-xs font-bold text-red-600"
 }
-const _hoisted_937 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_938 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_939 = ["onClick", "disabled"]
-const _hoisted_940 = {
+const _hoisted_940 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_941 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_942 = ["onClick", "disabled"]
+const _hoisted_943 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_941 = {
+const _hoisted_944 = {
   key: 1,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_942 = {
+const _hoisted_945 = {
   key: 2,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_943 = {
+const _hoisted_946 = {
   key: 3,
   class: "mt-3 space-y-2"
 }
-const _hoisted_944 = {
+const _hoisted_947 = {
   key: 0,
   class: "rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] font-bold text-amber-700 leading-relaxed"
 }
-const _hoisted_945 = { class: "flex-1 min-w-0" }
-const _hoisted_946 = { class: "text-xs font-bold text-gray-700 truncate" }
-const _hoisted_947 = {
+const _hoisted_948 = { class: "flex-1 min-w-0" }
+const _hoisted_949 = { class: "text-xs font-bold text-gray-700 truncate" }
+const _hoisted_950 = {
   key: 0,
   class: "text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary-100 text-primary-700 mr-1"
 }
-const _hoisted_948 = { class: "text-[11px] text-gray-400 truncate" }
-const _hoisted_949 = {
+const _hoisted_951 = { class: "text-[11px] text-gray-400 truncate" }
+const _hoisted_952 = {
   key: 0,
   class: "text-amber-600"
 }
-const _hoisted_950 = ["onClick", "disabled"]
-const _hoisted_951 = ["onClick", "disabled"]
-const _hoisted_952 = ["onClick", "title"]
-const _hoisted_953 = {
+const _hoisted_953 = ["onClick", "disabled"]
+const _hoisted_954 = ["onClick", "disabled"]
+const _hoisted_955 = ["onClick", "title"]
+const _hoisted_956 = {
   key: 0,
   class: "w-full flex flex-wrap gap-2 pt-1"
 }
-const _hoisted_954 = ["onClick"]
-const _hoisted_955 = ["onClick"]
-const _hoisted_956 = ["onClick"]
 const _hoisted_957 = ["onClick"]
-const _hoisted_958 = {
+const _hoisted_958 = ["onClick"]
+const _hoisted_959 = ["onClick"]
+const _hoisted_960 = ["onClick"]
+const _hoisted_961 = {
   key: 4,
   class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 p-3"
 }
-const _hoisted_959 = { class: "flex items-center justify-between gap-2 mb-1" }
-const _hoisted_960 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_961 = { class: "flex gap-2" }
-const _hoisted_962 = ["onClick"]
-const _hoisted_963 = ["onClick"]
-const _hoisted_964 = { class: "text-[11px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar" }
-const _hoisted_965 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_966 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_967 = ["onClick"]
-const _hoisted_968 = {
+const _hoisted_962 = { class: "flex items-center justify-between gap-2 mb-1" }
+const _hoisted_963 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_964 = { class: "flex gap-2" }
+const _hoisted_965 = ["onClick"]
+const _hoisted_966 = ["onClick"]
+const _hoisted_967 = { class: "text-[11px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto custom-scrollbar" }
+const _hoisted_968 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_969 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_970 = ["onClick"]
+const _hoisted_971 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_969 = {
+const _hoisted_972 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_970 = {
+const _hoisted_973 = {
   key: 2,
   class: "mt-3 text-xs text-gray-400"
 }
-const _hoisted_971 = {
+const _hoisted_974 = {
   key: 3,
   class: "mt-3 max-h-80 overflow-y-auto custom-scrollbar space-y-1.5"
 }
-const _hoisted_972 = {
+const _hoisted_975 = {
   key: 0,
   class: "text-xs text-gray-400"
 }
-const _hoisted_973 = { class: "flex items-start gap-2" }
-const _hoisted_974 = { class: "flex-1 min-w-0" }
-const _hoisted_975 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_976 = { key: 0 }
-const _hoisted_977 = {
+const _hoisted_976 = { class: "flex items-start gap-2" }
+const _hoisted_977 = { class: "flex-1 min-w-0" }
+const _hoisted_978 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_979 = { key: 0 }
+const _hoisted_980 = {
   key: 1,
   class: "ml-1 text-[11px] font-normal text-primary-600"
 }
-const _hoisted_978 = { class: "ml-1 text-[11px] font-normal text-gray-400" }
-const _hoisted_979 = { class: "text-[11px] text-gray-500 leading-relaxed break-words" }
-const _hoisted_980 = {
+const _hoisted_981 = { class: "ml-1 text-[11px] font-normal text-gray-400" }
+const _hoisted_982 = { class: "text-[11px] text-gray-500 leading-relaxed break-words" }
+const _hoisted_983 = {
   key: 0,
   class: "mt-1.5 flex gap-1.5"
 }
-const _hoisted_981 = ["onClick"]
-const _hoisted_982 = ["onClick", "disabled"]
-const _hoisted_983 = ["onClick"]
 const _hoisted_984 = ["onClick"]
-const _hoisted_985 = ["onClick"]
-const _hoisted_986 = {
+const _hoisted_985 = ["onClick", "disabled"]
+const _hoisted_986 = ["onClick"]
+const _hoisted_987 = ["onClick"]
+const _hoisted_988 = ["onClick"]
+const _hoisted_989 = {
   key: 1,
   class: "mt-1.5"
 }
-const _hoisted_987 = ["onUpdate:modelValue"]
-const _hoisted_988 = { class: "mt-1.5 flex gap-2" }
-const _hoisted_989 = ["onClick", "disabled"]
-const _hoisted_990 = ["onClick", "disabled"]
-const _hoisted_991 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_992 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_990 = ["onUpdate:modelValue"]
+const _hoisted_991 = { class: "mt-1.5 flex gap-2" }
+const _hoisted_992 = ["onClick", "disabled"]
 const _hoisted_993 = ["onClick", "disabled"]
-const _hoisted_994 = ["onClick"]
-const _hoisted_995 = { class: "mt-3 grid grid-cols-2 gap-2" }
-const _hoisted_996 = { class: "block" }
-const _hoisted_997 = ["onUpdate:modelValue", "onChange", "disabled"]
-const _hoisted_998 = { class: "block" }
-const _hoisted_999 = ["onUpdate:modelValue", "onChange", "disabled"]
-const _hoisted_1000 = { class: "mt-2 text-xs text-gray-500 leading-relaxed" }
-const _hoisted_1001 = { class: "font-bold text-gray-700" }
-const _hoisted_1002 = {
+const _hoisted_994 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_995 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_996 = ["onClick", "disabled"]
+const _hoisted_997 = ["onClick"]
+const _hoisted_998 = { class: "mt-3 grid grid-cols-2 gap-2" }
+const _hoisted_999 = { class: "block" }
+const _hoisted_1000 = ["onUpdate:modelValue", "onChange", "disabled"]
+const _hoisted_1001 = { class: "block" }
+const _hoisted_1002 = ["onUpdate:modelValue", "onChange", "disabled"]
+const _hoisted_1003 = { class: "mt-2 text-xs text-gray-500 leading-relaxed" }
+const _hoisted_1004 = { class: "font-bold text-gray-700" }
+const _hoisted_1005 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-primary-600"
 }
-const _hoisted_1003 = { key: 0 }
-const _hoisted_1004 = { key: 1 }
-const _hoisted_1005 = {
+const _hoisted_1006 = { key: 0 }
+const _hoisted_1007 = { key: 1 }
+const _hoisted_1008 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_1006 = {
+const _hoisted_1009 = {
   key: 2,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_1007 = {
+const _hoisted_1010 = {
   key: 3,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_1008 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_1009 = { class: "flex items-center justify-between gap-2 mb-2" }
-const _hoisted_1010 = ["onClick"]
-const _hoisted_1011 = {
+const _hoisted_1011 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_1012 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_1013 = ["onClick"]
+const _hoisted_1014 = {
   key: 0,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_1012 = {
+const _hoisted_1015 = {
   key: 1,
   class: "mt-3"
 }
-const _hoisted_1013 = { class: "text-xs text-gray-500 mb-2" }
-const _hoisted_1014 = { key: 0 }
-const _hoisted_1015 = {
+const _hoisted_1016 = { class: "text-xs text-gray-500 mb-2" }
+const _hoisted_1017 = { key: 0 }
+const _hoisted_1018 = {
   key: 0,
   class: "mb-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700 leading-relaxed"
 }
-const _hoisted_1016 = {
+const _hoisted_1019 = {
   key: 1,
   class: "text-xs text-gray-400"
 }
-const _hoisted_1017 = {
+const _hoisted_1020 = {
   key: 2,
   class: "max-h-64 overflow-y-auto custom-scrollbar space-y-1.5"
 }
-const _hoisted_1018 = ["value", "onUpdate:modelValue"]
-const _hoisted_1019 = { class: "flex-1 min-w-0" }
-const _hoisted_1020 = { class: "text-xs font-bold text-gray-700" }
-const _hoisted_1021 = {
+const _hoisted_1021 = ["value", "onUpdate:modelValue"]
+const _hoisted_1022 = { class: "flex-1 min-w-0" }
+const _hoisted_1023 = { class: "text-xs font-bold text-gray-700" }
+const _hoisted_1024 = {
   key: 0,
   class: "ml-1 text-[11px] font-normal text-primary-600"
 }
-const _hoisted_1022 = { class: "text-[11px] text-gray-400" }
-const _hoisted_1023 = ["onClick", "disabled"]
-const _hoisted_1024 = ["onClick"]
-const _hoisted_1025 = {
+const _hoisted_1025 = { class: "text-[11px] text-gray-400" }
+const _hoisted_1026 = ["onClick", "disabled"]
+const _hoisted_1027 = ["onClick"]
+const _hoisted_1028 = {
   key: 2,
   class: "mt-3"
 }
-const _hoisted_1026 = { class: "text-xs text-gray-500 mb-1" }
-const _hoisted_1027 = ["onUpdate:modelValue"]
-const _hoisted_1028 = { class: "mt-2 flex gap-2" }
-const _hoisted_1029 = ["onClick", "disabled"]
-const _hoisted_1030 = ["onClick", "disabled"]
-const _hoisted_1031 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_1032 = { class: "mt-1 flex items-center gap-2 flex-wrap" }
-const _hoisted_1033 = { class: "text-[11px] text-gray-500 leading-relaxed" }
-const _hoisted_1034 = ["onClick"]
-const _hoisted_1035 = ["onClick", "disabled"]
-const _hoisted_1036 = ["onChange"]
-const _hoisted_1037 = { class: "text-xs text-gray-500 leading-relaxed" }
-const _hoisted_1038 = { key: 0 }
-const _hoisted_1039 = { key: 1 }
-const _hoisted_1040 = { class: "mt-3 flex gap-2" }
-const _hoisted_1041 = ["onClick", "disabled"]
-const _hoisted_1042 = ["onClick", "disabled"]
-const _hoisted_1043 = ["onClick"]
-const _hoisted_1044 = {
+const _hoisted_1029 = { class: "text-xs text-gray-500 mb-1" }
+const _hoisted_1030 = ["onUpdate:modelValue"]
+const _hoisted_1031 = { class: "mt-2 flex gap-2" }
+const _hoisted_1032 = ["onClick", "disabled"]
+const _hoisted_1033 = ["onClick", "disabled"]
+const _hoisted_1034 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_1035 = { class: "mt-1 flex items-center gap-2 flex-wrap" }
+const _hoisted_1036 = { class: "text-[11px] text-gray-500 leading-relaxed" }
+const _hoisted_1037 = ["onClick"]
+const _hoisted_1038 = ["onClick", "disabled"]
+const _hoisted_1039 = ["onChange"]
+const _hoisted_1040 = { class: "text-xs text-gray-500 leading-relaxed" }
+const _hoisted_1041 = { key: 0 }
+const _hoisted_1042 = { key: 1 }
+const _hoisted_1043 = { class: "mt-3 flex gap-2" }
+const _hoisted_1044 = ["onClick", "disabled"]
+const _hoisted_1045 = ["onClick", "disabled"]
+const _hoisted_1046 = ["onClick"]
+const _hoisted_1047 = {
   key: 1,
   class: "mt-2 flex gap-2"
 }
-const _hoisted_1045 = ["onClick", "disabled"]
-const _hoisted_1046 = ["onClick", "disabled"]
-const _hoisted_1047 = {
+const _hoisted_1048 = ["onClick", "disabled"]
+const _hoisted_1049 = ["onClick", "disabled"]
+const _hoisted_1050 = {
   key: 2,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_1048 = {
+const _hoisted_1051 = {
   key: 3,
   class: "mt-2 text-xs font-bold text-emerald-600"
 }
-const _hoisted_1049 = {
+const _hoisted_1052 = {
   key: 4,
   class: "mt-3"
 }
-const _hoisted_1050 = { class: "text-xs text-gray-500 mb-2" }
-const _hoisted_1051 = { key: 0 }
-const _hoisted_1052 = { class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar" }
-const _hoisted_1053 = { class: "flex items-center gap-2 mb-1.5" }
-const _hoisted_1054 = ["onUpdate:modelValue"]
-const _hoisted_1055 = ["onUpdate:modelValue"]
-const _hoisted_1056 = { class: "mt-1.5 flex gap-2" }
-const _hoisted_1057 = ["onClick"]
-const _hoisted_1058 = ["onClick"]
-const _hoisted_1059 = { class: "mt-2 flex gap-2" }
+const _hoisted_1053 = { class: "text-xs text-gray-500 mb-2" }
+const _hoisted_1054 = { key: 0 }
+const _hoisted_1055 = { class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar" }
+const _hoisted_1056 = { class: "flex items-center gap-2 mb-1.5" }
+const _hoisted_1057 = ["onUpdate:modelValue"]
+const _hoisted_1058 = ["onUpdate:modelValue"]
+const _hoisted_1059 = { class: "mt-1.5 flex gap-2" }
 const _hoisted_1060 = ["onClick"]
 const _hoisted_1061 = ["onClick"]
-const _hoisted_1062 = ["onClick"]
-const _hoisted_1063 = { class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2" }
-const _hoisted_1064 = { class: "mt-2" }
-const _hoisted_1065 = ["onUpdate:modelValue"]
-const _hoisted_1066 = { class: "mt-1 flex gap-2" }
-const _hoisted_1067 = ["onClick"]
-const _hoisted_1068 = ["onClick"]
-const _hoisted_1069 = { class: "mt-3" }
-const _hoisted_1070 = ["onUpdate:modelValue"]
-const _hoisted_1071 = { class: "mt-1 flex gap-2" }
-const _hoisted_1072 = ["onClick"]
-const _hoisted_1073 = ["onClick"]
-const _hoisted_1074 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
-const _hoisted_1075 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_1062 = { class: "mt-2 flex gap-2" }
+const _hoisted_1063 = ["onClick"]
+const _hoisted_1064 = ["onClick"]
+const _hoisted_1065 = ["onClick"]
+const _hoisted_1066 = { class: "mt-3 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2" }
+const _hoisted_1067 = { class: "mt-2" }
+const _hoisted_1068 = ["onUpdate:modelValue"]
+const _hoisted_1069 = { class: "mt-1 flex gap-2" }
+const _hoisted_1070 = ["onClick"]
+const _hoisted_1071 = ["onClick"]
+const _hoisted_1072 = { class: "mt-3" }
+const _hoisted_1073 = ["onUpdate:modelValue"]
+const _hoisted_1074 = { class: "mt-1 flex gap-2" }
+const _hoisted_1075 = ["onClick"]
 const _hoisted_1076 = ["onClick"]
-const _hoisted_1077 = {
+const _hoisted_1077 = { class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4" }
+const _hoisted_1078 = { class: "flex items-center justify-between gap-2 mb-2" }
+const _hoisted_1079 = ["onClick"]
+const _hoisted_1080 = {
   key: 0,
   class: "mt-3"
 }
-const _hoisted_1078 = {
+const _hoisted_1081 = {
   key: 0,
   class: "space-y-2 max-h-96 overflow-y-auto custom-scrollbar mb-2"
 }
-const _hoisted_1079 = { class: "text-[11px] font-bold text-gray-500 mb-1" }
-const _hoisted_1080 = { class: "text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words" }
-const _hoisted_1081 = ["onClick"]
-const _hoisted_1082 = ["onUpdate:modelValue", "disabled"]
-const _hoisted_1083 = { class: "mt-2 flex gap-2" }
-const _hoisted_1084 = ["onClick", "disabled"]
-const _hoisted_1085 = ["onClick"]
-const _hoisted_1086 = ["onClick"]
-const _hoisted_1087 = {
+const _hoisted_1082 = { class: "text-[11px] font-bold text-gray-500 mb-1" }
+const _hoisted_1083 = { class: "text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words" }
+const _hoisted_1084 = ["onClick"]
+const _hoisted_1085 = ["onUpdate:modelValue", "disabled"]
+const _hoisted_1086 = { class: "mt-2 flex gap-2" }
+const _hoisted_1087 = ["onClick", "disabled"]
+const _hoisted_1088 = ["onClick"]
+const _hoisted_1089 = ["onClick"]
+const _hoisted_1090 = {
   key: 1,
   class: "mt-2 text-xs font-bold text-red-600"
 }
-const _hoisted_1088 = {
+const _hoisted_1091 = {
   key: 2,
   class: "mt-2 text-[11px] text-gray-400 leading-relaxed"
 }
-const _hoisted_1089 = {
+const _hoisted_1092 = {
   key: 0,
   class: "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-sm font-bold text-emerald-700"
 }
-const _hoisted_1090 = { class: "flex items-center gap-2 mb-1" }
-const _hoisted_1091 = { class: "text-xs text-gray-400 truncate" }
-const _hoisted_1092 = { class: "text-sm text-gray-700 leading-relaxed" }
-const _hoisted_1093 = { class: "choice-modal" }
-const _hoisted_1094 = { class: "choice-modal__head" }
-const _hoisted_1095 = ["onClick", "disabled"]
-const _hoisted_1096 = {
+const _hoisted_1093 = { class: "flex items-center gap-2 mb-1" }
+const _hoisted_1094 = { class: "text-xs text-gray-400 truncate" }
+const _hoisted_1095 = { class: "text-sm text-gray-700 leading-relaxed" }
+const _hoisted_1096 = { class: "choice-modal" }
+const _hoisted_1097 = { class: "choice-modal__head" }
+const _hoisted_1098 = ["onClick", "disabled"]
+const _hoisted_1099 = {
   key: 0,
   class: "mt-5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-center"
 }
-const _hoisted_1097 = { class: "mt-1 font-mono text-xl font-bold tracking-widest text-gray-900 select-all" }
-const _hoisted_1098 = { class: "mt-1 text-xs text-gray-400" }
-const _hoisted_1099 = ["onClick"]
-const _hoisted_1100 = ["onUpdate:modelValue", "disabled", "onKeydown"]
-const _hoisted_1101 = {
+const _hoisted_1100 = { class: "mt-1 font-mono text-xl font-bold tracking-widest text-gray-900 select-all" }
+const _hoisted_1101 = { class: "mt-1 text-xs text-gray-400" }
+const _hoisted_1102 = ["onClick"]
+const _hoisted_1103 = ["onUpdate:modelValue", "disabled", "onKeydown"]
+const _hoisted_1104 = {
   key: 2,
   class: "mt-5"
 }
-const _hoisted_1102 = { class: "mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-gray-600" }
-const _hoisted_1103 = { class: "tabular-nums" }
-const _hoisted_1104 = { class: "h-2 overflow-hidden rounded-full bg-primary-50" }
-const _hoisted_1105 = { class: "mt-2 h-4 text-xs tabular-nums text-gray-400" }
-const _hoisted_1106 = { class: "mt-5 flex gap-2" }
-const _hoisted_1107 = ["onClick", "disabled"]
-const _hoisted_1108 = ["onClick", "disabled"]
+const _hoisted_1105 = { class: "mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-gray-600" }
+const _hoisted_1106 = { class: "tabular-nums" }
+const _hoisted_1107 = { class: "h-2 overflow-hidden rounded-full bg-primary-50" }
+const _hoisted_1108 = { class: "mt-2 h-4 text-xs tabular-nums text-gray-400" }
+const _hoisted_1109 = { class: "mt-5 flex gap-2" }
+const _hoisted_1110 = ["onClick", "disabled"]
+const _hoisted_1111 = ["onClick", "disabled"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -15018,167 +15047,182 @@ return function render(_ctx, _cache) {
               _createCommentVNode(" Memory overview and timeline "),
               (memorySettings.enabled)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                    (displayedClassicMemories.length)
-                      ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                          _createElementVNode("div", _hoisted_652, [
-                            _createElementVNode("header", _hoisted_653, [
-                              _createElementVNode("div", _hoisted_654, [
-                                _cache[236] || (_cache[236] = _createElementVNode("h3", null, "记忆浏览", -1 /* CACHED */)),
-                                (summaryCompressionRate === null)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_655, "未压缩"))
-                                  : (_openBlock(), _createElementBlock("span", _hoisted_656, [
-                                      _cache[235] || (_cache[235] = _createTextVNode("压缩率", -1 /* CACHED */)),
-                                      _createElementVNode("b", null, _toDisplayString(summaryCompressionRate) + "%", 1 /* TEXT */)
-                                    ]))
-                              ]),
-                              _createCommentVNode(" Solid = what the context keeps, gray stripes = what the summaries saved. "),
-                              (summaryCompressionRate !== null && conversationBodyLength > 0)
-                                ? (_openBlock(), _createElementBlock("div", {
-                                    key: 0,
-                                    class: "memory-compression",
-                                    role: "img",
-                                    "aria-label": '正文压缩前 ' + conversationBodyLength.toLocaleString() + ' 字，使用总结后 ' + summaryCompressedBodyLength.toLocaleString() + ' 字',
-                                    title: "按当前对话正文统计，压缩后包含保留的原文",
-                                    style: _normalizeStyle({ '--summary-retained': Math.min(100, summaryCompressedBodyLength / conversationBodyLength * 100) + '%' })
-                                  }, [
-                                    _cache[242] || (_cache[242] = _createElementVNode("div", {
-                                      class: "memory-compression__track",
-                                      "aria-hidden": "true"
+                    (currentCharacter && classicMemoryLoad.status !== 'ready')
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_652, [
+                          _createElementVNode("p", null, _toDisplayString(classicMemoryLoad.status === 'loading' ? '正在读取记忆…' : '记忆尚未读取成功'), 1 /* TEXT */),
+                          (classicMemoryLoad.error)
+                            ? (_openBlock(), _createElementBlock("small", _hoisted_653, _toDisplayString(classicMemoryLoad.error), 1 /* TEXT */))
+                            : _createCommentVNode("v-if", true),
+                          (classicMemoryLoad.status !== 'loading')
+                            ? (_openBlock(), _createElementBlock("button", {
+                                key: 1,
+                                type: "button",
+                                class: "rphub-composer-btn mt-3",
+                                onClick: $event => (ensureCurrentCharacterMemories())
+                              }, "重新读取记忆", 8 /* PROPS */, _hoisted_654))
+                            : _createCommentVNode("v-if", true)
+                        ]))
+                      : (displayedClassicMemories.length)
+                        ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
+                            _createElementVNode("div", _hoisted_655, [
+                              _createElementVNode("header", _hoisted_656, [
+                                _createElementVNode("div", _hoisted_657, [
+                                  _cache[236] || (_cache[236] = _createElementVNode("h3", null, "记忆浏览", -1 /* CACHED */)),
+                                  (summaryCompressionRate === null)
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_658, "未压缩"))
+                                    : (_openBlock(), _createElementBlock("span", _hoisted_659, [
+                                        _cache[235] || (_cache[235] = _createTextVNode("压缩率", -1 /* CACHED */)),
+                                        _createElementVNode("b", null, _toDisplayString(summaryCompressionRate) + "%", 1 /* TEXT */)
+                                      ]))
+                                ]),
+                                _createCommentVNode(" Solid = what the context keeps, gray stripes = what the summaries saved. "),
+                                (summaryCompressionRate !== null && conversationBodyLength > 0)
+                                  ? (_openBlock(), _createElementBlock("div", {
+                                      key: 0,
+                                      class: "memory-compression",
+                                      role: "img",
+                                      "aria-label": '正文压缩前 ' + conversationBodyLength.toLocaleString() + ' 字，使用总结后 ' + summaryCompressedBodyLength.toLocaleString() + ' 字',
+                                      title: "按当前对话正文统计，压缩后包含保留的原文",
+                                      style: _normalizeStyle({ '--summary-retained': Math.min(100, summaryCompressedBodyLength / conversationBodyLength * 100) + '%' })
                                     }, [
-                                      _createElementVNode("div", { class: "memory-compression__fill" })
-                                    ], -1 /* CACHED */)),
-                                    _createElementVNode("div", _hoisted_658, [
-                                      _createElementVNode("span", null, [
-                                        _cache[237] || (_cache[237] = _createElementVNode("i", { class: "is-kept" }, null, -1 /* CACHED */)),
-                                        _cache[238] || (_cache[238] = _createTextVNode("后 ", -1 /* CACHED */)),
-                                        _createElementVNode("strong", null, _toDisplayString(summaryCompressedBodyLength.toLocaleString()), 1 /* TEXT */),
-                                        _cache[239] || (_cache[239] = _createTextVNode(" 字", -1 /* CACHED */))
-                                      ]),
-                                      _createElementVNode("span", null, [
-                                        _cache[240] || (_cache[240] = _createTextVNode("原 ", -1 /* CACHED */)),
-                                        _createElementVNode("strong", null, _toDisplayString(conversationBodyLength.toLocaleString()), 1 /* TEXT */),
-                                        _cache[241] || (_cache[241] = _createTextVNode(" 字", -1 /* CACHED */))
+                                      _cache[242] || (_cache[242] = _createElementVNode("div", {
+                                        class: "memory-compression__track",
+                                        "aria-hidden": "true"
+                                      }, [
+                                        _createElementVNode("div", { class: "memory-compression__fill" })
+                                      ], -1 /* CACHED */)),
+                                      _createElementVNode("div", _hoisted_661, [
+                                        _createElementVNode("span", null, [
+                                          _cache[237] || (_cache[237] = _createElementVNode("i", { class: "is-kept" }, null, -1 /* CACHED */)),
+                                          _cache[238] || (_cache[238] = _createTextVNode("后 ", -1 /* CACHED */)),
+                                          _createElementVNode("strong", null, _toDisplayString(summaryCompressedBodyLength.toLocaleString()), 1 /* TEXT */),
+                                          _cache[239] || (_cache[239] = _createTextVNode(" 字", -1 /* CACHED */))
+                                        ]),
+                                        _createElementVNode("span", null, [
+                                          _cache[240] || (_cache[240] = _createTextVNode("原 ", -1 /* CACHED */)),
+                                          _createElementVNode("strong", null, _toDisplayString(conversationBodyLength.toLocaleString()), 1 /* TEXT */),
+                                          _cache[241] || (_cache[241] = _createTextVNode(" 字", -1 /* CACHED */))
+                                        ])
                                       ])
-                                    ])
-                                  ], 12 /* STYLE, PROPS */, _hoisted_657))
-                                : _createCommentVNode("v-if", true)
-                            ]),
-                            _createElementVNode("ol", _hoisted_659, [
-                              (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(displayedClassicMemories, (memory) => {
-                                return (_openBlock(), _createElementBlock("li", {
-                                  key: memory.id,
-                                  class: "memory-item"
-                                }, [
-                                  _createElementVNode("div", _hoisted_660, [
-                                    _createElementVNode("span", _hoisted_661, "第 " + _toDisplayString(memory.displayTurnStart === memory.displayTurnEnd
+                                    ], 12 /* STYLE, PROPS */, _hoisted_660))
+                                  : _createCommentVNode("v-if", true)
+                              ]),
+                              _createElementVNode("ol", _hoisted_662, [
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(displayedClassicMemories, (memory) => {
+                                  return (_openBlock(), _createElementBlock("li", {
+                                    key: memory.id,
+                                    class: "memory-item"
+                                  }, [
+                                    _createElementVNode("div", _hoisted_663, [
+                                      _createElementVNode("span", _hoisted_664, "第 " + _toDisplayString(memory.displayTurnStart === memory.displayTurnEnd
                                             ? memory.displayTurnStart
                                             : memory.displayTurnStart + '-' + memory.displayTurnEnd) + " 轮", 1 /* TEXT */),
-                                    _createElementVNode("span", _hoisted_662, [
-                                      _createTextVNode(_toDisplayString(Number(memory.originalChars || 0).toLocaleString()) + " → ", 1 /* TEXT */),
-                                      _createElementVNode("b", null, _toDisplayString(Number(memory.compressedChars || 0).toLocaleString()), 1 /* TEXT */),
-                                      _cache[243] || (_cache[243] = _createTextVNode(" 字", -1 /* CACHED */))
-                                    ]),
-                                    _createElementVNode("button", {
-                                      type: "button",
-                                      onClick: $event => (retryClassicMemory(memory)),
-                                      disabled: Boolean(retryingClassicMemoryId) || isActiveBatchExtracting,
-                                      class: "memory-item__retry",
-                                      title: retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结',
-                                      "aria-label": retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结'
-                                    }, [
-                                      (_openBlock(), _createElementBlock("svg", {
-                                        class: _normalizeClass({ 'animate-spin': retryingClassicMemoryId === memory.id }),
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24",
-                                        "aria-hidden": "true"
-                                      }, [...(_cache[244] || (_cache[244] = [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M4 4v6h6M20 20v-6h-6M5.1 15a7 7 0 0011.3 2.4L20 14M4 10l3.6-3.4A7 7 0 0118.9 9"
-                                        }, null, -1 /* CACHED */)
-                                      ]))], 2 /* CLASS */))
-                                    ], 8 /* PROPS */, _hoisted_663),
-                                    _createCommentVNode(" [rphub 2.8.65] 编辑这条总结 "),
-                                    _createElementVNode("button", {
-                                      type: "button",
-                                      onClick: $event => (startEditClassicMemory(memory)),
-                                      disabled: Boolean(retryingClassicMemoryId) || savingClassicMemoryId === memory.id,
-                                      class: "memory-item__retry",
-                                      title: "编辑这条总结",
-                                      "aria-label": "编辑这条总结"
-                                    }, [...(_cache[245] || (_cache[245] = [
-                                      _createElementVNode("svg", {
-                                        class: "w-4 h-4",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24"
+                                      _createElementVNode("span", _hoisted_665, [
+                                        _createTextVNode(_toDisplayString(Number(memory.originalChars || 0).toLocaleString()) + " → ", 1 /* TEXT */),
+                                        _createElementVNode("b", null, _toDisplayString(Number(memory.compressedChars || 0).toLocaleString()), 1 /* TEXT */),
+                                        _cache[243] || (_cache[243] = _createTextVNode(" 字", -1 /* CACHED */))
+                                      ]),
+                                      _createElementVNode("button", {
+                                        type: "button",
+                                        onClick: $event => (retryClassicMemory(memory)),
+                                        disabled: Boolean(retryingClassicMemoryId) || isActiveBatchExtracting,
+                                        class: "memory-item__retry",
+                                        title: retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结',
+                                        "aria-label": retryingClassicMemoryId === memory.id ? '正在重新生成' : '重新生成这条总结'
                                       }, [
-                                        _createElementVNode("path", {
-                                          "stroke-linecap": "round",
-                                          "stroke-linejoin": "round",
-                                          "stroke-width": "2",
-                                          d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                        })
-                                      ], -1 /* CACHED */)
-                                    ]))], 8 /* PROPS */, _hoisted_664)
-                                  ]),
-                                  (editingClassicMemoryId === memory.id)
-                                    ? (_openBlock(), _createElementBlock("div", _hoisted_665, [
-                                        _withDirectives(_createElementVNode("textarea", {
-                                          "onUpdate:modelValue": $event => ((editingClassicMemoryText) = $event),
-                                          rows: "6",
-                                          class: "memory-item__editor-input",
-                                          placeholder: "这条总结的正文"
-                                        }, null, 8 /* PROPS */, _hoisted_666), [
-                                          [_vModelText, editingClassicMemoryText]
-                                        ]),
-                                        _createElementVNode("div", _hoisted_667, [
-                                          _createElementVNode("button", {
-                                            type: "button",
-                                            onClick: $event => (cancelEditClassicMemory()),
-                                            class: "rphub-composer-btn"
-                                          }, "取消", 8 /* PROPS */, _hoisted_668),
-                                          _createElementVNode("button", {
-                                            type: "button",
-                                            onClick: $event => (saveEditClassicMemory()),
-                                            disabled: savingClassicMemoryId === memory.id,
-                                            class: "rphub-composer-btn rphub-composer-btn--primary"
-                                          }, "保存", 8 /* PROPS */, _hoisted_669)
-                                        ])
-                                      ]))
-                                    : (_openBlock(), _createElementBlock("p", _hoisted_670, _toDisplayString(memory.summary), 1 /* TEXT */))
-                                ]))
-                              }), 128 /* KEYED_FRAGMENT */))
-                            ])
-                          ]),
-                          _createVNode(_component_pagination_controls, {
-                            class: "mt-4",
-                            current: classicMemoryPage,
-                            total: classicMemoryPageCount,
-                            label: "基础模式记忆分页",
-                            onChange: $event => (classicMemoryPage = $event)
-                          }, null, 8 /* PROPS */, ["current", "total", "onChange"])
-                        ], 64 /* STABLE_FRAGMENT */))
-                      : (_openBlock(), _createElementBlock("div", _hoisted_671, [...(_cache[246] || (_cache[246] = [
-                          _createElementVNode("svg", {
-                            fill: "none",
-                            stroke: "currentColor",
-                            "stroke-width": "1.5",
-                            "stroke-linecap": "round",
-                            "stroke-linejoin": "round",
-                            viewBox: "0 0 24 24",
-                            "aria-hidden": "true"
-                          }, [
-                            _createElementVNode("path", { d: "M8 6h8M8 10h8M8 14h5m-7 7h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" })
-                          ], -1 /* CACHED */),
-                          _createElementVNode("p", null, "还没有记忆", -1 /* CACHED */),
-                          _createElementVNode("small", null, "继续对话会自动生成，也可以在上方设置里点\"补录记忆\"", -1 /* CACHED */)
-                        ]))]))
+                                        (_openBlock(), _createElementBlock("svg", {
+                                          class: _normalizeClass({ 'animate-spin': retryingClassicMemoryId === memory.id }),
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24",
+                                          "aria-hidden": "true"
+                                        }, [...(_cache[244] || (_cache[244] = [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M4 4v6h6M20 20v-6h-6M5.1 15a7 7 0 0011.3 2.4L20 14M4 10l3.6-3.4A7 7 0 0118.9 9"
+                                          }, null, -1 /* CACHED */)
+                                        ]))], 2 /* CLASS */))
+                                      ], 8 /* PROPS */, _hoisted_666),
+                                      _createCommentVNode(" [rphub 2.8.65] 编辑这条总结 "),
+                                      _createElementVNode("button", {
+                                        type: "button",
+                                        onClick: $event => (startEditClassicMemory(memory)),
+                                        disabled: Boolean(retryingClassicMemoryId) || savingClassicMemoryId === memory.id,
+                                        class: "memory-item__retry",
+                                        title: "编辑这条总结",
+                                        "aria-label": "编辑这条总结"
+                                      }, [...(_cache[245] || (_cache[245] = [
+                                        _createElementVNode("svg", {
+                                          class: "w-4 h-4",
+                                          fill: "none",
+                                          stroke: "currentColor",
+                                          viewBox: "0 0 24 24"
+                                        }, [
+                                          _createElementVNode("path", {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                          })
+                                        ], -1 /* CACHED */)
+                                      ]))], 8 /* PROPS */, _hoisted_667)
+                                    ]),
+                                    (editingClassicMemoryId === memory.id)
+                                      ? (_openBlock(), _createElementBlock("div", _hoisted_668, [
+                                          _withDirectives(_createElementVNode("textarea", {
+                                            "onUpdate:modelValue": $event => ((editingClassicMemoryText) = $event),
+                                            rows: "6",
+                                            class: "memory-item__editor-input",
+                                            placeholder: "这条总结的正文"
+                                          }, null, 8 /* PROPS */, _hoisted_669), [
+                                            [_vModelText, editingClassicMemoryText]
+                                          ]),
+                                          _createElementVNode("div", _hoisted_670, [
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              onClick: $event => (cancelEditClassicMemory()),
+                                              class: "rphub-composer-btn"
+                                            }, "取消", 8 /* PROPS */, _hoisted_671),
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              onClick: $event => (saveEditClassicMemory()),
+                                              disabled: savingClassicMemoryId === memory.id,
+                                              class: "rphub-composer-btn rphub-composer-btn--primary"
+                                            }, "保存", 8 /* PROPS */, _hoisted_672)
+                                          ])
+                                        ]))
+                                      : (_openBlock(), _createElementBlock("p", _hoisted_673, _toDisplayString(memory.summary), 1 /* TEXT */))
+                                  ]))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ])
+                            ]),
+                            _createVNode(_component_pagination_controls, {
+                              class: "mt-4",
+                              current: classicMemoryPage,
+                              total: classicMemoryPageCount,
+                              label: "基础模式记忆分页",
+                              onChange: $event => (classicMemoryPage = $event)
+                            }, null, 8 /* PROPS */, ["current", "total", "onChange"])
+                          ], 64 /* STABLE_FRAGMENT */))
+                        : (_openBlock(), _createElementBlock("div", _hoisted_674, [...(_cache[246] || (_cache[246] = [
+                            _createElementVNode("svg", {
+                              fill: "none",
+                              stroke: "currentColor",
+                              "stroke-width": "1.5",
+                              "stroke-linecap": "round",
+                              "stroke-linejoin": "round",
+                              viewBox: "0 0 24 24",
+                              "aria-hidden": "true"
+                            }, [
+                              _createElementVNode("path", { d: "M8 6h8M8 10h8M8 14h5m-7 7h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" })
+                            ], -1 /* CACHED */),
+                            _createElementVNode("p", null, "还没有记忆", -1 /* CACHED */),
+                            _createElementVNode("small", null, "继续对话会自动生成，也可以在上方设置里点\"补录记忆\"", -1 /* CACHED */)
+                          ]))]))
                   ], 64 /* STABLE_FRAGMENT */))
-                : (_openBlock(), _createElementBlock("div", _hoisted_672, [...(_cache[247] || (_cache[247] = [
+                : (_openBlock(), _createElementBlock("div", _hoisted_675, [...(_cache[247] || (_cache[247] = [
                     _createElementVNode("svg", {
                       fill: "none",
                       stroke: "currentColor",
@@ -15241,8 +15285,8 @@ return function render(_ctx, _cache) {
                           }, [
                             _createElementVNode("use", { href: "#icon-export" })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_674),
-                        _createElementVNode("label", _hoisted_675, [
+                        ]))], 8 /* PROPS */, _hoisted_677),
+                        _createElementVNode("label", _hoisted_678, [
                           _cache[250] || (_cache[250] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
@@ -15256,7 +15300,7 @@ return function render(_ctx, _cache) {
                             accept: ".json",
                             onChange: importWorldInfo,
                             class: "hidden"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_676)
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_679)
                         ]),
                         _createElementVNode("button", {
                           onClick: createWorldInfo,
@@ -15276,25 +15320,25 @@ return function render(_ctx, _cache) {
                               d: "M12 4v16m8-8H4"
                             })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_677)
+                        ]))], 8 /* PROPS */, _hoisted_680)
                       ], 64 /* STABLE_FRAGMENT */))
                     : _createCommentVNode("v-if", true)
                 ]),
                 _: 1 /* STABLE */
               }, 8 /* PROPS */, ["onMenu"]),
               (resourceBatch.active)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_678, [
+                ? (_openBlock(), _createElementBlock("div", _hoisted_681, [
                     _createElementVNode("span", null, "已选 " + _toDisplayString(resourceBatch.count) + " / " + _toDisplayString(resourceBatch.total) + " 条", 1 /* TEXT */),
                     _createElementVNode("button", {
                       type: "button",
                       class: "resource-batch-remove",
                       disabled: !resourceBatch.count,
                       onClick: $event => (resourceBatch.remove())
-                    }, "删除所选", 8 /* PROPS */, _hoisted_679)
+                    }, "删除所选", 8 /* PROPS */, _hoisted_682)
                   ]))
                 : _createCommentVNode("v-if", true),
               _createCommentVNode(" Activation Settings "),
-              _createElementVNode("div", _hoisted_680, [
+              _createElementVNode("div", _hoisted_683, [
                 _createElementVNode("button", {
                   onClick: $event => (showWorldInfoSettings = !showWorldInfoSettings),
                   class: _normalizeClass(["settings-collapse-trigger", ['w-full flex justify-between items-center px-4 py-3 rounded-xl font-bold',
@@ -15302,7 +15346,7 @@ return function render(_ctx, _cache) {
                   "aria-controls": "worldinfo-settings-panel",
                   "aria-expanded": showWorldInfoSettings
                 }, [
-                  _createElementVNode("span", _hoisted_682, [
+                  _createElementVNode("span", _hoisted_685, [
                     _createElementVNode("div", {
                       class: _normalizeClass(['p-1.5 rounded-lg mr-3 transition-colors', showWorldInfoSettings ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500'])
                     }, [...(_cache[252] || (_cache[252] = [
@@ -15335,24 +15379,24 @@ return function render(_ctx, _cache) {
                       d: "M19 9l-7 7-7-7"
                     }, null, -1 /* CACHED */)
                   ]))], 2 /* CLASS */))
-                ], 10 /* CLASS, PROPS */, _hoisted_681),
+                ], 10 /* CLASS, PROPS */, _hoisted_684),
                 _createElementVNode("div", {
                   id: "worldinfo-settings-panel",
                   class: _normalizeClass(["settings-collapse", { 'is-open': showWorldInfoSettings }]),
                   "aria-hidden": !showWorldInfoSettings,
                   inert: !showWorldInfoSettings
                 }, [
-                  _createElementVNode("div", _hoisted_684, [
-                    _createElementVNode("div", _hoisted_685, [
-                      _createElementVNode("div", _hoisted_686, [
+                  _createElementVNode("div", _hoisted_687, [
+                    _createElementVNode("div", _hoisted_688, [
+                      _createElementVNode("div", _hoisted_689, [
                         _createCommentVNode(" Scan Depth "),
                         _createElementVNode("div", null, [
-                          _createElementVNode("div", _hoisted_687, [
+                          _createElementVNode("div", _hoisted_690, [
                             _cache[255] || (_cache[255] = _createElementVNode("label", {
                               for: "worldinfo-scan-depth",
                               class: "font-semibold text-gray-700"
                             }, "扫描深度", -1 /* CACHED */)),
-                            _createElementVNode("span", _hoisted_688, _toDisplayString(worldInfoSettings.scanDepth), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_691, _toDisplayString(worldInfoSettings.scanDepth), 1 /* TEXT */)
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-scan-depth",
@@ -15363,7 +15407,7 @@ return function render(_ctx, _cache) {
                             max: "20",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_689), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_692), [
                             [
                               _vModelText,
                               worldInfoSettings.scanDepth,
@@ -15374,12 +15418,12 @@ return function render(_ctx, _cache) {
                         ]),
                         _createCommentVNode(" Max Scan Depth "),
                         _createElementVNode("div", null, [
-                          _createElementVNode("div", _hoisted_690, [
+                          _createElementVNode("div", _hoisted_693, [
                             _cache[256] || (_cache[256] = _createElementVNode("label", {
                               for: "worldinfo-max-depth",
                               class: "font-semibold text-gray-700"
                             }, "最大扫描深度", -1 /* CACHED */)),
-                            _createElementVNode("span", _hoisted_691, _toDisplayString(worldInfoSettings.maxDepth), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_694, _toDisplayString(worldInfoSettings.maxDepth), 1 /* TEXT */)
                           ]),
                           _withDirectives(_createElementVNode("input", {
                             id: "worldinfo-max-depth",
@@ -15390,7 +15434,7 @@ return function render(_ctx, _cache) {
                             max: "50",
                             step: "1",
                             class: "compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_692), [
+                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_695), [
                             [
                               _vModelText,
                               worldInfoSettings.maxDepth,
@@ -15402,10 +15446,10 @@ return function render(_ctx, _cache) {
                       ])
                     ])
                   ])
-                ], 10 /* CLASS, PROPS */, _hoisted_683)
+                ], 10 /* CLASS, PROPS */, _hoisted_686)
               ]),
-              _createElementVNode("div", _hoisted_693, [
-                _createElementVNode("label", _hoisted_694, [
+              _createElementVNode("div", _hoisted_696, [
+                _createElementVNode("label", _hoisted_697, [
                   _cache[257] || (_cache[257] = _createElementVNode("svg", {
                     viewBox: "0 0 24 24",
                     fill: "none",
@@ -15427,13 +15471,13 @@ return function render(_ctx, _cache) {
                     type: "search",
                     placeholder: "搜索名称或关键词",
                     autocomplete: "off"
-                  }, null, 8 /* PROPS */, _hoisted_695), [
+                  }, null, 8 /* PROPS */, _hoisted_698), [
                     [_vModelText, worldInfoQuery]
                   ])
                 ]),
-                _createElementVNode("span", _hoisted_696, _toDisplayString(worldInfoTotalCount) + " 条", 1 /* TEXT */)
+                _createElementVNode("span", _hoisted_699, _toDisplayString(worldInfoTotalCount) + " 条", 1 /* TEXT */)
               ]),
-              _createElementVNode("div", _hoisted_697, [
+              _createElementVNode("div", _hoisted_700, [
                 _createElementVNode("button", {
                   type: "button",
                   class: "worldinfo-pager-btn",
@@ -15442,8 +15486,8 @@ return function render(_ctx, _cache) {
                 }, [...(_cache[258] || (_cache[258] = [
                   _createElementVNode("span", { "aria-hidden": "true" }, "‹", -1 /* CACHED */),
                   _createTextVNode(" 上一页", -1 /* CACHED */)
-                ]))], 8 /* PROPS */, _hoisted_698),
-                _createElementVNode("span", _hoisted_699, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
+                ]))], 8 /* PROPS */, _hoisted_701),
+                _createElementVNode("span", _hoisted_702, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
                 _createElementVNode("button", {
                   type: "button",
                   class: "worldinfo-pager-btn",
@@ -15452,7 +15496,7 @@ return function render(_ctx, _cache) {
                 }, [...(_cache[259] || (_cache[259] = [
                   _createTextVNode("下一页 ", -1 /* CACHED */),
                   _createElementVNode("span", { "aria-hidden": "true" }, "›", -1 /* CACHED */)
-                ]))], 8 /* PROPS */, _hoisted_700)
+                ]))], 8 /* PROPS */, _hoisted_703)
               ]),
               _createElementVNode("div", {
                 id: "worldinfo-list",
@@ -15468,17 +15512,17 @@ return function render(_ctx, _cache) {
                     "data-resource-index": index,
                     class: _normalizeClass(["sortable-list-item", { 'is-off': !entry.enabled }])
                   }, [
-                    _createElementVNode("div", _hoisted_703, [
+                    _createElementVNode("div", _hoisted_706, [
                       (resourceBatch.active)
-                        ? (_openBlock(), _createElementBlock("label", _hoisted_704, [
+                        ? (_openBlock(), _createElementBlock("label", _hoisted_707, [
                             _createElementVNode("input", {
                               type: "checkbox",
                               "aria-label": '选择世界书：'+(entry.comment || '未命名条目'),
                               checked: resourceBatch.selected.has(entry),
                               onChange: $event => (resourceBatch.toggle(entry))
-                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_705)
+                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_708)
                           ]))
-                        : (_openBlock(), _createElementBlock("div", _hoisted_706, [...(_cache[260] || (_cache[260] = [
+                        : (_openBlock(), _createElementBlock("div", _hoisted_709, [...(_cache[260] || (_cache[260] = [
                             _createElementVNode("svg", {
                               class: "w-6 h-6",
                               fill: "none",
@@ -15493,15 +15537,15 @@ return function render(_ctx, _cache) {
                               })
                             ], -1 /* CACHED */)
                           ]))])),
-                      _createElementVNode("div", _hoisted_707, [
-                        _createElementVNode("div", _hoisted_708, [
-                          _createElementVNode("h3", _hoisted_709, [
+                      _createElementVNode("div", _hoisted_710, [
+                        _createElementVNode("div", _hoisted_711, [
+                          _createElementVNode("h3", _hoisted_712, [
                             _createElementVNode("button", {
                               type: "button",
                               class: "resource-open",
                               "aria-label": '查看'+(entry.comment || '未命名条目'),
                               onClick: $event => (editWorldInfo(index))
-                            }, _toDisplayString(entry.comment || '未命名条目'), 9 /* TEXT, PROPS */, _hoisted_710)
+                            }, _toDisplayString(entry.comment || '未命名条目'), 9 /* TEXT, PROPS */, _hoisted_713)
                           ]),
                           _createElementVNode("span", {
                             class: _normalizeClass(["meta-badge meta-badge--desktop", entry.scope === 'global' ? 'meta-badge--global' : 'meta-badge--bound'])
@@ -15509,17 +15553,17 @@ return function render(_ctx, _cache) {
                         ])
                       ])
                     ]),
-                    _createElementVNode("div", _hoisted_711, [
-                      _createElementVNode("label", _hoisted_712, [
+                    _createElementVNode("div", _hoisted_714, [
+                      _createElementVNode("label", _hoisted_715, [
                         _createElementVNode("input", {
                           type: "checkbox",
                           checked: entry.enabled,
                           onChange: $event => (setWorldInfoEnabled(entry, $event.target.checked, $event)),
                           class: "settings-toggle-input sr-only"
-                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_713),
+                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_716),
                         _cache[261] || (_cache[261] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                       ]),
-                      _createElementVNode("div", _hoisted_714, [
+                      _createElementVNode("div", _hoisted_717, [
                         _createElementVNode("button", {
                           onClick: $event => (editWorldInfo(index)),
                           class: "item-action-button item-action-button--edit",
@@ -15532,7 +15576,7 @@ return function render(_ctx, _cache) {
                           }, [
                             _createElementVNode("use", { href: "#icon-edit" })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_715),
+                        ]))], 8 /* PROPS */, _hoisted_718),
                         _createElementVNode("button", {
                           onClick: $event => (deleteWorldInfo(index)),
                           class: "item-action-button item-action-button--delete",
@@ -15551,13 +15595,13 @@ return function render(_ctx, _cache) {
                               d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                             })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_716)
+                        ]))], 8 /* PROPS */, _hoisted_719)
                       ])
                     ])
-                  ], 10 /* CLASS, PROPS */, _hoisted_702))
+                  ], 10 /* CLASS, PROPS */, _hoisted_705))
                 }), 128 /* KEYED_FRAGMENT */))
-              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_701),
-              _createElementVNode("div", _hoisted_717, [
+              ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_704),
+              _createElementVNode("div", _hoisted_720, [
                 _createElementVNode("button", {
                   type: "button",
                   class: "worldinfo-pager-btn",
@@ -15566,8 +15610,8 @@ return function render(_ctx, _cache) {
                 }, [...(_cache[264] || (_cache[264] = [
                   _createElementVNode("span", { "aria-hidden": "true" }, "‹", -1 /* CACHED */),
                   _createTextVNode(" 上一页", -1 /* CACHED */)
-                ]))], 8 /* PROPS */, _hoisted_718),
-                _createElementVNode("span", _hoisted_719, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
+                ]))], 8 /* PROPS */, _hoisted_721),
+                _createElementVNode("span", _hoisted_722, _toDisplayString(worldInfoPage) + " / " + _toDisplayString(worldInfoPageCount), 1 /* TEXT */),
                 _createElementVNode("button", {
                   type: "button",
                   class: "worldinfo-pager-btn",
@@ -15576,9 +15620,9 @@ return function render(_ctx, _cache) {
                 }, [...(_cache[265] || (_cache[265] = [
                   _createTextVNode("下一页 ", -1 /* CACHED */),
                   _createElementVNode("span", { "aria-hidden": "true" }, "›", -1 /* CACHED */)
-                ]))], 8 /* PROPS */, _hoisted_720)
+                ]))], 8 /* PROPS */, _hoisted_723)
               ])
-            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_673))
+            ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_676))
           : _createCommentVNode("v-if", true),
         (currentView === 'settings-detail')
           ? (_openBlock(), _createElementBlock("div", {
@@ -15602,7 +15646,7 @@ return function render(_ctx, _cache) {
                 ]))]),
                 _: 1 /* STABLE */
               }, 8 /* PROPS */, ["title", "onMenu"]),
-              _createElementVNode("div", _hoisted_722, [
+              _createElementVNode("div", _hoisted_725, [
                 (['appearance','legacy'].includes(settingsSection))
                   ? (_openBlock(), _createBlock(_component_shell_utilities, {
                       key: 0,
@@ -15612,13 +15656,13 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true),
                 _createCommentVNode(" User Settings "),
                 (settingsSection==='persona')
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_723, [
-                      _createElementVNode("div", _hoisted_724, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_726, [
+                      _createElementVNode("div", _hoisted_727, [
                         _createCommentVNode(" Profile Management Controls "),
                         _createElementVNode("div", {
                           class: _normalizeClass(["settings-profile-actions", showProfileDropdown ? 'z-[60]' : 'z-10'])
                         }, [
-                          _createElementVNode("div", _hoisted_725, [
+                          _createElementVNode("div", _hoisted_728, [
                             _createCommentVNode(" Trigger Button "),
                             _createElementVNode("button", {
                               onClick: _withModifiers($event => (showProfileDropdown = !showProfileDropdown), ["stop"]),
@@ -15628,7 +15672,7 @@ return function render(_ctx, _cache) {
                                 src: user.avatar,
                                 class: "w-5 h-5"
                               }, null, 8 /* PROPS */, ["src"]),
-                              _createElementVNode("span", _hoisted_727, _toDisplayString(user.name || '未命名'), 1 /* TEXT */),
+                              _createElementVNode("span", _hoisted_730, _toDisplayString(user.name || '未命名'), 1 /* TEXT */),
                               (_openBlock(), _createElementBlock("svg", {
                                 class: _normalizeClass(["w-3.5 h-3.5 flex-shrink-0 opacity-80 transition-transform duration-200", {'rotate-180': showProfileDropdown}]),
                                 fill: "none",
@@ -15642,7 +15686,7 @@ return function render(_ctx, _cache) {
                                   d: "M19 9l-7 7-7-7"
                                 }, null, -1 /* CACHED */)
                               ]))], 2 /* CLASS */))
-                            ], 8 /* PROPS */, _hoisted_726),
+                            ], 8 /* PROPS */, _hoisted_729),
                             _createCommentVNode(" Dropdown Panel "),
                             _createVNode(_Transition, {
                               "enter-active-class": "transition-all duration-150 ease-out",
@@ -15654,8 +15698,8 @@ return function render(_ctx, _cache) {
                             }, {
                               default: _withCtx(() => [
                                 showProfileDropdown
-                                  ? (_openBlock(), _createElementBlock("div", _hoisted_728, [
-                                      _createElementVNode("div", _hoisted_729, [
+                                  ? (_openBlock(), _createElementBlock("div", _hoisted_731, [
+                                      _createElementVNode("div", _hoisted_732, [
                                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(userProfiles, (profile) => {
                                           return (_openBlock(), _createElementBlock("div", {
                                             key: profile.uuid,
@@ -15669,21 +15713,21 @@ return function render(_ctx, _cache) {
                                               class: "w-7 h-7"
                                             }, null, 8 /* PROPS */, ["src"]),
                                             _createCommentVNode(" Profile Info "),
-                                            _createElementVNode("div", _hoisted_731, [
-                                              _createElementVNode("div", _hoisted_732, _toDisplayString(profile.name ||
+                                            _createElementVNode("div", _hoisted_734, [
+                                              _createElementVNode("div", _hoisted_735, _toDisplayString(profile.name ||
                                                             '未命名人设'), 1 /* TEXT */),
                                               _createElementVNode("div", {
                                                 class: _normalizeClass(["text-[10px] truncate mt-0.5", activeProfileId === profile.uuid ? 'text-primary-500' : 'text-gray-400'])
                                               }, [
                                                 _createTextVNode(_toDisplayString(profile.person === 'second' ? '第二人称' : '第三人称') + " ", 1 /* TEXT */),
                                                 (profile.description)
-                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_733, " · " + _toDisplayString(profile.description.substring(0, 20)) + _toDisplayString(profile.description.length > 20 ? '...' : ''), 1 /* TEXT */))
+                                                  ? (_openBlock(), _createElementBlock("span", _hoisted_736, " · " + _toDisplayString(profile.description.substring(0, 20)) + _toDisplayString(profile.description.length > 20 ? '...' : ''), 1 /* TEXT */))
                                                   : _createCommentVNode("v-if", true)
                                               ], 2 /* CLASS */)
                                             ]),
                                             _createCommentVNode(" Active Indicator "),
                                             (activeProfileId === profile.uuid)
-                                              ? (_openBlock(), _createElementBlock("svg", _hoisted_734, [...(_cache[268] || (_cache[268] = [
+                                              ? (_openBlock(), _createElementBlock("svg", _hoisted_737, [...(_cache[268] || (_cache[268] = [
                                                   _createElementVNode("path", {
                                                     "stroke-linecap": "round",
                                                     "stroke-linejoin": "round",
@@ -15692,7 +15736,7 @@ return function render(_ctx, _cache) {
                                                   }, null, -1 /* CACHED */)
                                                 ]))]))
                                               : _createCommentVNode("v-if", true)
-                                          ], 10 /* CLASS, PROPS */, _hoisted_730))
+                                          ], 10 /* CLASS, PROPS */, _hoisted_733))
                                         }), 128 /* KEYED_FRAGMENT */))
                                       ])
                                     ]))
@@ -15719,7 +15763,7 @@ return function render(_ctx, _cache) {
                                 d: "M12 4v16m8-8H4"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_735),
+                          ]))], 8 /* PROPS */, _hoisted_738),
                           _createElementVNode("button", {
                             onClick: $event => (deleteProfile(activeProfileId)),
                             class: "settings-action settings-action--icon text-red-500 hover:text-red-600 hover:bg-red-50",
@@ -15738,13 +15782,13 @@ return function render(_ctx, _cache) {
                                 d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_736)
+                          ]))], 8 /* PROPS */, _hoisted_739)
                         ], 2 /* CLASS */)
                       ]),
-                      _createElementVNode("div", _hoisted_737, [
+                      _createElementVNode("div", _hoisted_740, [
                         _createCommentVNode(" Avatar and profile fields "),
-                        _createElementVNode("div", _hoisted_738, [
-                          _createElementVNode("div", _hoisted_739, [
+                        _createElementVNode("div", _hoisted_741, [
+                          _createElementVNode("div", _hoisted_742, [
                             _createElementVNode("div", {
                               class: "settings-profile-avatar overflow-hidden relative cursor-pointer group",
                               onClick: $event => ($refs.userAvatarInput.click())
@@ -15775,7 +15819,7 @@ return function render(_ctx, _cache) {
                                   })
                                 ])
                               ], -1 /* CACHED */))
-                            ], 8 /* PROPS */, _hoisted_740),
+                            ], 8 /* PROPS */, _hoisted_743),
                             _createCommentVNode(" Camera Icon Badge "),
                             _createElementVNode("div", {
                               class: "absolute bottom-1 right-1 bg-primary-600 text-white p-1.5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:bg-primary-700 transition-colors z-10",
@@ -15795,23 +15839,23 @@ return function render(_ctx, _cache) {
                                   d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                                 })
                               ], -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_741),
+                            ]))], 8 /* PROPS */, _hoisted_744),
                             _createElementVNode("input", {
                               type: "file",
                               ref: "userAvatarInput",
                               accept: "image/*",
                               onChange: handleUserAvatarUpload,
                               class: "hidden"
-                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_742)
+                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_745)
                           ]),
                           _createCommentVNode(" Form Section "),
-                          _createElementVNode("div", _hoisted_743, [
+                          _createElementVNode("div", _hoisted_746, [
                             _createCommentVNode(" Name and Perspective Row "),
-                            _createElementVNode("div", _hoisted_744, [
+                            _createElementVNode("div", _hoisted_747, [
                               _createCommentVNode(" User Name "),
-                              _createElementVNode("div", _hoisted_745, [
+                              _createElementVNode("div", _hoisted_748, [
                                 _cache[274] || (_cache[274] = _createElementVNode("label", { class: "settings-label" }, "角色名", -1 /* CACHED */)),
-                                _createElementVNode("div", _hoisted_746, [
+                                _createElementVNode("div", _hoisted_749, [
                                   _cache[273] || (_cache[273] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
@@ -15832,7 +15876,7 @@ return function render(_ctx, _cache) {
                                     type: "text",
                                     class: "settings-control settings-control--icon",
                                     placeholder: "您的名字"
-                                  }, null, 8 /* PROPS */, _hoisted_747), [
+                                  }, null, 8 /* PROPS */, _hoisted_750), [
                                     [_vModelText, user.name]
                                   ])
                                 ])
@@ -15840,7 +15884,7 @@ return function render(_ctx, _cache) {
                               _createCommentVNode(" Perspective "),
                               _createElementVNode("div", null, [
                                 _cache[277] || (_cache[277] = _createElementVNode("label", { class: "settings-label" }, "叙事视角", -1 /* CACHED */)),
-                                _createElementVNode("div", _hoisted_748, [
+                                _createElementVNode("div", _hoisted_751, [
                                   _createElementVNode("div", {
                                     class: _normalizeClass(["segmented-switch__indicator", { 'is-right': !isSecondPerson }])
                                   }, null, 2 /* CLASS */),
@@ -15850,37 +15894,37 @@ return function render(_ctx, _cache) {
                                   }, [...(_cache[275] || (_cache[275] = [
                                     _createElementVNode("span", null, "第二人称", -1 /* CACHED */),
                                     _createElementVNode("span", { class: "text-xs font-normal opacity-80" }, "(你)", -1 /* CACHED */)
-                                  ]))], 10 /* CLASS, PROPS */, _hoisted_749),
+                                  ]))], 10 /* CLASS, PROPS */, _hoisted_752),
                                   _createElementVNode("button", {
                                     onClick: $event => (togglePerson('third')),
                                     class: _normalizeClass(["segmented-switch__option", { 'is-active': !isSecondPerson }])
                                   }, [
                                     _cache[276] || (_cache[276] = _createElementVNode("span", null, "第三人称", -1 /* CACHED */)),
-                                    _createElementVNode("span", _hoisted_751, "(" + _toDisplayString(user.name || '他/她') + ")", 1 /* TEXT */)
-                                  ], 10 /* CLASS, PROPS */, _hoisted_750)
+                                    _createElementVNode("span", _hoisted_754, "(" + _toDisplayString(user.name || '他/她') + ")", 1 /* TEXT */)
+                                  ], 10 /* CLASS, PROPS */, _hoisted_753)
                                 ])
                               ])
                             ]),
-                            _createElementVNode("div", _hoisted_752, [
+                            _createElementVNode("div", _hoisted_755, [
                               _cache[278] || (_cache[278] = _createElementVNode("label", { class: "settings-label" }, "偏好设定", -1 /* CACHED */)),
                               _withDirectives(_createElementVNode("textarea", {
                                 "onUpdate:modelValue": $event => ((user.preferences) = $event),
                                 rows: "4",
                                 placeholder: "偏好的互动方式、称呼或希望长期遵循的习惯...",
                                 class: "settings-control"
-                              }, null, 8 /* PROPS */, _hoisted_753), [
+                              }, null, 8 /* PROPS */, _hoisted_756), [
                                 [_vModelText, user.preferences]
                               ])
                             ]),
                             _createCommentVNode(" Description "),
-                            _createElementVNode("div", _hoisted_754, [
+                            _createElementVNode("div", _hoisted_757, [
                               _cache[279] || (_cache[279] = _createElementVNode("label", { class: "settings-label" }, "详细设定", -1 /* CACHED */)),
                               _withDirectives(_createElementVNode("textarea", {
                                 "onUpdate:modelValue": $event => ((user.description) = $event),
                                 rows: "6",
                                 placeholder: "外貌、性格、背景故事等...",
                                 class: "settings-control"
-                              }, null, 8 /* PROPS */, _hoisted_755), [
+                              }, null, 8 /* PROPS */, _hoisted_758), [
                                 [_vModelText, user.description]
                               ])
                             ])
@@ -15891,11 +15935,11 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true),
                 _createCommentVNode(" API Settings - Optimized UI "),
                 (['api','image'].includes(settingsSection))
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_756, [
-                      _createElementVNode("div", _hoisted_757, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_759, [
+                      _createElementVNode("div", _hoisted_760, [
                         _createCommentVNode(" Integrated Service Status Monitoring "),
-                        _createElementVNode("div", _hoisted_758, [
-                          _createElementVNode("h4", _hoisted_759, [
+                        _createElementVNode("div", _hoisted_761, [
+                          _createElementVNode("h4", _hoisted_762, [
                             _cache[281] || (_cache[281] = _createElementVNode("span", null, "服务连接状态", -1 /* CACHED */)),
                             _createElementVNode("button", {
                               onClick: checkAllStatuses,
@@ -15915,39 +15959,39 @@ return function render(_ctx, _cache) {
                                 })
                               ], -1 /* CACHED */),
                               _createTextVNode(" 立即检测 ", -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_760)
+                            ]))], 8 /* PROPS */, _hoisted_763)
                           ]),
-                          _createElementVNode("div", _hoisted_761, [
+                          _createElementVNode("div", _hoisted_764, [
                             _createCommentVNode(" General API Status "),
-                            _createElementVNode("div", _hoisted_762, [
+                            _createElementVNode("div", _hoisted_765, [
                               _createElementVNode("div", {
                                 class: _normalizeClass(['w-2.5 h-2.5 rounded-full mr-3 shadow-sm flex-shrink-0', apiStatus === 'connected' ? 'bg-green-500 shadow-green-200' : (apiStatus === 'checking' ? 'bg-yellow-400 animate-pulse shadow-yellow-200' : (apiStatus === 'error' ? 'bg-red-500 shadow-red-200' : 'bg-gray-300'))])
                               }, null, 2 /* CLASS */),
-                              _createElementVNode("div", _hoisted_763, [
-                                _createElementVNode("div", _hoisted_764, [
+                              _createElementVNode("div", _hoisted_766, [
+                                _createElementVNode("div", _hoisted_767, [
                                   _cache[282] || (_cache[282] = _createElementVNode("div", { class: "text-xs font-bold text-gray-700 truncate" }, "API 接口", -1 /* CACHED */)),
                                   (apiStatus === 'connected')
-                                    ? (_openBlock(), _createElementBlock("span", _hoisted_765, _toDisplayString(apiLatency) + "ms", 1 /* TEXT */))
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_768, _toDisplayString(apiLatency) + "ms", 1 /* TEXT */))
                                     : _createCommentVNode("v-if", true)
                                 ])
                               ])
                             ]),
                             _createCommentVNode(" Image API Status "),
-                            _createElementVNode("div", _hoisted_766, [
+                            _createElementVNode("div", _hoisted_769, [
                               _createElementVNode("div", {
                                 class: _normalizeClass(['w-2.5 h-2.5 rounded-full mr-3 shadow-sm flex-shrink-0', imageGenStatus === 'connected' ? 'bg-green-500 shadow-green-200' : (imageGenStatus === 'checking' ? 'bg-yellow-400 animate-pulse shadow-yellow-200' : (imageGenStatus === 'error' ? 'bg-red-500 shadow-red-200' : 'bg-gray-300'))])
                               }, null, 2 /* CLASS */),
-                              _createElementVNode("div", _hoisted_767, [
-                                _createElementVNode("div", _hoisted_768, [
-                                  _createElementVNode("div", _hoisted_769, [
+                              _createElementVNode("div", _hoisted_770, [
+                                _createElementVNode("div", _hoisted_771, [
+                                  _createElementVNode("div", _hoisted_772, [
                                     _cache[283] || (_cache[283] = _createElementVNode("span", null, "生图服务", -1 /* CACHED */)),
                                     _cache[284] || (_cache[284] = _createElementVNode("span", { class: "text-gray-400" }, "·", -1 /* CACHED */)),
-                                    _createElementVNode("span", _hoisted_770, [
+                                    _createElementVNode("span", _hoisted_773, [
                                       _createElementVNode("span", null, _toDisplayString(quotaLabel), 1 /* TEXT */)
                                     ])
                                   ]),
                                   (imageGenStatus === 'connected')
-                                    ? (_openBlock(), _createElementBlock("span", _hoisted_771, _toDisplayString(imageGenLatency) + "ms", 1 /* TEXT */))
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_774, _toDisplayString(imageGenLatency) + "ms", 1 /* TEXT */))
                                     : _createCommentVNode("v-if", true)
                                 ])
                               ])
@@ -15955,8 +15999,8 @@ return function render(_ctx, _cache) {
                           ])
                         ]),
                         _createCommentVNode(" Main API Inputs "),
-                        _createElementVNode("div", _hoisted_772, [
-                          _createElementVNode("div", _hoisted_773, [
+                        _createElementVNode("div", _hoisted_775, [
+                          _createElementVNode("div", _hoisted_776, [
                             _cache[294] || (_cache[294] = _createElementVNode("div", { class: "mb-2 ml-1 flex items-center justify-between gap-3" }, [
                               _createElementVNode("label", { class: "settings-label !mb-0" }, "API 提供商"),
                               _createElementVNode("a", {
@@ -15966,14 +16010,14 @@ return function render(_ctx, _cache) {
                                 class: "text-primary-600 hover:text-primary-700 hover:underline cursor-pointer transition-colors text-xs normal-case font-medium"
                               }, " 获取API ")
                             ], -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_774, [
+                            _createElementVNode("div", _hoisted_777, [
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (showApiProviderSelector = !showApiProviderSelector),
                                 class: "settings-control flex items-center justify-between text-left"
                               }, [
-                                _createElementVNode("span", _hoisted_776, [
-                                  _createElementVNode("span", _hoisted_777, [
+                                _createElementVNode("span", _hoisted_779, [
+                                  _createElementVNode("span", _hoisted_780, [
                                     (selectedApiProvider.icon)
                                       ? (_openBlock(), _createElementBlock("img", {
                                           key: 0,
@@ -15981,8 +16025,8 @@ return function render(_ctx, _cache) {
                                           alt: selectedApiProvider.name,
                                           class: "w-5 h-5 object-contain",
                                           onError: $event => ($event.target.style.visibility = 'hidden')
-                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_778))
-                                      : (_openBlock(), _createElementBlock("svg", _hoisted_779, [...(_cache[285] || (_cache[285] = [
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_781))
+                                      : (_openBlock(), _createElementBlock("svg", _hoisted_782, [...(_cache[285] || (_cache[285] = [
                                           _createElementVNode("path", {
                                             "stroke-linecap": "round",
                                             "stroke-linejoin": "round",
@@ -15991,7 +16035,7 @@ return function render(_ctx, _cache) {
                                           }, null, -1 /* CACHED */)
                                         ]))]))
                                   ]),
-                                  _createElementVNode("span", _hoisted_780, _toDisplayString(selectedApiProvider.name), 1 /* TEXT */)
+                                  _createElementVNode("span", _hoisted_783, _toDisplayString(selectedApiProvider.name), 1 /* TEXT */)
                                 ]),
                                 _cache[286] || (_cache[286] = _createElementVNode("svg", {
                                   class: "w-4 h-4 text-gray-400 ml-2 shrink-0",
@@ -16006,9 +16050,9 @@ return function render(_ctx, _cache) {
                                     d: "M19 9l-7 7-7-7"
                                   })
                                 ], -1 /* CACHED */))
-                              ], 8 /* PROPS */, _hoisted_775),
+                              ], 8 /* PROPS */, _hoisted_778),
                               showApiProviderSelector
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_781, [
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_784, [
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(apiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("button", {
                                         key: provider.id,
@@ -16016,20 +16060,20 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (selectApiProvider(provider)),
                                         class: _normalizeClass(['w-full px-3 py-2.5 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _createElementVNode("span", _hoisted_783, [
+                                        _createElementVNode("span", _hoisted_786, [
                                           _createElementVNode("img", {
                                             src: provider.icon,
                                             alt: provider.name,
                                             class: "w-5 h-5 object-contain",
                                             onError: $event => ($event.target.style.visibility = 'hidden')
-                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_784)
+                                          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_787)
                                         ]),
-                                        _createElementVNode("span", _hoisted_785, [
-                                          _createElementVNode("span", _hoisted_786, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _createElementVNode("span", _hoisted_787, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
+                                        _createElementVNode("span", _hoisted_788, [
+                                          _createElementVNode("span", _hoisted_789, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _createElementVNode("span", _hoisted_790, _toDisplayString(provider.apiUrl), 1 /* TEXT */)
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_788, [...(_cache[287] || (_cache[287] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_791, [...(_cache[287] || (_cache[287] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -16038,7 +16082,7 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : _createCommentVNode("v-if", true)
-                                      ], 10 /* CLASS, PROPS */, _hoisted_782))
+                                      ], 10 /* CLASS, PROPS */, _hoisted_785))
                                     }), 128 /* KEYED_FRAGMENT */)),
                                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(customApiProviderOptions, (provider) => {
                                       return (_openBlock(), _createElementBlock("div", {
@@ -16049,9 +16093,9 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (onCustomApiEntryClick(provider)),
                                         class: _normalizeClass(['w-full mt-2 px-3 py-2.5 border-t border-gray-100 rounded-lg flex items-center text-left transition-all', selectedApiProvider.id === provider.id ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'])
                                       }, [
-                                        _createElementVNode("span", _hoisted_790, [
+                                        _createElementVNode("span", _hoisted_793, [
                                           (provider.id === 'custom')
-                                            ? (_openBlock(), _createElementBlock("svg", _hoisted_791, [...(_cache[288] || (_cache[288] = [
+                                            ? (_openBlock(), _createElementBlock("svg", _hoisted_794, [...(_cache[288] || (_cache[288] = [
                                                 _createElementVNode("path", {
                                                   "stroke-linecap": "round",
                                                   "stroke-linejoin": "round",
@@ -16059,7 +16103,7 @@ return function render(_ctx, _cache) {
                                                   d: "M12 4v16m8-8H4"
                                                 }, null, -1 /* CACHED */)
                                               ]))]))
-                                            : (_openBlock(), _createElementBlock("svg", _hoisted_792, [...(_cache[289] || (_cache[289] = [
+                                            : (_openBlock(), _createElementBlock("svg", _hoisted_795, [...(_cache[289] || (_cache[289] = [
                                                 _createElementVNode("path", {
                                                   "stroke-linecap": "round",
                                                   "stroke-linejoin": "round",
@@ -16068,12 +16112,12 @@ return function render(_ctx, _cache) {
                                                 }, null, -1 /* CACHED */)
                                               ]))]))
                                         ]),
-                                        _createElementVNode("span", _hoisted_793, [
-                                          _createElementVNode("span", _hoisted_794, _toDisplayString(provider.name), 1 /* TEXT */),
-                                          _createElementVNode("span", _hoisted_795, _toDisplayString(provider.hint || '手动输入 API 地址'), 1 /* TEXT */)
+                                        _createElementVNode("span", _hoisted_796, [
+                                          _createElementVNode("span", _hoisted_797, _toDisplayString(provider.name), 1 /* TEXT */),
+                                          _createElementVNode("span", _hoisted_798, _toDisplayString(provider.hint || '手动输入 API 地址'), 1 /* TEXT */)
                                         ]),
                                         (selectedApiProvider.id === provider.id)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_796, [...(_cache[290] || (_cache[290] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_799, [...(_cache[290] || (_cache[290] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -16104,15 +16148,15 @@ return function render(_ctx, _cache) {
                                                   d: "M6 18L18 6M6 6l12 12"
                                                 })
                                               ], -1 /* CACHED */)
-                                            ]))], 8 /* PROPS */, _hoisted_797))
+                                            ]))], 8 /* PROPS */, _hoisted_800))
                                           : _createCommentVNode("v-if", true)
-                                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_789))
+                                      ], 42 /* CLASS, PROPS, NEED_HYDRATION */, _hoisted_792))
                                     }), 128 /* KEYED_FRAGMENT */))
                                   ]))
                                 : _createCommentVNode("v-if", true)
                             ]),
                             isCustomApiProvider
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_798, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_801, [
                                   _cache[292] || (_cache[292] = _createElementVNode("label", { class: "settings-label" }, "站点名称", -1 /* CACHED */)),
                                   _createElementVNode("input", {
                                     class: "settings-control",
@@ -16120,11 +16164,11 @@ return function render(_ctx, _cache) {
                                     onInput: $event => (updateCustomApiProvider(selectedApiProvider.id, 'name', $event.target.value)),
                                     placeholder: "给这个站点起个名字",
                                     "aria-label": "自定义站点名称"
-                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_799)
+                                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_802)
                                 ]))
                               : _createCommentVNode("v-if", true),
                             isCustomApiProvider
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_800, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_803, [
                                   _cache[293] || (_cache[293] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
@@ -16145,15 +16189,15 @@ return function render(_ctx, _cache) {
                                     type: "text",
                                     class: "settings-control settings-control--icon font-mono",
                                     placeholder: "https://your-api.example/v1"
-                                  }, null, 8 /* PROPS */, _hoisted_801), [
+                                  }, null, 8 /* PROPS */, _hoisted_804), [
                                     [_vModelText, settings.apiUrl]
                                   ])
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ]),
-                          _createElementVNode("div", _hoisted_802, [
+                          _createElementVNode("div", _hoisted_805, [
                             _cache[296] || (_cache[296] = _createElementVNode("label", { class: "settings-label" }, "API Key", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_803, [
+                            _createElementVNode("div", _hoisted_806, [
                               _cache[295] || (_cache[295] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none" }, [
                                 _createElementVNode("svg", {
                                   class: "w-5 h-5",
@@ -16178,9 +16222,9 @@ return function render(_ctx, _cache) {
                             ])
                           ]),
                           _createCommentVNode(" Model Configuration Inputs "),
-                          _createElementVNode("div", _hoisted_804, [
-                            _createElementVNode("div", _hoisted_805, [
-                              _createElementVNode("div", _hoisted_806, [
+                          _createElementVNode("div", _hoisted_807, [
+                            _createElementVNode("div", _hoisted_808, [
+                              _createElementVNode("div", _hoisted_809, [
                                 _cache[298] || (_cache[298] = _createElementVNode("label", { class: "settings-label !mb-0" }, "聊天模型", -1 /* CACHED */)),
                                 _createElementVNode("button", {
                                   type: "button",
@@ -16202,9 +16246,9 @@ return function render(_ctx, _cache) {
                                     })
                                   ], -1 /* CACHED */),
                                   _createTextVNode(" 刷新模型列表 ", -1 /* CACHED */)
-                                ]))], 8 /* PROPS */, _hoisted_807)
+                                ]))], 8 /* PROPS */, _hoisted_810)
                               ]),
-                              _createElementVNode("div", _hoisted_808, [
+                              _createElementVNode("div", _hoisted_811, [
                                 _cache[300] || (_cache[300] = _createElementVNode("div", { class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-500 transition-colors pointer-events-none z-10" }, [
                                   _createElementVNode("svg", {
                                     class: "w-5 h-5",
@@ -16226,7 +16270,7 @@ return function render(_ctx, _cache) {
                                   "aria-label": "选择聊天模型",
                                   class: "settings-control settings-control--icon flex items-center justify-between text-left"
                                 }, [
-                                  _createElementVNode("span", _hoisted_810, "已配置 " + _toDisplayString([settings.qualityModel,
+                                  _createElementVNode("span", _hoisted_813, "已配置 " + _toDisplayString([settings.qualityModel,
                                                     settings.balancedModel, settings.fastModel, settings.slot4Model, settings.slot5Model].filter(Boolean).length) + " / 5 个槽位", 1 /* TEXT */),
                                   _cache[299] || (_cache[299] = _createElementVNode("svg", {
                                     class: "w-5 h-5 text-gray-400",
@@ -16241,24 +16285,24 @@ return function render(_ctx, _cache) {
                                       d: "M19 9l-7 7-7-7"
                                     })
                                   ], -1 /* CACHED */))
-                                ], 8 /* PROPS */, _hoisted_809)
+                                ], 8 /* PROPS */, _hoisted_812)
                               ])
                             ])
                           ]),
                           _createCommentVNode(" Image Generation Settings "),
-                          _createElementVNode("div", _hoisted_811, [
+                          _createElementVNode("div", _hoisted_814, [
                             _createVNode(_component_image_provider_settings, {
                               api: imageApi,
                               onRemove: removeImageProvider
                             }, null, 8 /* PROPS */, ["api", "onRemove"]),
-                            _createElementVNode("div", _hoisted_812, [
+                            _createElementVNode("div", _hoisted_815, [
                               (imageApi.selectedId === 'builtin')
-                                ? (_openBlock(), _createElementBlock("a", _hoisted_813, " 获取生图密钥 "))
+                                ? (_openBlock(), _createElementBlock("a", _hoisted_816, " 获取生图密钥 "))
                                 : _createCommentVNode("v-if", true)
                             ]),
-                            _createElementVNode("div", _hoisted_814, [
+                            _createElementVNode("div", _hoisted_817, [
                               _createCommentVNode(" Image Key "),
-                              _createElementVNode("div", _hoisted_815, [
+                              _createElementVNode("div", _hoisted_818, [
                                 _cache[301] || (_cache[301] = _createElementVNode("label", { class: "settings-label" }, "自动生图密钥", -1 /* CACHED */)),
                                 _createVNode(_component_secret_input, {
                                   modelValue: settings.imageGenKey,
@@ -16267,8 +16311,8 @@ return function render(_ctx, _cache) {
                                   placeholder: imageApi.selectedId === 'builtin' ? 'STA1N密钥/NAI官方密钥' : '此站点的密钥'
                                 }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue", "placeholder"]),
                                 (imageApi.selectedId === 'builtin')
-                                  ? (_openBlock(), _createElementBlock("div", _hoisted_816, [
-                                      _createElementVNode("span", _hoisted_817, _toDisplayString(quotaLabel), 1 /* TEXT */),
+                                  ? (_openBlock(), _createElementBlock("div", _hoisted_819, [
+                                      _createElementVNode("span", _hoisted_820, _toDisplayString(quotaLabel), 1 /* TEXT */),
                                       _createElementVNode("button", {
                                         type: "button",
                                         class: "settings-icon-button",
@@ -16278,13 +16322,13 @@ return function render(_ctx, _cache) {
                                         onClick: fetchQuota
                                       }, [
                                         _createVNode(_component_shell_icon, { name: "RefreshCw" })
-                                      ], 8 /* PROPS */, _hoisted_818)
+                                      ], 8 /* PROPS */, _hoisted_821)
                                     ]))
                                   : _createCommentVNode("v-if", true)
                               ]),
                               _createCommentVNode(" Image Model "),
                               (imageApi.current.protocol !== 'openai')
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_819, [
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_822, [
                                     _cache[302] || (_cache[302] = _createElementVNode("label", { class: "settings-label" }, "生图版本", -1 /* CACHED */)),
                                     _createVNode(_component_custom_select, {
                                       modelValue: settings.imageModel,
@@ -16296,7 +16340,7 @@ return function render(_ctx, _cache) {
                                   ]))
                                 : _createCommentVNode("v-if", true),
                               _createCommentVNode(" Image Style "),
-                              _createElementVNode("div", _hoisted_820, [
+                              _createElementVNode("div", _hoisted_823, [
                                 _cache[309] || (_cache[309] = _createElementVNode("label", { class: "settings-label" }, "生图风格", -1 /* CACHED */)),
                                 _createVNode(_component_custom_select, {
                                   modelValue: settings.imageStyle,
@@ -16306,13 +16350,13 @@ return function render(_ctx, _cache) {
                                   "menu-class": "text-sm"
                                 }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue", "options"]),
                                 (settings.imageStyle === 'custom')
-                                  ? (_openBlock(), _createElementBlock("div", _hoisted_821, [
+                                  ? (_openBlock(), _createElementBlock("div", _hoisted_824, [
                                       _createElementVNode("button", {
                                         type: "button",
                                         onClick: $event => (showCustomArtistEditor = !showCustomArtistEditor),
                                         class: "flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left hover:bg-gray-50/50 dark:hover:bg-gray-700/50 active:scale-[0.99] transition-all"
                                       }, [
-                                        _createElementVNode("div", _hoisted_823, [
+                                        _createElementVNode("div", _hoisted_826, [
                                           _cache[305] || (_cache[305] = _createElementVNode("span", { class: "inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-primary-600 text-white shadow-sm shadow-primary-500/20 flex-shrink-0" }, [
                                             _createElementVNode("svg", {
                                               class: "w-3.5 h-3.5",
@@ -16328,14 +16372,14 @@ return function render(_ctx, _cache) {
                                               })
                                             ])
                                           ], -1 /* CACHED */)),
-                                          _createElementVNode("div", _hoisted_824, [
-                                            _createElementVNode("div", _hoisted_825, [
+                                          _createElementVNode("div", _hoisted_827, [
+                                            _createElementVNode("div", _hoisted_828, [
                                               _cache[303] || (_cache[303] = _createElementVNode("span", { class: "block text-xs font-bold text-gray-700 dark:text-gray-200" }, "自定义画师串管理", -1 /* CACHED */)),
-                                              _createElementVNode("span", _hoisted_826, _toDisplayString(settings.customImageArtists.length), 1 /* TEXT */)
+                                              _createElementVNode("span", _hoisted_829, _toDisplayString(settings.customImageArtists.length), 1 /* TEXT */)
                                             ]),
-                                            _createElementVNode("span", _hoisted_827, [
+                                            _createElementVNode("span", _hoisted_830, [
                                               _cache[304] || (_cache[304] = _createTextVNode("使用中：", -1 /* CACHED */)),
-                                              _createElementVNode("b", _hoisted_828, _toDisplayString(activeCustomArtist.name || activeCustomArtist.artists || '（未填写）'), 1 /* TEXT */)
+                                              _createElementVNode("b", _hoisted_831, _toDisplayString(activeCustomArtist.name || activeCustomArtist.artists || '（未填写）'), 1 /* TEXT */)
                                             ])
                                           ])
                                         ]),
@@ -16352,15 +16396,15 @@ return function render(_ctx, _cache) {
                                             d: "M19 9l-7 7-7-7"
                                           }, null, -1 /* CACHED */)
                                         ]))], 2 /* CLASS */))
-                                      ], 8 /* PROPS */, _hoisted_822),
+                                      ], 8 /* PROPS */, _hoisted_825),
                                       showCustomArtistEditor
-                                        ? (_openBlock(), _createElementBlock("div", _hoisted_829, [
+                                        ? (_openBlock(), _createElementBlock("div", _hoisted_832, [
                                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(settings.customImageArtists, (customArtistEntry, customArtistIdx) => {
                                               return (_openBlock(), _createElementBlock("div", {
                                                 key: 'rphub-custom-artist-' + customArtistIdx,
                                                 class: _normalizeClass(['rounded-xl border p-3 shadow-sm transition-all space-y-2', customArtistEntry.selected ? 'bg-primary-50/40 dark:bg-primary-950/20 border-primary-300 dark:border-primary-700/80 ring-1 ring-primary-400/30' : 'bg-white/90 dark:bg-gray-800/90 border-gray-200/70 dark:border-gray-700 hover:border-gray-300'])
                                               }, [
-                                                _createElementVNode("div", _hoisted_830, [
+                                                _createElementVNode("div", _hoisted_833, [
                                                   _createElementVNode("button", {
                                                     type: "button",
                                                     class: "flex min-w-0 flex-1 items-center gap-2 text-left group cursor-pointer",
@@ -16370,23 +16414,23 @@ return function render(_ctx, _cache) {
                                                       class: _normalizeClass(['flex-none w-4 h-4 rounded-full border flex items-center justify-center transition-all', customArtistEntry.selected ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-300 bg-transparent group-hover:border-primary-400'])
                                                     }, [
                                                       (customArtistEntry.selected)
-                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_832))
+                                                        ? (_openBlock(), _createElementBlock("span", _hoisted_835))
                                                         : _createCommentVNode("v-if", true)
                                                     ], 2 /* CLASS */),
                                                     _createElementVNode("span", {
                                                       class: _normalizeClass(['truncate text-xs font-bold transition-colors', customArtistEntry.selected ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 group-hover:text-primary-600'])
                                                     }, _toDisplayString(customArtistEntry.name || ('画师串 ' + (customArtistIdx + 1))), 3 /* TEXT, CLASS */),
                                                     (customArtistEntry.selected)
-                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_833, " 生效中 "))
+                                                      ? (_openBlock(), _createElementBlock("span", _hoisted_836, " 生效中 "))
                                                       : _createCommentVNode("v-if", true)
-                                                  ], 8 /* PROPS */, _hoisted_831),
+                                                  ], 8 /* PROPS */, _hoisted_834),
                                                   (settings.customImageArtists.length > 1)
                                                     ? (_openBlock(), _createElementBlock("button", {
                                                         key: 0,
                                                         type: "button",
                                                         class: "rounded-lg border border-red-200/80 bg-red-50/80 hover:bg-red-100 text-red-600 px-2 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-2xs",
                                                         onClick: $event => (removeCustomArtist(customArtistIdx))
-                                                      }, "删除", 8 /* PROPS */, _hoisted_834))
+                                                      }, "删除", 8 /* PROPS */, _hoisted_837))
                                                     : _createCommentVNode("v-if", true)
                                                 ]),
                                                 _withDirectives(_createElementVNode("input", {
@@ -16394,7 +16438,7 @@ return function render(_ctx, _cache) {
                                                   "onUpdate:modelValue": $event => ((customArtistEntry.name) = $event),
                                                   class: "settings-control !py-1.5 !text-xs !bg-white/90 dark:!bg-gray-700/80",
                                                   placeholder: "条目备注名称（如：厚涂水彩 / 赛博朋克）"
-                                                }, null, 8 /* PROPS */, _hoisted_835), [
+                                                }, null, 8 /* PROPS */, _hoisted_838), [
                                                   [_vModelText, customArtistEntry.name]
                                                 ]),
                                                 _withDirectives(_createElementVNode("textarea", {
@@ -16402,7 +16446,7 @@ return function render(_ctx, _cache) {
                                                   rows: "2",
                                                   class: "settings-control resize-y custom-scrollbar !text-xs !bg-white/90 dark:!bg-gray-700/80 leading-relaxed font-mono",
                                                   placeholder: '正面画师串（用英文逗号分隔，如：artgerm, wlop, greg rutkowski）'
-                                                }, null, 8 /* PROPS */, _hoisted_836), [
+                                                }, null, 8 /* PROPS */, _hoisted_839), [
                                                   [_vModelText, customArtistEntry.artists]
                                                 ]),
                                                 _withDirectives(_createElementVNode("textarea", {
@@ -16410,7 +16454,7 @@ return function render(_ctx, _cache) {
                                                   rows: "2",
                                                   class: "settings-control resize-y custom-scrollbar !text-xs !bg-white/90 dark:!bg-gray-700/80 leading-relaxed font-mono",
                                                   placeholder: '该画师串绑定的专属负面词（选填，例如：worst quality, low quality）'
-                                                }, null, 8 /* PROPS */, _hoisted_837), [
+                                                }, null, 8 /* PROPS */, _hoisted_840), [
                                                   [_vModelText, customArtistEntry.negative]
                                                 ])
                                               ], 2 /* CLASS */))
@@ -16434,7 +16478,7 @@ return function render(_ctx, _cache) {
                                                 })
                                               ], -1 /* CACHED */),
                                               _createTextVNode(" + 添加新画师串 ", -1 /* CACHED */)
-                                            ]))], 8 /* PROPS */, _hoisted_838)
+                                            ]))], 8 /* PROPS */, _hoisted_841)
                                           ]))
                                         : _createCommentVNode("v-if", true)
                                     ]))
@@ -16449,12 +16493,12 @@ return function render(_ctx, _cache) {
                                     _createElementVNode("span", { class: "block text-sm font-bold text-gray-700" }, "固定已生成的图片"),
                                     _createElementVNode("span", { class: "mt-0.5 block text-[11px] leading-snug text-gray-400" }, "开启后，切换画师串 / 生图风格时已生成的旧图保持不变；reroll 仍可单独重新生成")
                                   ], -1 /* CACHED */)),
-                                  _createElementVNode("span", _hoisted_840, _toDisplayString(settings.freezeGeneratedImages ? '已开启' : '已关闭'), 1 /* TEXT */)
-                                ], 8 /* PROPS */, _hoisted_839)
+                                  _createElementVNode("span", _hoisted_843, _toDisplayString(settings.freezeGeneratedImages ? '已开启' : '已关闭'), 1 /* TEXT */)
+                                ], 8 /* PROPS */, _hoisted_842)
                               ]),
                               _createCommentVNode(" Image Size "),
                               (imageApi.current.protocol !== 'openai')
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_841, [
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_844, [
                                     _cache[310] || (_cache[310] = _createElementVNode("label", { class: "settings-label" }, "生图比例", -1 /* CACHED */)),
                                     _createVNode(_component_custom_select, {
                                       modelValue: settings.imageSize,
@@ -16466,7 +16510,7 @@ return function render(_ctx, _cache) {
                                   ]))
                                 : _createCommentVNode("v-if", true),
                               _createCommentVNode(" Image Count "),
-                              _createElementVNode("div", _hoisted_842, [
+                              _createElementVNode("div", _hoisted_845, [
                                 _cache[311] || (_cache[311] = _createElementVNode("label", { class: "settings-label" }, "期望生图数量", -1 /* CACHED */)),
                                 _createVNode(_component_custom_select, {
                                   modelValue: settings.imageGenCount,
@@ -16478,13 +16522,13 @@ return function render(_ctx, _cache) {
                               ]),
                               _createCommentVNode(" 高级生图参数（rphub 2.8.65） "),
                               (imageApi.current.protocol !== 'openai')
-                                ? (_openBlock(), _createElementBlock("details", _hoisted_843, [
+                                ? (_openBlock(), _createElementBlock("details", _hoisted_846, [
                                     _cache[317] || (_cache[317] = _createElementVNode("summary", { class: "cursor-pointer select-none text-xs font-bold text-gray-600 dark:text-gray-300" }, [
                                       _createTextVNode(" 高级生图参数 "),
                                       _createElementVNode("span", { class: "ml-1 font-normal text-gray-400" }, "采样器 / 步数 / 引导强度 / 噪声调度")
                                     ], -1 /* CACHED */)),
-                                    _createElementVNode("div", _hoisted_844, [
-                                      _createElementVNode("div", _hoisted_845, [
+                                    _createElementVNode("div", _hoisted_847, [
+                                      _createElementVNode("div", _hoisted_848, [
                                         _cache[312] || (_cache[312] = _createElementVNode("label", { class: "settings-label" }, "采样器", -1 /* CACHED */)),
                                         _createVNode(_component_custom_select, {
                                           "model-value": imageGenParams.sampler,
@@ -16494,7 +16538,7 @@ return function render(_ctx, _cache) {
                                           "onUpdate:modelValue": value => setImageGenParam('sampler', value)
                                         }, null, 8 /* PROPS */, ["model-value", "options", "onUpdate:modelValue"])
                                       ]),
-                                      _createElementVNode("div", _hoisted_846, [
+                                      _createElementVNode("div", _hoisted_849, [
                                         _cache[313] || (_cache[313] = _createElementVNode("label", { class: "settings-label" }, "噪声调度", -1 /* CACHED */)),
                                         _createVNode(_component_custom_select, {
                                           "model-value": imageGenParams.noise_schedule,
@@ -16504,7 +16548,7 @@ return function render(_ctx, _cache) {
                                           "onUpdate:modelValue": value => setImageGenParam('noise_schedule', value)
                                         }, null, 8 /* PROPS */, ["model-value", "options", "onUpdate:modelValue"])
                                       ]),
-                                      _createElementVNode("div", _hoisted_847, [
+                                      _createElementVNode("div", _hoisted_850, [
                                         _cache[314] || (_cache[314] = _createElementVNode("label", {
                                           for: "image-steps",
                                           class: "settings-label"
@@ -16518,9 +16562,9 @@ return function render(_ctx, _cache) {
                                           value: imageGenParams.steps,
                                           class: "settings-control",
                                           onChange: event => setImageGenParam('steps', event.target.value, event.target)
-                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_848)
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_851)
                                       ]),
-                                      _createElementVNode("div", _hoisted_849, [
+                                      _createElementVNode("div", _hoisted_852, [
                                         _cache[315] || (_cache[315] = _createElementVNode("label", { class: "settings-label" }, "提示词引导强度（1 - 20）", -1 /* CACHED */)),
                                         _createElementVNode("input", {
                                           type: "number",
@@ -16530,9 +16574,9 @@ return function render(_ctx, _cache) {
                                           value: imageGenParams.scale,
                                           class: "settings-control",
                                           onChange: event => setImageGenParam('scale', event.target.value)
-                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_850)
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_853)
                                       ]),
-                                      _createElementVNode("div", _hoisted_851, [
+                                      _createElementVNode("div", _hoisted_854, [
                                         _cache[316] || (_cache[316] = _createElementVNode("label", { class: "settings-label" }, "引导重缩放（0 - 1）", -1 /* CACHED */)),
                                         _createElementVNode("input", {
                                           type: "number",
@@ -16542,14 +16586,14 @@ return function render(_ctx, _cache) {
                                           value: imageGenParams.cfg,
                                           class: "settings-control",
                                           onChange: event => setImageGenParam('cfg', event.target.value)
-                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_852)
+                                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_855)
                                       ]),
-                                      _createElementVNode("div", _hoisted_853, [
+                                      _createElementVNode("div", _hoisted_856, [
                                         _createElementVNode("button", {
                                           type: "button",
                                           class: "settings-control text-center text-xs font-bold text-gray-600 hover:text-primary-600 dark:text-gray-300",
                                           onClick: $event => (resetImageGenParams())
-                                        }, "恢复默认", 8 /* PROPS */, _hoisted_854)
+                                        }, "恢复默认", 8 /* PROPS */, _hoisted_857)
                                       ])
                                     ]),
                                     _cache[318] || (_cache[318] = _createElementVNode("p", { class: "mt-2 text-[11px] leading-relaxed text-gray-400" }, " 默认 28 步，更高步数需确认。已固定的旧图保持不变。 ", -1 /* CACHED */))
@@ -16563,57 +16607,57 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true),
                 _createCommentVNode(" Advanced Settings "),
                 (settingsSection==='reading')
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_855, [
-                      _createElementVNode("div", _hoisted_856, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_858, [
+                      _createElementVNode("div", _hoisted_859, [
                         _createCommentVNode(" Settings Toggles Grid "),
-                        _createElementVNode("div", _hoisted_857, [
-                          _createElementVNode("label", _hoisted_858, [
+                        _createElementVNode("div", _hoisted_860, [
+                          _createElementVNode("label", _hoisted_861, [
                             _cache[320] || (_cache[320] = _createElementVNode("span", { class: "text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors" }, "使用封面背景", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_859, [
+                            _createElementVNode("div", _hoisted_862, [
                               _withDirectives(_createElementVNode("input", {
                                 type: "checkbox",
                                 "onUpdate:modelValue": $event => ((settings.useCharacterBackground) = $event),
                                 class: "settings-toggle-input sr-only"
-                              }, null, 8 /* PROPS */, _hoisted_860), [
+                              }, null, 8 /* PROPS */, _hoisted_863), [
                                 [_vModelCheckbox, settings.useCharacterBackground]
                               ]),
                               _cache[319] || (_cache[319] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                             ])
                           ]),
-                          _createElementVNode("label", _hoisted_861, [
+                          _createElementVNode("label", _hoisted_864, [
                             _cache[322] || (_cache[322] = _createElementVNode("span", { class: "text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors" }, "沉浸模式", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_862, [
+                            _createElementVNode("div", _hoisted_865, [
                               _withDirectives(_createElementVNode("input", {
                                 type: "checkbox",
                                 "onUpdate:modelValue": $event => ((settings.immersiveMode) = $event),
                                 class: "settings-toggle-input sr-only"
-                              }, null, 8 /* PROPS */, _hoisted_863), [
+                              }, null, 8 /* PROPS */, _hoisted_866), [
                                 [_vModelCheckbox, settings.immersiveMode]
                               ]),
                               _cache[321] || (_cache[321] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                             ])
                           ]),
-                          _createElementVNode("label", _hoisted_864, [
+                          _createElementVNode("label", _hoisted_867, [
                             _cache[324] || (_cache[324] = _createElementVNode("span", { class: "text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors" }, "显示最新用量", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_865, [
+                            _createElementVNode("div", _hoisted_868, [
                               _withDirectives(_createElementVNode("input", {
                                 type: "checkbox",
                                 "onUpdate:modelValue": $event => ((settings.showLatestUsageBar) = $event),
                                 class: "settings-toggle-input sr-only"
-                              }, null, 8 /* PROPS */, _hoisted_866), [
+                              }, null, 8 /* PROPS */, _hoisted_869), [
                                 [_vModelCheckbox, settings.showLatestUsageBar]
                               ]),
                               _cache[323] || (_cache[323] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
                             ])
                           ]),
-                          _createElementVNode("label", _hoisted_867, [
+                          _createElementVNode("label", _hoisted_870, [
                             _cache[326] || (_cache[326] = _createElementVNode("span", { class: "text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors" }, "文风过滤", -1 /* CACHED */)),
-                            _createElementVNode("div", _hoisted_868, [
+                            _createElementVNode("div", _hoisted_871, [
                               _withDirectives(_createElementVNode("input", {
                                 type: "checkbox",
                                 "onUpdate:modelValue": $event => ((settings.styleFilterEnabled) = $event),
                                 class: "settings-toggle-input sr-only"
-                              }, null, 8 /* PROPS */, _hoisted_869), [
+                              }, null, 8 /* PROPS */, _hoisted_872), [
                                 [_vModelCheckbox, settings.styleFilterEnabled]
                               ]),
                               _cache[325] || (_cache[325] = _createElementVNode("div", { class: "settings-toggle" }, null, -1 /* CACHED */))
@@ -16621,7 +16665,7 @@ return function render(_ctx, _cache) {
                           ])
                         ]),
                         _createCommentVNode(" Chat Rendering & Display Parameters "),
-                        _createElementVNode("div", _hoisted_870, [
+                        _createElementVNode("div", _hoisted_873, [
                           _cache[336] || (_cache[336] = _createElementVNode("h4", { class: "settings-subheading flex items-center mb-3" }, [
                             _createElementVNode("svg", {
                               class: "w-4 h-4 mr-2 text-gray-400",
@@ -16638,8 +16682,8 @@ return function render(_ctx, _cache) {
                             ]),
                             _createTextVNode(" 显示与聊天渲染 ")
                           ], -1 /* CACHED */)),
-                          _createElementVNode("div", _hoisted_871, [
-                            _createElementVNode("div", _hoisted_872, [
+                          _createElementVNode("div", _hoisted_874, [
+                            _createElementVNode("div", _hoisted_875, [
                               _cache[327] || (_cache[327] = _createElementVNode("label", { class: "settings-label" }, "对话字体大小", -1 /* CACHED */)),
                               _createVNode(_component_custom_select, {
                                 modelValue: settings.fontSize,
@@ -16649,10 +16693,10 @@ return function render(_ctx, _cache) {
                                 "menu-class": "text-sm"
                               }, null, 8 /* PROPS */, ["modelValue", "onUpdate:modelValue", "options"])
                             ]),
-                            _createElementVNode("div", _hoisted_873, [
-                              _createElementVNode("div", _hoisted_874, [
+                            _createElementVNode("div", _hoisted_876, [
+                              _createElementVNode("div", _hoisted_877, [
                                 _cache[330] || (_cache[330] = _createElementVNode("label", { class: "settings-label !mb-0" }, "聊天渲染上限", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_875, _toDisplayString(settings.chatRenderMessageLimit) + " 条", 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_878, _toDisplayString(settings.chatRenderMessageLimit) + " 条", 1 /* TEXT */),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (toggleSettingsLock('renderLimitLocked')),
@@ -16663,7 +16707,7 @@ return function render(_ctx, _cache) {
                                   "aria-label": "锁定聊天渲染上限"
                                 }, [
                                   (settings.renderLimitLocked)
-                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_877, [...(_cache[328] || (_cache[328] = [
+                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_880, [...(_cache[328] || (_cache[328] = [
                                         _createElementVNode("rect", {
                                           x: "4",
                                           y: "11",
@@ -16673,7 +16717,7 @@ return function render(_ctx, _cache) {
                                         }, null, -1 /* CACHED */),
                                         _createElementVNode("path", { d: "M8 11V7a4 4 0 018 0v4" }, null, -1 /* CACHED */)
                                       ]))]))
-                                    : (_openBlock(), _createElementBlock("svg", _hoisted_878, [...(_cache[329] || (_cache[329] = [
+                                    : (_openBlock(), _createElementBlock("svg", _hoisted_881, [...(_cache[329] || (_cache[329] = [
                                         _createElementVNode("rect", {
                                           x: "4",
                                           y: "11",
@@ -16683,7 +16727,7 @@ return function render(_ctx, _cache) {
                                         }, null, -1 /* CACHED */),
                                         _createElementVNode("path", { d: "M8 11V7a4 4 0 017.5-2" }, null, -1 /* CACHED */)
                                       ]))]))
-                                ], 10 /* CLASS, PROPS */, _hoisted_876)
+                                ], 10 /* CLASS, PROPS */, _hoisted_879)
                               ]),
                               _withDirectives(_createElementVNode("input", {
                                 "onUpdate:modelValue": $event => ((settings.chatRenderMessageLimit) = $event),
@@ -16694,7 +16738,7 @@ return function render(_ctx, _cache) {
                                 disabled: settings.renderLimitLocked,
                                 class: _normalizeClass(['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
                                                 settings.renderLimitLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'])
-                              }, null, 10 /* CLASS, PROPS */, _hoisted_879), [
+                              }, null, 10 /* CLASS, PROPS */, _hoisted_882), [
                                 [
                                   _vModelText,
                                   settings.chatRenderMessageLimit,
@@ -16704,10 +16748,10 @@ return function render(_ctx, _cache) {
                               ]),
                               _cache[331] || (_cache[331] = _createElementVNode("p", { class: "mt-2 text-[11px] leading-relaxed text-gray-400" }, "最多保留多少条聊天消息在当前页面；只影响显示，完整聊天历史仍保存在本地。", -1 /* CACHED */))
                             ]),
-                            _createElementVNode("div", _hoisted_880, [
-                              _createElementVNode("div", _hoisted_881, [
+                            _createElementVNode("div", _hoisted_883, [
+                              _createElementVNode("div", _hoisted_884, [
                                 _cache[334] || (_cache[334] = _createElementVNode("label", { class: "settings-label !mb-0" }, "UI 模板保留楼数", -1 /* CACHED */)),
-                                _createElementVNode("span", _hoisted_882, _toDisplayString(settings.uiTemplateKeepFloors) + " 楼", 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_885, _toDisplayString(settings.uiTemplateKeepFloors) + " 楼", 1 /* TEXT */),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (toggleSettingsLock('uiFloorsLocked')),
@@ -16718,7 +16762,7 @@ return function render(_ctx, _cache) {
                                   "aria-label": "锁定 UI 模板保留楼数"
                                 }, [
                                   (settings.uiFloorsLocked)
-                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_884, [...(_cache[332] || (_cache[332] = [
+                                    ? (_openBlock(), _createElementBlock("svg", _hoisted_887, [...(_cache[332] || (_cache[332] = [
                                         _createElementVNode("rect", {
                                           x: "4",
                                           y: "11",
@@ -16728,7 +16772,7 @@ return function render(_ctx, _cache) {
                                         }, null, -1 /* CACHED */),
                                         _createElementVNode("path", { d: "M8 11V7a4 4 0 018 0v4" }, null, -1 /* CACHED */)
                                       ]))]))
-                                    : (_openBlock(), _createElementBlock("svg", _hoisted_885, [...(_cache[333] || (_cache[333] = [
+                                    : (_openBlock(), _createElementBlock("svg", _hoisted_888, [...(_cache[333] || (_cache[333] = [
                                         _createElementVNode("rect", {
                                           x: "4",
                                           y: "11",
@@ -16738,7 +16782,7 @@ return function render(_ctx, _cache) {
                                         }, null, -1 /* CACHED */),
                                         _createElementVNode("path", { d: "M8 11V7a4 4 0 017.5-2" }, null, -1 /* CACHED */)
                                       ]))]))
-                                ], 10 /* CLASS, PROPS */, _hoisted_883)
+                                ], 10 /* CLASS, PROPS */, _hoisted_886)
                               ]),
                               _withDirectives(_createElementVNode("input", {
                                 "onUpdate:modelValue": $event => ((settings.uiTemplateKeepFloors) = $event),
@@ -16749,7 +16793,7 @@ return function render(_ctx, _cache) {
                                 disabled: settings.uiFloorsLocked,
                                 class: _normalizeClass(['compact-range w-full h-1.5 bg-primary-100 rounded-lg appearance-none accent-primary-500',
                                                 settings.uiFloorsLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'])
-                              }, null, 10 /* CLASS, PROPS */, _hoisted_886), [
+                              }, null, 10 /* CLASS, PROPS */, _hoisted_889), [
                                 [
                                   _vModelText,
                                   settings.uiTemplateKeepFloors,
@@ -16765,7 +16809,7 @@ return function render(_ctx, _cache) {
                     ]))
                   : _createCommentVNode("v-if", true),
                 _createCommentVNode(" Runtime Environment (read-only) "),
-                _createElementVNode("details", _hoisted_887, [
+                _createElementVNode("details", _hoisted_890, [
                   _cache[345] || (_cache[345] = _createElementVNode("summary", { class: "settings-card__header cursor-pointer" }, [
                     _createElementVNode("span", { class: "font-semibold" }, [
                       _createElementVNode("svg", {
@@ -16779,64 +16823,64 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" 运行环境 ")
                     ])
                   ], -1 /* CACHED */)),
-                  _createElementVNode("div", _hoisted_888, [
+                  _createElementVNode("div", _hoisted_891, [
                     _createElementVNode("button", {
                       type: "button",
                       class: "settings-action",
                       onClick: $event => (refreshRuntimeEnv())
-                    }, "重新读取", 8 /* PROPS */, _hoisted_889)
+                    }, "重新读取", 8 /* PROPS */, _hoisted_892)
                   ]),
-                  _createElementVNode("div", _hoisted_890, [
+                  _createElementVNode("div", _hoisted_893, [
                     runtimeEnv
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                          _createElementVNode("div", _hoisted_891, [
-                            _createElementVNode("div", _hoisted_892, [
+                          _createElementVNode("div", _hoisted_894, [
+                            _createElementVNode("div", _hoisted_895, [
                               _cache[337] || (_cache[337] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "WebView 内核", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_893, _toDisplayString(runtimeEnv.chrome), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_896, _toDisplayString(runtimeEnv.chrome), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_894, [
+                            _createElementVNode("div", _hoisted_897, [
                               _cache[338] || (_cache[338] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "判定", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_895, _toDisplayString(runtimeEnv.engineVerdict), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_898, _toDisplayString(runtimeEnv.engineVerdict), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_896, [
+                            _createElementVNode("div", _hoisted_899, [
                               _cache[339] || (_cache[339] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "设备内存", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_897, _toDisplayString(runtimeEnv.deviceRam), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_900, _toDisplayString(runtimeEnv.deviceRam), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_898, [
+                            _createElementVNode("div", _hoisted_901, [
                               _cache[340] || (_cache[340] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "JS 堆上限", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_899, _toDisplayString(runtimeEnv.heapLimit), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_902, _toDisplayString(runtimeEnv.heapLimit), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_900, [
+                            _createElementVNode("div", _hoisted_903, [
                               _cache[341] || (_cache[341] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "JS 堆已用", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_901, _toDisplayString(runtimeEnv.heapUsed) + "（" + _toDisplayString(runtimeEnv.heapRatio) + "）", 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_904, _toDisplayString(runtimeEnv.heapUsed) + "（" + _toDisplayString(runtimeEnv.heapRatio) + "）", 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_902, [
+                            _createElementVNode("div", _hoisted_905, [
                               _cache[342] || (_cache[342] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "聊天渲染", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_903, _toDisplayString(runtimeEnv.renderWindow), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_906, _toDisplayString(runtimeEnv.renderWindow), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_904, [
+                            _createElementVNode("div", _hoisted_907, [
                               _cache[343] || (_cache[343] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "角色列表", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_905, _toDisplayString(runtimeEnv.charPage), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_908, _toDisplayString(runtimeEnv.charPage), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_906, [
+                            _createElementVNode("div", _hoisted_909, [
                               _cache[344] || (_cache[344] = _createElementVNode("span", { class: "w-28 flex-none text-gray-500" }, "UA 原文", -1 /* CACHED */)),
-                              _createElementVNode("span", _hoisted_907, _toDisplayString(runtimeEnv.ua), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_910, _toDisplayString(runtimeEnv.ua), 1 /* TEXT */)
                             ])
                           ]),
                           _createElementVNode("button", {
                             type: "button",
                             class: "settings-action",
                             onClick: $event => (copyRuntimeEnv())
-                          }, "复制诊断信息", 8 /* PROPS */, _hoisted_908)
+                          }, "复制诊断信息", 8 /* PROPS */, _hoisted_911)
                         ], 64 /* STABLE_FRAGMENT */))
-                      : (_openBlock(), _createElementBlock("p", _hoisted_909, "尚未读取。"))
+                      : (_openBlock(), _createElementBlock("p", _hoisted_912, "尚未读取。"))
                   ])
                 ])
               ])
-            ], 8 /* PROPS */, _hoisted_721))
+            ], 8 /* PROPS */, _hoisted_724))
           : _createCommentVNode("v-if", true),
         (currentView === 'cache')
-          ? (_openBlock(), _createElementBlock("div", _hoisted_910, [
+          ? (_openBlock(), _createElementBlock("div", _hoisted_913, [
               _createVNode(_component_settings_page_header, {
                 title: "向量缓存",
                 onMenu: shellGoBack
@@ -16880,7 +16924,7 @@ return function render(_ctx, _cache) {
             onClick: scrollWorldInfoTop
           }, [
             _createVNode(_component_shell_icon, { name: "ChevronUp" })
-          ], 8 /* PROPS */, _hoisted_911))
+          ], 8 /* PROPS */, _hoisted_914))
         : _createCommentVNode("v-if", true),
       _createCommentVNode(" Modals "),
       _createVNode(_component_memory_backfill_modal, {
@@ -17064,8 +17108,8 @@ return function render(_ctx, _cache) {
       _createVNode(_component_retry_confirm_modal, { state: globalConfirmModal }, null, 8 /* PROPS */, ["state"]),
       _createCommentVNode(" 记忆工具：只读审计浮层。与记忆系统主流程完全隔离，不写任何记忆数据。 "),
       showMemTools
-        ? (_openBlock(), _createElementBlock("div", _hoisted_912, [
-            _createElementVNode("div", _hoisted_913, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_915, [
+            _createElementVNode("div", _hoisted_916, [
               _createElementVNode("button", {
                 type: "button",
                 onClick: closeMemTools,
@@ -17085,52 +17129,52 @@ return function render(_ctx, _cache) {
                     d: "M15 19l-7-7 7-7"
                   })
                 ], -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_914),
+              ]))], 8 /* PROPS */, _hoisted_917),
               _cache[347] || (_cache[347] = _createElementVNode("h2", { class: "text-base font-bold text-gray-800 flex-1 min-w-0 truncate" }, "记忆工具", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: runMemToolsAudit,
                 disabled: memToolsAudit.loading,
                 class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-              }, _toDisplayString(memToolsAudit.loading ? '检查中' : '重新检查'), 9 /* TEXT, PROPS */, _hoisted_915)
+              }, _toDisplayString(memToolsAudit.loading ? '检查中' : '重新检查'), 9 /* TEXT, PROPS */, _hoisted_918)
             ]),
-            _createElementVNode("div", _hoisted_916, [
-              _createElementVNode("div", _hoisted_917, [
+            _createElementVNode("div", _hoisted_919, [
+              _createElementVNode("div", _hoisted_920, [
                 _cache[354] || (_cache[354] = _createElementVNode("div", { class: "text-xs text-gray-500 mb-1" }, "当前作用域", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_918, _toDisplayString(memToolsScopeId || '未选择角色'), 1 /* TEXT */),
-                _createElementVNode("div", _hoisted_919, [
+                _createElementVNode("div", _hoisted_921, _toDisplayString(memToolsScopeId || '未选择角色'), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_922, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: runMemToolsDiag,
                     disabled: memToolsDiag.running,
                     class: "px-2.5 py-1 rounded-lg text-xs font-bold border border-primary-200 text-primary-700 bg-primary-50 active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsDiag.running ? '读取中' : '存储诊断'), 9 /* TEXT, PROPS */, _hoisted_920),
+                  }, _toDisplayString(memToolsDiag.running ? '读取中' : '存储诊断'), 9 /* TEXT, PROPS */, _hoisted_923),
                   (memToolsDiag.text)
-                    ? (_openBlock(), _createElementBlock("span", _hoisted_921, _toDisplayString(memToolsDiag.text), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("span", _hoisted_924, _toDisplayString(memToolsDiag.text), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
                   (memToolsDiag.error)
-                    ? (_openBlock(), _createElementBlock("span", _hoisted_922, _toDisplayString(memToolsDiag.error), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("span", _hoisted_925, _toDisplayString(memToolsDiag.error), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true)
                 ]),
-                _createElementVNode("div", _hoisted_923, [
-                  _createElementVNode("div", _hoisted_924, [
+                _createElementVNode("div", _hoisted_926, [
+                  _createElementVNode("div", _hoisted_927, [
                     _cache[348] || (_cache[348] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "记忆条数", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_925, _toDisplayString(memToolsAudit.memoryCount), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_928, _toDisplayString(memToolsAudit.memoryCount), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_926, [
+                  _createElementVNode("div", _hoisted_929, [
                     _cache[349] || (_cache[349] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "库内条数", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_927, _toDisplayString(memToolsAudit.storedCount < 0 ? '读不到' : memToolsAudit.storedCount), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_930, _toDisplayString(memToolsAudit.storedCount < 0 ? '读不到' : memToolsAudit.storedCount), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_928, [
+                  _createElementVNode("div", _hoisted_931, [
                     _cache[350] || (_cache[350] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "已覆盖轮次", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_929, _toDisplayString(memToolsAudit.coveredTurns), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_932, _toDisplayString(memToolsAudit.coveredTurns), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_930, [
+                  _createElementVNode("div", _hoisted_933, [
                     _cache[351] || (_cache[351] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "应覆盖到", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_931, _toDisplayString(memToolsAudit.auditableMaxTurn), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_934, _toDisplayString(memToolsAudit.auditableMaxTurn), 1 /* TEXT */)
                   ])
                 ]),
-                _createElementVNode("div", _hoisted_932, [
+                _createElementVNode("div", _hoisted_935, [
                   _cache[352] || (_cache[352] = _createElementVNode("label", { class: "text-xs text-gray-500 flex-shrink-0" }, "字数下限", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("input", {
                     "onUpdate:modelValue": $event => ((memToolsConfig.minChars) = $event),
@@ -17139,7 +17183,7 @@ return function render(_ctx, _cache) {
                     step: "10",
                     onChange: $event => {saveMemToolsConfig(); runMemToolsAudit()},
                     class: "w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-700"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_933), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_936), [
                     [
                       _vModelText,
                       memToolsConfig.minChars,
@@ -17155,7 +17199,7 @@ return function render(_ctx, _cache) {
                     step: "1",
                     onChange: $event => {saveMemToolsConfig(); runMemToolsAudit()},
                     class: "w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-700"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_934), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_937), [
                     [
                       _vModelText,
                       memToolsConfig.keepFloors,
@@ -17168,32 +17212,32 @@ return function render(_ctx, _cache) {
                   type: "button",
                   onClick: $event => (memToolsExportConversation()),
                   class: "mt-3 w-full py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                }, " 导出当前记忆 TXT ", 8 /* PROPS */, _hoisted_935),
+                }, " 导出当前记忆 TXT ", 8 /* PROPS */, _hoisted_938),
                 (memToolsAudit.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_936, _toDisplayString(memToolsAudit.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_939, _toDisplayString(memToolsAudit.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_937, [
-                _createElementVNode("div", _hoisted_938, [
+              _createElementVNode("div", _hoisted_940, [
+                _createElementVNode("div", _hoisted_941, [
                   _cache[355] || (_cache[355] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "存档与回滚", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (saveMemToolsSnapshot()),
                     disabled: memToolsVersions.saving,
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsVersions.saving ? '存档中' : '立即存档'), 9 /* TEXT, PROPS */, _hoisted_939)
+                  }, _toDisplayString(memToolsVersions.saving ? '存档中' : '立即存档'), 9 /* TEXT, PROPS */, _hoisted_942)
                 ]),
                 _cache[356] || (_cache[356] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 存档只写自己的存储键，不动记忆本身。回滚前会自动先存一份当前状态。 ", -1 /* CACHED */)),
                 (memToolsVersions.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_940, _toDisplayString(memToolsVersions.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_943, _toDisplayString(memToolsVersions.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsVersions.loading)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_941, "读取中"))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_944, "读取中"))
                   : (!memToolsVersions.list.length)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_942, "还没有存档"))
-                    : (_openBlock(), _createElementBlock("div", _hoisted_943, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_945, "还没有存档"))
+                    : (_openBlock(), _createElementBlock("div", _hoisted_946, [
                         memToolsVersionsDrifted
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_944, " 当前记忆和「当前」那一版已经不一样了，再存档会从它分出一条新支。 "))
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_947, " 当前记忆和「当前」那一版已经不一样了，再存档会从它分出一条新支。 "))
                           : _createCommentVNode("v-if", true),
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsVersions.list, (version) => {
                           return (_openBlock(), _createElementBlock("div", {
@@ -17201,17 +17245,17 @@ return function render(_ctx, _cache) {
                             class: _normalizeClass(["flex items-center gap-2 flex-wrap rounded-xl bg-gray-50 px-3 py-2", String(version.versionId || version.id) === String(memToolsVersionsCurrentId) ? 'ring-1 ring-primary-300' : '']),
                             style: _normalizeStyle({ marginLeft: Math.min(memToolsNodeDepth(version), 5) * 12 + 'px' })
                           }, [
-                            _createElementVNode("div", _hoisted_945, [
-                              _createElementVNode("div", _hoisted_946, [
+                            _createElementVNode("div", _hoisted_948, [
+                              _createElementVNode("div", _hoisted_949, [
                                 (String(version.versionId || version.id) === String(memToolsVersionsCurrentId))
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_947, "当前"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_950, "当前"))
                                   : _createCommentVNode("v-if", true),
                                 _createTextVNode(" " + _toDisplayString(memToolsTimeText(version.createdAt)) + " · " + _toDisplayString(version.count) + " 条 · " + _toDisplayString(version.chars) + " 字 ", 1 /* TEXT */)
                               ]),
-                              _createElementVNode("div", _hoisted_948, [
+                              _createElementVNode("div", _hoisted_951, [
                                 _createTextVNode(_toDisplayString(version.label), 1 /* TEXT */),
                                 (version.rebasedFromVersionId)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_949, " · 已重挂"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_952, " · 已重挂"))
                                   : _createCommentVNode("v-if", true)
                               ])
                             ]),
@@ -17220,174 +17264,174 @@ return function render(_ctx, _cache) {
                               onClick: $event => (restoreMemToolsSnapshot(version.id)),
                               disabled: !!memToolsVersions.restoring,
                               class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                            }, _toDisplayString(memToolsVersions.restoring === version.id ? '回滚中' : '回滚'), 9 /* TEXT, PROPS */, _hoisted_950),
+                            }, _toDisplayString(memToolsVersions.restoring === version.id ? '回滚中' : '回滚'), 9 /* TEXT, PROPS */, _hoisted_953),
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (deleteMemToolsSnapshot(version.id)),
                               disabled: !!memToolsVersions.restoring,
                               class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                            }, " 删 ", 8 /* PROPS */, _hoisted_951),
+                            }, " 删 ", 8 /* PROPS */, _hoisted_954),
                             _createElementVNode("button", {
                               type: "button",
                               onClick: $event => (toggleMemToolsVersionOpen(version.versionId || version.id)),
                               class: "px-2 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-500 border border-gray-200 active:scale-95",
                               title: memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '更多操作'
-                            }, _toDisplayString(memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '…'), 9 /* TEXT, PROPS */, _hoisted_952),
+                            }, _toDisplayString(memToolsVersionOpenId === String(version.versionId || version.id) ? '收起' : '…'), 9 /* TEXT, PROPS */, _hoisted_955),
                             (memToolsVersionOpenId === String(version.versionId || version.id))
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_953, [
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_956, [
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (copyMemToolsVersion(version)),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                  }, " 复制正文 ", 8 /* PROPS */, _hoisted_954),
+                                  }, " 复制正文 ", 8 /* PROPS */, _hoisted_957),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (openMemToolsVersionView(version.versionId || version.id, 'self')),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                  }, " 看这一版 ", 8 /* PROPS */, _hoisted_955),
+                                  }, " 看这一版 ", 8 /* PROPS */, _hoisted_958),
                                   (version.parentVersionId)
                                     ? (_openBlock(), _createElementBlock("button", {
                                         key: 0,
                                         type: "button",
                                         onClick: $event => (openMemToolsVersionView(version.versionId || version.id, 'parent')),
                                         class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                      }, " 看上一版 ", 8 /* PROPS */, _hoisted_956))
+                                      }, " 看上一版 ", 8 /* PROPS */, _hoisted_959))
                                     : _createCommentVNode("v-if", true),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (memToolsExportVersion(version)),
                                     class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                  }, " 导出 TXT ", 8 /* PROPS */, _hoisted_957)
+                                  }, " 导出 TXT ", 8 /* PROPS */, _hoisted_960)
                                 ]))
                               : _createCommentVNode("v-if", true)
                           ], 6 /* CLASS, STYLE */))
                         }), 128 /* KEYED_FRAGMENT */))
                       ])),
                 (memToolsVersionView.open)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_958, [
-                      _createElementVNode("div", _hoisted_959, [
-                        _createElementVNode("div", _hoisted_960, _toDisplayString(memToolsVersionView.title), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_961, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_961, [
+                      _createElementVNode("div", _hoisted_962, [
+                        _createElementVNode("div", _hoisted_963, _toDisplayString(memToolsVersionView.title), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_964, [
                           _createElementVNode("button", {
                             type: "button",
                             onClick: $event => (copyMemToolsVersionView()),
                             class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                          }, " 复制 ", 8 /* PROPS */, _hoisted_962),
+                          }, " 复制 ", 8 /* PROPS */, _hoisted_965),
                           _createElementVNode("button", {
                             type: "button",
                             onClick: $event => (closeMemToolsVersionView()),
                             class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                          }, " 关闭 ", 8 /* PROPS */, _hoisted_963)
+                          }, " 关闭 ", 8 /* PROPS */, _hoisted_966)
                         ])
                       ]),
-                      _createElementVNode("pre", _hoisted_964, _toDisplayString(memToolsVersionView.text), 1 /* TEXT */)
+                      _createElementVNode("pre", _hoisted_967, _toDisplayString(memToolsVersionView.text), 1 /* TEXT */)
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_965, [
-                _createElementVNode("div", _hoisted_966, [
+              _createElementVNode("div", _hoisted_968, [
+                _createElementVNode("div", _hoisted_969, [
                   _cache[357] || (_cache[357] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "逐条查看与修改", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsEdit.listOpen = !memToolsEdit.listOpen),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsEdit.listOpen ? '收起列表' : '展开列表'), 9 /* TEXT, PROPS */, _hoisted_967)
+                  }, _toDisplayString(memToolsEdit.listOpen ? '收起列表' : '展开列表'), 9 /* TEXT, PROPS */, _hoisted_970)
                 ]),
                 _cache[359] || (_cache[359] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 可以改单条正文、用原文重新总结这一条、或撤销回到上一版存档。改完增强模式下会自动重建这一条的向量。 ", -1 /* CACHED */)),
                 (memToolsEdit.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_968, _toDisplayString(memToolsEdit.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_971, _toDisplayString(memToolsEdit.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsEdit.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_969, _toDisplayString(memToolsEdit.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_972, _toDisplayString(memToolsEdit.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (!memToolsEdit.listOpen)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_970, "共 " + _toDisplayString(memToolsRows.length) + " 条", 1 /* TEXT */))
-                  : (_openBlock(), _createElementBlock("div", _hoisted_971, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_973, "共 " + _toDisplayString(memToolsRows.length) + " 条", 1 /* TEXT */))
+                  : (_openBlock(), _createElementBlock("div", _hoisted_974, [
                       (!memToolsRows.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_972, "这个角色还没有记忆"))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_975, "这个角色还没有记忆"))
                         : _createCommentVNode("v-if", true),
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsRows, (row) => {
                         return (_openBlock(), _createElementBlock("div", {
                           key: row.memory.id,
                           class: "rounded-xl bg-gray-50 px-3 py-2"
                         }, [
-                          _createElementVNode("div", _hoisted_973, [
-                            _createElementVNode("div", _hoisted_974, [
-                              _createElementVNode("div", _hoisted_975, [
+                          _createElementVNode("div", _hoisted_976, [
+                            _createElementVNode("div", _hoisted_977, [
+                              _createElementVNode("div", _hoisted_978, [
                                 _createTextVNode(" 第 " + _toDisplayString(row.start), 1 /* TEXT */),
                                 (row.end !== row.start)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_976, "–" + _toDisplayString(row.end), 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_979, "–" + _toDisplayString(row.end), 1 /* TEXT */))
                                   : _createCommentVNode("v-if", true),
                                 _cache[358] || (_cache[358] = _createTextVNode(" 轮 ", -1 /* CACHED */)),
                                 (row.memory.secondaryCompressed)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_977, "已合并"))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_980, "已合并"))
                                   : _createCommentVNode("v-if", true),
-                                _createElementVNode("span", _hoisted_978, _toDisplayString(row.len) + " 字", 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_981, _toDisplayString(row.len) + " 字", 1 /* TEXT */)
                               ]),
-                              _createElementVNode("div", _hoisted_979, _toDisplayString(row.preview), 1 /* TEXT */)
+                              _createElementVNode("div", _hoisted_982, _toDisplayString(row.preview), 1 /* TEXT */)
                             ])
                           ]),
                           (memToolsEdit.id !== row.memory.id)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_980, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_983, [
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (openMemToolsMemoryEdit(row)),
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                }, "改", 8 /* PROPS */, _hoisted_981),
+                                }, "改", 8 /* PROPS */, _hoisted_984),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (retryMemToolsMemory(row)),
                                   disabled: !!memToolsEdit.running,
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                                }, _toDisplayString(memToolsEdit.running === row.memory.id ? '总结中' : '重试'), 9 /* TEXT, PROPS */, _hoisted_982),
+                                }, _toDisplayString(memToolsEdit.running === row.memory.id ? '总结中' : '重试'), 9 /* TEXT, PROPS */, _hoisted_985),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (undoMemToolsMemory(row)),
                                   class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                                }, "撤销", 8 /* PROPS */, _hoisted_983),
+                                }, "撤销", 8 /* PROPS */, _hoisted_986),
                                 _createElementVNode("button", {
                                   type: "button",
                                   onClick: $event => (toggleMemToolsPin(row)),
                                   class: _normalizeClass(["px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white border border-gray-200 active:scale-95", memToolsRangePinned(row.start, row.end) ? 'text-gray-400' : 'text-primary-600'])
-                                }, _toDisplayString(memToolsRangePinned(row.start, row.end) ? '已钉住' : '钉住'), 11 /* TEXT, CLASS, PROPS */, _hoisted_984),
+                                }, _toDisplayString(memToolsRangePinned(row.start, row.end) ? '已钉住' : '钉住'), 11 /* TEXT, CLASS, PROPS */, _hoisted_987),
                                 (memToolsEdit.running === row.memory.id)
                                   ? (_openBlock(), _createElementBlock("button", {
                                       key: 0,
                                       type: "button",
                                       onClick: $event => (abortMemToolsEdit()),
                                       class: "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                    }, "停止", 8 /* PROPS */, _hoisted_985))
+                                    }, "停止", 8 /* PROPS */, _hoisted_988))
                                   : _createCommentVNode("v-if", true)
                               ]))
-                            : (_openBlock(), _createElementBlock("div", _hoisted_986, [
+                            : (_openBlock(), _createElementBlock("div", _hoisted_989, [
                                 _withDirectives(_createElementVNode("textarea", {
                                   "onUpdate:modelValue": $event => ((memToolsEdit.text) = $event),
                                   rows: "6",
                                   class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                                }, null, 8 /* PROPS */, _hoisted_987), [
+                                }, null, 8 /* PROPS */, _hoisted_990), [
                                   [_vModelText, memToolsEdit.text]
                                 ]),
-                                _createElementVNode("div", _hoisted_988, [
+                                _createElementVNode("div", _hoisted_991, [
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (saveMemToolsMemoryEdit(row)),
                                     disabled: memToolsEdit.writing,
                                     class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-primary-600 text-white active:scale-95 disabled:opacity-50"
-                                  }, _toDisplayString(memToolsEdit.writing ? '保存中' : '保存'), 9 /* TEXT, PROPS */, _hoisted_989),
+                                  }, _toDisplayString(memToolsEdit.writing ? '保存中' : '保存'), 9 /* TEXT, PROPS */, _hoisted_992),
                                   _createElementVNode("button", {
                                     type: "button",
                                     onClick: $event => (cancelMemToolsMemoryEdit()),
                                     disabled: memToolsEdit.writing,
                                     class: "px-4 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                                  }, "取消", 8 /* PROPS */, _hoisted_990)
+                                  }, "取消", 8 /* PROPS */, _hoisted_993)
                                 ])
                               ]))
                         ]))
                       }), 128 /* KEYED_FRAGMENT */))
                     ]))
               ]),
-              _createElementVNode("div", _hoisted_991, [
-                _createElementVNode("div", _hoisted_992, [
+              _createElementVNode("div", _hoisted_994, [
+                _createElementVNode("div", _hoisted_995, [
                   _cache[360] || (_cache[360] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "自动总结与批量压缩", -1 /* CACHED */)),
                   (!memToolsAuto.running)
                     ? (_openBlock(), _createElementBlock("button", {
@@ -17396,17 +17440,17 @@ return function render(_ctx, _cache) {
                         onClick: $event => (runMemToolsAuto()),
                         disabled: !memToolsAutoPlan.groups.length,
                         class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                      }, " 开始 ", 8 /* PROPS */, _hoisted_993))
+                      }, " 开始 ", 8 /* PROPS */, _hoisted_996))
                     : (_openBlock(), _createElementBlock("button", {
                         key: 1,
                         type: "button",
                         onClick: $event => (abortMemToolsAuto()),
                         class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                      }, _toDisplayString(memToolsAuto.stopping ? '正在停止…' : '停止'), 9 /* TEXT, PROPS */, _hoisted_994))
+                      }, _toDisplayString(memToolsAuto.stopping ? '正在停止…' : '停止'), 9 /* TEXT, PROPS */, _hoisted_997))
                 ]),
                 _cache[364] || (_cache[364] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 把保留线之前的旧总结按连续性分组合并。已钉住的区间会跳过，跑完一段会自动钉住。开跑前会自动存档，停止后已保存的部分会保留。 ", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_995, [
-                  _createElementVNode("label", _hoisted_996, [
+                _createElementVNode("div", _hoisted_998, [
+                  _createElementVNode("label", _hoisted_999, [
                     _cache[361] || (_cache[361] = _createElementVNode("span", { class: "text-[11px] font-bold text-gray-500" }, "保留最近几轮", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("input", {
                       "onUpdate:modelValue": $event => ((memToolsAuto.keepTurns) = $event),
@@ -17416,7 +17460,7 @@ return function render(_ctx, _cache) {
                       onChange: $event => (saveMemToolsAuto()),
                       disabled: memToolsAuto.running,
                       class: "mt-1 w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none disabled:opacity-50"
-                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_997), [
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1000), [
                       [
                         _vModelText,
                         memToolsAuto.keepTurns,
@@ -17425,7 +17469,7 @@ return function render(_ctx, _cache) {
                       ]
                     ])
                   ]),
-                  _createElementVNode("label", _hoisted_998, [
+                  _createElementVNode("label", _hoisted_1001, [
                     _cache[362] || (_cache[362] = _createElementVNode("span", { class: "text-[11px] font-bold text-gray-500" }, "每组几条", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("input", {
                       "onUpdate:modelValue": $event => ((memToolsAuto.groupSize) = $event),
@@ -17435,7 +17479,7 @@ return function render(_ctx, _cache) {
                       onChange: $event => (saveMemToolsAuto()),
                       disabled: memToolsAuto.running,
                       class: "mt-1 w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none disabled:opacity-50"
-                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_999), [
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1002), [
                       [
                         _vModelText,
                         memToolsAuto.groupSize,
@@ -17445,59 +17489,59 @@ return function render(_ctx, _cache) {
                     ])
                   ])
                 ]),
-                _createElementVNode("div", _hoisted_1000, [
+                _createElementVNode("div", _hoisted_1003, [
                   _createTextVNode(" 当前对话共 " + _toDisplayString(memToolsAutoPlan.totalTurns) + " 轮，保留最近 " + _toDisplayString(memToolsAutoPlan.keep) + " 轮；可压缩 " + _toDisplayString(memToolsAutoPlan.eligibleCount) + " 条，其中 " + _toDisplayString(memToolsAutoPlan.pinnedCount) + " 条已被钉住，分成 ", 1 /* TEXT */),
-                  _createElementVNode("span", _hoisted_1001, _toDisplayString(memToolsAutoPlan.groups.length), 1 /* TEXT */),
+                  _createElementVNode("span", _hoisted_1004, _toDisplayString(memToolsAutoPlan.groups.length), 1 /* TEXT */),
                   _cache[363] || (_cache[363] = _createTextVNode(" 组。 ", -1 /* CACHED */))
                 ]),
                 (memToolsAuto.total)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1002, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1005, [
                       _createTextVNode(" 已完成 " + _toDisplayString(memToolsAuto.done) + "/" + _toDisplayString(memToolsAuto.total) + " 段", 1 /* TEXT */),
                       (memToolsAuto.current)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1003, " · " + _toDisplayString(memToolsAuto.current), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1006, " · " + _toDisplayString(memToolsAuto.current), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (memToolsAuto.retryLeft)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1004, " · " + _toDisplayString(memToolsAuto.retryLeft) + " 秒后重试", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1007, " · " + _toDisplayString(memToolsAuto.retryLeft) + " 秒后重试", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsPinned.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1005, _toDisplayString(memToolsPinned.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1008, _toDisplayString(memToolsPinned.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsAuto.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1006, _toDisplayString(memToolsAuto.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1009, _toDisplayString(memToolsAuto.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsAuto.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1007, _toDisplayString(memToolsAuto.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1010, _toDisplayString(memToolsAuto.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_1008, [
-                _createElementVNode("div", _hoisted_1009, [
+              _createElementVNode("div", _hoisted_1011, [
+                _createElementVNode("div", _hoisted_1012, [
                   _cache[365] || (_cache[365] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "合并记忆", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsMerge.picking ? closeMemToolsMergePick() : openMemToolsMergePick()),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsMerge.picking ? '退出选择' : '选择记忆'), 9 /* TEXT, PROPS */, _hoisted_1010)
+                  }, _toDisplayString(memToolsMerge.picking ? '退出选择' : '选择记忆'), 9 /* TEXT, PROPS */, _hoisted_1013)
                 ]),
                 _cache[366] || (_cache[366] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 勾选首尾相接的两条以上，合成一条。合并前会自动存档，结果不满意可以回滚。 ", -1 /* CACHED */)),
                 (memToolsMerge.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1011, _toDisplayString(memToolsMerge.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1014, _toDisplayString(memToolsMerge.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsMerge.picking)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1012, [
-                      _createElementVNode("div", _hoisted_1013, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1015, [
+                      _createElementVNode("div", _hoisted_1016, [
                         _createTextVNode(" 已选 " + _toDisplayString(memToolsMergePickedList.length) + " 条 ", 1 /* TEXT */),
                         (memToolsMergePickedList.length >= 2)
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_1014, "· 第 " + _toDisplayString(memToolsMergePickedList[0].start) + "–" + _toDisplayString(memToolsMergePickedList[memToolsMergePickedList.length - 1].end) + " 轮", 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_1017, "· 第 " + _toDisplayString(memToolsMergePickedList[0].start) + "–" + _toDisplayString(memToolsMergePickedList[memToolsMergePickedList.length - 1].end) + " 轮", 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
                       ]),
                       memToolsMergeGap
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1015, " 选中的记忆之间有空隙，第 " + _toDisplayString(memToolsMergeGap.from) + "–" + _toDisplayString(memToolsMergeGap.to) + " 轮没有被覆盖。请补齐或去掉一端。 ", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1018, " 选中的记忆之间有空隙，第 " + _toDisplayString(memToolsMergeGap.from) + "–" + _toDisplayString(memToolsMergeGap.to) + " 轮没有被覆盖。请补齐或去掉一端。 ", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (!memToolsMergePickable.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1016, "这个角色还没有记忆"))
-                        : (_openBlock(), _createElementBlock("div", _hoisted_1017, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1019, "这个角色还没有记忆"))
+                        : (_openBlock(), _createElementBlock("div", _hoisted_1020, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsMergePickable, (item) => {
                               return (_openBlock(), _createElementBlock("label", {
                                 key: item.memory.id,
@@ -17508,17 +17552,17 @@ return function render(_ctx, _cache) {
                                   value: item.memory.id,
                                   "onUpdate:modelValue": $event => ((memToolsMerge.selected) = $event),
                                   class: "w-4 h-4 flex-shrink-0 accent-primary-600"
-                                }, null, 8 /* PROPS */, _hoisted_1018), [
+                                }, null, 8 /* PROPS */, _hoisted_1021), [
                                   [_vModelCheckbox, memToolsMerge.selected]
                                 ]),
-                                _createElementVNode("div", _hoisted_1019, [
-                                  _createElementVNode("div", _hoisted_1020, [
+                                _createElementVNode("div", _hoisted_1022, [
+                                  _createElementVNode("div", _hoisted_1023, [
                                     _createTextVNode(_toDisplayString(item.start === item.end ? '第 ' + item.start + ' 轮' : '第 ' + item.start + '–' + item.end + ' 轮') + " ", 1 /* TEXT */),
                                     (item.memory.secondaryCompressed)
-                                      ? (_openBlock(), _createElementBlock("span", _hoisted_1021, "已合并"))
+                                      ? (_openBlock(), _createElementBlock("span", _hoisted_1024, "已合并"))
                                       : _createCommentVNode("v-if", true)
                                   ]),
-                                  _createElementVNode("div", _hoisted_1022, _toDisplayString(item.len) + " 字", 1 /* TEXT */)
+                                  _createElementVNode("div", _hoisted_1025, _toDisplayString(item.len) + " 字", 1 /* TEXT */)
                                 ])
                               ]))
                             }), 128 /* KEYED_FRAGMENT */))
@@ -17528,89 +17572,89 @@ return function render(_ctx, _cache) {
                         onClick: $event => (runMemToolsMerge()),
                         disabled: !memToolsMergeCanRun,
                         class: "mt-3 w-full py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                      }, _toDisplayString(memToolsMerge.running ? '合并中' : ('合并选中的 ' + memToolsMergePickedList.length + ' 条')), 9 /* TEXT, PROPS */, _hoisted_1023),
+                      }, _toDisplayString(memToolsMerge.running ? '合并中' : ('合并选中的 ' + memToolsMergePickedList.length + ' 条')), 9 /* TEXT, PROPS */, _hoisted_1026),
                       (memToolsMerge.running)
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 3,
                             type: "button",
                             onClick: $event => (abortMemToolsMerge()),
                             class: "mt-2 w-full py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                          }, " 取消 ", 8 /* PROPS */, _hoisted_1024))
+                          }, " 取消 ", 8 /* PROPS */, _hoisted_1027))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsMerge.previewOpen)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1025, [
-                      _createElementVNode("div", _hoisted_1026, " 合并结果 · " + _toDisplayString(memToolsMerge.preview.replace(/\s+/g, '').length) + " 字 · 可以改 ", 1 /* TEXT */),
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1028, [
+                      _createElementVNode("div", _hoisted_1029, " 合并结果 · " + _toDisplayString(memToolsMerge.preview.replace(/\s+/g, '').length) + " 字 · 可以改 ", 1 /* TEXT */),
                       _withDirectives(_createElementVNode("textarea", {
                         "onUpdate:modelValue": $event => ((memToolsMerge.preview) = $event),
                         rows: "8",
                         class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                      }, null, 8 /* PROPS */, _hoisted_1027), [
+                      }, null, 8 /* PROPS */, _hoisted_1030), [
                         [_vModelText, memToolsMerge.preview]
                       ]),
-                      _createElementVNode("div", _hoisted_1028, [
+                      _createElementVNode("div", _hoisted_1031, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (confirmMemToolsMergeWrite()),
                           disabled: memToolsMerge.writing,
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                        }, _toDisplayString(memToolsMerge.writing ? '写入中' : '确认写入'), 9 /* TEXT, PROPS */, _hoisted_1029),
+                        }, _toDisplayString(memToolsMerge.writing ? '写入中' : '确认写入'), 9 /* TEXT, PROPS */, _hoisted_1032),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (cancelMemToolsMergePreview()),
                           disabled: memToolsMerge.writing,
                           class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                        }, " 取消 ", 8 /* PROPS */, _hoisted_1030)
+                        }, " 取消 ", 8 /* PROPS */, _hoisted_1033)
                       ])
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
-              _createElementVNode("div", _hoisted_1031, [
+              _createElementVNode("div", _hoisted_1034, [
                 _cache[371] || (_cache[371] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800 mb-2" }, "提炼人物档案 / 故事纪事", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_1032, [
-                  _createElementVNode("span", _hoisted_1033, _toDisplayString(memToolsImportLabel), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_1035, [
+                  _createElementVNode("span", _hoisted_1036, _toDisplayString(memToolsImportLabel), 1 /* TEXT */),
                   (memToolsImport.name && !memToolsImport.busy)
                     ? (_openBlock(), _createElementBlock("button", {
                         key: 0,
                         type: "button",
                         onClick: $event => (clearMemToolsImport()),
                         class: "px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                      }, "清除", 8 /* PROPS */, _hoisted_1034))
+                      }, "清除", 8 /* PROPS */, _hoisted_1037))
                     : (_openBlock(), _createElementBlock("button", {
                         key: 1,
                         type: "button",
                         onClick: $event => (pickMemToolsImportFile()),
                         disabled: memToolsImport.busy,
                         class: "px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 disabled:opacity-50"
-                      }, _toDisplayString(memToolsImport.busy ? '读取中' : '选择对话文件'), 9 /* TEXT, PROPS */, _hoisted_1035)),
+                      }, _toDisplayString(memToolsImport.busy ? '读取中' : '选择对话文件'), 9 /* TEXT, PROPS */, _hoisted_1038)),
                   _createElementVNode("input", {
                     id: "rphub-memtools-import-file",
                     type: "file",
                     accept: ".jsonl,.json,.txt,.html,.htm",
                     class: "hidden",
                     onChange: $event => (readMemToolsImportFile($event))
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1036)
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1039)
                 ]),
-                _createElementVNode("div", _hoisted_1037, [
+                _createElementVNode("div", _hoisted_1040, [
                   (memToolsImport.name)
-                    ? (_openBlock(), _createElementBlock("span", _hoisted_1038, "把导入的 " + _toDisplayString(memToolsImport.turns.length) + " 轮对话原文（" + _toDisplayString(memToolsImport.chars) + " 字）发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
-                    : (_openBlock(), _createElementBlock("span", _hoisted_1039, "把 " + _toDisplayString(memToolsExtractSource.count) + " 条记忆（" + _toDisplayString(memToolsExtractSource.chars) + " 字）连同最近两轮原文一起发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("span", _hoisted_1041, "把导入的 " + _toDisplayString(memToolsImport.turns.length) + " 轮对话原文（" + _toDisplayString(memToolsImport.chars) + " 字）发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
+                    : (_openBlock(), _createElementBlock("span", _hoisted_1042, "把 " + _toDisplayString(memToolsExtractSource.count) + " 条记忆（" + _toDisplayString(memToolsExtractSource.chars) + " 字）连同最近两轮原文一起发给总结模型，拆成可编辑的条目。", 1 /* TEXT */))
                 ]),
                 _cache[372] || (_cache[372] = _createElementVNode("div", { class: "mt-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-700 leading-relaxed" }, " 生成可能要几分钟，字数越多越久。存下来不会自动进上下文，也不参与向量召回，要你自己复制到世界书或人设里。 ", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_1040, [
+                _createElementVNode("div", _hoisted_1043, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (runMemToolsExtract('character')),
                     disabled: !!memToolsExtract.running || !memToolsExtractSource.count,
                     class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsExtract.running === 'character' ? '生成中' : '生成人物档案'), 9 /* TEXT, PROPS */, _hoisted_1041),
+                  }, _toDisplayString(memToolsExtract.running === 'character' ? '生成中' : '生成人物档案'), 9 /* TEXT, PROPS */, _hoisted_1044),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (runMemToolsExtract('story')),
                     disabled: !!memToolsExtract.running || !memToolsExtractSource.count,
                     class: "flex-1 py-2 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all disabled:opacity-50"
-                  }, _toDisplayString(memToolsExtract.running === 'story' ? '生成中' : '生成故事纪事'), 9 /* TEXT, PROPS */, _hoisted_1042)
+                  }, _toDisplayString(memToolsExtract.running === 'story' ? '生成中' : '生成故事纪事'), 9 /* TEXT, PROPS */, _hoisted_1045)
                 ]),
                 (memToolsExtract.running)
                   ? (_openBlock(), _createElementBlock("button", {
@@ -17618,10 +17662,10 @@ return function render(_ctx, _cache) {
                       type: "button",
                       onClick: $event => (abortMemToolsExtract()),
                       class: "mt-2 w-full py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                    }, " 取消 ", 8 /* PROPS */, _hoisted_1043))
+                    }, " 取消 ", 8 /* PROPS */, _hoisted_1046))
                   : _createCommentVNode("v-if", true),
                 (!memToolsExtract.running && (memToolsExtractNeedsContinue('character') || memToolsExtractNeedsContinue('story')))
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1044, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1047, [
                       (memToolsExtractNeedsContinue('character'))
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 0,
@@ -17629,7 +17673,7 @@ return function render(_ctx, _cache) {
                             onClick: $event => (continueMemToolsExtract('character')),
                             disabled: !memToolsExtractContinueLeft('character'),
                             class: "flex-1 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white active:scale-95 transition-all disabled:opacity-50"
-                          }, " 继续补写人物" + _toDisplayString(memToolsExtractContinueLeft('character') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_1045))
+                          }, " 继续补写人物" + _toDisplayString(memToolsExtractContinueLeft('character') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_1048))
                         : _createCommentVNode("v-if", true),
                       (memToolsExtractNeedsContinue('story'))
                         ? (_openBlock(), _createElementBlock("button", {
@@ -17638,31 +17682,31 @@ return function render(_ctx, _cache) {
                             onClick: $event => (continueMemToolsExtract('story')),
                             disabled: !memToolsExtractContinueLeft('story'),
                             class: "flex-1 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white active:scale-95 transition-all disabled:opacity-50"
-                          }, " 继续补写故事" + _toDisplayString(memToolsExtractContinueLeft('story') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_1046))
+                          }, " 继续补写故事" + _toDisplayString(memToolsExtractContinueLeft('story') ? '' : '（已用完）'), 9 /* TEXT, PROPS */, _hoisted_1049))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.error)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1047, _toDisplayString(memToolsExtract.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1050, _toDisplayString(memToolsExtract.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.notice)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1048, _toDisplayString(memToolsExtract.notice), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1051, _toDisplayString(memToolsExtract.notice), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (memToolsExtract.entries.length)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1049, [
-                      _createElementVNode("div", _hoisted_1050, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1052, [
+                      _createElementVNode("div", _hoisted_1053, [
                         _createTextVNode(_toDisplayString(memToolsExtract.entries.length) + " 条 · " + _toDisplayString(memToolsExtractTotal) + " 字 ", 1 /* TEXT */),
                         (memToolsExtract.savedAt)
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_1051, "· 上次保存 " + _toDisplayString(memToolsTimeText(memToolsExtract.savedAt)), 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_1054, "· 上次保存 " + _toDisplayString(memToolsTimeText(memToolsExtract.savedAt)), 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_1052, [
+                      _createElementVNode("div", _hoisted_1055, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsExtract.entries, (entry) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: entry.id,
                             class: "rounded-xl bg-gray-50 border border-gray-200 p-3"
                           }, [
-                            _createElementVNode("div", _hoisted_1053, [
+                            _createElementVNode("div", _hoisted_1056, [
                               _createElementVNode("span", {
                                 class: _normalizeClass(["text-[11px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0", entry.kind === 'story' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'])
                               }, _toDisplayString(entry.kind === 'story' ? '故事' : '人物'), 3 /* TEXT, CLASS */),
@@ -17670,7 +17714,7 @@ return function render(_ctx, _cache) {
                                 "onUpdate:modelValue": $event => ((entry.label) = $event),
                                 type: "text",
                                 class: "flex-1 min-w-0 bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                              }, null, 8 /* PROPS */, _hoisted_1054), [
+                              }, null, 8 /* PROPS */, _hoisted_1057), [
                                 [_vModelText, entry.label]
                               ])
                             ]),
@@ -17678,122 +17722,122 @@ return function render(_ctx, _cache) {
                               "onUpdate:modelValue": $event => ((entry.text) = $event),
                               rows: "6",
                               class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                            }, null, 8 /* PROPS */, _hoisted_1055), [
+                            }, null, 8 /* PROPS */, _hoisted_1058), [
                               [_vModelText, entry.text]
                             ]),
-                            _createElementVNode("div", _hoisted_1056, [
+                            _createElementVNode("div", _hoisted_1059, [
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (copyMemToolsExtract(entry)),
                                 class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                              }, " 复制正文 ", 8 /* PROPS */, _hoisted_1057),
+                              }, " 复制正文 ", 8 /* PROPS */, _hoisted_1060),
                               _createElementVNode("button", {
                                 type: "button",
                                 onClick: $event => (removeMemToolsExtractEntry(entry.id)),
                                 class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                              }, " 删 ", 8 /* PROPS */, _hoisted_1058)
+                              }, " 删 ", 8 /* PROPS */, _hoisted_1061)
                             ])
                           ]))
                         }), 128 /* KEYED_FRAGMENT */))
                       ]),
-                      _createElementVNode("div", _hoisted_1059, [
+                      _createElementVNode("div", _hoisted_1062, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (saveMemToolsExtract()),
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all"
-                        }, " 保存到本机 ", 8 /* PROPS */, _hoisted_1060),
+                        }, " 保存到本机 ", 8 /* PROPS */, _hoisted_1063),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (clearMemToolsExtract()),
                           class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                        }, " 清空 ", 8 /* PROPS */, _hoisted_1061)
+                        }, " 清空 ", 8 /* PROPS */, _hoisted_1064)
                       ]),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (memToolsExportEntries()),
                         class: "mt-2 w-full py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, " 导出 JSON ", 8 /* PROPS */, _hoisted_1062)
+                      }, " 导出 JSON ", 8 /* PROPS */, _hoisted_1065)
                     ]))
                   : _createCommentVNode("v-if", true),
-                _createElementVNode("details", _hoisted_1063, [
+                _createElementVNode("details", _hoisted_1066, [
                   _cache[369] || (_cache[369] = _createElementVNode("summary", { class: "text-xs font-bold text-gray-600 cursor-pointer" }, "提示词（可以改，改完只影响以后生成）", -1 /* CACHED */)),
                   _cache[370] || (_cache[370] = _createElementVNode("div", { class: "mt-2 text-[11px] text-gray-500 leading-relaxed" }, " 留空就用默认那一份。改坏了点「恢复默认」清掉，不会丢东西。 ", -1 /* CACHED */)),
-                  _createElementVNode("div", _hoisted_1064, [
+                  _createElementVNode("div", _hoisted_1067, [
                     _cache[367] || (_cache[367] = _createElementVNode("div", { class: "text-[11px] font-bold text-gray-600 mb-1" }, "人物档案", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("textarea", {
                       "onUpdate:modelValue": $event => ((memToolsExtractPrompt.character) = $event),
                       rows: "4",
                       placeholder: "留空用默认提示词",
                       class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[11px] text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                    }, null, 8 /* PROPS */, _hoisted_1065), [
+                    }, null, 8 /* PROPS */, _hoisted_1068), [
                       [_vModelText, memToolsExtractPrompt.character]
                     ]),
-                    _createElementVNode("div", _hoisted_1066, [
+                    _createElementVNode("div", _hoisted_1069, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (saveMemToolsExtractPrompt('character')),
                         class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                      }, "保存这份", 8 /* PROPS */, _hoisted_1067),
+                      }, "保存这份", 8 /* PROPS */, _hoisted_1070),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (resetMemToolsExtractPrompt('character')),
                         class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, "恢复默认", 8 /* PROPS */, _hoisted_1068)
+                      }, "恢复默认", 8 /* PROPS */, _hoisted_1071)
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_1069, [
+                  _createElementVNode("div", _hoisted_1072, [
                     _cache[368] || (_cache[368] = _createElementVNode("div", { class: "text-[11px] font-bold text-gray-600 mb-1" }, "故事纪事", -1 /* CACHED */)),
                     _withDirectives(_createElementVNode("textarea", {
                       "onUpdate:modelValue": $event => ((memToolsExtractPrompt.story) = $event),
                       rows: "4",
                       placeholder: "留空用默认提示词",
                       class: "w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[11px] text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                    }, null, 8 /* PROPS */, _hoisted_1070), [
+                    }, null, 8 /* PROPS */, _hoisted_1073), [
                       [_vModelText, memToolsExtractPrompt.story]
                     ]),
-                    _createElementVNode("div", _hoisted_1071, [
+                    _createElementVNode("div", _hoisted_1074, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (saveMemToolsExtractPrompt('story')),
                         class: "flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                      }, "保存这份", 8 /* PROPS */, _hoisted_1072),
+                      }, "保存这份", 8 /* PROPS */, _hoisted_1075),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: $event => (resetMemToolsExtractPrompt('story')),
                         class: "px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                      }, "恢复默认", 8 /* PROPS */, _hoisted_1073)
+                      }, "恢复默认", 8 /* PROPS */, _hoisted_1076)
                     ])
                   ])
                 ])
               ]),
-              _createElementVNode("div", _hoisted_1074, [
-                _createElementVNode("div", _hoisted_1075, [
+              _createElementVNode("div", _hoisted_1077, [
+                _createElementVNode("div", _hoisted_1078, [
                   _cache[373] || (_cache[373] = _createElementVNode("div", { class: "text-sm font-bold text-gray-800" }, "自由提问", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: $event => (memToolsAsk.open ? closeMemToolsAsk() : openMemToolsAsk()),
                     class: "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-primary-600 border border-gray-200 active:scale-95 transition-all"
-                  }, _toDisplayString(memToolsAsk.open ? '收起' : '展开'), 9 /* TEXT, PROPS */, _hoisted_1076)
+                  }, _toDisplayString(memToolsAsk.open ? '收起' : '展开'), 9 /* TEXT, PROPS */, _hoisted_1079)
                 ]),
                 _cache[374] || (_cache[374] = _createElementVNode("div", { class: "text-xs text-gray-500 leading-relaxed" }, " 拿现有记忆回答具体问题。只发记忆条目和最近两轮原文，不发全部对话；回答不会写进记忆。 ", -1 /* CACHED */)),
                 (memToolsAsk.open)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1077, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1080, [
                       (memToolsAsk.rounds.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1078, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1081, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsAsk.rounds, (item) => {
                               return (_openBlock(), _createElementBlock("div", {
                                 key: item.id,
                                 class: "rounded-xl bg-gray-50 border border-gray-200 p-3"
                               }, [
-                                _createElementVNode("div", _hoisted_1079, "问：" + _toDisplayString(item.question), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_1080, _toDisplayString(item.pending ? '思考中…' : item.answer), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_1082, "问：" + _toDisplayString(item.question), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_1083, _toDisplayString(item.pending ? '思考中…' : item.answer), 1 /* TEXT */),
                                 (!item.pending)
                                   ? (_openBlock(), _createElementBlock("button", {
                                       key: 0,
                                       type: "button",
                                       onClick: $event => (copyMemToolsAskAnswer(item)),
                                       class: "mt-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-primary-600 border border-gray-200 active:scale-95"
-                                    }, " 复制回答 ", 8 /* PROPS */, _hoisted_1081))
+                                    }, " 复制回答 ", 8 /* PROPS */, _hoisted_1084))
                                   : _createCommentVNode("v-if", true)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */))
@@ -17805,23 +17849,23 @@ return function render(_ctx, _cache) {
                         disabled: memToolsAsk.running,
                         placeholder: "例如：她左手腕上的伤是怎么来的",
                         class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:ring-2 focus:ring-primary-500 focus:outline-none"
-                      }, null, 8 /* PROPS */, _hoisted_1082), [
+                      }, null, 8 /* PROPS */, _hoisted_1085), [
                         [_vModelText, memToolsAsk.question]
                       ]),
-                      _createElementVNode("div", _hoisted_1083, [
+                      _createElementVNode("div", _hoisted_1086, [
                         _createElementVNode("button", {
                           type: "button",
                           onClick: $event => (runMemToolsAsk()),
                           disabled: memToolsAsk.running || !memToolsExtractSource.count,
                           class: "flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 text-white active:scale-95 transition-all disabled:opacity-50"
-                        }, _toDisplayString(memToolsAsk.running ? '生成中' : '提问'), 9 /* TEXT, PROPS */, _hoisted_1084),
+                        }, _toDisplayString(memToolsAsk.running ? '生成中' : '提问'), 9 /* TEXT, PROPS */, _hoisted_1087),
                         (memToolsAsk.running)
                           ? (_openBlock(), _createElementBlock("button", {
                               key: 0,
                               type: "button",
                               onClick: $event => (abortMemToolsAsk()),
                               class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-red-600 border border-gray-200 active:scale-95"
-                            }, " 取消 ", 8 /* PROPS */, _hoisted_1085))
+                            }, " 取消 ", 8 /* PROPS */, _hoisted_1088))
                           : _createCommentVNode("v-if", true),
                         (!memToolsAsk.running && memToolsAsk.rounds.length)
                           ? (_openBlock(), _createElementBlock("button", {
@@ -17829,33 +17873,33 @@ return function render(_ctx, _cache) {
                               type: "button",
                               onClick: $event => (clearMemToolsAsk()),
                               class: "px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-600 border border-gray-200 active:scale-95"
-                            }, " 清空 ", 8 /* PROPS */, _hoisted_1086))
+                            }, " 清空 ", 8 /* PROPS */, _hoisted_1089))
                           : _createCommentVNode("v-if", true)
                       ]),
                       (memToolsAsk.error)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1087, _toDisplayString(memToolsAsk.error), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1090, _toDisplayString(memToolsAsk.error), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       (memToolsAsk.running)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1088, " 输入越长越久，回答也可能被模型长度上限截断；被截断就缩小问题范围重问。 "))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1091, " 输入越长越久，回答也可能被模型长度上限截断；被截断就缩小问题范围重问。 "))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true)
               ]),
               (!memToolsAudit.loading && !memToolsAudit.issues.length && !memToolsAudit.error)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_1089, " 没发现问题 "))
+                ? (_openBlock(), _createElementBlock("div", _hoisted_1092, " 没发现问题 "))
                 : _createCommentVNode("v-if", true),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(memToolsAudit.issues, (issue, idx) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: idx,
                   class: "bg-white rounded-2xl border border-gray-200 shadow-sm p-4"
                 }, [
-                  _createElementVNode("div", _hoisted_1090, [
+                  _createElementVNode("div", _hoisted_1093, [
                     _createElementVNode("span", {
                       class: _normalizeClass(["text-[11px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0", issue.level === 'warn' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'])
                     }, _toDisplayString(issue.tag), 3 /* TEXT, CLASS */),
-                    _createElementVNode("span", _hoisted_1091, _toDisplayString(issue.where), 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_1094, _toDisplayString(issue.where), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_1092, _toDisplayString(issue.text), 1 /* TEXT */)
+                  _createElementVNode("div", _hoisted_1095, _toDisplayString(issue.text), 1 /* TEXT */)
                 ]))
               }), 128 /* KEYED_FRAGMENT */))
             ])
@@ -17870,8 +17914,8 @@ return function render(_ctx, _cache) {
         "panel-class": "compact-modal-panel"
       }, {
         default: _withCtx(() => [
-          _createElementVNode("div", _hoisted_1093, [
-            _createElementVNode("div", _hoisted_1094, [
+          _createElementVNode("div", _hoisted_1096, [
+            _createElementVNode("div", _hoisted_1097, [
               _createElementVNode("div", null, [
                 _createElementVNode("h3", null, _toDisplayString(cloudBackup.mode === 'upload' ? '上传备份' : '下载备份'), 1 /* TEXT */),
                 _createElementVNode("p", null, _toDisplayString(cloudBackup.mode === 'upload' ? '全部角色卡和对应的聊天记录' : '输入上传时得到的密钥，把角色卡和聊天合并到本机'), 1 /* TEXT */)
@@ -17897,7 +17941,7 @@ return function render(_ctx, _cache) {
                     d: "M6 18L18 6M6 6l12 12"
                   })
                 ], -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_1095)
+              ]))], 8 /* PROPS */, _hoisted_1098)
             ]),
             (cloudBackup.mode === 'upload')
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
@@ -17908,15 +17952,15 @@ return function render(_ctx, _cache) {
                     _createElementVNode("li", null, "密钥相当于取件码，拿到的人都能下载这份备份，请勿外传")
                   ], -1 /* CACHED */)),
                   (cloudBackup.key && !cloudBackup.progress)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_1096, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1099, [
                         _cache[376] || (_cache[376] = _createElementVNode("div", { class: "text-xs text-gray-500" }, "备份密钥", -1 /* CACHED */)),
-                        _createElementVNode("div", _hoisted_1097, _toDisplayString(cloudBackup.key), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_1098, "有效期至 " + _toDisplayString(formatCloudBackupTime(cloudBackup.expiresAt)), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_1100, _toDisplayString(cloudBackup.key), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_1101, "有效期至 " + _toDisplayString(formatCloudBackupTime(cloudBackup.expiresAt)), 1 /* TEXT */),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: copyCloudBackupKey,
                           class: "settings-action mt-3"
-                        }, "复制密钥", 8 /* PROPS */, _hoisted_1099)
+                        }, "复制密钥", 8 /* PROPS */, _hoisted_1102)
                       ]))
                     : _createCommentVNode("v-if", true)
                 ], 64 /* STABLE_FRAGMENT */))
@@ -17937,26 +17981,26 @@ return function render(_ctx, _cache) {
                     disabled: cloudBackup.busy,
                     onKeydown: _withKeys(startCloudRestore, ["enter"]),
                     class: "mt-4 w-full bg-gray-50/60 border border-gray-300 rounded-lg px-4 py-3 text-center font-mono text-lg tracking-widest uppercase text-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-all"
-                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1100), [
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1103), [
                     [_vModelText, cloudBackup.restoreKey]
                   ])
                 ], 64 /* STABLE_FRAGMENT */)),
             (cloudBackup.progress)
-              ? (_openBlock(), _createElementBlock("div", _hoisted_1101, [
-                  _createElementVNode("div", _hoisted_1102, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_1104, [
+                  _createElementVNode("div", _hoisted_1105, [
                     _createElementVNode("span", null, _toDisplayString(cloudBackup.progress.label), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_1103, _toDisplayString(Math.floor(cloudBackup.progress.percent)) + "%", 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_1106, _toDisplayString(Math.floor(cloudBackup.progress.percent)) + "%", 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_1104, [
+                  _createElementVNode("div", _hoisted_1107, [
                     _createElementVNode("div", {
                       class: "h-full rounded-full bg-primary-500 transition-[width] duration-300",
                       style: _normalizeStyle({ width: cloudBackup.progress.percent + '%' })
                     }, null, 4 /* STYLE */)
                   ]),
-                  _createElementVNode("p", _hoisted_1105, _toDisplayString(cloudBackup.progress.detail), 1 /* TEXT */)
+                  _createElementVNode("p", _hoisted_1108, _toDisplayString(cloudBackup.progress.detail), 1 /* TEXT */)
                 ]))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_1106, [
+            _createElementVNode("div", _hoisted_1109, [
               (cloudBackup.mode === 'upload')
                 ? (_openBlock(), _createElementBlock("button", {
                     key: 0,
@@ -17964,14 +18008,14 @@ return function render(_ctx, _cache) {
                     onClick: startCloudBackup,
                     disabled: cloudBackup.busy,
                     class: "modal-primary-button flex-1 justify-center disabled:opacity-60"
-                  }, _toDisplayString(cloudBackup.busy ? '上传中...' : (cloudBackup.key ? '重新上传' : '开始上传')), 9 /* TEXT, PROPS */, _hoisted_1107))
+                  }, _toDisplayString(cloudBackup.busy ? '上传中...' : (cloudBackup.key ? '重新上传' : '开始上传')), 9 /* TEXT, PROPS */, _hoisted_1110))
                 : (_openBlock(), _createElementBlock("button", {
                     key: 1,
                     type: "button",
                     onClick: startCloudRestore,
                     disabled: cloudBackup.busy || !cloudBackup.restoreKey.trim(),
                     class: "modal-primary-button flex-1 justify-center disabled:opacity-60"
-                  }, _toDisplayString(cloudBackup.busy ? '下载中...' : '开始下载'), 9 /* TEXT, PROPS */, _hoisted_1108))
+                  }, _toDisplayString(cloudBackup.busy ? '下载中...' : '开始下载'), 9 /* TEXT, PROPS */, _hoisted_1111))
             ])
           ])
         ]),

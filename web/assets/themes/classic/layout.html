@@ -2233,7 +2233,12 @@
 
                 <!-- Memory overview and timeline -->
                 <template v-if="memorySettings.enabled">
-                    <template v-if="displayedClassicMemories.length">
+                    <div v-if="currentCharacter && classicMemoryLoad.status !== 'ready'" class="empty-state" role="status">
+                        <p>{{ classicMemoryLoad.status === 'loading' ? '正在读取记忆…' : '记忆尚未读取成功' }}</p>
+                        <small v-if="classicMemoryLoad.error">{{ classicMemoryLoad.error }}</small>
+                        <button v-if="classicMemoryLoad.status !== 'loading'" type="button" class="rphub-composer-btn mt-3" @click="ensureCurrentCharacterMemories()">重新读取记忆</button>
+                    </div>
+                    <template v-else-if="displayedClassicMemories.length">
                         <div class="list-card">
                             <header class="memory-browse">
                                 <div class="memory-browse__head">

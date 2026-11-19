@@ -2138,6 +2138,7 @@ const app = createApp({
         const SUMMARY_KEEP_FLOORS_DEFAULT = 20;
         const LIST_PAGE_SIZE = 10;
         const classicMemories = ref([]);
+        const classicMemoryLoad = reactive({ status: 'idle', error: '' });
         const classicMemoryPage = ref(1);
         const memorySettings = reactive({
             enabled: false,
@@ -7955,6 +7956,9 @@ const app = createApp({
             _b1MemoryViewKey = memoryContentKey(list);
             classicMemories.value = list;
             _classicMemoriesLoaded = true;
+            Object.assign(classicMemoryLoad, { status: 'ready', error: '' });
+            window.__rpMemoryLoadSkipped = false;
+            try { localStorage.removeItem('rphub.memoryBootSkip'); } catch (_) {}
         };
         const adoptCharacterMemories = (loaded, notify = true) => {
             if (loaded.memoryState) {
@@ -7965,6 +7969,7 @@ const app = createApp({
             _b1MemoryState = null;
             _b1MemoryViewKey = '';
             classicMemories.value = [];
+            Object.assign(classicMemoryLoad, { status: 'error', error: '记忆尚未读取成功，原记录已保留' });
             if (notify) showToast('当前角色记忆读取超时，已保留原记忆；聊天可继续使用', 'warning', 7000);
         };
         // 维护代次推进后，已提交基线失效。允许在「意图起点」重读：此时 payload 还没算，
@@ -9630,7 +9635,11 @@ const app = createApp({
         //   挪到这里后首次求值可以正常执行：此刻 currentCharacterIndex(1248)、
         //   characters(1246)、activeStoryBranchId(4344)、_classicMemoriesLoaded(4152)、
         //   _b1ScopeEpoch(6642)、getCurrentStoryBranchScopeId(6637) 全部已初始化。
-        watch(getCurrentStoryBranchScopeId, () => { _b1ScopeEpoch++; _classicMemoriesLoaded = false; }, { flush: 'sync' });
+        watch(getCurrentStoryBranchScopeId, () => {
+            _b1ScopeEpoch++;
+            _classicMemoriesLoaded = false;
+            Object.assign(classicMemoryLoad, { status: 'idle', error: '' });
+        }, { flush: 'sync' });
         // PNG 角色卡的头像连同整张卡的数据一起保存，可达十几 MB。界面显示改用短的 blob 地址，
         // 否则每次重绘背景样式、每新建一个消息头像，浏览器都要重新解析整段 data URL。
         let avatarDisplayCache = { source: '', url: '' };
@@ -13389,6 +13398,7 @@ const app = createApp({
                         }
                         const startTurn = Number(group[0].turn);
                         const endTurn = Number(group[group.length - 1].turn);
+                        const sourceIds = new Set(group.map(memory => String(memory.id)));
                         const sourceMemories = group.map(memory => cloneForStorage(memory));
                         const mergedMemory = markRuntimeRaw({
                             id: generateUUID(),
@@ -13409,13 +13419,13 @@ const app = createApp({
                         // 逐组合并：每条都走版本协议，成功后才能真正算完成
                         const intent = await tryBeginMemoryIntent('二次压缩');
                         if (!intent) break;
-                        const merged = await commitMemoryTransform(intent, list => [
+                        const committed = await commitMemoryTransform(intent, list => [
                             ...list.filter(memory => !sourceIds.has(String(memory && memory.id || ''))),
                             mergedMemory
                         ], {
                             validate: (current, before) => [...sourceIds].every(id => sameMemorySources(current, before, [id]))
                         });
-                        if (!merged.published) break;
+                        if (!committed.published) break;
                         merged += 1;
                         completed++;
                         onProgress?.(completed, groups.length);
@@ -13594,6 +13604,9 @@ const app = createApp({
 
         const generateAndStoreClassicMemory = async (job, signal) => {
             if (!job || job.epoch !== _classicExtractionEpoch) return false;
+            if (!_classicMemoriesLoaded || _b1MemoryState?.scopeId !== job.storyScopeId) {
+                throw memoryOperationError('MemoryNotLoadedError', '记忆尚未读取成功，已停止补录');
+            }
             if (currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId || hasClassicMemoryForJob(job)) return false;
             const inFlightKey = `${job.epoch}:${job.key}`;
             if (_classicSummaryInFlightKeys.has(inFlightKey)) return false;
@@ -13603,8 +13616,7 @@ const app = createApp({
                 const summary = await requestClassicMemorySummary(job, signal);
                 if (signal?.aborted || job.epoch !== _classicExtractionEpoch) return false;
                 if (currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId || hasClassicMemoryForJob(job)) return false;
-                const intent = await tryBeginMemoryIntent('生成总结');
-                if (!intent) return false;
+                const intent = await beginMemoryIntent('生成总结');
                 const targetIds = new Set(job.sourceAssistantIds || []);
                 const alreadyStored = list => list.some(memory => {
                     const memoryIds = memory?.sourceAssistantIds || [];
@@ -14691,7 +14703,11 @@ const app = createApp({
             let secondarySkipped = 0;
             const emptyTargets = new Set();
             try {
+                if (!await ensureCurrentCharacterMemories()) {
+                    throw memoryOperationError('MemoryNotLoadedError', classicMemoryLoad.error || '记忆尚未读取成功，请重新读取后再补录');
+                }
                 while (_classicBatchExtractAbort === batchController && !batchController.signal.aborted) {
+                    if (!_classicMemoriesLoaded) throw memoryOperationError('MemoryNotLoadedError', '记忆保存状态已变化，已停止补录');
                     _classicBatchRescanRequested = false;
                     const snapshot = await ensureConversationMessageIds();
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
@@ -14745,6 +14761,8 @@ const app = createApp({
 
                         if (results.some(result => result.added)) await saveClassicMemoriesNow();
                         for (const failed of results.filter(result => result.error)) {
+                            if (['MemoryNotLoadedError', 'MemoryProtocolError', 'StorageConflictError', 'StoragePausedError',
+                                'MemoryCommitError'].includes(failed.error.name)) throw failed.error;
                             if (!manual) throw failed.error;
                             let retryError = failed.error;
                             while (true) {
@@ -15858,6 +15876,41 @@ const app = createApp({
                 window.__rpBootStage = '载入角色记忆超时（已跳过）';
             }
         };
+
+        let memoryRecovery = null;
+        const ensureCurrentCharacterMemories = () => {
+            const scopeId = getCurrentStoryBranchScopeId(), scopeEpoch = _b1ScopeEpoch;
+            if (!scopeId) return Promise.resolve(false);
+            if (_classicMemoriesLoaded && _b1MemoryState?.scopeId === scopeId) return Promise.resolve(true);
+            if (memoryRecovery?.scopeId === scopeId && memoryRecovery.scopeEpoch === scopeEpoch) return memoryRecovery.promise;
+            // 已有基线失效属于保存冲突，不能自动用库内副本替换当前视图。
+            if (_b1MemoryState?.scopeId === scopeId) {
+                Object.assign(classicMemoryLoad, { status: 'error', error: '记忆已被其他操作修改，请重新进入角色后再补录' });
+                return Promise.resolve(false);
+            }
+            const recovery = { scopeId, scopeEpoch };
+            memoryRecovery = recovery;
+            Object.assign(classicMemoryLoad, { status: 'loading', error: '' });
+            recovery.promise = (async () => {
+                try {
+                    const loaded = await readCharacterMemories(scopeId);
+                    if (scopeEpoch !== _b1ScopeEpoch || scopeId !== getCurrentStoryBranchScopeId()) return false;
+                    adoptCharacterMemories(loaded, false);
+                    return loaded.summaryLoaded;
+                } catch (error) {
+                    if (scopeEpoch === _b1ScopeEpoch && scopeId === getCurrentStoryBranchScopeId()) {
+                        Object.assign(classicMemoryLoad, { status: 'error', error: error.message || '记忆读取失败，原记录已保留。' });
+                    }
+                    return false;
+                } finally {
+                    if (memoryRecovery === recovery) memoryRecovery = null;
+                }
+            })();
+            return recovery.promise;
+        };
+        watch(currentView, view => {
+            if (view === 'memory' && !_classicMemoriesLoaded && !_b1MemoryState) ensureCurrentCharacterMemories();
+        });
 
         const selectCharacter = async (index, isNewImport = false, { silent = false } = {}) => {
             let char = characters.value[index];
@@ -17414,7 +17467,8 @@ const app = createApp({
             toggleAutoImageGen, setWorldInfoEnabled, handleGeneratedImageReroll,
             quotaValue, quotaLoading, quotaError, quotaLabel, fetchQuota, imageApi, removeImageProvider,
             // Memory System Exports
-            classicMemoryPage, classicMemoryPageCount, memorySettings, retryingClassicMemoryId, retryClassicMemory,
+            classicMemoryPage, classicMemoryPageCount, classicMemoryLoad, ensureCurrentCharacterMemories,
+            memorySettings, retryingClassicMemoryId, retryClassicMemory,
             editingClassicMemoryId, editingClassicMemoryText, savingClassicMemoryId,
             startEditClassicMemory, cancelEditClassicMemory, saveEditClassicMemory,
             isActiveBatchExtracting: isClassicBatchExtracting,
