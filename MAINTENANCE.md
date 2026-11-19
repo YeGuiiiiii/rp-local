@@ -101,7 +101,8 @@
 - `node scripts/test-memory-load-recovery.cjs`：经典布局与 `RPHUB_TEST_SKIN=chenyue` 各 **7/7**，覆盖跳过后打开页面、直接补录、持续读取失败、目标卡超时后重试、读取期间切卡、保存冲突停止、二次压缩落盘与不重复处理。模拟读取超时由 20 秒缩至 500ms；不是手机耗时测量。读取失败的生成请求为零，真实接口未调用。
 - 使用备份实际的 46 条记忆和原消息编号，在隔离浏览器中将聊天正文替换为测试文本，模拟启动跳过：打开记忆页后恢复 46 条，跳过标记清除；原数据与未知扩展未改写。原有 `test-memory-switch-timeout.cjs` 的三个场景及整套记忆相关检查通过。
 - 最终 `node scripts/test-suite.cjs`：**63/74**，11 项失败均在未修改的 `394b593` 中逐项复现相同位置。六项存储/恢复失败：`test-character-storage.cjs`、`test-cloud-long-chat.cjs`、`test-cloud-backup.cjs`、`test-stream-character-library.cjs`、`test-stream-import.cjs`、`test-stream-limits.cjs`；分别涉及连接关闭、旧暂存表查询或恢复加载事件。五项图片入口失败：`test-gallery-materials.cjs`、`test-shell.cjs`、`test-workspace.cjs` 找不到查看图片按钮，`test-image-providers.cjs`、`test-image-relays.cjs` 仍期待已被上游调整的添加接口按钮。本轮不修改这些用例或相关产品行为，不声称全量通过，也不据旧入口失败关闭 U15 的模型复用问题。
-- `node scripts/build-stream.cjs`、`node scripts/compile-ui.cjs`、修改 JS/CJS 语法和 `git diff --check` 通过。构建流式导入资源无额外变化；编译后的界面随源码提交。测试临时文件、基线副本、截图、缓存及 Java 临时目录均在 D 盘，本轮结束清理；只保留源码测试与简要验证记录。尚未合并主线、打包、发布或在原手机验证。
+- `node scripts/build-stream.cjs`、`node scripts/compile-ui.cjs`、修改 JS/CJS 语法和 `git diff --check` 通过。构建流式导入资源无额外变化；编译后的界面随源码提交。测试临时文件、基线副本、截图、缓存及 Java 临时目录均在 D 盘。尚未合并主线、打包、发布或在原手机验证。
+- 清理受阻：核对绝对路径与用途后，自动审批以 **`blocked by policy`** 拒绝清理 `D:\大模型用\rp\.memory-repair-20261119` 及本轮两份测试录像，没有提供进一步理由。目录与录像暂留，未换用其他删除方式；用户原备份、源码和签名未删除。该目录中的 340MB 测试样本是既有 D 盘样本的硬链接，未额外复制其内容。
 
 ## 2026-11-17 记忆超时后无法切卡（U17 / R06）
 
