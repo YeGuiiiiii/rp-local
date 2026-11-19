@@ -13674,15 +13674,25 @@ const app = createApp({
             const resolve = createSummarySourceResolver(snapshot);
             // 父条目永不进任务表：记忆工具会把父摘要也列出来，直接把它交给索引会发一次
             // 注定写不回的请求（它不在 getSummarySources 的结果里，写回身份检查必然拦下）。
-            return sources.filter(memory => !isSecondaryClassicMemory(memory)).map(memory => {
-                const sourceUserText = resolve(memory);
-                return { memory, sourceUserText, state: classifySummaryEmbedding(memory, sourceUserText, model, apiUrl) };
-            })
-                // 缺坐标、原文变了、或指纹与当前文本不符 ⇒ 需要重算。
-                // 指纹不符这条专治「文案改了但坐标没清」：过去只有 sourceUserText 变才重算，
-                // 编辑总结正文的路径不会触发，召回就一直拿旧坐标打分。
-                // 缺原文（noSource）不进任务表：它发不出请求，占住名额只会让进度永远差一截。
-                .filter(job => job.state === 'stale' || job.state === 'broken');
+            // [rphub 2.9.144] 逐条产出，不再一次性 map 成数组。
+            //   9330 条任务每条都带一段原文（sourceUserText），全塞进数组等于把整本聊天再复制
+            //   一份到内存里；点击补录时先算总数正好触发这个峰值，渲染进程被系统杀掉 → 应用重载。
+            const iterate = function* () {
+                for (const memory of sources) {
+                    if (isSecondaryClassicMemory(memory)) continue;   // 父条目永不进任务表
+                    const sourceUserText = resolve(memory);
+                    const state = classifySummaryEmbedding(memory, sourceUserText, model, apiUrl);
+                    if (state !== 'stale' && state !== 'broken') continue;
+                    yield { memory, sourceUserText, state };
+                }
+            };
+            return iterate();
+        };
+        // 只要数量时用它：逐条走一遍但不保留任何任务对象，峰值只跟单条大小有关。
+        const countSummaryEmbeddingJobs = (snapshot, sources) => {
+            let total = 0;
+            for (const _job of getSummaryEmbeddingJobs(snapshot, sources)) total += 1;
+            return total;
         };
 
         const indexSummaryMemories = async (snapshot, signal, sources, onProgress) => {
@@ -13695,34 +13705,69 @@ const app = createApp({
             const isCurrent = () => !signal?.aborted && epoch === _classicExtractionEpoch
                 && scopeId === getCurrentStoryBranchScopeId()
                 && memorySettings.mode === MEMORY_MODE_ENHANCED;
-            // 缺原文的条目根本不进 jobs：既不该发请求，也不该占进度名额。
-            // 计数单独报给调用方，由它提示「待补」，避免一条缺来源把整批带停。
-            const coverage = summarizeSummaryEmbeddingCoverage(snapshot, sources, model, apiUrl);
-            const jobs = getSummaryEmbeddingJobs(snapshot, sources);
+            // [rphub 2.9.145] 开跑前不再做全量预处理。
+            //   2.9.144 之前是把 9311 条任务全建成数组（每条带一段原文），峰值几十 MB；
+            //   2.9.144 改成「先数一遍」——但那仍然是 9311 次 resolve + classify 的同步循环，
+            //   指纹要对每条正文做哈希，主线程被占住几十秒，WebView 直接被系统判死重载。
+            //   现在改成：总数用 sources.length 当上界（便宜），缺原文/父条目在遍历时顺路计数。
+            // 调用方多数时候不传 sources（传 undefined），原来靠 getSummaryEmbeddingJobs 的默认参数兜底；
+            // 这里直接读 sources.length 就会抛 "Cannot read properties of undefined"。
+            if (!Array.isArray(sources)) sources = getSummarySources(classicMemories.value);
+            const total = sources.length;
+            let noSourceCount = 0, parentCount = 0;
             let written = 0, skippedChanged = 0, cancelled = false, emptyStreak = 0;
             // 返回值把「请求了几条 / 写成几条 / 缺几条原文 / 几条在请求期间变了 / 是否被取消」
             // 分开报：调用方据此区分正常跳过、过期丢弃与失败，不把正文已提交的操作报成失败。
             const settle = () => ({
-                requested: jobs.length, written,
-                skippedNoSource: coverage.noSource, skippedParent: coverage.parents,
+                requested: total, written,
+                skippedNoSource: noSourceCount, skippedParent: parentCount,
                 skippedChanged, cancelled
             });
-            if (!jobs.length) return settle();
+            if (!total) return settle();
             if (!model) throw new Error('请先选择向量模型');
-            onProgress?.(0, jobs.length);
-            for (let offset = 0; offset < jobs.length; offset += SUMMARY_EMBEDDING_BATCH_SIZE) {
+            onProgress?.(0, total);
+            const resolveSource = createSummarySourceResolver(snapshot);
+            const iterator = (function* () {
+                for (const memory of sources) {
+                    if (isSecondaryClassicMemory(memory)) { parentCount += 1; continue; }
+                    const sourceUserText = resolveSource(memory);
+                    const state = classifySummaryEmbedding(memory, sourceUserText, model, apiUrl);
+                    if (state === 'noSource') { noSourceCount += 1; continue; }
+                    if (state !== 'stale' && state !== 'broken') continue;
+                    yield { memory, sourceUserText, state };
+                }
+            })();
+            let batch = [];
+            let scanned = 0;
+            for (;;) {
                 if (!isCurrent()) { cancelled = true; return settle(); }
-                const batch = jobs.slice(offset, offset + SUMMARY_EMBEDDING_BATCH_SIZE);
+                while (batch.length < SUMMARY_EMBEDDING_BATCH_SIZE) {
+                    const next = iterator.next();
+                    if (next.done) break;
+                    batch.push(next.value);
+                    scanned += 1;
+                    // 每扫描 32 条让出一次：指纹哈希是纯计算，攒着算会把主线程钉死。
+                    if (scanned % 32 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                        if (!isCurrent()) { cancelled = true; return settle(); }
+                    }
+                }
+                if (!batch.length) break;
                 const vectors = await requestMemoryEmbeddings(batch.map(job => buildSummaryEmbeddingText({
                     ...job.memory, sourceUserText: job.sourceUserText
                 })), signal, model);
                 if (!isCurrent()) { cancelled = true; return settle(); }
                 const packed = vectors.map(quantizeEmbeddingForStorage);
                 if (packed.some(value => !value)) throw new Error('嵌入接口返回了无效坐标');
-                const currentSources = new Set(getSummarySources(classicMemories.value));
+                // [rphub 2.9.143] 按 key 比对，不再比对象引用。
+                //   getSummarySources 返回的是对象实例，而每次写入提交都会重建一批对象
+                //   （commit 里 map 出 {...item, ...packed}），整表被重新接管时更是全换新对象。
+                //   引用比对于是从某一批开始全部失配 → updateByKey 为空 → 每批都「写不进去」，
+                //   9326 条的任务写进 64 条就再也推不动。key 由 id（缺失时用轮次+摘要前缀）生成，稳定。
+                const currentKeys = new Set(getSummarySources(classicMemories.value).map(summarySourceKey));
                 const updateByKey = new Map();
                 batch.forEach((job, index) => {
-                    if (!currentSources.has(job.memory)) return;
+                    if (!currentKeys.has(summarySourceKey(job.memory))) return;
                     updateByKey.set(summarySourceKey(job.memory), {
                         packed: packed[index],
                         sourceUserText: job.sourceUserText,
@@ -13734,12 +13779,13 @@ const app = createApp({
                 if (!intent || !updateByKey.size) {
                     skippedChanged += batch.length;
                     emptyStreak += 1;
-                    if (isCurrent()) onProgress?.(written + skippedChanged, jobs.length);
+                    if (isCurrent()) onProgress?.(written + skippedChanged, total);
                     // 连续三批一条都写不进去，说明基线一直在变或存储被暂停；
                     // 继续跑只是把剩下几百条请求一遍再丢掉，既费钱也看不到进展。
                     if (emptyStreak >= 3) {
                         throw new Error('向量写入被持续拒绝（记忆可能同时变动，或存储正在维护），已停止本次补录以免空转');
                     }
+                    batch = [];
                     continue;
                 }
                 emptyStreak = 0;
@@ -13779,8 +13825,12 @@ const app = createApp({
                 written += batchWritten;
                 // [rphub 2.9.142] 进度算「已处理」，不能只算「已写入」：
                 //   写入被拒时一条都不涨，654 条的任务会一直停在 16/654，看起来就是卡死。
-                if (isCurrent()) onProgress?.(written + skippedChanged, jobs.length);
+                if (isCurrent()) onProgress?.(written + skippedChanged, total);
+                batch = [];
             }
+            // 总数取的是上界（sources.length），真正需要重算的通常更少。
+            // 收尾时把这一阶段补齐到 100%，否则「已处理 < 总数」会被判成「部分任务未完成」。
+            if (isCurrent()) onProgress?.(total, total);
             return settle();
         };
 
@@ -14606,7 +14656,7 @@ const app = createApp({
                     const remaining = {
                         summary: jobs.length,
                         vector: memorySettings.mode === MEMORY_MODE_ENHANCED
-                            ? getSummaryEmbeddingJobs(snapshot).length + jobs.length : 0,
+                            ? getSummarySources(classicMemories.value).length + jobs.length : 0,
                         secondary: getEligibleClassicSecondaryGroups(safeTurnCount, [...classicMemories.value, ...jobs]).length
                     };
                     progress.stages.forEach(stage => { stage.total = stage.current + remaining[stage.key]; });

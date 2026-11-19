@@ -1,4 +1,4 @@
-import { upgrade, database, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate } from './storage.mjs';
+import { upgrade, database, deleteStagingDatabase, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate } from './storage.mjs';
 import { profile, profiles } from './profiles.mjs';
 import { verifyChunks, decodeChat } from './cloud.mjs';
 
@@ -8,7 +8,8 @@ const cancelled = signal => {
     if (signal?.aborted) throw new DOMException('导入已取消', 'AbortError');
 };
 export async function stageEntries(entries, { limits = profile() } = {}) {
-    const db = await window.RPHubStorage.initDB(), id = crypto.randomUUID().replaceAll('-', '');
+    // [rphub 2.9.147] 暂存写进独立库，不再落到正式库 RPHubDB。
+    const db = await database(), id = crypto.randomUUID().replaceAll('-', '');
     const sink = new StagingSink(db, id), encoder = new TextEncoder();
     try {
         await saveSession(db, { id, state: 'reading' });
@@ -62,9 +63,9 @@ function writeWeb(items) {
         if (localStorage.getItem(key) !== value) throw new Error('偏好设置写入失败：' + key);
     }
 }
-async function discardPreparedCards(db, session) {
+async function discardPreparedCards(main, session) {
     if (!session.cardRevision) return;
-    const tx = db.transaction('store', 'readwrite'), store = tx.objectStore('store');
+    const tx = main.transaction('store', 'readwrite'), store = tx.objectStore('store');
     for (const prefix of ['__rp_card__:', '__rp_card_image__:']) {
         const start = prefix + session.cardRevision + ':';
         store.delete(IDBKeyRange.bound(start, start + '\uffff'));
@@ -73,8 +74,10 @@ async function discardPreparedCards(db, session) {
 }
 // The journal is committed before touching another database or localStorage.
 // The formal store and the journal's final state commit in the same transaction.
-export async function recover(db) {
-    const sessions = await resultOf(db.transaction('restore_sessions').objectStore('restore_sessions').getAll());
+export async function recover(main) {
+    // 会话与暂存数据在独立库里；恢复动作只碰正式库的 store。
+    const stage = await database();
+    const sessions = await resultOf(stage.transaction('restore_sessions').objectStore('restore_sessions').getAll());
     for (const session of sessions) {
         if (session.state === 'applying' || session.state === 'applied') {
             window.RPLocalStore?.setWebWritesPaused(true);
@@ -88,9 +91,23 @@ export async function recover(db) {
                 }
             } finally { window.RPLocalStore?.setWebWritesPaused(false); }
         }
-        if (session.state !== 'applied') await discardPreparedCards(db, session);
-        await removeSession(db, session.id);
+        if (session.state !== 'applied') await discardPreparedCards(main, session);
+        await removeSession(stage, session.id);
     }
+    stage.close();
+    // 老版本把暂存表建在正式库里，那些行还占着逻辑空间；新代码不再读它们，顺手清空。
+    //   注意：IndexedDB 删行不会立刻缩小文件，但至少让「压缩存储」重写时不再搬这几张废表。
+    const legacy = ['restore_sessions', 'restore_units', 'restore_records', 'restore_web', 'restore_companions']
+        .filter(name => main.objectStoreNames.contains(name));
+    if (legacy.length) {
+        try {
+            const tx = main.transaction(legacy, 'readwrite');
+            legacy.forEach(name => tx.objectStore(name).clear());
+            await completed(tx);
+        } catch (error) { /* 清不掉不影响使用 */ }
+    }
+    // 暂存库已清空：整库删掉，把空间还给系统（这是本版的核心目的）。
+    await deleteStagingDatabase();
 }
 async function prepareExtras(db, session) {
     const web = new Map();
@@ -121,16 +138,16 @@ async function prepareExtras(db, session) {
     const priority = [...groups.keys()].sort()[0];
     return { web: [...web].map(([key, value]) => ({ key, value })), moments: groups.get(priority) };
 }
-async function prepareCharacters(db, session, restoreValue, signal, progress) {
+async function prepareCharacters(main, stage, session, restoreValue, signal, progress) {
     const record = session.plan.find(item => item.key === 'rp_hub_characters');
     if (!record) return null;
-    await discardPreparedCards(db, session);
+    await discardPreparedCards(main, session);
     session.cardRevision = crypto.randomUUID().replaceAll('-', '');
-    await saveSession(db, session);
+    await saveSession(stage, session);
     const cards = [], ids = new Set();
     for (let part = 0; part < record.count; part++) {
         cancelled(signal);
-        const unit = await resultOf(db.transaction('restore_units').objectStore('restore_units')
+        const unit = await resultOf(stage.transaction('restore_units').objectStore('restore_units')
             .get([session.id, session.source, record.entry, part]));
         const card = restoreValue(unit?.value);
         // [rphub 2.9.036] 原先这条在 validate() 里靠回扫 62MB 分片来查，现在挪到真正用到的地方。
@@ -147,7 +164,7 @@ async function prepareCharacters(db, session, restoreValue, signal, progress) {
         window.RPLocalStore?.assignFolders(cards, false);
         Object.assign(card, { uuid, importedName: summary.importedName, storageFolder: summary.storageFolder });
         const suffix = session.cardRevision + ':' + uuid;
-        const tx = db.transaction('store', 'readwrite'), store = tx.objectStore('store');
+        const tx = main.transaction('store', 'readwrite'), store = tx.objectStore('store');
         if (typeof card.avatar === 'string' && card.avatar.startsWith('data:') && card.avatar.length >= 65536) {
             store.put({ uuid, storageFolder: card.storageFolder, avatar: card.avatar }, '__rp_card_image__:' + suffix);
             card.avatar = { rphubCardImage: 1 };
@@ -159,8 +176,13 @@ async function prepareCharacters(db, session, restoreValue, signal, progress) {
     return { rphubCardLibrary: 1, cards };
 }
 export async function apply(id, { beforeApply, restoreValue, signal, progress }) {
-    const db = await window.RPHubStorage.initDB();
-    const session = await readSession(db, id);
+    // [rphub 2.9.147] 正式库与暂存库分开：读暂存、写正式，两边各开各的连接。
+    //   原来它们在同一个库、同一个事务里，好处是「要么全成要么全不成」；
+    //   代价是暂存数据留在正式库里清不掉。现在按 key 逐个写，每个 key 自己一个事务，
+    //   导入失败时旧代码那套「恢复旧偏好 + 删掉本次准备好的卡片」照旧执行。
+    const main = await window.RPHubStorage.initDB();
+    const stage = await database();
+    const session = await readSession(stage, id);
     if (session?.state !== 'complete') throw new Error('暂存数据不可用，请重新选择文件');
     const deleted = new Set(session.deleted);
     const records = session.plan.filter(item => !item.key.startsWith('__ls__:')
@@ -168,18 +190,55 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
         && !item.key.startsWith('rp_hub_b1_memory_state_') && !deleted.has(item.key));
     const cardCount = session.plan.find(item => item.key === 'rp_hub_characters')?.count || 0;
     const totalWork = cardCount + records.length + 1;
-    const extras = await prepareExtras(db, session);
+    const extras = await prepareExtras(stage, session);
     cancelled(signal);
     await beforeApply();
     await window.RPLocalStore?.flush();
     window.RPHubStorage.setWritesPaused(true);
     window.RPLocalStore?.setWebWritesPaused(true);
     let journaled = false, committed = false, recoveryRequired = false;
+
+    const writeKey = (key, value) => new Promise((resolve, reject) => {
+        const tx = main.transaction('store', 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onabort = () => reject(tx.error || new DOMException('导入已取消', 'AbortError'));
+        tx.onerror = () => {};
+        try {
+            for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([{ key, value }])) {
+                window.RPHubStorage.putStoredRecord(tx.objectStore('store'), entry.value, entry.key);
+            }
+        } catch (error) {
+            try { tx.abort(); } catch (_) {}
+            reject(error);
+        }
+    });
+
+    const readRecordValue = async record => {
+        if (!record.array) {
+            const unit = await resultOf(stage.transaction('restore_units').objectStore('restore_units')
+                .get([session.id, session.source, record.entry, 0]));
+            return restoreValue(unit?.value);
+        }
+        const value = [];
+        const tx = stage.transaction('restore_units');
+        const request = tx.objectStore('restore_units').openCursor(rangeOf(session.id, session.source, record.entry));
+        await new Promise((resolve, reject) => {
+            request.onsuccess = () => {
+                const cursor = request.result;
+                if (!cursor) { resolve(); return; }
+                try { value.push(restoreValue(cursor.value.value)); cursor.continue(); }
+                catch (error) { reject(error); }
+            };
+            request.onerror = () => reject(request.error);
+        });
+        return value;
+    };
+
     try {
         const oldCardKeys = cardCount || session.plan.some(item => item.key === 'rp_hub_characters')
-            ? (await window.RPHubStorage.readStorageKeys(db))
+            ? (await window.RPHubStorage.readStorageKeys(main))
             .filter(key => key.startsWith('__rp_card__:') || key.startsWith('__rp_card_image__:')) : [];
-        const characters = await prepareCharacters(db, session, restoreValue, signal,
+        const characters = await prepareCharacters(main, stage, session, restoreValue, signal,
             done => progress?.(done, totalWork, '正在整理角色卡 ' + done + ' / ' + cardCount));
         const journal = {
             id, state: 'applying', web: extras.web, cardRevision: session.cardRevision,
@@ -191,79 +250,49 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             try { journal.oldMoments = await resultOf(moments.transaction('moments').objectStore('moments').get('list')); }
             finally { moments.close(); }
         }
-        await saveSession(db, journal);
+        await saveSession(stage, journal);
         journaled = true;
         cancelled(signal);
         if (journal.hasMoments) await writeMoments(extras.moments.map(value => restoreValue(value)));
         cancelled(signal);
+
+        // ① 清掉旧的卡片键与本次要作废的键（单独一个事务，量小）
         await new Promise((resolve, reject) => {
-            const tx = db.transaction(['store', 'restore_units', 'restore_sessions'], 'readwrite');
+            const tx = main.transaction('store', 'readwrite');
             const store = tx.objectStore('store');
             store.delete('__rp_local_mirror_revision');
             oldCardKeys.forEach(key => store.delete(key));
-            let failure;
-            const abort = () => { try { tx.abort(); } catch (_) {} };
-            signal?.addEventListener('abort', abort, { once: true });
-            tx.oncomplete = () => { signal?.removeEventListener('abort', abort); committed = true; resolve(); };
-            tx.onabort = () => { signal?.removeEventListener('abort', abort); reject(failure || tx.error || new DOMException('导入已取消', 'AbortError')); };
+            try {
+                for (const key of deleted) {
+                    for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
+                        { key: key.replace('rp_hub_classic_memories_', 'rp_hub_b1_memory_state_'),
+                            value: { schema: 1, revision: crypto.randomUUID().replaceAll('-', ''), deleted: true } }
+                    ])) store.put(entry.value, entry.key);
+                    store.delete(key);
+                }
+            } catch (error) { try { tx.abort(); } catch (_) {} reject(error); return; }
+            tx.oncomplete = () => resolve();
+            tx.onabort = () => reject(tx.error || new DOMException('导入已取消', 'AbortError'));
             tx.onerror = () => {};
-            const fail = error => { failure = error; abort(); };
-            for (const key of deleted) {
-                for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
-                    { key: key.replace('rp_hub_classic_memories_', 'rp_hub_b1_memory_state_'),
-                        value: { schema: 1, revision: crypto.randomUUID().replaceAll('-', ''), deleted: true } }
-                ])) store.put(entry.value, entry.key);
-                store.delete(key);
-            }
-            const next = index => {
-                try {
-                    cancelled(signal);
-                    if (index === records.length) {
-                        writeWeb(extras.web);
-                        tx.objectStore('restore_sessions').put({ id, state: 'applied', web: extras.web,
-                            cardRevision: session.cardRevision });
-                        return;
-                    }
-                    const record = records[index];
-                    if (record.key === 'rp_hub_characters') {
-                        store.put(characters, record.key);
-                        progress?.(cardCount + index + 1, totalWork);
-                        next(index + 1);
-                        return;
-                    }
-                    let value = record.array ? [] : undefined;
-                    const req = tx.objectStore('restore_units').openCursor(rangeOf(id, session.source, record.entry));
-                    req.onsuccess = () => {
-                        try {
-                            const cursor = req.result;
-                            if (cursor) {
-                                const item = restoreValue(cursor.value.value);
-                                if (record.array) value.push(item); else value = item;
-                                cursor.continue();
-                            } else {
-                                for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
-                                    { key: record.key, value }
-                                ])) window.RPHubStorage.putStoredRecord(store, entry.value, entry.key);
-                                value = null;
-                                progress?.(cardCount + index + 1, totalWork);
-                                next(index + 1);
-                            }
-                        } catch (error) { fail(error); }
-                    };
-                } catch (error) { fail(error); }
-            };
-            next(0);
         });
-        // [rphub 2.9.043] 收尾有两件事：① 把导入结果写成手机上的本地文件副本；② 删掉这次用的
-        //   暂存库（300MB 级备份的暂存库可能几十兆）。两者互不相干，原先排队做，用户就盯着
-        //   「正在保存本机存档」多等一份时间。这里并行发起，并把文案说清「只需一次」。
-        //   这一步不能省：写入本机文件是让下次冷启动直接可用的前提，省掉它只是把同一份等待
-        //   挪到重载之后，用户会以为「启动变慢了」。
+        cancelled(signal);
+
+        // ② 逐条写入：读一条（或一整个数组记录）、写一条，写完就放手。
+        for (let index = 0; index < records.length; index++) {
+            cancelled(signal);
+            const record = records[index];
+            const value = record.key === 'rp_hub_characters' ? characters : await readRecordValue(record);
+            cancelled(signal);
+            await writeKey(record.key, value);
+            progress?.(cardCount + index + 1, totalWork);
+        }
+
+        writeWeb(extras.web);
+        await saveSession(stage, { id, state: 'applied', web: extras.web, cardRevision: session.cardRevision });
+        committed = true;
+        // [rphub 2.9.043] 收尾两件事：写本机文件副本、回收暂存库。文案说明「只需一次」。
         progress?.(totalWork - 1, totalWork, '正在写入本机存档（只需一次，之后启动更快）');
-        await Promise.all([
-            window.RPHubStorage.syncLocalFiles?.() ?? null,
-            removeSession(db, id),
-        ]);
+        await (window.RPHubStorage.syncLocalFiles?.() ?? null);
         progress?.(totalWork, totalWork);
     } catch (error) {
         if (committed) {
@@ -272,8 +301,8 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
         }
         if (!committed) {
             try {
-                if (journaled) await recover(db);
-                else await discardPreparedCards(db, session);
+                if (journaled) await recover(main);
+                else await discardPreparedCards(main, session);
             }
             catch (rollbackError) {
                 recoveryRequired = true;
@@ -288,6 +317,11 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
             window.RPHubStorage.setWritesPaused(false);
             window.RPLocalStore?.setWebWritesPaused(false);
         }
+        try { stage.close(); } catch (_) {}
+        try { main.close?.(); } catch (_) {}
+        // 成功或失败都清掉暂存库：成功时数据已经写进正式库，失败时重导即可。
+        // 这一句是「导一次涨几百兆」的根治点——暂存那几百兆从此不在正式库里。
+        if (!recoveryRequired) await deleteStagingDatabase();
     }
 }
 window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles, verifyChunks, decodeChat };

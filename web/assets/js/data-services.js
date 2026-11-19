@@ -35,7 +35,8 @@
         request.onupgradeneeded = (event) => {
             const database = event.target.result;
             if (!database.objectStoreNames.contains('store')) database.createObjectStore('store');
-            if (name === DB_NAME) window.RPStreamImport.upgrade(database);
+            // [rphub 2.9.147] 不再往正式库里建导入暂存表：它们已迁到独立的 RPHubStagingDB。
+            //   老版本留下的 restore_* 空表不动（删表要升版本，风险大于收益）。
         };
     });
 

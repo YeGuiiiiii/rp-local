@@ -21,8 +21,22 @@ export const completed = tx => new Promise((resolve, reject) => {
     tx.onerror = () => {}; // An error can precede rollback; wait for onabort.
 });
 export const rangeOf = (...keys) => IDBKeyRange.bound(keys, [...keys, []]);
+// [rphub 2.9.147] 暂存库独立成一个数据库。
+//   原先 restore_* 表建在正式库 RPHubDB 里：导一次 265MB 备份，主库要吞下约 400MB 暂存
+//   ＋400MB 正式数据；导完只是删行，IndexedDB 不会把文件缩回去，于是每导一次主库就胖几百兆。
+//   独立成库之后，导完或取消直接 deleteDatabase，空间整块还回去，主库一点都不长。
+export const STAGING_DB_NAME = 'RPHubStagingDB';
+export const deleteStagingDatabase = () => new Promise(resolve => {
+    let request;
+    try { request = indexedDB.deleteDatabase(STAGING_DB_NAME); }
+    catch (error) { resolve(false); return; }
+    const done = () => resolve(true);
+    request.onsuccess = done;
+    request.onerror = done;
+    request.onblocked = done;          // 还有连接没关时会被挡住：不算失败，下次开库会重建
+});
 export const database = () => new Promise((resolve, reject) => {
-    const request = indexedDB.open('RPHubDB', 2);
+    const request = indexedDB.open(STAGING_DB_NAME, 1);
     let settled = false;
     const timer = setTimeout(() => fail(new Error('打开数据库超时，请关闭其他软件页面后重试')), 15000);
     function fail(error) { settled = true; clearTimeout(timer); reject(error); }

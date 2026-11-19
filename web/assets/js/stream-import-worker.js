@@ -1768,8 +1768,9 @@
     };
   });
   var rangeOf = (...keys) => IDBKeyRange.bound(keys, [...keys, []]);
+  var STAGING_DB_NAME = "RPHubStagingDB";
   var database = () => new Promise((resolve, reject) => {
-    const request = indexedDB.open("RPHubDB", 2);
+    const request = indexedDB.open(STAGING_DB_NAME, 1);
     let settled = false;
     const timer = setTimeout(() => fail(new Error("\u6253\u5F00\u6570\u636E\u5E93\u8D85\u65F6\uFF0C\u8BF7\u5173\u95ED\u5176\u4ED6\u8F6F\u4EF6\u9875\u9762\u540E\u91CD\u8BD5")), 15e3);
     function fail(error) {
