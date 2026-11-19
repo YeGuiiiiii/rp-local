@@ -9,10 +9,12 @@
         template: `<div class="mb-4">
           <label class="settings-label" :for="'image-provider-' + fieldId">生图接口</label>
           <div class="flex items-center gap-2">
-            <select :id="'image-provider-' + fieldId" class="settings-control min-w-0 flex-1" :value="api.selectedId" :disabled="!api.ready" @change="api.select($event.target.value)">
+            <select :id="'image-provider-' + fieldId" class="settings-control min-w-0 flex-1" :value="api.selectedId" :disabled="!api.ready" @change="$event.target.value === '__add_image_provider__' ? api.add() : api.select($event.target.value)">
               <option v-for="item in api.profiles" :key="item.id" :value="item.id">{{item.name}}</option>
+              <option value="__add_image_provider__" :disabled="!api.ready">＋ 新增生图接口…</option>
             </select>
-            <button type="button" class="settings-icon-button" aria-label="添加生图接口" title="添加生图接口" :disabled="!api.ready" @click="api.add()"><shell-icon name="Plus"/></button>
+            <!-- [rphub 2.9.142] 去掉右侧的加号：新增入口挪进下拉列表末尾。 -->
+            <!--   直接删掉按钮会让人没法新建接口，所以保留能力、只换位置。 -->
             <button v-if="api.selectedId !== 'builtin'" type="button" class="settings-icon-button" aria-label="删除生图接口" title="删除生图接口" @click="$emit('remove')"><shell-icon name="Trash2"/></button>
           </div>
           <div v-if="api.selectedId !== 'builtin'" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">

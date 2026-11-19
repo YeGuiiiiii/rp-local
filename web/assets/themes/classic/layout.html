@@ -1356,6 +1356,12 @@
 </div>
                                         </div>
                                     </div>
+                                    <div v-if="isCustomApiProvider" class="mb-2">
+                                        <label class="settings-label">站点名称</label>
+                                        <input class="settings-control" :value="selectedApiProvider.name"
+                                            @input="updateCustomApiProvider(selectedApiProvider.id, 'name', $event.target.value)"
+                                            placeholder="给这个站点起个名字" aria-label="自定义站点名称">
+                                    </div>
                                     <div v-if="isCustomApiProvider" class="relative">
                                         <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2717,6 +2723,12 @@
                                                 </button>
 </div>
                                         </div>
+                                    </div>
+                                    <div v-if="isCustomApiProvider" class="mb-2">
+                                        <label class="settings-label">站点名称</label>
+                                        <input class="settings-control" :value="selectedApiProvider.name"
+                                            @input="updateCustomApiProvider(selectedApiProvider.id, 'name', $event.target.value)"
+                                            placeholder="给这个站点起个名字" aria-label="自定义站点名称">
                                     </div>
                                     <div v-if="isCustomApiProvider" class="relative">
                                         <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">

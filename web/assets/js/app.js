@@ -13699,7 +13699,7 @@ const app = createApp({
             // 计数单独报给调用方，由它提示「待补」，避免一条缺来源把整批带停。
             const coverage = summarizeSummaryEmbeddingCoverage(snapshot, sources, model, apiUrl);
             const jobs = getSummaryEmbeddingJobs(snapshot, sources);
-            let written = 0, skippedChanged = 0, cancelled = false;
+            let written = 0, skippedChanged = 0, cancelled = false, emptyStreak = 0;
             // 返回值把「请求了几条 / 写成几条 / 缺几条原文 / 几条在请求期间变了 / 是否被取消」
             // 分开报：调用方据此区分正常跳过、过期丢弃与失败，不把正文已提交的操作报成失败。
             const settle = () => ({
@@ -13731,7 +13731,18 @@ const app = createApp({
                 });
                 let batchWritten = 0;
                 const intent = await tryBeginMemoryIntent('建立向量索引');
-                if (!intent || !updateByKey.size) { skippedChanged += batch.length; continue; }
+                if (!intent || !updateByKey.size) {
+                    skippedChanged += batch.length;
+                    emptyStreak += 1;
+                    if (isCurrent()) onProgress?.(written + skippedChanged, jobs.length);
+                    // 连续三批一条都写不进去，说明基线一直在变或存储被暂停；
+                    // 继续跑只是把剩下几百条请求一遍再丢掉，既费钱也看不到进展。
+                    if (emptyStreak >= 3) {
+                        throw new Error('向量写入被持续拒绝（记忆可能同时变动，或存储正在维护），已停止本次补录以免空转');
+                    }
+                    continue;
+                }
+                emptyStreak = 0;
                 const applyVectorUpdates = list => list.map(item => {
                     const update = updateByKey.get(summarySourceKey(item));
                     if (!update) {
@@ -13766,7 +13777,9 @@ const app = createApp({
                 skippedChanged += batch.length - batchWritten;
                 if (!result.published) return settle();
                 written += batchWritten;
-                if (isCurrent()) onProgress?.(written, jobs.length);
+                // [rphub 2.9.142] 进度算「已处理」，不能只算「已写入」：
+                //   写入被拒时一条都不涨，654 条的任务会一直停在 16/654，看起来就是卡死。
+                if (isCurrent()) onProgress?.(written + skippedChanged, jobs.length);
             }
             return settle();
         };
