@@ -1,6 +1,6 @@
 # RP-Local 2.9.138
 
-当前安装包：[下载 2.9.138 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.138/RP-local-2.9.138.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.138/SHA256SUMS-2.9.138.txt)。发布页与软件内更新的验收状态分别记录在 [维护清单](MAINTENANCE.md) 的 R06；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
+当前安装包：[下载 2.9.150 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.150/RP-local-2.9.150.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.150/SHA256SUMS-2.9.150.txt)。发布页与软件内更新的验收状态分别记录在 [维护清单](MAINTENANCE.md) 的 R07；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
 
 本版为 **2.9.138**，Android versionCode 为 **397**，基于完整 `2.9.137` 主线，包含 `2.9.136`、`2.9.134`、`2.9.117` 等已有修复。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
 
