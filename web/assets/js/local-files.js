@@ -225,6 +225,43 @@
             delete inventory[key];
             if (bridge) write('个人数据/文件索引.json', inventory);
         }),
+        // [rphub 2.9.148] 角色卡文件夹的可删清单。
+        //   角色卡写盘走的是 saveEntry 里的特例分支（直接 write 角色卡.json / 封面数据.json），
+        //   从来没有进 inventory，所以按账本清理时永远看不到它们——删卡、重导都会把旧文件夹留下。
+        //   这里改成「按目录扫」：不依赖账本，谁在盘上就报谁。
+        listCardFolders: () => {
+            if (!bridge) return [];
+            const out = [];
+            let folders = [];
+            try { folders = call('list', '角色卡数据').filter(item => item.directory); }
+            catch (error) { return out; }
+            folders.forEach(folder => {
+                let files = 0, bytes = 0;
+                try {
+                    call('list', '角色卡数据/' + folder.name).forEach(entry => {
+                        if (entry.directory) return;
+                        files += 1;
+                        bytes += Number(entry.size || entry.bytes || 0) || 0;
+                    });
+                } catch (error) { /* 读不到就按 0 算 */ }
+                out.push({ name: folder.name, files, bytes });
+            });
+            return out;
+        },
+        // 只删文件夹里的文件，不删目录本身：桥的 remove 对目录的语义没有保证，
+        //   删空目录省不了多少空间，删错目录却是不可逆的。
+        removeCardFolderFiles: folder => {
+            if (!bridge || !folder) return 0;
+            let removed = 0;
+            try {
+                call('list', '角色卡数据/' + folder).forEach(entry => {
+                    if (entry.directory) return;
+                    try { call('remove', '角色卡数据/' + folder + '/' + entry.name); removed += 1; }
+                    catch (error) { /* 单个失败不影响其它文件 */ }
+                });
+            } catch (error) { return removed; }
+            return removed;
+        },
         flush: async () => {
             await queue;
             if (pendingFailures.size) throw pendingFailures.values().next().value;

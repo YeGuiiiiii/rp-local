@@ -6443,6 +6443,11 @@ const app = createApp({
                 const imageDataUrls = new Map();
                 const dataUrlPattern = /data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g;
                 const tokenUsageLimit = getTokenUsageHealthLimit();
+                // [rphub 2.9.148] 孤儿聊天：作用域归属的角色卡已不在列表里（删卡、或导入了不含它的备份），
+                //   数据还躺在主库里，界面上永远看不到，也永远不会被清理到。
+                const activeOwners = new Set(characters.value.map(card => String(card.uuid || '')).filter(Boolean));
+                const orphanChatKeys = [];
+                let orphanChatBytes = 0, orphanChatCount = 0;
                 // ---- 口径二（备份体积）的累加器：字段与 2.8.94 起逐字一致 ----
                 let backupTotalBytes = 0;
                 let backupCount = 0;
@@ -6479,6 +6484,14 @@ const app = createApp({
                             duplicateUiCount += result.removedCount;
                             duplicateUiBytes += result.savedBytes;
                             duplicateUiTargets.push('全局 UI 模板');
+                        }
+                    }
+                    if (logicalKey.startsWith('chat_')) {
+                        const owner = String(logicalKey.slice(5)).split('__branch__')[0];
+                        if (owner && !activeOwners.has(owner)) {
+                            orphanChatCount += 1;
+                            orphanChatBytes += estimateDataHealthSize(value);
+                            orphanChatKeys.push(entry.key);
                         }
                     }
                     if (logicalKey.startsWith('chat_') && Array.isArray(value)) {
@@ -6592,6 +6605,36 @@ const app = createApp({
                     duplicateImageCount += info.count - 1;
                     duplicateImageBytes += (info.count - 1) * info.sampleLength;
                 });
+                if (orphanChatCount > 0) {
+                    items.push({
+                        id: 'orphan-chats',
+                        label: '无主聊天记录',
+                        detail: '这些聊天所属的角色卡已不在列表里（删卡或导入了别的备份）。清理只删这些聊天，不动当前角色卡。',
+                        bytes: orphanChatBytes,
+                        count: orphanChatCount,
+                        cleanable: true,
+                        action: 'purge-orphan-chats',
+                        keys: orphanChatKeys.slice(0, 500)
+                    });
+                }
+                try {
+                    const folders = window.RPLocalStore?.available && typeof window.RPLocalStore.listCardFolders === 'function'
+                        ? window.RPLocalStore.listCardFolders() : [];
+                    const liveFolders = new Set(characters.value.map(card => card.storageFolder).filter(Boolean));
+                    const dead = folders.filter(folder => !liveFolders.has(folder.name));
+                    if (dead.length) {
+                        items.push({
+                            id: 'orphan-card-folders',
+                            label: '无主角色卡文件夹',
+                            detail: '本机文件夹里的旧角色卡（' + dead.length + ' 个）。清理只删这些文件夹里的文件，不动当前角色卡。',
+                            bytes: dead.reduce((sum, folder) => sum + folder.bytes, 0),
+                            count: dead.length,
+                            cleanable: true,
+                            action: 'purge-card-folders',
+                            folders: dead.map(folder => folder.name).slice(0, 500)
+                        });
+                    }
+                } catch (error) { /* 本机文件不可用就跳过 */ }
                 if (duplicateImageCount > 0) {
                     items.push({
                         id: 'duplicate-images',
@@ -6793,6 +6836,20 @@ const app = createApp({
                     }
                     if (changed) {
                         await setStoredValue('global_ui_templates', globalUiTemplates.value);
+                    }
+                } else if (item.action === 'purge-orphan-chats') {
+                    // [rphub 2.9.148] 只删「所属角色卡已不在列表里」的聊天，逐个走既有删除通道，
+                    //   顺带把本机文件副本一起清掉；不认识的键一律跳过。
+                    for (const key of item.keys || []) {
+                        const logical = getStorageLogicalKey(key);
+                        if (!logical.startsWith('chat_')) continue;
+                        await deleteScopedStoredValue('chat', logical.slice('chat_'.length));
+                    }
+                } else if (item.action === 'purge-card-folders') {
+                    // 只删文件夹里的文件，不删目录：目录删除的语义在桥上没有保证。
+                    for (const folder of item.folders || []) {
+                        try { window.RPLocalStore?.removeCardFolderFiles?.(folder); }
+                        catch (error) { /* 单个文件夹失败不影响其它 */ }
                     }
                 } else if (item.action === 'slim-chat-ui') {
                     if (!getMainDb()) await initDB();
@@ -15040,6 +15097,11 @@ const app = createApp({
                 if (!template.runtimeByCharacter) return;
                 [char.uuid, ...allBranchScopeIds].forEach(scopeId => delete template.runtimeByCharacter[scopeId]);
             });
+            // [rphub 2.9.148] 删卡顺手清本机文件夹。
+            //   原来 remove() 对 __rp_card__ 直接 return，写盘时又没进账本，
+            //   于是「删卡」只删了库里的记录，本机 角色卡数据/<角色>/ 一直留着（大卡十几兆）。
+            try { window.RPLocalStore?.removeCardFolderFiles?.(char.storageFolder); }
+            catch (error) { /* 文件夹清理失败不影响删卡 */ }
         };
 
         const finishCharacterDeletion = async () => {
