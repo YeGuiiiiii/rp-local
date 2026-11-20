@@ -309,24 +309,16 @@
                 if (entry.name === 'chat') yield deletedMemory(entry.id);
             }
         };
-        let session, recoveryRequired = false;
-        try {
-            session = await window.RPStreamImport.stageEntries(records(), {
-                limits: window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile'))
-            });
-            await window.RPStreamImport.apply(session, {
-                beforeApply: async () => {
-                    const saved = await options.saveAll();
-                    if (saved?.ok === false) throw saved.error || new Error('保存当前数据失败');
-                }, restoreValue: options.decode,
-                progress: (done, total, label = '正在恢复备份') => onProgress({ label, percent: 90 + done / total * 10, detail: `${done} / ${total} 项` })
-            });
-        } catch (error) {
-            recoveryRequired = error.recoveryRequired;
-            throw error;
-        } finally {
-            if (session && !recoveryRequired) await window.RPStreamImport.removeSession(storage().getMainDb(), session);
-        }
+        const session = await window.RPStreamImport.stageEntries(records(), {
+            limits: window.RPStreamImport.profile(localStorage.getItem('rp-backup-profile'))
+        });
+        await window.RPStreamImport.apply(session, {
+            beforeApply: async () => {
+                const saved = await options.saveAll();
+                if (saved?.ok === false) throw saved.error || new Error('保存当前数据失败');
+            }, restoreValue: options.decode,
+            progress: (done, total, label = '正在恢复备份') => onProgress({ label, percent: 90 + done / total * 10, detail: `${done} / ${total} 项` })
+        });
     };
 
     const useCloudBackup = ({ saveAll, toast, decode, transfer }) => {

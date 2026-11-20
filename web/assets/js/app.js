@@ -4904,7 +4904,7 @@ const app = createApp({
                 progress: value => Object.assign(backupTask, { percent: value.percent, message: value.label, detail: value.detail }),
                 finish: () => { backupTask.active = false; },
                 fail: error => Object.assign(backupTask, { locked: !!error.recoveryRequired, recovery: !!error.recoveryRequired,
-                    error: error.message || String(error), message: error.recoveryRequired ? '需要恢复原数据' : '操作未完成，请重试' })
+                    error: error.message || String(error), message: error.recoveryRequired ? '请重新打开软件完成恢复' : '操作未完成，请重试' })
             }
         });
         // Export Modal State
@@ -5305,6 +5305,7 @@ const app = createApp({
                 if (isManualTrigger) showToast('正在执行全量自动备份...', 'info');
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
+                const backupSettings = await snapshotBackupSettings();
 
                 const fileName = 'rp-hub-autobackup-' + todayStr + '-' + timeCode + '.json';
                 const bridge = window.AndroidBridge;
@@ -5320,6 +5321,7 @@ const app = createApp({
                     if (legacyEntries.length) {
                         entries = entries.concat(legacyEntries);
                     }
+                    entries = entries.map(entry => withBackupSettings(entry, backupSettings));
                     // [rphub 互通] 外壳必须与桌面版 App 逐字段一致。桌面端 exportAllData 写的是
                     //   type + __rphub_backup__ + version:8 + entries + databases + webStorage。
                     //   旧实现只写 type / version:1 / entries：桌面端仍能读到 entries（分支 A 只认 type），
@@ -5384,7 +5386,7 @@ const app = createApp({
                     // 只留逻辑键（O(键数)），供遗留库去重；不保留条目本体
                     if (slim && slim.key !== undefined) mainLogicalKeys.add(getStorageLogicalKey(String(slim.key)));
                     // slim.value 已由 slimBackupEntry 深克隆过，直接复用，不再重复 unwrapForStorage
-                    writeEntry(slim);
+                    writeEntry(withBackupSettings(slim, backupSettings));
                 }, () => gateTripped);
 
                 if (gateTripped) {
@@ -6173,6 +6175,20 @@ const app = createApp({
             'global_ui_templates', 'global_worldinfo', 'last_active_char', 'memory_settings',
             'presets', 'preset_groups', 'regex', 'settings', 'user', 'user_profiles', 'worldinfo', 'worldinfo_settings'
         ].includes(logicalKey);
+        const snapshotBackupSettings = async () => {
+            const imageProviderBackup = await imageApi.backupSnapshot();
+            const value = { ...retainedSettingsExtras, ...settings,
+                imageGenKey: imageProviderBackup.profiles.find(item => item.id === 'builtin').key };
+            delete value.imageProviderBackup;
+            const saved = await window.RPHubStorage.commitStoredValueBatch({
+                writes: [{ key: 'rp_hub_settings', value }]
+            });
+            if (!['committed', 'unchanged'].includes(saved.status))
+                throw saved.error || new Error('设置保存失败，请重试');
+            return { ...value, imageProviderBackup };
+        };
+        const withBackupSettings = (entry, value) => getStorageLogicalKey(entry.key) === 'settings'
+            ? { ...entry, value } : entry;
         const shouldIncludeBackupEntry = (entry) => {
             const logicalKey = getStorageLogicalKey(entry.key);
             // [rphub 2.9.034] 旧版自动备份快照（auto_backup_<日期>_<ts>）不再进新备份。
@@ -6983,6 +6999,7 @@ const app = createApp({
                 if (isConversationBusy.value || isClassicBatchExtracting.value) throw new Error('请先停止当前生成或记忆补录，再进行备份');
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
+                const backupSettings = await snapshotBackupSettings();
                 const fileName = buildBackupFileName();
                 const nativeBridge = window.AndroidBridge;
                 // [rphub 2.9.103] 备份固定走「下载」通道（RP本地版 根目录），不再受用户选择影响
@@ -7021,7 +7038,8 @@ const app = createApp({
                     entries: entries(), total: new Set(keys.flat().filter(key => !key.startsWith('__rp_')
                         && shouldIncludeBackupEntry({ key })).map(getStorageLogicalKey)).size + local.length,
                     readCharacter: window.RPHubStorage.readCharacter,
-                    transform: entry => slimBackupEntry(entry, true), companions: collectCompanionDatabasesDump,
+                    transform: entry => withBackupSettings(slimBackupEntry(entry, true), backupSettings),
+                    companions: collectCompanionDatabasesDump,
                     webStorage: () => Object.fromEntries(Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
                         .filter(Boolean).map(key => [key, localStorage.getItem(key)])),
                     progress: value => Object.assign(backupTask, { percent: value.percent, message: value.message,

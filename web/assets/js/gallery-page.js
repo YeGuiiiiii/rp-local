@@ -107,7 +107,7 @@
             const selectMode = ref(false);
             const picked = ref([]);
             const notice = ref('');
-            let pressTimer = null, pressMoved = false, pressStart = null;
+            let pressTimer = null, pressStart = null, longPressed = null;
             const isPicked = name => picked.value.indexOf(name) >= 0;
             const enterSelect = photo => {
                 selectMode.value = true;
@@ -125,33 +125,39 @@
             };
             const exitSelect = () => { selectMode.value = false; picked.value = []; };
             const startPress = (photo, event) => {
+                if (!event.isPrimary || event.button !== 0) return;
+                longPressed = null;
                 if (selectMode.value) return;
-                pressMoved = false;
-                pressStart = { x: event.clientX, y: event.clientY };
+                pressStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
                 clearTimeout(pressTimer);
                 pressTimer = setTimeout(() => {
                     pressTimer = null;
-                    if (!pressMoved) enterSelect(photo);
+                    longPressed = photo.name;
+                    enterSelect(photo);
                 }, 450);
             };
             const movePress = event => {
-                if (!pressStart) return;
-                if (Math.abs(event.clientX - pressStart.x) > 10 || Math.abs(event.clientY - pressStart.y) > 10) pressMoved = true;
+                if (event.pointerId !== pressStart?.id) return;
+                if (Math.abs(event.clientX - pressStart.x) > 10 || Math.abs(event.clientY - pressStart.y) > 10) endPress();
             };
-            const endPress = () => { clearTimeout(pressTimer); pressTimer = null; pressStart = null; };
-            const onPhotoClick = (photo, index) => {
+            const endPress = event => {
+                if (event && event.pointerId !== pressStart?.id) return;
+                clearTimeout(pressTimer); pressTimer = null; pressStart = null;
+            };
+            const onPhotoClick = (photo, index, event) => {
+                if (event.detail && photo.name === longPressed) { longPressed = null; return; }
                 if (selectMode.value) { togglePick(photo); return; }
                 previewIndex.value = index;
                 zoomed.value = false;
             };
-            const removeBrowserPhoto = (key, owner) => new Promise((resolve, reject) => {
+            const removeBrowserPhoto = key => new Promise((resolve, reject) => {
                 const request = indexedDB.open('RPHubImageVaultV1', 1);
                 request.onsuccess = () => {
                     const db = request.result;
                     const tx = db.transaction('images', 'readwrite');
                     tx.objectStore('images').delete(key);
                     tx.oncomplete = () => { db.close(); resolve(true); };
-                    tx.onerror = () => { db.close(); reject(tx.error); };
+                    tx.onabort = () => { db.close(); reject(tx.error); };
                 };
                 request.onerror = () => reject(request.error);
             });
@@ -171,22 +177,29 @@
                 if (!fail) exitSelect();
             };
             const batchRemove = async () => {
-                if (!picked.value.length) return;
+                if (!picked.value.length || saving.value || !selected.value) return;
                 const list = [...picked.value];
                 if (!window.confirm('删除选中的 ' + list.length + ' 张图片？此操作不可撤销')) return;
-                const base = '图片/' + folder(selected.value);
-                let ok = 0, fail = 0;
-                for (const name of list) {
-                    try {
-                        if (local.available) local.call('remove', base + '/' + name);
-                        else await removeBrowserPhoto(name, selected.value.uuid);
-                        ok += 1;
-                    } catch (_) { fail += 1; }
+                const card = selected.value, token = sequence;
+                const base = '图片/' + folder(card), removed = new Set();
+                saving.value = true;
+                try {
+                    for (const name of list) {
+                        try {
+                            if (local.available) local.call('remove', base + '/' + name);
+                            else await removeBrowserPhoto(name);
+                            removed.add(name);
+                        } catch (_) {}
+                    }
+                    if (token !== sequence) return;
+                    photos.value = photos.value.filter(photo => !removed.has(photo.name));
+                    counts.value[card.uuid] = photos.value.length;
+                    const failed = list.length - removed.size;
+                    notice.value = '已删除 ' + removed.size + ' 张' + (failed ? '，失败 ' + failed + ' 张' : '');
+                    exitSelect();
+                } finally {
+                    saving.value = false;
                 }
-                photos.value = photos.value.filter(photo => list.indexOf(photo.name) < 0);
-                counts.value[selected.value.uuid] = photos.value.length;
-                notice.value = '已删除 ' + ok + ' 张' + (fail ? '，失败 ' + fail + ' 张' : '');
-                exitSelect();
             };
             const keys = event => {
                 if (!props.active || !preview.value) return;
@@ -202,7 +215,7 @@
             watch(() => props.characters.map(card => card.uuid + ':' + card.storageFolder).join('|'), () => {
                 if (props.active) refreshCounts();
             });
-            onBeforeUnmount(() => { sequence++; releaseUrls(); window.removeEventListener('keydown', keys); });
+            onBeforeUnmount(() => { sequence++; endPress(); releaseUrls(); window.removeEventListener('keydown', keys); });
             expose({ back, open, selectedId });
             return { search, selected, albums, photos, counts, loading, error, limit, preview, previewIndex, zoomed, saving, open, back, move, save, coverLoaded,
                 selectMode, picked, notice, isPicked, togglePick, selectAll, exitSelect, startPress, movePress, endPress, onPhotoClick, batchSave, batchRemove,
@@ -233,7 +246,7 @@
               <div class="shell-photo-grid" :class="{'is-selecting':selectMode}" @pointermove.passive="movePress" @pointerup="endPress" @pointercancel="endPress" @pointerleave="endPress">
                 <button v-for="(photo,index) in photos.slice(0,limit)" :key="photo.name" type="button"
                   class="image-glass shell-photo-cell" :class="{'is-picked':isPicked(photo.name)}"
-                  @pointerdown="startPress(photo, $event)" @click="onPhotoClick(photo, index)"
+                  @pointerdown="startPress(photo, $event)" @click="onPhotoClick(photo, index, $event)"
                   :aria-pressed="selectMode ? isPicked(photo.name) : null"
                   :aria-label="'第 '+(index+1)+' 张图片'">
                   <img :src="photo.url" alt="" loading="lazy">
@@ -245,7 +258,7 @@
                 <span class="shell-gallery-count">已选 {{picked.length}} 张</span>
                 <button type="button" class="shell-gallery-action" @click="selectAll"><icon name="CheckCheck"/>全选</button>
                 <button type="button" class="shell-gallery-action" :disabled="!picked.length||saving" @click="batchSave"><icon name="Download"/>{{saving?'保存中':'下载'}}</button>
-                <button type="button" class="shell-gallery-action is-danger" :disabled="!picked.length" @click="batchRemove"><icon name="Trash2"/>删除</button>
+                <button type="button" class="shell-gallery-action is-danger" :disabled="!picked.length||saving" @click="batchRemove"><icon name="Trash2"/>删除</button>
                 <button type="button" class="shell-gallery-action" @click="exitSelect">取消</button>
               </div>
               <button v-if="limit<photos.length" type="button" class="shell-button" @click="limit+=48">加载更多图片</button>

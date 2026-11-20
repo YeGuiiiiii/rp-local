@@ -2290,6 +2290,7 @@
 
   // scripts/stream-import/client.mjs
   var readSession = (db, id) => resultOf(db.transaction("restore_sessions").objectStore("restore_sessions").get(id));
+  var commitKey = (id) => "__rp_restore_commit__:" + id;
   var webText = (value) => String(value ?? "");
   var cancelled = (signal) => {
     if (signal?.aborted) throw new DOMException("\u5BFC\u5165\u5DF2\u53D6\u6D88", "AbortError");
@@ -2321,8 +2322,14 @@
       await saveSession(db, { id, ...result, source: "entries", state: "complete" });
       return id;
     } catch (error) {
-      await removeSession(db, id);
+      try {
+        await removeSession(db, id);
+      } catch (cleanupError) {
+        console.warn("\u6E05\u7406\u5BFC\u5165\u6682\u5B58\u5931\u8D25:", cleanupError);
+      }
       throw error;
+    } finally {
+      db.close();
     }
   }
   async function momentsDb() {
@@ -2379,28 +2386,42 @@
     }
     await completed(tx);
   }
+  async function recoverSession(main, session) {
+    const key = commitKey(session.id);
+    const committed = session.state === "applied" || await resultOf(main.transaction("store").objectStore("store").get(key));
+    if (session.state === "applying" || session.state === "applied") {
+      if (committed && session.imageProviders)
+        await window.RPImageProviders.persistConfig(session.imageProviders);
+      const items = committed ? session.web : session.oldWeb;
+      if (!committed && session.hasMoments) await writeMoments(session.oldMoments);
+      writeWeb(items);
+      for (const { key: key2, value } of items) {
+        if (value === null) await window.RPLocalStore?.remove("__ls__:" + key2);
+        else await window.RPLocalStore?.save("__ls__:" + key2, value);
+      }
+    }
+    if (!committed) await discardPreparedCards(main, session);
+  }
   async function recover(main) {
     const stage = await database();
-    const sessions = await resultOf(stage.transaction("restore_sessions").objectStore("restore_sessions").getAll());
-    for (const session of sessions) {
-      if (session.state === "applying" || session.state === "applied") {
-        window.RPLocalStore?.setWebWritesPaused(true);
-        try {
-          const items = session.state === "applying" ? session.oldWeb : session.web;
-          if (session.state === "applying" && session.hasMoments) await writeMoments(session.oldMoments);
-          writeWeb(items);
-          for (const { key, value } of items) {
-            if (value === null) await window.RPLocalStore?.remove("__ls__:" + key);
-            else await window.RPLocalStore?.save("__ls__:" + key, value);
-          }
-        } finally {
-          window.RPLocalStore?.setWebWritesPaused(false);
-        }
+    window.RPLocalStore?.setWebWritesPaused(true);
+    try {
+      const sessions = await resultOf(stage.transaction("restore_sessions").objectStore("restore_sessions").getAll());
+      for (const session of sessions) {
+        await recoverSession(main, session);
+        await removeSession(stage, session.id);
       }
-      if (session.state !== "applied") await discardPreparedCards(main, session);
-      await removeSession(stage, session.id);
+      const keys = await window.RPHubStorage.readStorageKeys(main);
+      const markers = keys.filter((key) => key.startsWith("__rp_restore_commit__:"));
+      if (markers.length) {
+        const tx = main.transaction("store", "readwrite");
+        markers.forEach((key) => tx.objectStore("store").delete(key));
+        await completed(tx);
+      }
+    } finally {
+      window.RPLocalStore?.setWebWritesPaused(false);
+      stage.close();
     }
-    stage.close();
     const legacy = ["restore_sessions", "restore_units", "restore_records", "restore_web", "restore_companions"].filter((name) => main.objectStoreNames.contains(name));
     if (legacy.length) {
       try {
@@ -2422,23 +2443,27 @@
     }
     if ([...web].reduce((total, [key, value]) => total + (key.length + value.length) * 2, 0) > 16 * 1048576)
       throw new Error("\u504F\u597D\u8BBE\u7F6E\u4F53\u79EF\u8D85\u8FC7 16 MB");
-    const groups = /* @__PURE__ */ new Map();
-    let bytes = 0;
+    let priority = Infinity, bytes = 0, moments;
+    const maxMomentsBytes = Math.max(32 * 1048576, Number(session.unitBytes) || 0);
     await each(db, "restore_companions", rangeOf(session.id), (item) => {
-      const priority2 = item.database === "sf_moments_db" && item.store === "moments" ? 0 : item.database === "SakuraMomentsDB" && item.store === "moments" ? 1 : item.database === "moments" && item.store === "list" ? 2 : -1;
-      if (priority2 < 0) return;
+      const rank = item.database === "sf_moments_db" && item.store === "moments" ? 0 : item.database === "SakuraMomentsDB" && item.store === "moments" ? 1 : item.database === "moments" && item.store === "list" ? 2 : -1;
+      if (rank < 0 || rank > priority) return;
+      if (rank < priority) {
+        priority = rank;
+        bytes = 0;
+        moments = [];
+      }
       bytes += item.bytes;
-      const maxMomentsBytes = Math.max(32 * 1048576, Number(session.unitBytes) || 0);
-      if (bytes > maxMomentsBytes)
-        throw new Error("\u540D\u573A\u9762\u6570\u636E\u8D85\u8FC7 " + maxMomentsBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD");
-      if (!groups.has(priority2)) groups.set(priority2, []);
+      if (bytes > maxMomentsBytes) return;
       const record = item.value;
       const value = record && typeof record === "object" && Object.hasOwn(record, "v") ? record.v : record;
-      if ((record?.k ?? record?.key) === "list" && Array.isArray(value)) groups.get(priority2).push(...value);
-      else groups.get(priority2).push(value);
+      if ((record?.k ?? record?.key) === "list" && Array.isArray(value)) {
+        for (const moment of value) moments.push(moment);
+      } else moments.push(value);
     });
-    const priority = [...groups.keys()].sort()[0];
-    return { web: [...web].map(([key, value]) => ({ key, value })), moments: groups.get(priority) };
+    if (bytes > maxMomentsBytes)
+      throw new Error("\u540D\u573A\u9762\u6570\u636E\u8D85\u8FC7 " + maxMomentsBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD");
+    return { web: [...web].map(([key, value]) => ({ key, value })), moments };
   }
   async function prepareCharacters(main, stage, session, restoreValue, signal, progress) {
     const record = session.plan.find((item) => item.key === "rp_hub_characters");
@@ -2479,12 +2504,39 @@
     return { rphubCardLibrary: 1, cards };
   }
   async function apply(id, { beforeApply, restoreValue, signal, progress }) {
-    const main = await window.RPHubStorage.initDB();
-    const stage = await database();
+    const main = await window.RPHubStorage.initDB(), stage = await database();
+    let retain = false;
+    try {
+      await applySession(main, stage, id, { beforeApply, restoreValue, signal, progress });
+    } catch (error) {
+      retain = !!error.recoveryRequired;
+      throw error;
+    } finally {
+      try {
+        if (!retain) await removeSession(stage, id);
+      } catch (error) {
+        retain = true;
+        console.warn("\u6E05\u7406\u5BFC\u5165\u6682\u5B58\u5931\u8D25:", error);
+      } finally {
+        stage.close();
+      }
+      if (!retain) {
+        try {
+          const tx = main.transaction("store", "readwrite");
+          tx.objectStore("store").delete(commitKey(id));
+          await completed(tx);
+        } catch (error) {
+          console.warn("\u6E05\u7406\u5BFC\u5165\u63D0\u4EA4\u6807\u8BB0\u5931\u8D25:", error);
+        }
+        await deleteStagingDatabase();
+      }
+    }
+  }
+  async function applySession(main, stage, id, { beforeApply, restoreValue, signal, progress }) {
     const session = await readSession(stage, id);
     if (session?.state !== "complete") throw new Error("\u6682\u5B58\u6570\u636E\u4E0D\u53EF\u7528\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u6587\u4EF6");
     const deleted = new Set(session.deleted);
-    const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && item.key !== "__rp_local_mirror_revision" && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
+    const records = session.plan.filter((item) => !item.key.startsWith("__ls__:") && item.key !== "__rp_local_mirror_revision" && !item.key.startsWith("__rp_restore_commit__:") && !item.key.startsWith("rp_hub_b1_memory_state_") && !deleted.has(item.key));
     const cardCount = session.plan.find((item) => item.key === "rp_hub_characters")?.count || 0;
     const totalWork = cardCount + records.length + 1;
     const extras = await prepareExtras(stage, session);
@@ -2493,25 +2545,7 @@
     await window.RPLocalStore?.flush();
     window.RPHubStorage.setWritesPaused(true);
     window.RPLocalStore?.setWebWritesPaused(true);
-    let journaled = false, committed = false, recoveryRequired = false;
-    const writeKey = (key, value) => new Promise((resolve, reject) => {
-      const tx = main.transaction("store", "readwrite");
-      tx.oncomplete = () => resolve();
-      tx.onabort = () => reject(tx.error || new DOMException("\u5BFC\u5165\u5DF2\u53D6\u6D88", "AbortError"));
-      tx.onerror = () => {
-      };
-      try {
-        for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([{ key, value }])) {
-          window.RPHubStorage.putStoredRecord(tx.objectStore("store"), entry.value, entry.key);
-        }
-      } catch (error) {
-        try {
-          tx.abort();
-        } catch (_) {
-        }
-        reject(error);
-      }
-    });
+    let journal, committed = false, recoveryRequired = false;
     const readRecordValue = async (record) => {
       if (!record.array) {
         const unit = await resultOf(stage.transaction("restore_units").objectStore("restore_units").get([session.id, session.source, record.entry, 0]));
@@ -2539,6 +2573,14 @@
       return value;
     };
     try {
+      const settingsRecord = records.find((item) => item.key === "rp_hub_settings");
+      const settings = settingsRecord && await readRecordValue(settingsRecord);
+      const imageProviders = Object.hasOwn(settings ?? {}, "imageProviderBackup") ? window.RPImageProviders.validateConfig(settings.imageProviderBackup) : void 0;
+      if (settings && typeof settings === "object") {
+        delete settings.imageProviderBackup;
+        if (imageProviders) settings.imageGenKey = imageProviders.profiles.find((item) => item.id === "builtin").key;
+        else delete settings.imageGenKey;
+      }
       const oldCardKeys = cardCount || session.plan.some((item) => item.key === "rp_hub_characters") ? (await window.RPHubStorage.readStorageKeys(main)).filter((key) => key.startsWith("__rp_card__:") || key.startsWith("__rp_card_image__:")) : [];
       const characters = await prepareCharacters(
         main,
@@ -2548,33 +2590,91 @@
         signal,
         (done) => progress?.(done, totalWork, "\u6B63\u5728\u6574\u7406\u89D2\u8272\u5361 " + done + " / " + cardCount)
       );
-      const journal = {
+      const snapshot = {
         id,
         state: "applying",
         web: extras.web,
         cardRevision: session.cardRevision,
+        imageProviders,
         oldWeb: extras.web.map(({ key }) => ({ key, value: localStorage.getItem(key) })),
         hasMoments: extras.moments !== void 0
       };
-      if (journal.hasMoments) {
+      if (snapshot.hasMoments) {
         const moments = await momentsDb();
         try {
-          journal.oldMoments = await resultOf(moments.transaction("moments").objectStore("moments").get("list"));
+          snapshot.oldMoments = await resultOf(moments.transaction("moments").objectStore("moments").get("list"));
         } finally {
           moments.close();
         }
       }
-      await saveSession(stage, journal);
-      journaled = true;
+      await saveSession(stage, snapshot);
+      journal = snapshot;
       cancelled(signal);
       if (journal.hasMoments) await writeMoments(extras.moments.map((value) => restoreValue(value)));
       cancelled(signal);
       await new Promise((resolve, reject) => {
-        const tx = main.transaction("store", "readwrite");
+        const tx = main.transaction("store", "readwrite", { durability: "strict" });
         const store = tx.objectStore("store");
-        store.delete("__rp_local_mirror_revision");
-        oldCardKeys.forEach((key) => store.delete(key));
+        const marker = commitKey(id);
+        let failure, index = 0;
+        const fail = (error) => {
+          failure ||= error;
+          try {
+            tx.abort();
+          } catch (_) {
+          }
+        };
+        const abort = () => fail(new DOMException("\u5BFC\u5165\u5DF2\u53D6\u6D88", "AbortError"));
+        const settle = (error) => {
+          signal?.removeEventListener("abort", abort);
+          if (error) reject(error);
+          else resolve();
+        };
+        tx.oncomplete = () => settle();
+        tx.onabort = () => settle(failure || tx.error || new Error("\u5BFC\u5165\u4E8B\u52A1\u5931\u8D25"));
+        store.fail = fail;
+        signal?.addEventListener("abort", abort, { once: true });
+        const next = () => {
+          cancelled(signal);
+          if (index === records.length) {
+            writeWeb(extras.web);
+            store.put(true, marker);
+            return;
+          }
+          const record = records[index];
+          let ready = false, value, error;
+          const load = record.key === "rp_hub_characters" ? Promise.resolve(characters) : record === settingsRecord ? Promise.resolve(settings) : readRecordValue(record);
+          load.then((result) => {
+            value = result;
+            ready = true;
+          }, (failure2) => {
+            error = failure2;
+            ready = true;
+          });
+          const pump = () => {
+            store.get(marker).onsuccess = () => {
+              try {
+                cancelled(signal);
+                if (!ready) {
+                  pump();
+                  return;
+                }
+                if (error) throw error;
+                for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([{ key: record.key, value }]))
+                  window.RPHubStorage.putStoredRecord(store, entry.value, entry.key);
+                index++;
+                progress?.(cardCount + index, totalWork);
+                next();
+              } catch (error2) {
+                fail(error2);
+              }
+            };
+          };
+          pump();
+        };
         try {
+          store.delete("__rp_local_mirror_revision");
+          oldCardKeys.forEach((key) => store.delete(key));
           for (const key of deleted) {
             for (const entry of window.RPHubStorage.prepareRestoredMemoryEntries([
               {
@@ -2584,42 +2684,25 @@
             ])) store.put(entry.value, entry.key);
             window.RPHubStorage.deleteStoredRecord(store, key);
           }
+          next();
         } catch (error) {
-          try {
-            tx.abort();
-          } catch (_) {
-          }
-          reject(error);
-          return;
+          fail(error);
         }
-        tx.oncomplete = () => resolve();
-        tx.onabort = () => reject(tx.error || new DOMException("\u5BFC\u5165\u5DF2\u53D6\u6D88", "AbortError"));
-        tx.onerror = () => {
-        };
       });
-      cancelled(signal);
-      for (let index = 0; index < records.length; index++) {
-        cancelled(signal);
-        const record = records[index];
-        const value = record.key === "rp_hub_characters" ? characters : await readRecordValue(record);
-        cancelled(signal);
-        await writeKey(record.key, value);
-        progress?.(cardCount + index + 1, totalWork);
-      }
-      writeWeb(extras.web);
-      await saveSession(stage, { id, state: "applied", web: extras.web, cardRevision: session.cardRevision });
       committed = true;
       progress?.(totalWork - 1, totalWork, "\u6B63\u5728\u5199\u5165\u672C\u673A\u5B58\u6863\uFF08\u53EA\u9700\u4E00\u6B21\uFF0C\u4E4B\u540E\u542F\u52A8\u66F4\u5FEB\uFF09");
       await (window.RPHubStorage.syncLocalFiles?.() ?? null);
+      await recoverSession(main, journal);
       progress?.(totalWork, totalWork);
     } catch (error) {
       if (committed) {
+        recoveryRequired = true;
         error.recoveryRequired = true;
         error.message = "\u672C\u673A\u5B58\u6863\u4FDD\u5B58\u672A\u5B8C\u6210\uFF0C\u8BF7\u91CD\u65B0\u6253\u5F00\u8F6F\u4EF6\u7EE7\u7EED\u6062\u590D\uFF1A" + error.message;
       }
       if (!committed) {
         try {
-          if (journaled) await recover(main);
+          if (journal) await recoverSession(main, journal);
           else await discardPreparedCards(main, session);
         } catch (rollbackError) {
           recoveryRequired = true;
@@ -2634,15 +2717,6 @@
         window.RPHubStorage.setWritesPaused(false);
         window.RPLocalStore?.setWebWritesPaused(false);
       }
-      try {
-        stage.close();
-      } catch (_) {
-      }
-      try {
-        main.close?.();
-      } catch (_) {
-      }
-      if (!recoveryRequired) await deleteStagingDatabase();
     }
   }
   window.RPStreamImport = { upgrade, database, recover, apply, stageEntries, readSession, removeSession, profile, profiles, verifyChunks, decodeChat };

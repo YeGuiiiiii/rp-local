@@ -26202,7 +26202,7 @@ return function render(_ctx, _cache) {
                   type: "button",
                   class: _normalizeClass(["image-glass shell-photo-cell", {'is-picked':isPicked(photo.name)}]),
                   onPointerdown: $event => (startPress(photo, $event)),
-                  onClick: $event => (onPhotoClick(photo, index)),
+                  onClick: $event => (onPhotoClick(photo, index, $event)),
                   "aria-pressed": selectMode ? isPicked(photo.name) : null,
                   "aria-label": '第 '+(index+1)+' 张图片'
                 }, [
@@ -26246,7 +26246,7 @@ return function render(_ctx, _cache) {
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-gallery-action is-danger",
-                    disabled: !picked.length,
+                    disabled: !picked.length||saving,
                     onClick: batchRemove
                   }, [
                     _createVNode(_component_icon, { name: "Trash2" }),
@@ -26515,7 +26515,7 @@ return function render(_ctx, _cache) {
                   "aria-hidden": "true",
                   draggable: "false"
                 }, null, 8 /* PROPS */, _hoisted_5),
-                _createElementVNode("h3", null, _toDisplayString(external ? task.title : state.phase === 'recovery' ? '需要恢复原数据' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'select' ? '选择要导入的内容' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
+                _createElementVNode("h3", null, _toDisplayString(external ? task.title : state.phase === 'recovery' ? '请重新打开软件完成恢复' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'select' ? '选择要导入的内容' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
                 (!external)
                   ? (_openBlock(), _createElementBlock("p", _hoisted_6, _toDisplayString(state.name), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),

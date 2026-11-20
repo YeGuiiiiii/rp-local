@@ -9,7 +9,7 @@
         if (!result.ok) throw new Error(result.error || '生图接口保存失败');
         return result.value;
     };
-    // Browser previews use a separate database; player backup imports never replace connection credentials.
+    const protocols = ['jobs', 'openai', 'novelai'];
     const browserStore = (mode, value) => new Promise((resolve, reject) => {
         const request = indexedDB.open('RPLocalImageProviders', 1);
         request.onupgradeneeded = () => request.result.createObjectStore('config');
@@ -22,9 +22,26 @@
             tx.onabort = tx.onerror = () => { db.close(); reject(tx.error || new Error('生图接口保存失败')); };
         };
     });
+    function validateConfig(value) {
+        const ids = new Set();
+        if (!Array.isArray(value?.profiles) || value.profiles.some(item => {
+            if (!item?.id || ids.has(item.id) || !protocols.includes(item.protocol)
+                || ['id', 'name', 'url', 'key', 'model', 'size'].some(key => typeof item[key] !== 'string')) return true;
+            ids.add(item.id);
+            return false;
+        }) || !ids.has('builtin')) throw new Error('生图接口记录损坏，请保留数据并重试');
+        return { ...value, selectedId: ids.has(value.selectedId) ? value.selectedId : 'builtin' };
+    }
+    function persistConfig(snapshot) {
+        if (window.RPLocalFiles) return native('writeTextIfChanged', file, JSON.stringify(snapshot));
+        return browserStore('readwrite', snapshot);
+    }
     function create(baseUrl) {
         let pending = Promise.resolve();
         let modelController, modelTimer;
+        const snapshot = () => validateConfig(JSON.parse(JSON.stringify({
+            selectedId: api.selectedId, profiles: api.profiles
+        })));
         const api = Vue.reactive({
             ready: false, error: '', selectedId: 'builtin', models: [], modelsLoading: false, modelsError: '',
             profiles: [{ id: 'builtin', name: '默认站点（STA1N）', protocol: 'jobs', url: baseUrl, key: '', model: '', size: 'auto' }],
@@ -34,14 +51,11 @@
                     const saved = window.RPLocalFiles ? JSON.parse(native('readText', file) || 'null')
                         : await browserStore('readonly');
                     if (saved) {
-                        if (!Array.isArray(saved.profiles) || !saved.profiles.some(item => item.id === 'builtin')
-                            || saved.profiles.some(item => !item || !['jobs', 'openai', 'novelai'].includes(item.protocol)
-                                || ['id', 'name', 'url', 'key', 'model', 'size'].some(key => typeof item[key] !== 'string'))) {
-                            throw new Error('生图接口记录损坏，请保留数据并重试');
-                        }
-                        api.profiles = saved.profiles;
+                        const config = validateConfig(saved);
+                        api.profiles = config.profiles;
                         api.profiles.forEach(provider => { provider.protocol = detectProtocol(provider.url) || provider.protocol; });
-                        api.selectedId = api.profiles.some(item => item.id === saved.selectedId) ? saved.selectedId : 'builtin';
+                        Object.assign(api.profiles.find(item => item.id === 'builtin'), { url: baseUrl, protocol: 'jobs' });
+                        api.selectedId = config.selectedId;
                     } else api.current.key = String(legacyKey || '');
                     api.ready = true;
                     if (!saved && legacyKey) await save();
@@ -62,7 +76,7 @@
             },
             update(field, value) {
                 if (!api.ready || !['name', 'protocol', 'url', 'key', 'model', 'size'].includes(field)) return;
-                if (field === 'protocol' && !['jobs', 'openai', 'novelai'].includes(value)) return;
+                if (field === 'protocol' && !protocols.includes(value)) return;
                 api.current[field] = String(value);
                 if (field === 'url') api.current.protocol = detectProtocol(value) || api.current.protocol;
                 return save();
@@ -114,7 +128,13 @@
                     if (modelController === controller) api.modelsLoading = false;
                 }
             },
-            flush: () => pending
+            flush: () => pending,
+            async backupSnapshot() {
+                if (!api.ready) throw new Error(api.error || '生图接口尚未读取完成');
+                const current = snapshot();
+                await pending;
+                return current;
+            }
         });
         Vue.watch(() => [api.ready, api.selectedId, api.current.url, api.current.key, api.current.protocol], () => {
             clearTimeout(modelTimer);
@@ -127,12 +147,12 @@
                 modelTimer = setTimeout(() => api.fetchModels(), 600);
         });
         function save() {
-            const snapshot = JSON.parse(JSON.stringify({ selectedId: api.selectedId, profiles: api.profiles }));
             try {
+                const current = snapshot();
                 if (window.RPLocalFiles) {
-                    native('writeTextIfChanged', file, JSON.stringify(snapshot));
+                    persistConfig(current);
                     pending = Promise.resolve();
-                } else pending = pending.catch(() => {}).then(() => browserStore('readwrite', snapshot));
+                } else pending = pending.catch(() => {}).then(() => persistConfig(current));
             } catch (error) { pending = Promise.reject(error); }
             return pending.then(() => { api.error = ''; return true; }, error => {
                 api.error = '生图接口未保存，请重试：' + error.message;
@@ -217,5 +237,5 @@
             throw error;
         } finally { clearTimeout(timer); }
     };
-    window.RPImageProviders = Object.freeze({ create, generateNovelImage });
+    window.RPImageProviders = Object.freeze({ create, generateNovelImage, validateConfig, persistConfig });
 })();

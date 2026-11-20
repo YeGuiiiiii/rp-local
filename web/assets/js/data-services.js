@@ -80,7 +80,7 @@
         const synchronized = !!revision && revision === window.RPLocalStore.readRevision()
             && (Array.isArray(value) || isCharacterDirectory(value));
         const entries = synchronized ? [{ key: 'rp_hub_characters', value }]
-            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY)
+            : (await readStorageKeys(mainDb)).filter(key => key !== LOCAL_MIRROR_KEY && !key.startsWith('__rp_restore_commit__:'))
                 .map(key => key === 'rp_hub_characters' ? { key, value } : { key });
         if (!synchronized) await dbDeleteFrom(mainDb, LOCAL_MIRROR_KEY, { mirror: false, force: true });
         await window.RPLocalStore.initialize(entries, async (key, restored) => {

@@ -125,9 +125,14 @@ function prepare(count, bytes) {
             assert.equal(await page.evaluate(async scope => (await RPHubStorage.getScopedStoredValue('chat', scope))[0].content, scope),
                 'original', failure + ' must preserve the original chat');
             assert.equal(await page.evaluate(async () => {
-                const db = await RPHubStorage.initDB();
-                return new Promise(resolve => { const req = db.transaction('restore_sessions').objectStore('restore_sessions').count();
-                    req.onsuccess = () => resolve(req.result); });
+                const db = await RPStreamImport.database();
+                try {
+                    return await new Promise((resolve, reject) => {
+                        const req = db.transaction('restore_sessions').objectStore('restore_sessions').count();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                } finally { db.close(); }
             }), 0, 'Failed staging must be removed');
         }
         mode = '';
