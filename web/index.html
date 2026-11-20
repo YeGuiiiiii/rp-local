@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="rphub-update-api" content="https://rphub-presence.zeabur.app">
-    <script>window.RP_LOCAL_VERSION = '2.9.152'; window.RP_LOCAL_RELEASE = 411;</script>
+    <script>window.RP_LOCAL_VERSION = '2.9.153'; window.RP_LOCAL_RELEASE = 412;</script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/card-night.js"></script>
     <script src="assets/themes/catalog.js"></script>
@@ -1174,8 +1174,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                    <div v-if="isGeminiModel" class="rounded-xl bg-gray-50">
-                                        <label class="flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100">
+                                    <div class="rounded-xl bg-gray-50">
+                                        <label v-if="isGeminiModel" class="flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100">
                                             <span>Gemini抗截断</span>
                                             <span class="relative inline-flex flex-none items-center">
                                                 <input v-model="settings.preventTruncation" @change="$event.target.checked && (settings.stream = true)" type="checkbox" class="settings-toggle-input sr-only">

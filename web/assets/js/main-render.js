@@ -313,11 +313,11 @@ const _hoisted_160 = ["onUpdate:modelValue"]
 const _hoisted_161 = { class: "flex cursor-pointer items-center justify-between gap-1.5 rounded-xl bg-gray-50 px-2.5 py-2.5 text-xs font-semibold text-gray-600 whitespace-nowrap transition-colors hover:bg-gray-100" }
 const _hoisted_162 = { class: "relative inline-flex flex-none items-center" }
 const _hoisted_163 = ["onUpdate:modelValue"]
-const _hoisted_164 = {
+const _hoisted_164 = { class: "rounded-xl bg-gray-50" }
+const _hoisted_165 = {
   key: 0,
-  class: "rounded-xl bg-gray-50"
+  class: "flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100"
 }
-const _hoisted_165 = { class: "flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100" }
 const _hoisted_166 = { class: "relative inline-flex flex-none items-center" }
 const _hoisted_167 = ["onUpdate:modelValue", "onChange"]
 const _hoisted_168 = {
@@ -2955,9 +2955,9 @@ return function render(_ctx, _cache) {
                                   ])
                                 ])
                               ]),
-                              isGeminiModel
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_164, [
-                                    _createElementVNode("label", _hoisted_165, [
+                              _createElementVNode("div", _hoisted_164, [
+                                isGeminiModel
+                                  ? (_openBlock(), _createElementBlock("label", _hoisted_165, [
                                       _cache[52] || (_cache[52] = _createElementVNode("span", null, "Gemini抗截断", -1 /* CACHED */)),
                                       _createElementVNode("span", _hoisted_166, [
                                         _withDirectives(_createElementVNode("input", {
@@ -2970,22 +2970,22 @@ return function render(_ctx, _cache) {
                                         ]),
                                         _cache[51] || (_cache[51] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
                                       ])
+                                    ]))
+                                  : _createCommentVNode("v-if", true),
+                                _createElementVNode("label", _hoisted_168, [
+                                  _cache[54] || (_cache[54] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
+                                  _createElementVNode("span", _hoisted_169, [
+                                    _withDirectives(_createElementVNode("input", {
+                                      "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
+                                      type: "checkbox",
+                                      class: "settings-toggle-input sr-only"
+                                    }, null, 8 /* PROPS */, _hoisted_170), [
+                                      [_vModelCheckbox, settings.inputObfuscation]
                                     ]),
-                                    _createElementVNode("label", _hoisted_168, [
-                                      _cache[54] || (_cache[54] = _createElementVNode("span", null, "输入混淆", -1 /* CACHED */)),
-                                      _createElementVNode("span", _hoisted_169, [
-                                        _withDirectives(_createElementVNode("input", {
-                                          "onUpdate:modelValue": $event => ((settings.inputObfuscation) = $event),
-                                          type: "checkbox",
-                                          class: "settings-toggle-input sr-only"
-                                        }, null, 8 /* PROPS */, _hoisted_170), [
-                                          [_vModelCheckbox, settings.inputObfuscation]
-                                        ]),
-                                        _cache[53] || (_cache[53] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
-                                      ])
-                                    ])
-                                  ]))
-                                : _createCommentVNode("v-if", true)
+                                    _cache[53] || (_cache[53] = _createElementVNode("span", { class: "settings-toggle settings-toggle--compact settings-toggle--solid" }, null, -1 /* CACHED */))
+                                  ])
+                                ])
+                              ])
                             ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_134)
                           ]))
                         : _createCommentVNode("v-if", true)
