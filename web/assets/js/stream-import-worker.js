@@ -1948,7 +1948,8 @@
       name: data.file?.name || data.name,
       state: "reading",
       bytes: ranges ? rangeBytes : data.file?.size || data.bytes || 0,
-      read: 0
+      read: 0,
+      unitBytes: limits.unitBytes
     };
     let db, timer, lastNotice = 0, phase = survey ? "\u6E05\u70B9\u5BFC\u5165\u5185\u5BB9" : "\u5206\u5757\u8BFB\u53D6\u4E0E\u6821\u9A8C";
     let postedStamp = "";

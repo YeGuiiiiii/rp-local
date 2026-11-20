@@ -2305,7 +2305,7 @@
         let part = 0;
         const write = async (value) => {
           const bytes = encoder.encode(JSON.stringify(value)).length;
-          const maxBytes = entry.key === "rp_hub_characters" ? profiles.at(-1).unitBytes : limits.unitBytes;
+          const maxBytes = entry.key === "rp_hub_characters" ? Math.min(128 * 1048576, Math.max(profiles.at(-1).unitBytes, limits.unitBytes)) : limits.unitBytes;
           if (bytes > maxBytes) throw new Error("\u5355\u6761\u4E91\u7AEF\u6570\u636E\u8D85\u8FC7 " + maxBytes / 1048576 + " MB\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8");
           sink.emit({ kind: "unit", source: "entries", entry: index, part: part++, value, bytes });
           await sink.flush();
@@ -2428,7 +2428,9 @@
       const priority2 = item.database === "sf_moments_db" && item.store === "moments" ? 0 : item.database === "SakuraMomentsDB" && item.store === "moments" ? 1 : item.database === "moments" && item.store === "list" ? 2 : -1;
       if (priority2 < 0) return;
       bytes += item.bytes;
-      if (bytes > 32 * 1048576) throw new Error("\u540D\u573A\u9762\u6570\u636E\u8D85\u8FC7 32 MB\uFF0C\u8BF7\u4F7F\u7528\u539F\u6709\u5BFC\u5165");
+      const maxMomentsBytes = Math.max(32 * 1048576, Number(session.unitBytes) || 0);
+      if (bytes > maxMomentsBytes)
+        throw new Error("\u540D\u573A\u9762\u6570\u636E\u8D85\u8FC7 " + maxMomentsBytes / 1048576 + " MB\uFF0C\u8BF7\u5207\u6362\u8BFB\u53D6\u6863\u4F4D\u6216\u62C6\u5206\u5907\u4EFD");
       if (!groups.has(priority2)) groups.set(priority2, []);
       const record = item.value;
       const value = record && typeof record === "object" && Object.hasOwn(record, "v") ? record.v : record;

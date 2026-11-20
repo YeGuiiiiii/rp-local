@@ -1034,8 +1034,9 @@
         if (isCharacterDirectory(value)) return value.cards;
         if (!Array.isArray(value)) throw storageWriteError('StorageDataError', '角色卡目录损坏，未执行覆盖');
         const paused = writesPaused;
-        const session = await window.RPStreamImport.stageEntries([{ key: 'rp_hub_characters', value }],
-            { limits: window.RPStreamImport.profile('fast') });
+        const baseLimits = window.RPStreamImport.profile('fast');
+        const limits = window.RPStreamImportLimits?.(baseLimits) || baseLimits;
+        const session = await window.RPStreamImport.stageEntries([{ key: 'rp_hub_characters', value }], { limits });
         let recoveryRequired = false;
         try {
             await window.RPStreamImport.apply(session, { beforeApply: async () => {}, restoreValue: item => item });

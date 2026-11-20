@@ -19,7 +19,9 @@ export async function stageEntries(entries, { limits = profile() } = {}) {
             let part = 0;
             const write = async value => {
                 const bytes = encoder.encode(JSON.stringify(value)).length;
-                const maxBytes = entry.key === 'rp_hub_characters' ? profiles.at(-1).unitBytes : limits.unitBytes;
+                const maxBytes = entry.key === 'rp_hub_characters'
+                    ? Math.min(128 * 1048576, Math.max(profiles.at(-1).unitBytes, limits.unitBytes))
+                    : limits.unitBytes;
                 if (bytes > maxBytes) throw new Error('单条云端数据超过 ' + maxBytes / 1048576 + ' MB，原数据未改动');
                 sink.emit({ kind: 'unit', source: 'entries', entry: index, part: part++, value, bytes });
                 await sink.flush();
@@ -128,7 +130,9 @@ async function prepareExtras(db, session) {
                 : item.database === 'moments' && item.store === 'list' ? 2 : -1;
         if (priority < 0) return;
         bytes += item.bytes;
-        if (bytes > 32 * 1048576) throw new Error('名场面数据超过 32 MB，请使用原有导入');
+        const maxMomentsBytes = Math.max(32 * 1048576, Number(session.unitBytes) || 0);
+        if (bytes > maxMomentsBytes)
+            throw new Error('名场面数据超过 ' + maxMomentsBytes / 1048576 + ' MB，请切换读取档位或拆分备份');
         if (!groups.has(priority)) groups.set(priority, []);
         const record = item.value;
         const value = record && typeof record === 'object' && Object.hasOwn(record, 'v') ? record.v : record;

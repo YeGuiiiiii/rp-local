@@ -33,6 +33,7 @@ self.onmessage = async ({ data }) => {
     const session = {
         id: data.id, name: data.file?.name || data.name, state: 'reading',
         bytes: ranges ? rangeBytes : (data.file?.size || data.bytes || 0), read: 0,
+        unitBytes: limits.unitBytes,
     };
     let db, timer, lastNotice = 0, phase = survey ? '清点导入内容' : '分块读取与校验';
     // [rphub 2.9.041] 心跳不能空转。原先每秒无条件发一条「分块读取与校验」，主线程的看门狗

@@ -11232,11 +11232,11 @@ const app = createApp({
             const url = String(memorySettings.memoryApiUrl || '').trim();
             return url ? String(memorySettings.memoryApiKey || '').trim() : String(settings.apiKey || '').trim();
         };
-        const requestMemoryJson = (options) => requestChatCompletion({
+        const requestMemoryJson = (options) => requestTrackedChatCompletion({
             ...options,
             url: getMemoryApiEndpoint(options.path || 'chat/completions'),
             apiKey: getMemoryApiKey()
-        });
+        }, 'summary');
         const fetchMemoryModels = async (isManual = false) => {
             const apiKey = getMemoryApiKey();
             if (!apiKey) {
