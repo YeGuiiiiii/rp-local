@@ -268,7 +268,7 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
                         { key: key.replace('rp_hub_classic_memories_', 'rp_hub_b1_memory_state_'),
                             value: { schema: 1, revision: crypto.randomUUID().replaceAll('-', ''), deleted: true } }
                     ])) store.put(entry.value, entry.key);
-                    store.delete(key);
+                    window.RPHubStorage.deleteStoredRecord(store, key);
                 }
             } catch (error) { try { tx.abort(); } catch (_) {} reject(error); return; }
             tx.oncomplete = () => resolve();

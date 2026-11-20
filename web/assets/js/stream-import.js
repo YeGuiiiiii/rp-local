@@ -2580,7 +2580,7 @@
                 value: { schema: 1, revision: crypto.randomUUID().replaceAll("-", ""), deleted: true }
               }
             ])) store.put(entry.value, entry.key);
-            store.delete(key);
+            window.RPHubStorage.deleteStoredRecord(store, key);
           }
         } catch (error) {
           try {

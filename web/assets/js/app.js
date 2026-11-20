@@ -5643,7 +5643,7 @@ const app = createApp({
             store.delete('__rp_local_mirror_revision');
             if (entry.key === '__rp_local_mirror_revision') return;
             if (entry.key.startsWith('rp_hub_b1_memory_state_') && entry.value?.deleted === true) {
-                store.delete(entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
+                window.RPHubStorage.deleteStoredRecord(store, entry.key.replace('rp_hub_b1_memory_state_', 'rp_hub_classic_memories_'));
             }
             return window.RPHubStorage.putStoredRecord(store, restoreRphubBinaryDeep(entry.value), entry.key);
         };
@@ -8003,8 +8003,19 @@ const app = createApp({
             const state = await refreshMemoryBaseline(scopeId, { checkedView: true });
             const writeState = window.RPHubStorage.getStorageWriteState();
             if (writeState.paused || writeState.epoch !== state.writeEpoch) throw memoryOperationError('StoragePausedError', '存储维护后需要重新载入记忆');
-            return Object.freeze({ label, scopeId, scopeEpoch: _b1ScopeEpoch, state,
-                viewKey: _b1MemoryViewKey, source: cloneForStorage(classicMemories.value), writeEpoch: state.writeEpoch });
+            const rawSnapshot = classicMemories.value.slice();
+            let lazySource = null;
+            const intentObj = {};
+            Object.defineProperties(intentObj, {
+                label: { value: label, enumerable: true },
+                scopeId: { value: scopeId, enumerable: true },
+                scopeEpoch: { value: _b1ScopeEpoch, enumerable: true },
+                state: { value: state, enumerable: true },
+                viewKey: { value: _b1MemoryViewKey, enumerable: true },
+                source: { get: () => (lazySource ||= cloneForStorage(rawSnapshot)), enumerable: true },
+                writeEpoch: { value: state.writeEpoch, enumerable: true }
+            });
+            return Object.freeze(intentObj);
         };
         const memoryIntentActive = intent => !!intent && _classicMemoriesLoaded
             && intent.scopeId === getCurrentStoryBranchScopeId() && intent.scopeEpoch === _b1ScopeEpoch
@@ -8017,10 +8028,12 @@ const app = createApp({
                     && memoryContentKey(classicMemories.value) === _b1MemoryViewKey;
                 if (!guard()) throw memoryOperationError('StorageConflictError', '记忆操作已过期，未提交旧结果');
                 if (options.validate) {
-                    if (options.validate(classicMemories.value, intent.source) !== true) throw memoryOperationError('StorageConflictError', '原始来源已变化，未套用旧结果');
+                    const before = options.validate.length >= 2 ? intent.source : null;
+                    if (options.validate(classicMemories.value, before) !== true) throw memoryOperationError('StorageConflictError', '原始来源已变化，未套用旧结果');
                 } else if (_b1MemoryState !== intent.state) throw memoryOperationError('StorageConflictError', '其他记忆操作已提交，请重新检查');
                 const state = _b1MemoryState;
-                const next = numberClassicMemories(prepareClassicMemoriesForRuntime(transform(cloneForStorage(classicMemories.value))));
+                const input = options.cloneInput === false ? classicMemories.value : cloneForStorage(classicMemories.value);
+                const next = numberClassicMemories(prepareClassicMemoriesForRuntime(transform(input)));
                 const result = await window.RPHubStorage.commitMemoryState(state, next, {
                     guard: () => guard() && _b1MemoryState === state,
                     signal: options.signal, expected: options.expected, changes: options.changes
@@ -8043,7 +8056,7 @@ const app = createApp({
         };
         const commitMemoryDraft = (intent, nextList, options = {}) => {
             const frozen = cloneForStorage(nextList);
-            return commitMemoryTransform(intent, () => frozen, options);
+            return commitMemoryTransform(intent, () => frozen, { ...options, cloneInput: false });
         };
         const requireMemoryPublished = result => {
             if (!result.published) throw memoryOperationError('MemoryScopeError', '结果已提交原作用域，但当前界面已切换', { committed: true });
@@ -13423,6 +13436,7 @@ const app = createApp({
                             ...list.filter(memory => !sourceIds.has(String(memory && memory.id || ''))),
                             mergedMemory
                         ], {
+                            cloneInput: false,
                             validate: (current, before) => [...sourceIds].every(id => sameMemorySources(current, before, [id]))
                         });
                         if (!committed.published) break;
@@ -13685,11 +13699,10 @@ const app = createApp({
             return vectors;
         };
 
-        // 2.7.84：默认值原来取 settings.apiUrl（聊天站），但嵌入请求实际发往
-        // getMemoryApiEndpoint('embeddings')（优先 memorySettings.memoryApiUrl）。
-        // 用户单独配了记忆接口时两者不等，坐标「是否当前」的判据完全失效。
-        const hasCurrentSummaryEmbedding = (memory, model = getMemoryEmbeddingModel(), apiUrl = getMemoryApiEndpoint('embeddings')) =>
-            memory.embeddingModel === model && memory.embeddingApiUrl === apiUrl
+        // [rphub 2.9.151] 同名向量模型且有效维度已就绪时，跨中转/主站域名切换（如 cdn.sta1n.cn → sta1n.ai）
+        //   保持既有坐标可用，避免把近万条同模型向量误判损坏而全量重算或阻断对话召回；维度差异由余弦相似度长度核对兜底。
+        const hasCurrentSummaryEmbedding = (memory, model = getMemoryEmbeddingModel(), _apiUrl = getMemoryApiEndpoint('embeddings')) =>
+            Boolean(model) && memory?.embeddingModel === model
             && getSummaryEmbedding(memory).length > 0;
 
         // 坐标是否「脏」：只有带指纹且与当前文本不符才判定为脏。
@@ -13887,7 +13900,7 @@ const app = createApp({
                     };
                     return next;
                 });
-                const result = await commitMemoryTransform(intent, applyVectorUpdates);
+                const result = await commitMemoryTransform(intent, applyVectorUpdates, { cloneInput: false });
                 // 过期不写回：既不算失败也不算成功，单独计成「请求期间已变」。
                 skippedChanged += batch.length - batchWritten;
                 if (!result.published) return settle();
@@ -14737,29 +14750,88 @@ const app = createApp({
                     let summarized = 0;
                     reportSummary(0, jobs.length);
 
-                    const runClassicJob = async target => {
+                    const requestJobDraft = async target => {
                         const job = buildClassicSummaryJob(snapshot, target.index);
                         if (!job) {
                             emptyTargets.add(target.key);
                             reportSummary(++summarized, jobs.length);
-                            return { job: target, added: false };
+                            return { job: target, draft: null, skipped: true };
                         }
+                        if (job.epoch !== _classicExtractionEpoch) return { job, draft: null };
+                        if (!_classicMemoriesLoaded || _b1MemoryState?.scopeId !== job.storyScopeId) {
+                            return { job: { ...job, index: target.index }, error: memoryOperationError('MemoryNotLoadedError', '记忆尚未读取成功，已停止补录') };
+                        }
+                        if (currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId || hasClassicMemoryForJob(job)) {
+                            if (hasClassicMemoryForJob(job)) reportSummary(++summarized, jobs.length);
+                            return { job, draft: null };
+                        }
+                        const inFlightKey = `${job.epoch}:${job.key}`;
+                        if (_classicSummaryInFlightKeys.has(inFlightKey)) return { job, draft: null };
+                        _classicSummaryInFlightKeys.add(inFlightKey);
                         try {
-                            const added = await generateAndStoreClassicMemory(job, batchController.signal);
-                            if (added || hasClassicMemoryForJob(job)) reportSummary(++summarized, jobs.length);
-                            return { job, added };
+                            const summary = await requestClassicMemorySummary(job, batchController.signal);
+                            if (batchController.signal.aborted || job.epoch !== _classicExtractionEpoch) return { job, draft: null };
+                            if (currentCharacter.value?.uuid !== job.characterId || getCurrentStoryBranchScopeId() !== job.storyScopeId) return { job, draft: null };
+                            return {
+                                job,
+                                draft: markRuntimeRaw({
+                                    id: generateUUID(),
+                                    timestamp: Date.now(),
+                                    turn: job.turn,
+                                    summary,
+                                    enabled: true,
+                                    classicMemory: true,
+                                    summaryModel: String(memorySettings.classicModel || '').trim(),
+                                    sourceUserIds: job.sourceUserIds,
+                                    sourceAssistantIds: job.sourceAssistantIds,
+                                    sourceUserText: job.sourceUserText,
+                                    sourceAssistantText: job.sourceAssistantText
+                                })
+                            };
                         } catch (error) {
                             return { job: { ...job, index: target.index }, error };
+                        } finally {
+                            _classicSummaryInFlightKeys.delete(inFlightKey);
                         }
+                    };
+                    const commitSummaryDrafts = async drafts => {
+                        if (!drafts.length) return 0;
+                        const intent = await beginMemoryIntent('生成总结');
+                        let appended = 0;
+                        const committed = await commitMemoryTransform(intent, list => {
+                            const next = list.slice();
+                            let nextNo = getNextClassicMemoryNo(next);
+                            appended = 0;
+                            for (const { job, draft } of drafts) {
+                                const targetIds = new Set(job.sourceAssistantIds || []);
+                                const exists = next.some(memory => {
+                                    const memoryIds = memory?.sourceAssistantIds || [];
+                                    if (targetIds.size > 0 && memoryIds.some(id => targetIds.has(id))) return true;
+                                    return targetIds.size === 0 && Number(memory?.turn) === Number(job.turn);
+                                });
+                                if (exists) continue;
+                                next.push(markRuntimeRaw({ ...draft, no: nextNo++ }));
+                                appended += 1;
+                            }
+                            return appended > 0 ? next : list;
+                        }, { validate: () => true, cloneInput: false });
+                        return committed.published ? drafts.length : 0;
                     };
                     const concurrency = normalizeClassicMemoryConcurrency(memorySettings.classicConcurrency);
                     for (let offset = 0; offset < jobs.length; offset += concurrency) {
                         if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
                         const group = jobs.slice(offset, offset + concurrency);
-                        const results = await Promise.all(group.map(runClassicJob));
+                        const results = await Promise.all(group.map(requestJobDraft));
                         if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
 
-                        if (results.some(result => result.added)) await saveClassicMemoriesNow();
+                        const readyDrafts = results.filter(result => result.draft);
+                        if (readyDrafts.length > 0) {
+                            const doneCount = await commitSummaryDrafts(readyDrafts);
+                            if (doneCount > 0) {
+                                summarized += doneCount;
+                                reportSummary(summarized, jobs.length);
+                            }
+                        }
                         for (const failed of results.filter(result => result.error)) {
                             if (['MemoryNotLoadedError', 'MemoryProtocolError', 'StorageConflictError', 'StoragePausedError',
                                 'MemoryCommitError'].includes(failed.error.name)) throw failed.error;
@@ -14773,10 +14845,11 @@ const app = createApp({
                                 );
                                 if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
                                 if (!retry) throw retryError;
-                                const retryResult = await runClassicJob(failed.job);
+                                const retryResult = await requestJobDraft(failed.job);
                                 if (!retryResult.error) {
-                                    if (retryResult.added) {
-                                        await saveClassicMemoriesNow();
+                                    if (retryResult.draft) {
+                                        const doneCount = await commitSummaryDrafts([retryResult]);
+                                        if (doneCount > 0) reportSummary(++summarized, jobs.length);
                                     }
                                     break;
                                 }
