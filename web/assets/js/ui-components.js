@@ -754,7 +754,7 @@
                                 <div class="mb-2 flex items-center justify-between gap-3 text-sm">
                                     <span class="font-medium text-gray-700">{{ stage.title }}</span>
                                     <span class="text-xs" :class="stage.current >= stage.total ? 'text-primary-600' : 'text-gray-400'">
-                                        {{ stage.current >= stage.total ? '已完成' : running ? (stageTiming(stage) || '等待中') : '未完成' }}
+                                        {{ stage.current >= stage.total ? '已完成' : running ? (progress.waitingForConversation ? '回复结束后继续' : stageTiming(stage) || '等待中') : '未完成' }}
                                     </span>
                                 </div>
                                 <div class="h-2 overflow-hidden rounded-full bg-gray-100" role="progressbar"

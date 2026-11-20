@@ -4609,7 +4609,7 @@ const app = createApp({
             };
         };
         // ═══════════ 记忆工具结束 ═══════════
-        const memoryBackfillProgress = ref({ status: 'idle', message: '', phase: '', stages: [] });
+        const memoryBackfillProgress = ref({ status: 'idle', message: '', phase: '', waitingForConversation: false, stages: [] });
         const retryingClassicMemoryId = ref('');
         let _isApplyingCharacterScopedData = false;
         let _classicMemoriesLoaded = false;
@@ -14658,6 +14658,7 @@ const app = createApp({
             isClassicBatchExtracting.value = false;
             if (memoryBackfillProgress.value.status === 'running') {
                 memoryBackfillProgress.value.status = 'stopped';
+                memoryBackfillProgress.value.waitingForConversation = false;
                 memoryBackfillProgress.value.message = '已停止补录，已完成的记忆已保留。';
             }
         };
@@ -14670,7 +14671,7 @@ const app = createApp({
         const startClassicBatchMemoryExtraction = async (options = {}) => {
             const { manual = true } = options;
             if (isClassicBatchExtracting.value) return;
-            memoryBackfillProgress.value = { status: 'running', message: '正在检查待补录记忆…', phase: '', stages: [] };
+            memoryBackfillProgress.value = { status: 'running', message: '正在检查待补录记忆…', phase: '', waitingForConversation: false, stages: [] };
             const progress = memoryBackfillProgress.value;
             if (!currentCharacter.value || chatHistory.value.length === 0) {
                 progress.status = 'done';
@@ -14705,6 +14706,7 @@ const app = createApp({
                 return (current, total) => {
                     if (!total || _classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
                     progress.phase = key;
+                    progress.waitingForConversation = false;
                     progress.message = '';
                     stage.current = previous + current;
                     stage.total = previous + total;
@@ -14859,8 +14861,11 @@ const app = createApp({
                     }
 
                     if (isConversationBusy.value) {
+                        progress.waitingForConversation = true;
                         progress.message = '等待当前回复结束后继续补录。';
                         await waitForMemoryConversationIdle(batchController.signal);
+                        progress.waitingForConversation = false;
+                        progress.message = '';
                         continue;
                     }
                     const currentTurnCount = buildConversationTurnSnapshot(chatHistory.value, { includeSystem: false }).turns.length;
@@ -14883,8 +14888,11 @@ const app = createApp({
                     }
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) break;
                     if (isConversationBusy.value) {
+                        progress.waitingForConversation = true;
                         progress.message = '等待当前回复结束后继续补录。';
                         await waitForMemoryConversationIdle(batchController.signal);
+                        progress.waitingForConversation = false;
+                        progress.message = '';
                         continue;
                     }
                     const finalTurnCount = buildConversationTurnSnapshot(

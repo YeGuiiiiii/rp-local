@@ -18840,7 +18840,7 @@ return function render(_ctx, _cache) {
                         _createElementVNode("span", _hoisted_7, _toDisplayString(stage.title), 1 /* TEXT */),
                         _createElementVNode("span", {
                           class: _normalizeClass(["text-xs", stage.current >= stage.total ? 'text-primary-600' : 'text-gray-400'])
-                        }, _toDisplayString(stage.current >= stage.total ? '已完成' : running ? (stageTiming(stage) || '等待中') : '未完成'), 3 /* TEXT, CLASS */)
+                        }, _toDisplayString(stage.current >= stage.total ? '已完成' : running ? (progress.waitingForConversation ? '回复结束后继续' : stageTiming(stage) || '等待中') : '未完成'), 3 /* TEXT, CLASS */)
                       ]),
                       _createElementVNode("div", {
                         class: "h-2 overflow-hidden rounded-full bg-gray-100",

@@ -5,6 +5,8 @@ const { chromium } = require('./playwright.cjs');
 const installFileBridge = require('./mock-files.cjs');
 const root = path.resolve(__dirname, '..');
 const web = path.join(root, 'web');
+const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, 'verification');
+fs.mkdirSync(output, { recursive: true });
 
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -49,6 +51,23 @@ const web = path.join(root, 'web');
   try {
     await page.goto('https://sta1n156.github.io/RP-Hub/', { waitUntil: 'load' });
     await ready();
+    await page.evaluate(() => {
+      __qa.showMemoryBackfillModal = true;
+      __qa.memoryBackfillProgress = {
+        status: 'running',
+        message: '等待当前回复结束后继续补录。',
+        waitingForConversation: true,
+        stages: [{ key: 'vector', title: '向量记忆', unit: '条', current: 0, total: 134, elapsedMs: 0 }]
+      };
+    });
+    const waitingDialog = page.getByRole('dialog', { name: '补录记忆', exact: true });
+    await waitingDialog.getByText('回复结束后继续', { exact: true }).waitFor();
+    await page.evaluate(() => {
+      __qa.memoryBackfillProgress.waitingForConversation = false;
+      __qa.memoryBackfillProgress.message = '';
+    });
+    await waitingDialog.getByText('等待中', { exact: true }).waitFor();
+    await page.evaluate(() => { __qa.showMemoryBackfillModal = false; });
     await page.evaluate(() => __qa.navigateWorkspace('patchlist'));
     await page.locator('.shell-runtime-info').waitFor();
     assert.ok((await page.locator('.shell-runtime-info').innerText()).includes('com.rphub.local'));
@@ -105,7 +124,13 @@ const web = path.join(root, 'web');
     await page.getByRole('dialog', { name: '聊天菜单', exact: true }).getByRole('button', { name: '记忆系统', exact: true }).click();
     assert.equal(await page.evaluate(() => __qa.currentView), 'memory');
     assert.equal(await page.getByRole('dialog', { name: '角色卡记忆管理', exact: true }).count(), 0);
+    await page.evaluate(() => { __qa.isGenerating = true; });
     await page.getByRole('button', { name: '补录记忆', exact: true }).click();
+    await page.waitForFunction(() => __qa.memoryBackfillProgress.waitingForConversation);
+    const activeBackfillDialog = page.getByRole('dialog', { name: '补录记忆', exact: true });
+    await activeBackfillDialog.getByText('等待当前回复结束后继续补录。', { exact: true }).waitFor();
+    await page.evaluate(() => { __qa.isGenerating = false; });
+    await page.waitForFunction(() => !__qa.memoryBackfillProgress.waitingForConversation);
     await page.waitForFunction(() => __qa.memoryBackfillProgress.status === 'done');
     assert.ok(summaryRequests > 0);
     await page.evaluate(() => { __qa.showMemoryBackfillModal = false; __qa.toasts = []; });
@@ -133,7 +158,7 @@ const web = path.join(root, 'web');
       await page.setViewportSize({ width, height: 900 });
       await page.waitForTimeout(300);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-      await page.screenshot({ path: path.join(root, `verification/memory-system-${width}.png`), fullPage: true });
+      await page.screenshot({ path: path.join(output, `memory-system-${width}.png`), fullPage: true });
     }
     await page.waitForTimeout(650);
     await page.reload({ waitUntil: 'load' });
@@ -147,7 +172,7 @@ const web = path.join(root, 'web');
       enableAndModesAndModelSelection: true, slidersAndLocksPersist: true, mockBackfillStored: true,
       characterMemoriesStaySeparate: true, redundantBranchDialogRemoved: true, returnToCaller: true,
       reloadPreservesSettings: true, runtimeVersionsDisplayed: true, widths: [390, 1280], summaryRequests, realApiUsed: false, errors };
-    fs.writeFileSync(path.join(root, 'verification/memory-system.json'), JSON.stringify(report, null, 2));
+    fs.writeFileSync(path.join(output, 'memory-system.json'), JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
