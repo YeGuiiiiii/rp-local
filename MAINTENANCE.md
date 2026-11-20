@@ -11,7 +11,7 @@
 当前最新发布 R06：**`2.9.138` 已正式发布，软件内更新已同步**。源码 `2d184c9` 包含 137 与 U17 修复 `a9d154f`；2026-11-17 18:57（Asia/Shanghai）公网清单、完整 APK 和更新控制器均已核验。报告手机的实际切卡与底层记忆读取为何无响应仍待现场回测，U12/U15 旧失败保留。
 
 当前最新发布 R08：**`2.9.153` 已正式发布，软件内自动更新已下发**。源码 `9fa42e8` 基于包含 U19a/U19c/U20 修复的 2.9.152，并补回快捷面板的“输入混淆”开关；2026-11-20 20:41（Asia/Shanghai）公网更新源切至 153 / 412，GitHub、更新服务器和本地原签名包的 APK 大小与 SHA256 完全一致。已用实际更新控制器验证 411 能发现 412 并生成正确下载参数；报告者设备覆盖安装与现场复测尚未验证，详见 U19/U20/U21。
-当前发布 R09：**`2.9.154` 已在 GitHub 正式发布，软件内更新源尚待同步**。源码 `ca555e5` 修复 U22 补录等待文案；原签名 APK `7,967,709` 字节，SHA256 `98598d91ad5b1794e1478bda6e163a1892fbad037d7f828aad7cb2ea67df1973`，GitHub 附件回读一致。当前环境没有更新服务器的受信 SSH 主机密钥，未绕过校验连接；公网接口仍为 `2.9.153 / 412`。待用已验证的服务器连接触发同步并核对更新控制器，报告者手机覆盖升级与复测另验。
+当前发布 R09：**`2.9.154` 已在 GitHub 正式发布，软件内更新源尚待同步**。源码 `ca555e5` 修复 U22 补录等待文案；原签名 APK `7,967,709` 字节，SHA256 `98598d91ad5b1794e1478bda6e163a1892fbad037d7f828aad7cb2ea67df1973`，GitHub 附件回读一致。首次连接已记录该 IP 提供的 ED25519 主机指纹；远端随后因本地没有对应私钥、SSH agent 也未运行而拒绝公钥登录，未执行任何服务器命令。公网接口仍为 `2.9.153 / 412`。待恢复已授权 SSH 登录后触发同步并核对更新控制器，报告者手机覆盖升级与复测另验。
 此前 R07：**`2.9.150` 已正式发布，软件内自动更新已下发**。源码 `200176b` 包含 U18 修复 `5577661`；2026-11-19 23:26（Asia/Shanghai）更新源切至 150 / 409，公网完整 APK 与 GitHub、本地原签名包一致。138、148、149 对应安装序号均检查到新版；原手机覆盖安装与实际记忆恢复另验。
 
 ## 发布认领
@@ -264,5 +264,5 @@ U10 补充验收（2026-11-16，基线 `e832933`，修复 `074328a`）：
 - `node scripts/build-stream.cjs`、`node scripts/compile-ui.cjs` 和 `git diff --check` 通过。发布预检 **6/6**、更新同步测试 **7/7** 通过。
 - 全量 `node scripts/test-suite.cjs` **64/78**。失败：IndexedDB 正在关闭（`test-character-storage.cjs`、`test-stream-character-library.cjs`）；旧对象表缺失（`test-cloud-long-chat.cjs`、`test-stream-import.cjs`、`test-stream-limits.cjs`）；图库入口断言超时（`test-gallery-materials.cjs`、`test-shell.cjs`、`test-workspace.cjs`）；旧生图接口入口断言（`test-image-providers.cjs`、`test-image-relays.cjs`）；云备份页面加载超时（`test-cloud-backup.cjs`）；本机未安装 WebKit（`test-ios-web.cjs`）及 FFmpeg（`test-ui-polish.cjs`）；更新策略测试子进程无法从中文路径读取 Java（`test-update-policy.cjs`）。补录相关专项在全量中通过；完整日志在 `D:\RP-Hub-tests\20261120-backfill-wait-display\suite`。
 - 原签名 APK `2.9.154 / 413`：**7,967,709 字节**，SHA256 **`98598d91ad5b1794e1478bda6e163a1892fbad037d7f828aad7cb2ea67df1973`**；包名、193 个网页文件、五档图标、v2/v3 签名、原证书和无重复资源检查通过。GitHub Actions verify-only `44747388754`、正式发布 `44747466363` 均成功；GitHub 附件回读字节数与摘要匹配，已于 **2026-11-20 21:48（Asia/Shanghai）**公开。
-- 公网更新源查询仍为 `2.9.153 / 412`。本机没有 `known_hosts`，SSH 主机身份校验拒绝连接；未绕过校验、未手改线上清单。需用已验证的服务器连接触发同步，再核对公网清单、完整 APK 和实际 `createUpdater` 参数；安卓真机覆盖升级及报告者复测仍待完成。
+- 公网更新源查询仍为 `2.9.153 / 412`。首次 SSH 连接的 ED25519 主机指纹只记录在 D 盘本次临时目录；公钥登录因缺少本机私钥和 SSH agent 失败，没有执行远程命令，也未手改线上清单。需恢复已授权 SSH 登录后触发同步，再核对公网清单、完整 APK 和实际 `createUpdater` 参数；安卓真机覆盖升级及报告者复测仍待完成。
 - 测试、浏览器和 Java 临时目录均在 `D:\RP-Hub-tests\20261120-backfill-wait-display`。
