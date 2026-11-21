@@ -15,7 +15,7 @@ fs.mkdirSync(output, { recursive: true });
         const page = await context.newPage(), errors = [], requests = [];
         let fail = false, jobsFail = false, format = 'url', modelFail = false;
         page.on('pageerror', error => errors.push(error.message));
-        await context.route('**/*', route => {
+        await context.route('**/*', async route => {
             const url = new URL(route.request().url()), method = route.request().method();
             if (['images-a.test', 'images-b.test', 'nai.sta1n.cn'].includes(url.hostname)) {
                 const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type,authorization',
@@ -45,6 +45,13 @@ fs.mkdirSync(output, { recursive: true });
                 return route.fulfill({ headers, json: { status: 'ok', type: 'sta1n', data: { value: 10 } } });
             }
             if (url.origin !== 'https://sta1n156.github.io') return route.abort();
+            if (url.pathname.includes('/_files/')) {
+                const name = decodeURIComponent(url.pathname.split('/_files/')[1]);
+                const file = await page.evaluate(name => __qaNativeFiles[name], name);
+                return route.fulfill(file?.binary
+                    ? { body: Buffer.from(file.binary, 'base64'), contentType: 'image/webp' }
+                    : { status: 404, body: '' });
+            }
             const file = path.resolve(web, url.pathname.slice('/RP-Hub/'.length) || 'index.html');
             if (!file.startsWith(web + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile())
                 return route.fulfill({ status: 404, body: '' });
@@ -61,10 +68,10 @@ fs.mkdirSync(output, { recursive: true });
         const imagePage = () => page.evaluate(() => __qa.openSettingsSection('image'));
         const keyInput = () => page.locator('.shell-image-section .secret-input input');
         await page.goto('https://sta1n156.github.io/RP-Hub/'); await ready(); await imagePage();
-        assert.equal(await page.getByRole('button', { name: '添加生图接口', exact: true }).count(), 1,
+        assert.equal(await page.getByLabel('生图接口', { exact: true }).locator('option[value="__add_image_provider__"]').count(), 1,
             'Image settings must let the user add independent providers');
         await keyInput().fill('original-key');
-        await page.getByRole('button', { name: '添加生图接口', exact: true }).click();
+        await page.getByLabel('生图接口', { exact: true }).selectOption('__add_image_provider__');
         assert.equal(await page.getByLabel('输出尺寸', { exact: true }).inputValue(), '1024x1024',
             'New OpenAI profiles must start with explicit dimensions rather than auto');
         await page.getByLabel('接口名称', { exact: true }).fill('A站');
@@ -74,7 +81,7 @@ fs.mkdirSync(output, { recursive: true });
         await page.getByLabel('生图 API 地址', { exact: true }).press('Tab');
         await keyInput().fill('1323');
         const a = await page.evaluate(() => __qa.imageApi.selectedId);
-        await page.getByRole('button', { name: '添加生图接口', exact: true }).click();
+        await page.getByLabel('生图接口', { exact: true }).selectOption('__add_image_provider__');
         await page.getByLabel('接口名称', { exact: true }).fill('B站');
         await page.getByLabel('接口名称', { exact: true }).press('Tab');
         await page.getByLabel('生图 API 地址', { exact: true }).fill('https://images-b.test/v1');
@@ -256,10 +263,15 @@ fs.mkdirSync(output, { recursive: true });
             ]);
             await RPLocalStore.flush();
         });
-        const startupRequest = page.waitForRequest(request => request.method() === 'POST'
-            && /\/api\/jobs$|\/images\/generations$/.test(new URL(request.url()).pathname));
+        const beforeStartup = requests.filter(request => request.method === 'POST').length;
         await page.reload(); await ready();
-        await startupRequest;
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'history');
+        assert.equal(requests.filter(request => request.method === 'POST').length, beforeStartup,
+            'Restored history must not submit another billable image request');
+        const selectedProvider = await page.evaluate(() => __qa.imageApi.selectedId);
+        await generate('startup-new-image', selectedProvider);
+        await page.waitForFunction(() => document.querySelector('.generated-image-card')?.dataset.imageJobState === 'done');
+        assert.equal(requests.filter(request => request.method === 'POST').length, beforeStartup + 1);
         assert.deepEqual(await page.evaluate(() => __earlyImageRequests), [],
             'Restored chat must wait for the selected provider before generating');
         // Import an old backup containing a different shared key; independent phone settings must win after restart.

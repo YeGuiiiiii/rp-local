@@ -243,7 +243,7 @@ fs.mkdirSync(transferEvidence, { recursive: true });
     await page.screenshot({ path: path.join(evidence, 'shell-gallery-390.png') });
     await page.getByRole('button', { name: '打开相簿：地牢小馆：炒翻日常', exact: true }).click();
     assert.equal(await page.locator('.shell-photo-grid button').count(), 1);
-    await page.getByRole('button', { name: '查看第 1 张图片', exact: true }).click();
+    await page.getByRole('button', { name: '第 1 张图片', exact: true }).click();
     await page.evaluate(() => {
       window.AndroidBridge = {
         isNativeApp: () => true,

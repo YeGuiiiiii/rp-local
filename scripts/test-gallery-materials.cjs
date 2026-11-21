@@ -134,7 +134,7 @@ const portrait = fs.readFileSync(path.join(root, 'dist/app-icon.png'));
         await capture(page, `albums-${mode}-${width}`);
         await page.getByRole('button', { name: '打开相簿：大梦未觉', exact: true }).click();
         await capture(page, `photos-${mode}-${width}`);
-        await page.getByRole('button', { name: '查看第 1 张图片', exact: true }).click();
+        await page.getByRole('button', { name: '第 1 张图片', exact: true }).click();
         await capture(page, `viewer-${mode}-${width}`);
         if (mode === 'journal' && width === 360) {
           await page.evaluate(() => {

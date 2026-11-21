@@ -8814,12 +8814,27 @@ const app = createApp({
         //   重渲染算不出命中，又发一次 POST —— 用户看到的就是两次调用、两次扣费。
         //   这张表只在内存里活一次会话，专门兜住这种「刚生成完、几秒后又要一次」的场景。
         const recentImageResults = new Map();
+        const recentImageKeyOf = card => {
+            const key = imageFreezeKeysOf(card)[0];
+            if (!key) return '';
+            const index = key.startsWith('m:') ? '' : card.closest('[data-chat-index]').dataset.chatIndex;
+            return JSON.stringify([imageFreezeScopeKey(), key, index]);
+        };
+        const recentImageRequestOf = requestUrl => {
+            const provider = imageApi.current;
+            const request = new URL(requestUrl, window.location.href);
+            request.searchParams.delete('nocache');
+            request.searchParams.set('token', provider.id === 'builtin' ? settings.imageGenKey.trim() : provider.key.trim());
+            applyImageGenParams(request.searchParams);
+            request.searchParams.sort();
+            return JSON.stringify([provider.id, provider.protocol, provider.url, provider.model, provider.size, request.href]);
+        };
         const rememberRecentImage = (card, requestUrl) => {
-            const keys = imageFreezeKeysOf(card);
+            const key = recentImageKeyOf(card);
             const src = card?.querySelector?.('img')?.getAttribute('src') || '';
-            if (!keys.length || !src) return;
+            if (!key || !src) return;
             const now = Date.now();
-            keys.forEach(key => recentImageResults.set(key, { url: src, requestUrl, ts: now }));
+            recentImageResults.set(key, { url: src, request: recentImageRequestOf(requestUrl), ts: now });
             if (recentImageResults.size > 200) {
                 [...recentImageResults.entries()]
                     .sort((a, b) => a[1].ts - b[1].ts)
@@ -8827,17 +8842,11 @@ const app = createApp({
                     .forEach(([key]) => recentImageResults.delete(key));
             }
         };
-        const recallRecentImage = (card) => {
-            const keys = imageFreezeKeysOf(card);
-            for (const key of keys) {
-                const hit = recentImageResults.get(key);
-                if (!hit || Date.now() - hit.ts >= 10 * 60 * 1000) continue;
-                // blob: 不能复用：它绑在旧卡片那次 objectURL 上，卡片重渲染时就被 revoke 了，
-                //   拿它顶上去只会得到一张裂图 —— 那比多一次请求更糟。http(s) 与 data: 才安全。
-                if (/^blob:/i.test(hit.url)) continue;
-                return hit;
-            }
-            return null;
+        const recallRecentImage = (card, requestUrl) => {
+            const hit = recentImageResults.get(recentImageKeyOf(card));
+            if (!hit || Date.now() - hit.ts >= 10 * 60 * 1000
+                || hit.request !== recentImageRequestOf(requestUrl) || /^blob:/i.test(hit.url)) return null;
+            return hit;
         };
         const recordImageFreezeEntry = (card, requestUrl) => {
             // [rphub 2.8.64] 去掉 isImageFreezeEnabled() 门控。
@@ -9325,7 +9334,7 @@ const app = createApp({
                 return Promise.resolve({ status: 'done', frozen: true });
             }
             if (options.fresh !== true) {
-                const recent = recallRecentImage(card);
+                const recent = recallRecentImage(card, requestUrl);
                 if (recent) {
                     const image = card.querySelector('img');
                     if (image) {

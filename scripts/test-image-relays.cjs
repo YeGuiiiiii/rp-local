@@ -44,7 +44,7 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
         }
         await page.goto('https://sta1n156.github.io/RP-Hub/'); await ready();
         await page.evaluate(() => __qa.openSettingsSection('image'));
-        await page.getByRole('button', { name: '添加生图接口', exact: true }).click();
+        await page.getByLabel('生图接口', { exact: true }).selectOption('__add_image_provider__');
         await page.getByLabel('生图 API 地址', { exact: true }).fill('https://gnai.rbq.my/ai/generate-image');
         await page.getByLabel('生图 API 地址', { exact: true }).press('Tab');
         assert.equal(await page.evaluate(() => __qa.imageApi.endpoint()), 'https://gnai.rbq.my/ai/generate-image',
