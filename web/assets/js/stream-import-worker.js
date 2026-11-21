@@ -1,5 +1,5 @@
 (() => {
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/utf-8.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/utf-8.js
   var charset;
   (function(charset2) {
     charset2[charset2["BACKSPACE"] = 8] = "BACKSPACE";
@@ -114,7 +114,7 @@
     [charset.LATIN_SMALL_LETTER_T]: charset.TAB
   };
 
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/bufferedString.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/bufferedString.js
   var NonBufferedString = class {
     constructor() {
       this.decoder = new TextDecoder("utf-8");
@@ -174,7 +174,7 @@
     }
   };
 
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/types/tokenType.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/types/tokenType.js
   var TokenType;
   (function(TokenType2) {
     TokenType2[TokenType2["LEFT_BRACE"] = 0] = "LEFT_BRACE";
@@ -192,7 +192,7 @@
   })(TokenType || (TokenType = {}));
   var tokenType_default = TokenType;
 
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/tokenizer.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/tokenizer.js
   var TokenizerStates;
   (function(TokenizerStates2) {
     TokenizerStates2[TokenizerStates2["START"] = 0] = "START";
@@ -868,14 +868,14 @@
     }
   };
 
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/types/stackElement.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/utils/types/stackElement.js
   var TokenParserMode;
   (function(TokenParserMode2) {
     TokenParserMode2[TokenParserMode2["OBJECT"] = 0] = "OBJECT";
     TokenParserMode2[TokenParserMode2["ARRAY"] = 1] = "ARRAY";
   })(TokenParserMode || (TokenParserMode = {}));
 
-  // rphub-research/repos/rp-local/scripts/ui-build/node_modules/@streamparser/json/dist/mjs/tokenparser.js
+  // scripts/ui-build/node_modules/@streamparser/json/dist/mjs/tokenparser.js
   var TokenParserState;
   (function(TokenParserState2) {
     TokenParserState2[TokenParserState2["VALUE"] = 0] = "VALUE";
@@ -1146,7 +1146,7 @@
     }
   };
 
-  // rphub-research/repos/rp-local/scripts/stream-import/decoder.mjs
+  // scripts/stream-import/decoder.mjs
   var modernKey = (key) => key.startsWith("silly_tavern_") ? "rp_hub_" + key.slice("silly_tavern_".length) : key;
   var shouldSkipEntryKey = (key) => {
     const raw = String(key || "");
@@ -1743,7 +1743,7 @@
     }
   };
 
-  // rphub-research/repos/rp-local/scripts/stream-import/storage.mjs
+  // scripts/stream-import/storage.mjs
   var stores = {
     restore_sessions: "id",
     restore_units: ["session", "source", "entry", "part"],
@@ -1899,7 +1899,7 @@
     return { plan: [...last.values()], deleted: [...deleted], summary };
   }
 
-  // rphub-research/repos/rp-local/scripts/stream-import/profiles.mjs
+  // scripts/stream-import/profiles.mjs
   var MB = 1048576;
   var profiles = Object.freeze([
     { id: "light", name: "\u7701\u5185\u5B58", chunkBytes: 65536, unitBytes: 16 * MB, collectionBytes: 64 * MB },
@@ -1908,7 +1908,7 @@
   ]);
   var profile = (id) => profiles.find((item) => item.id === id) || profiles[1];
 
-  // rphub-research/repos/rp-local/scripts/stream-import/worker.mjs
+  // scripts/stream-import/worker.mjs
   var paused = false;
   var resume;
   var running = false;
