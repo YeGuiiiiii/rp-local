@@ -233,10 +233,14 @@ const fixture = () => ({
     for (const failure of ['decode', 'quota', 'cancel', 'rollback']) {
       await stage();
       const message = await page.evaluate(async failure => {
-        const db = RPHubStorage.getMainDb();
-        const s = await RPStreamImport.readSession(db, (await new Promise(resolve => {
-          const q = db.transaction('restore_sessions').objectStore('restore_sessions').getAll(); q.onsuccess = () => resolve(q.result);
-        })).find(s => s.state === 'complete').id);
+        const db = await RPStreamImport.database();
+        const sessions = await new Promise((resolve, reject) => {
+          const tx = db.transaction('restore_sessions');
+          const q = tx.objectStore('restore_sessions').getAll();
+          tx.oncomplete = () => { db.close(); resolve(q.result); };
+          tx.onabort = () => { db.close(); reject(tx.error); };
+        });
+        const s = sessions.find(s => s.state === 'complete');
         const controller = new AbortController();
         const original = Storage.prototype.setItem;
         if (['quota', 'rollback'].includes(failure)) Storage.prototype.setItem = function (key, value) {
@@ -254,7 +258,7 @@ const fixture = () => ({
           if (failure === 'rollback') {
             if (!error.recoveryRequired) throw new Error('Missing recovery-required state');
             Storage.prototype.setItem = original;
-            await RPStreamImport.recover(db);
+            await RPStreamImport.recover(RPHubStorage.getMainDb());
             RPHubStorage.setWritesPaused(false); RPLocalStore.setWebWritesPaused(false);
           }
           return error.message;
@@ -265,11 +269,12 @@ const fixture = () => ({
     }
     // Reopen after a simulated process death between companion writes and the main commit.
     await page.evaluate(async () => {
-      const db = RPHubStorage.getMainDb();
+      const db = await RPStreamImport.database();
       const tx = db.transaction('restore_sessions', 'readwrite');
       tx.objectStore('restore_sessions').put({ id: 'crash-journal', state: 'applying', web: [],
         oldWeb: [{ key: 'stream-pref', value: 'old-pref' }], hasMoments: true, oldMoments: [{ content: '原名场面' }] });
-      await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onabort = () => reject(tx.error); });
+      try { await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onabort = () => reject(tx.error); }); }
+      finally { db.close(); }
       localStorage.setItem('stream-pref', 'interrupted-new');
       await new Promise(resolve => {
         const req = indexedDB.open('sf_moments_db', 1);

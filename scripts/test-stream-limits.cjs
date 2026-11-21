@@ -98,9 +98,12 @@ const root = path.resolve(__dirname, '..'), web = path.join(root, 'web');
     });
     await page.waitForFunction(() => __qa.streamImportPanel.state.phase === 'ready', null, { timeout: 120000 });
     await page.evaluate(async () => {
-      const db = RPHubStorage.getMainDb();
-      const sessions = await new Promise(resolve => {
-        const req = db.transaction('restore_sessions').objectStore('restore_sessions').getAll(); req.onsuccess = () => resolve(req.result);
+      const db = await RPStreamImport.database();
+      const sessions = await new Promise((resolve, reject) => {
+        const tx = db.transaction('restore_sessions');
+        const req = tx.objectStore('restore_sessions').getAll();
+        tx.oncomplete = () => { db.close(); resolve(req.result); };
+        tx.onabort = () => { db.close(); reject(tx.error); };
       });
       await RPStreamImport.apply(sessions.find(s => s.state === 'complete').id, {
         beforeApply: __qa.prepareStreamImport, restoreValue: value => __qa.restoreRphubBinaryDeep(value),
