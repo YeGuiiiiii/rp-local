@@ -17,6 +17,7 @@
     'use strict';
 
     var G = window;
+    try { if (G.parent && G.parent !== G) return; } catch (_) { return; }
     if (G.__rphubEmbeddingCacheLoaded) return;
     G.__rphubEmbeddingCacheLoaded = true;
 
@@ -248,6 +249,7 @@
     //      改成边删边按「预计剩余」判断，多写进来几条也会一起删掉。
     //   ② 淘汰正在跑的时候又来一次淘汰请求，不能直接 return 丢掉。
     //      丢掉的那次携带的「超出量」就没人处理了。记 _evictPending，跑完再补一轮。
+    var _evictTimer = null;
     function evictIfNeeded(retry) {
         if (_disabled) return;
         if (_evicting) {
@@ -264,6 +266,8 @@
         if (count <= MAX_ENTRIES && bytes <= MAX_BYTES) return;
 
         _evicting = true;
+        if (_evictTimer) { clearTimeout(_evictTimer); _evictTimer = null; }
+        _evictTimer = setTimeout(function () { _evictTimer = null; _evicting = false; }, 8000);
 
         openDB().then(function (db) {
             return new Promise(function (resolve) {
@@ -297,6 +301,7 @@
         }).catch(function () {
             return 0;
         }).then(function (removed) {
+            if (_evictTimer) { clearTimeout(_evictTimer); _evictTimer = null; }
             _evicting = false;
             var pending = _evictPending;
             _evictPending = false;
@@ -304,9 +309,6 @@
             // pending 说明有请求被合并掉了 ⇒ 补跑。retry 上限防止在库读不出来时无限递归。
             if ((pending || removed > 0) && retry < 8) evictIfNeeded(retry + 1);
         });
-        // 兜底：事务如果永远不 complete，_evicting 会永久为 true，
-        // 之后所有淘汰都被跳过 ⇒ 缓存无限增长。到点强制解锁。
-        setTimeout(function () { _evicting = false; }, 8000);
     }
 
     function resetCounters() {
@@ -465,10 +467,12 @@
                 get: function (name) {
                     var k = String(name || '').toLowerCase();
                     if (k === 'content-type') return 'application/json';
+                    if (k === 'x-rphub-embedding-cache') return 'hit';
                     return null;
                 },
                 has: function (name) {
-                    return String(name || '').toLowerCase() === 'content-type';
+                    var k = String(name || '').toLowerCase();
+                    return k === 'content-type' || k === 'x-rphub-embedding-cache';
                 }
             },
             text: function () { return Promise.resolve(text); },
@@ -582,10 +586,27 @@
                 return _nativeFetch.apply(self, args);
             }
 
-            return readEntry(key).then(function (hit) {
+            var reqSignal = (init && init.signal) || (input && input.signal) || null;
+            var createAbortError = function () {
+                try { return new DOMException('Aborted', 'AbortError'); }
+                catch (_) { var err = new Error('Aborted'); err.name = 'AbortError'; return err; }
+            };
+            if (reqSignal && reqSignal.aborted) {
+                return Promise.reject(createAbortError());
+            }
+
+            return readEntry(key).catch(function () {
+                // Only cache-read failures fall back to network; network errors / aborts must never trigger a second POST.
+                return null;
+            }).then(function (hit) {
+                if (reqSignal && reqSignal.aborted) {
+                    throw createAbortError();
+                }
                 if (hit && typeof hit.payload === 'string'
                         && isValidPayload(hit.payload, job.inputs.length)) {
                     _hits += 1;
+                    // Refresh updatedAt asynchronously for true LRU eviction.
+                    try { writeEntry(Object.assign({}, hit, { updatedAt: Date.now() })); } catch (_) {}
                     var now = Date.now();
                     if (_logged < HIT_LOG_LIMIT && now - _lastLogAt > HIT_LOG_INTERVAL) {
                         _logged += 1;
@@ -602,12 +623,6 @@
                 _misses += 1;
 
                 return _nativeFetch.apply(self, args).then(function (response) {
-                    // 关键：写缓存**不进响应路径**。
-                    // 原来是 return response.clone().text().then(...writeEntry...).then(=> response)，
-                    // 一旦 IndexedDB 卡住（onblocked / 事务挂起），官方那次 fetch 就跟着挂，
-                    // 120s 后报「API 响应超时」—— 缓存本该是纯增益，不能变成新的故障源。
-                    // 现在：clone() 同步拿到（安全，不消费原 body），写入完全后台跑，
-                    // 官方立刻拿到响应。写失败最多是下次没命中，不影响任何正确性。
                     try {
                         if (response && response.ok && typeof response.clone === 'function') {
                             var clone = response.clone();
@@ -616,9 +631,6 @@
                     } catch (_) {}
                     return response;
                 });
-            }).catch(function () {
-                // 缓存层任何异常都不许影响请求本身
-                return _nativeFetch.apply(self, args);
             });
         };
 
@@ -747,7 +759,7 @@
 
     function tickCard() {
         try {
-            if (G.RPThemePacks.current !== 'classic') return;
+            if (!G.RPThemePacks || G.RPThemePacks.current !== 'classic') return;
             if (!document.querySelector('.settings-view:not(.shell-settings-detail) .settings-stack')) return;
             if (!mountCard()) return;
             renderCard();

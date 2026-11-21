@@ -181,7 +181,17 @@
     if (!api) return;
     if (head.indexOf('base64') < 0) {
       try {
-        body = btoa(decodeURIComponent(body));
+        var decoded = decodeURIComponent(body);
+        if (typeof TextEncoder === 'function') {
+          var bytes = new TextEncoder().encode(decoded);
+          var bin = '';
+          for (var i = 0; i < bytes.length; i += 0x8000) {
+            bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+          }
+          body = btoa(bin);
+        } else {
+          body = btoa(unescape(encodeURIComponent(decoded)));
+        }
       } catch (e) {
         log('data url decode failed');
         return;

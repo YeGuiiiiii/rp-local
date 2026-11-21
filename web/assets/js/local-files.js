@@ -68,8 +68,9 @@
         if (activate) cards = list.map(({ uuid, storageFolder, importedName }) => ({ uuid, storageFolder, importedName }));
         return list;
     };
-    const pathOf = async key => {
-        const owner = ownerOf(key);
+    const pathOf = async (key, value) => {
+        const isMemoryTombstone = key.startsWith('rp_hub_b1_memory_state_') && value?.deleted === true;
+        const owner = isMemoryTombstone ? null : ownerOf(key);
         const directory = owner ? `角色卡数据/${folderOf(owner)}/` : '个人数据/';
         if (typeof inventory[key] === 'string' && inventory[key].startsWith(directory)) return inventory[key];
         const name = safeName(key.replace('rp_hub_', '')).slice(0, 48) + '-' + (await hash(key)).slice(0, 16);
@@ -92,7 +93,7 @@
                 name: card.name, favoriteAt: card.favoriteAt || null, createdAt: card.createdAt
             })));
         } else {
-            const base = await pathOf(key);
+            const base = await pathOf(key, value);
             const file = revision ? base.replace(/(?:\.[a-f0-9]{32})?\.json$/, '.' + revision + '.json') : base;
             write(file, { key, value });
             inventory[key] = file;
@@ -235,11 +236,18 @@
             let folders = [];
             try { folders = call('list', '角色卡数据').filter(item => item.directory); }
             catch (error) { return out; }
+            const protectedTombstones = new Set(
+                Object.entries(inventory)
+                    .filter(([key, file]) => key.startsWith('rp_hub_b1_memory_state_') && typeof file === 'string')
+                    .map(([, file]) => file)
+            );
             folders.forEach(folder => {
                 let files = 0, bytes = 0;
+                const prefix = '角色卡数据/' + folder.name + '/';
                 try {
                     call('list', '角色卡数据/' + folder.name).forEach(entry => {
                         if (entry.directory) return;
+                        if (protectedTombstones.has(prefix + entry.name)) return;
                         files += 1;
                         bytes += Number(entry.size || entry.bytes || 0) || 0;
                     });
@@ -252,14 +260,32 @@
         //   删空目录省不了多少空间，删错目录却是不可逆的。
         removeCardFolderFiles: folder => {
             if (!bridge || !folder) return 0;
+            const prefix = '角色卡数据/' + folder + '/';
+            const keepFiles = new Set(
+                Object.entries(inventory)
+                    .filter(([key, file]) => key.startsWith('rp_hub_b1_memory_state_') && typeof file === 'string' && file.startsWith(prefix))
+                    .map(([, file]) => file)
+            );
             let removed = 0;
             try {
                 call('list', '角色卡数据/' + folder).forEach(entry => {
                     if (entry.directory) return;
-                    try { call('remove', '角色卡数据/' + folder + '/' + entry.name); removed += 1; }
+                    const fullPath = prefix + entry.name;
+                    if (keepFiles.has(fullPath)) return;
+                    try { call('remove', fullPath); removed += 1; }
                     catch (error) { /* 单个失败不影响其它文件 */ }
                 });
             } catch (error) { return removed; }
+            let indexChanged = false;
+            for (const [key, file] of Object.entries(inventory)) {
+                if (typeof file === 'string' && file.startsWith(prefix) && !keepFiles.has(file)) {
+                    delete inventory[key];
+                    indexChanged = true;
+                }
+            }
+            if (indexChanged) {
+                try { write('个人数据/文件索引.json', inventory); } catch (_) {}
+            }
             return removed;
         },
         flush: async () => {
@@ -345,18 +371,36 @@
           </teleport>
         </section>`,
     };
-    if (bridge) {
+    const EPHEMERAL_LS_KEYS = new Set([
+        'rphub_embedding_cache_count',
+        'rphub_embedding_cache_bytes',
+        'rphub_import_trace_v1',
+        'rphub_heap_marks_v1',
+        'rphub_restore_peak_v1',
+        'rphub.bootAttempts',
+        '__qa_native_files',
+        '__qa_release_native'
+    ]);
+    const isTopWindow = (() => {
+        try { return window.top === window; }
+        catch (_) { return false; }
+    })();
+    if (bridge && isTopWindow) {
         const originalSet = Storage.prototype.setItem;
         const originalRemove = Storage.prototype.removeItem;
         Storage.prototype.setItem = function (key, value) {
             originalSet.call(this, key, value);
-            if (this === localStorage && !webWritesPaused) window.RPLocalStore.save('__ls__:' + key, String(value))
-                .catch(error => console.warn('本地偏好保存失败:', error.message));
+            if (this === localStorage && !webWritesPaused && !EPHEMERAL_LS_KEYS.has(String(key))) {
+                window.RPLocalStore.save('__ls__:' + key, String(value))
+                    .catch(error => console.warn('本地偏好保存失败:', error.message));
+            }
         };
         Storage.prototype.removeItem = function (key) {
             originalRemove.call(this, key);
-            if (this === localStorage && !webWritesPaused) window.RPLocalStore.remove('__ls__:' + key)
-                .catch(error => console.warn('本地偏好删除失败:', error.message));
+            if (this === localStorage && !webWritesPaused && !EPHEMERAL_LS_KEYS.has(String(key))) {
+                window.RPLocalStore.remove('__ls__:' + key)
+                    .catch(error => console.warn('本地偏好删除失败:', error.message));
+            }
         };
     }
 })();

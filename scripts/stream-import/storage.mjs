@@ -152,8 +152,9 @@ export async function validate(db, session, source, wait, maxCollectionBytes = 1
             });
             if (count !== record.count) throw new Error('暂存记录不完整：' + key);
         }
-        // Cards and chats use bounded records; other collections still need one bounded value.
-        if (key !== 'rp_hub_characters' && !key.startsWith('rp_hub_chat_') && bytes > maxCollectionBytes)
+        // Cards, chats, and classic memories use bounded chunked records; other collections still need one bounded value.
+        if (key !== 'rp_hub_characters' && !key.startsWith('rp_hub_chat_')
+            && !key.startsWith('rp_hub_classic_memories_') && bytes > maxCollectionBytes)
             throw new Error('单个数据集合超过 ' + maxCollectionBytes / 1048576 + ' MB，请切换读取档位或拆分备份：' + key);
         if (key === 'rp_hub_characters') summary.cards = record.count;
         if (key.startsWith('rp_hub_chat_') && record.array) summary.messages += record.count;

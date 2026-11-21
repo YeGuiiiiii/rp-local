@@ -179,15 +179,22 @@
             const batchRemove = async () => {
                 if (!picked.value.length || saving.value || !selected.value) return;
                 const list = [...picked.value];
-                if (!window.confirm('删除选中的 ' + list.length + ' 张图片？此操作不可撤销')) return;
+                const confirmMsg = '删除选中的 ' + list.length + ' 张图片？此操作不可撤销';
+                const confirmed = window.AndroidBridge?.isNativeApp?.() && typeof window.__rpConfirmAction === 'function'
+                    ? await window.__rpConfirmAction(confirmMsg, '删除图片')
+                    : window.confirm(confirmMsg);
+                if (!confirmed) return;
                 const card = selected.value, token = sequence;
                 const base = '图片/' + folder(card), removed = new Set();
                 saving.value = true;
                 try {
                     for (const name of list) {
                         try {
-                            if (local.available) local.call('remove', base + '/' + name);
-                            else await removeBrowserPhoto(name);
+                            if (local.available) {
+                                local.call('remove', base + '/' + name);
+                                const stem = String(name || '').replace(/\.[^.]+$/, '');
+                                if (stem) { try { local.call('remove', base + '/.索引/' + stem + '.json'); } catch (_) {} }
+                            } else await removeBrowserPhoto(name);
                             removed.add(name);
                         } catch (_) {}
                     }

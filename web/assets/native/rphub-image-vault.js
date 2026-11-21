@@ -109,7 +109,7 @@
             const file = await local()?.saveImage(key, blob, owner);
             if (!file) await transaction('readwrite', store => store.put({
                 k: key, b: blob, n: blob.size, a: Date.now(), t: Date.now(),
-                compressed: true, owner: owner?.uuid || '', g: new URL(request).searchParams.get('tag') || '',
+                compressed: true, owner: owner?.uuid || '', g: new URL(request, location.href).searchParams.get('tag') || '',
             }));
             return file || { url: blobUrl(key, blob), bytes: blob.size };
         })().finally(() => pending.delete(key));
@@ -127,6 +127,7 @@
         return true;
     }
     const markExpired = card => {
+        if (card.dataset.imageJobState === 'failed') return;
         card.classList.remove('is-generating', 'is-waiting');
         card.classList.add('is-generation-error');
         const label = card.querySelector('.generated-image-progress-label');

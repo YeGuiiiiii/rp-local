@@ -41,14 +41,21 @@
     });
 
     const initDB = async () => {
+        if (compactingPromise) await compactingPromise.catch(() => {});
         if (reopenPromise) return reopenPromise;
         if (initPromise) return initPromise;
         if (mainDb) return mainDb;
         initPromise = (async () => {
             mainDb = await openAppDB(DB_NAME, DB_VERSION);
+            let dbList = null;
+            try {
+                dbList = typeof indexedDB.databases === 'function' ? await indexedDB.databases() : null;
+            } catch (error) {
+                console.warn('IndexedDB list check failed:', error);
+            }
+            await recoverCompactionIfNeeded(dbList);
             await window.RPStreamImport.recover(mainDb);
             try {
-                const dbList = typeof indexedDB.databases === 'function' ? await indexedDB.databases() : null;
                 const legacyInfo = dbList?.find(item => item?.name === LEGACY_DB_NAME);
                 const shouldOpenLegacy = !dbList || !!legacyInfo;
                 if (shouldOpenLegacy) {
@@ -94,6 +101,7 @@
             const next = crypto.randomUUID();
             await dbSetTo(mainDb, LOCAL_MIRROR_KEY, next, { mirror: false, force: true });
             await window.RPLocalStore.saveRevision(next);
+            mirrorFailed = false;
         }
     };
 
@@ -228,8 +236,11 @@
     const memoryDirectoryBaselines = new Map();
     const rememberChunkBaseline = (baselines, checkDir, directory, groups) => {
         if (!checkDir(directory) || !Array.isArray(groups)) return;
-        const key = directory.revision + ':' + (directory.seq || 0);
-        if (baselines.has(key)) baselines.delete(key);
+        const prefix = directory.revision + ':';
+        for (const existingKey of [...baselines.keys()]) {
+            if (existingKey.startsWith(prefix)) baselines.delete(existingKey);
+        }
+        const key = prefix + (directory.seq || 0);
         baselines.set(key, groups);
         while (baselines.size > CHAT_BASELINE_LIMIT) {
             const oldest = baselines.keys().next().value;
@@ -707,17 +718,25 @@
             transaction = targetDb.transaction(['store'], 'readwrite');
             transaction.oncomplete = () => {
                 storageActiveWrites.delete(transaction);
+                let mirrorAccounted = false;
+                const finishMirror = () => {
+                    if (!mirrorRevision || mirrorAccounted) return false;
+                    mirrorAccounted = true;
+                    pendingMirrors = Math.max(0, pendingMirrors - 1);
+                    return pendingMirrors === 0;
+                };
                 if (mirrorRevision) {
                     pendingMirrors++;
                     latestMirrorRevision = mirrorRevision;
                 }
                 Promise.resolve(mirrors.size ? window.RPLocalStore.saveBatch([...mirrors]) : undefined)
                     .then(() => {
-                        if (mirrorRevision && --pendingMirrors === 0 && !mirrorFailed)
+                        if (finishMirror() && !mirrorFailed)
                             return window.RPLocalStore.saveRevision(latestMirrorRevision);
                     })
                     .then(() => settle(true, result),
                         error => {
+                            finishMirror();
                             mirrorFailed = true;
                             settle(false, Object.assign(error, { committed: true }));
                         });
@@ -1016,6 +1035,13 @@
                 await perform();
             }
             sources.forEach((source, index) => {
+                if (summaries[index]?.uuid && !source.uuid) source.uuid = summaries[index].uuid;
+                if (summaries[index]?.storageFolder && source.storageFolder !== summaries[index].storageFolder) {
+                    source.storageFolder = summaries[index].storageFolder;
+                }
+                if (summaries[index]?.importedName && !source.importedName) {
+                    source.importedName = summaries[index].importedName;
+                }
                 if (!isCharacterStub(source)) characterPreviews.set(source, {
                     source: source.avatar || '', preview: summaries[index].avatar,
                     imageSaved: hasLargeCardImage(payload[index]), edge: summaries[index].previewEdge,
@@ -1760,6 +1786,28 @@
     //     3) 删临时库。
     //   聊天分块的每个 part 都是独立键，按键复制即可，不需要理解目录结构。
     const COMPACT_DB_NAME = 'RPHubDB_compact';
+    const COMPACT_COMPLETE_KEY = '__rp_compact_complete__';
+    let compactingPromise = null;
+    const recoverCompactionIfNeeded = async (dbList) => {
+        if (Array.isArray(dbList) && !dbList.some(item => item?.name === COMPACT_DB_NAME)) return;
+        let temp = null;
+        try {
+            temp = await openAppDB(COMPACT_DB_NAME, DB_VERSION);
+            const marker = await readOne(temp, COMPACT_COMPLETE_KEY);
+            if (marker && marker.completed === true) {
+                const tempKeys = (await readAllKeys(temp)).filter(key => key !== COMPACT_COMPLETE_KEY);
+                const mainKeys = await readAllKeys(mainDb);
+                if (tempKeys.length > 0 && mainKeys.length < tempKeys.length) {
+                    await copyAllKeys(temp, mainDb, tempKeys);
+                }
+            }
+        } catch (error) {
+            console.warn('Compaction recovery check failed:', error);
+        } finally {
+            try { temp?.close(); } catch (_) {}
+        }
+        await deleteDbByName(COMPACT_DB_NAME);
+    };
     const deleteDbByName = (name) => new Promise(resolve => {
         let settled = false;
         const finish = ok => { if (!settled) { settled = true; resolve(ok); } };
@@ -1797,52 +1845,81 @@
         }
     };
     const compactDatabase = async (options = {}) => {
+        if (compactingPromise) throw storageWriteError('InvalidStateError', '存储压缩正在进行中');
         const onProgress = options.onProgress;
         const onStage = options.onStage;
         if (!mainDb) await initDB();
         if (!mainDb) throw storageWriteError('UnknownError', '主库未打开');
-        const keys = await readAllKeys(mainDb);
-        if (!keys.length) throw storageWriteError('StorageDataError', '主库是空的，没有可压缩的数据');
-        onStage?.('正在创建临时库');
-        await deleteDbByName(COMPACT_DB_NAME);
-        const temp = await openAppDB(COMPACT_DB_NAME, DB_VERSION);
-        try {
-            onStage?.('正在复制 ' + keys.length + ' 项到临时库');
-            await copyAllKeys(mainDb, temp, keys, onProgress, '复制');
-            const copied = await readAllKeys(temp);
-            if (copied.length !== keys.length) {
-                throw storageWriteError('StorageDataError', '临时库校验失败：' + copied.length + ' / ' + keys.length);
+        const prevWritesPaused = writesPaused;
+        const runCompact = async () => {
+            try {
+                // Pause all external writes and wait for queued character/file writes to drain.
+                if (!prevWritesPaused) {
+                    initialReads.clear();
+                    storageWriteEpoch++;
+                    writesPaused = true;
+                    const reason = storageWriteError('StoragePausedError', '存储整理期间已暂停其他写入');
+                    for (const abort of storageActiveWrites.values()) abort(reason);
+                }
+                window.RPLocalStore?.setWebWritesPaused?.(true);
+                await characterWriteQueue.catch(() => {});
+                await window.RPLocalStore?.flush?.().catch(() => {});
+                const keys = (await readAllKeys(mainDb)).filter(key => key !== COMPACT_COMPLETE_KEY);
+                if (!keys.length) throw storageWriteError('StorageDataError', '主库是空的，没有可压缩的数据');
+                onStage?.('正在创建临时库');
+                await deleteDbByName(COMPACT_DB_NAME);
+                const temp = await openAppDB(COMPACT_DB_NAME, DB_VERSION);
+                try {
+                    onStage?.('正在复制 ' + keys.length + ' 项到临时库');
+                    await copyAllKeys(mainDb, temp, keys, onProgress, '复制');
+                    const copied = await readAllKeys(temp);
+                    if (copied.length !== keys.length) {
+                        throw storageWriteError('StorageDataError', '临时库校验失败：' + copied.length + ' / ' + keys.length);
+                    }
+                    // Mark temp complete only after every live key is verified so a mid-rebuild crash can recover.
+                    await writeOne(temp, COMPACT_COMPLETE_KEY, { completed: true, count: keys.length, at: Date.now() });
+                } catch (error) {
+                    try { temp.close(); } catch (_) {}
+                    await deleteDbByName(COMPACT_DB_NAME);
+                    throw error;
+                }
+                // 到这里临时库里已有一份完整的活数据。主库下面会被删掉重建。
+                onStage?.('正在重建主库文件');
+                try { mainDb.close(); } catch (_) {}
+                mainDb = null;
+                if (!await deleteDbByName(DB_NAME)) {
+                    // 删不掉（多半被别的页面占着）：临时库留着没用，清掉，主库原样未动。
+                    try { temp.close(); } catch (_) {}
+                    await deleteDbByName(COMPACT_DB_NAME);
+                    mainDb = await openAppDB(DB_NAME, DB_VERSION);
+                    throw storageWriteError('InvalidStateError', '无法重建主库，可能被其它页面占用，请关闭其它页面后重试');
+                }
+                mainDb = await openAppDB(DB_NAME, DB_VERSION);
+                try {
+                    onStage?.('正在写回主库');
+                    await copyAllKeys(temp, mainDb, keys, onProgress, '写回');
+                    const restored = await readAllKeys(mainDb);
+                    if (restored.length !== keys.length) {
+                        throw storageWriteError('StorageDataError', '写回校验失败：' + restored.length + ' / ' + keys.length);
+                    }
+                } finally {
+                    try { temp.close(); } catch (_) {}
+                }
+                await deleteDbByName(COMPACT_DB_NAME);
+                chatDirectoryBaselines.clear();
+                memoryDirectoryBaselines.clear();
+                initialReads.clear();
+                storageWriteEpoch++;
+                onStage?.('完成');
+                return { keys: keys.length };
+            } finally {
+                if (!prevWritesPaused) writesPaused = false;
+                window.RPLocalStore?.setWebWritesPaused?.(false);
             }
-        } catch (error) {
-            try { temp.close(); } catch (_) {}
-            await deleteDbByName(COMPACT_DB_NAME);
-            throw error;
-        }
-        // 到这里临时库里已有一份完整的活数据。主库下面会被删掉重建。
-        onStage?.('正在重建主库文件');
-        try { mainDb.close(); } catch (_) {}
-        mainDb = null;
-        if (!await deleteDbByName(DB_NAME)) {
-            // 删不掉（多半被别的页面占着）：临时库留着没用，清掉，主库原样未动。
-            try { temp.close(); } catch (_) {}
-            await deleteDbByName(COMPACT_DB_NAME);
-            mainDb = await openAppDB(DB_NAME, DB_VERSION);
-            throw storageWriteError('InvalidStateError', '无法重建主库，可能被其它页面占用，请关闭其它页面后重试');
-        }
-        mainDb = await openAppDB(DB_NAME, DB_VERSION);
-        try {
-            onStage?.('正在写回主库');
-            await copyAllKeys(temp, mainDb, keys, onProgress, '写回');
-            const restored = await readAllKeys(mainDb);
-            if (restored.length !== keys.length) {
-                throw storageWriteError('StorageDataError', '写回校验失败：' + restored.length + ' / ' + keys.length);
-            }
-        } finally {
-            try { temp.close(); } catch (_) {}
-        }
-        await deleteDbByName(COMPACT_DB_NAME);
-        onStage?.('完成');
-        return { keys: keys.length };
+        };
+        compactingPromise = runCompact();
+        try { return await compactingPromise; }
+        finally { compactingPromise = null; }
     };
 
     window.RPHubStorage = Object.freeze({

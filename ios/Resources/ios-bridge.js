@@ -12,7 +12,7 @@
         'exists', 'list', 'remove', 'locations', 'consumeReleaseNotice', 'runtimeInfo',
     ].map(method => [method, (...args) => call('files', method, args)]));
     window.AndroidBridge = Object.fromEntries([
-        'saveFile', 'saveImageToGallery', 'openLighthouse',
+        'copyText', 'saveFile', 'saveImageToGallery', 'openLighthouse',
         'createBackupFile', 'createBackupFileToDownloads', 'writeBackupChunk',
         'finishBackupWrite', 'abortBackupWrite', 'listBackupFiles', 'readBackupFileText',
         'deleteBackupFile', 'renameBackupFile', 'getBackupFolder', 'getDefaultBackupFolderPath',

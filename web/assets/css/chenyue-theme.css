@@ -13,7 +13,7 @@
     --yy-field: #f7f4f8;
     --yy-depth: 0 5px 16px #34213d0d;
 }
-:root:not([data-app-theme="dark"]) {
+:root:not([data-app-theme="dark"]):where(:not([data-ui-skin="classic"])) {
     --shell-bg: #f4f1f7;
     --shell-surface: #fffefa;
     --shell-text: #393440;
@@ -36,6 +36,8 @@
     --yy-line: #595060;
     --yy-field: #322e3a;
     --yy-depth: 0 5px 16px #0002;
+}
+:root[data-app-theme="dark"]:where(:not([data-ui-skin="classic"])) {
     --shell-bg: #211f29;
     --shell-surface: #2c2935;
     --shell-text: #ece4f0;
@@ -64,7 +66,7 @@
     --gray-400: 112 103 120;
     --gray-500: 112 103 120;
 }
-:root:not([data-rphub-accent="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
+:root:not([data-accent-scope="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
     --primary-50: 247 239 243;
     --primary-100: 241 225 233;
     --primary-200: 224 194 208;
@@ -80,7 +82,7 @@
     --gray-400: 176 164 187;
     --gray-500: 176 164 187;
 }
-:root[data-app-theme="dark"]:not([data-rphub-accent="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
+:root[data-app-theme="dark"]:not([data-accent-scope="1"]) .chenyue-theme .app-main:not([data-view="chat"]) {
     --primary-50: 58 42 53;
     --primary-100: 72 49 64;
     --primary-200: 104 65 86;
@@ -98,7 +100,7 @@
     --primary-text-800: 243 206 216;
     --primary-text-900: 249 226 233;
 }
-:root[data-rphub-accent="1"] {
+:root[data-accent-scope="1"] {
     --yy-rose: rgb(var(--primary-700));
     --shell-accent: rgb(var(--primary-700));
     --shell-tint: rgb(var(--primary-50));

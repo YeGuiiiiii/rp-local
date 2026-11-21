@@ -625,7 +625,8 @@
         components: { Icon },
         setup() {
             const updates = window.RPUpdates;
-            return { updates, state: updates.state,
+            const isIosApp = location.protocol === 'rplocal:' || !!window.webkit?.messageHandlers?.rplocal;
+            return { updates, state: updates.state, isIosApp,
                 busy: computed(() => ['checking', 'downloading', 'verifying'].includes(updates.state.phase)),
                 status: computed(() => ({
                     idle: '', checking: '正在检查更新...', current: '已是最新版本',
@@ -658,6 +659,7 @@
             <details v-if="state.latest.notes"><summary>更新内容 · {{state.latest.versionName}}</summary><p>{{state.latest.notes}}</p></details>
             <button v-if="['ready','permission'].includes(state.phase)" type="button" class="shell-button" @click="updates.install()"><icon name="PackageCheck"/>安装更新</button>
             <button v-else-if="!busy && updates.native" type="button" class="shell-button" @click="updates.download()"><icon name="Download"/>下载更新</button>
+            <p v-else-if="!busy && isIosApp" class="app-update-hint">iOS 端请前往发布页获取新版安装包。</p>
             <a v-else-if="!busy" class="shell-button" :href="state.latest.url" target="_blank" rel="noopener"><icon name="Download"/>下载安装包</a>
           </div>
         </section>`
@@ -667,6 +669,7 @@
         props: { blocked: Boolean },
         setup(props) {
             const updates = window.RPUpdates, state = updates.state;
+            const isIosApp = location.protocol === 'rplocal:' || !!window.webkit?.messageHandlers?.rplocal;
             const dialog = ref(null), ready = ref(false), imageFailed = ref(false);
             const sync = () => {
                 const visible = ready.value && !props.blocked && state.showNotice && !!state.latest;
@@ -685,7 +688,7 @@
                 dialog.value?.close();
             });
             const dismiss = () => { updates.dismiss(); dialog.value.close(); };
-            return { updates, state, dialog, imageFailed, dismiss,
+            return { updates, state, dialog, imageFailed, dismiss, isIosApp,
                 trapFocus: useDialogFocus(() => state.showNotice && !props.blocked, '.update-notice'),
                 closed: () => { if (!props.blocked && state.showNotice) updates.dismiss(); },
                 busy: computed(() => ['checking', 'downloading', 'verifying'].includes(state.phase)),
@@ -723,6 +726,7 @@
                   <button v-else-if="updates.native" type="button" class="shell-button update-notice-primary"
                     :disabled="busy" @click="state.phase === 'error' ? updates.check() : updates.download()">
                     <icon :name="state.phase === 'error' ? 'RefreshCw' : 'Download'"/>{{state.phase === 'error' ? '重新检查' : '下载更新'}}</button>
+                  <span v-else-if="isIosApp" class="app-update-hint">iOS 请前往发布页获取新版</span>
                   <a v-else class="shell-button update-notice-primary" :href="state.latest.url"
                     target="_blank" rel="noopener"><icon name="Download"/>下载安装包</a>
                 </div>
@@ -817,7 +821,11 @@
                 finally { loading.value = false; }
             };
             const clear = async () => {
-                if (!confirm('清空向量缓存？角色卡、聊天和记忆不会删除。')) return;
+                const msg = '清空向量缓存？角色卡、聊天和记忆不会删除。';
+                const confirmed = window.AndroidBridge?.isNativeApp?.() && typeof window.__rpConfirmAction === 'function'
+                    ? await window.__rpConfirmAction(msg, '清空向量缓存')
+                    : confirm(msg);
+                if (!confirmed) return;
                 loading.value = true;
                 try {
                     if (!await window.RPHubEmbeddingCache.clear()) throw new Error('缓存清理失败');

@@ -176,6 +176,9 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
     private func appCall(_ method: String, _ args: [Any]) throws -> Any {
         let first = args.first as? String ?? ""
         switch method {
+        case "copyText":
+            UIPasteboard.general.string = first
+            return true
         case "saveFile", "saveImageToGallery":
             guard args.count > 1, let name = args[1] as? String,
                   first.count <= 64 * 1024 * 1024, let data = Data(base64Encoded: first) else {
@@ -187,7 +190,7 @@ final class RPViewController: UIViewController, WKUIDelegate, WKNavigationDelega
             share(url)
             return true
         case "openLighthouse":
-            guard let url = URL(string: first), ["http", "https"].contains(url.scheme ?? "") else {
+            guard let url = URL(string: first), ["http", "https"].contains(url.scheme?.lowercased() ?? "") else {
                 throw RPError.message("Invalid website")
             }
             DispatchQueue.main.async { self.openExternal(url) }

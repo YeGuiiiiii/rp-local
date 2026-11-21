@@ -21,17 +21,20 @@
         send('resource', '资源加载失败: ' + (e.target.src || e.target.href || ''), e.target.tagName, 0);
         return;
       }
+      if (window.__rphubEarlyTrapInstalled) return;
       var msg = (e && e.message) || 'unknown error';
       if (e && e.error) { var st = stackOf(e.error); if (st) msg = msg + ' | stack: ' + st; }
       send('onerror', msg, (e && e.filename) || '', (e && e.lineno) || 0);
     } catch (err) {}
   }, true);
-  window.addEventListener('unhandledrejection', function (e) {
-    try {
-      var r = e && e.reason;
-      send('unhandledrejection', (r && (r.stack || r.message)) || String(r), '', 0);
-    } catch (err) {}
-  });
+  if (!window.__rphubEarlyTrapInstalled) {
+    window.addEventListener('unhandledrejection', function (e) {
+      try {
+        var r = e && e.reason;
+        send('unhandledrejection', (r && (r.stack || r.message)) || String(r), '', 0);
+      } catch (err) {}
+    });
+  }
   var origError = console.error;
   console.error = function () {
     try {
@@ -54,7 +57,7 @@
         parts.push(a && a.stack ? a.stack : String(a));
       }
       var text = parts.join(' ');
-      if (text.indexOf('Vue') !== -1 || text.indexOf('Unhandled') !== -1 || text.indexOf('error') !== -1) {
+      if (text.indexOf('Vue') !== -1 || text.indexOf('Unhandled') !== -1 || /error/i.test(text)) {
         send('console.warn', text, '', 0);
       }
     } catch (err) {}

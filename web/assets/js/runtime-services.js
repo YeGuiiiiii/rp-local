@@ -82,7 +82,7 @@
         const replaceEscapedHtmlParagraphs = (documentNode) => {
             let modified = false;
             documentNode.querySelectorAll('p').forEach(paragraph => {
-                if (!/^\s*</.test(paragraph.innerHTML)) return;
+                if (!/^\s*(?:<|&lt;)/i.test(paragraph.innerHTML)) return;
                 const rawHtml = paragraph.textContent;
                 if (!/^\s*<(!doctype|html|head|body|div|span|style|script|table|img)/i.test(rawHtml)) return;
                 if (!paragraph.parentNode) return;
@@ -382,7 +382,10 @@
                 const getLogKey = log => String(log?.request_id || [log?.created_at, log?.model_name, log?.prompt_tokens, log?.completion_tokens].join('|'));
                 for (const delay of [500, 5000]) {
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    const apiRoot = record.apiUrl.replace(/\/+$/, '').replace(/\/v1$/i, '');
+                    const apiRoot = record.apiUrl
+                        .replace(/\/+$/, '')
+                        .replace(/\/(?:chat\/completions|models|embeddings)$/i, '')
+                        .replace(/\/v1$/i, '');
                     const response = await fetch(`${apiRoot}/api/log/token`, {
                         headers: { Authorization: `Bearer ${apiKey}` }
                     });
@@ -425,8 +428,13 @@
             if (tokenUsageHistory.value.length > usageLimit) {
                 tokenUsageHistory.value = tokenUsageHistory.value.slice(0, usageLimit);
             }
-            const apiKey = String(getApiKey?.() || '').trim();
-            if (record.apiUrl && apiKey) fetchLatestQuota(record, apiKey);
+            const apiKey = String((meta.apiKey !== undefined ? meta.apiKey : getApiKey?.()) || '').trim();
+            const hasMeasuredTokens = record.reported === true
+                || Number.isFinite(record.inputTokens)
+                || Number.isFinite(record.outputTokens);
+            if (record.apiUrl && apiKey && hasMeasuredTokens && meta.cached !== true) {
+                fetchLatestQuota(record, apiKey);
+            }
             saveTokenUsageHistoryNow().catch(error => console.error('Token usage history save failed:', error));
         };
         const clearTokenUsageHistory = () => {
@@ -551,10 +559,22 @@
         return 'image/png';
     };
 
+    const notifyImageSave = (message, type = 'error') => {
+        if (typeof window.toast === 'function') {
+            window.toast(message, type);
+            return;
+        }
+        window.dispatchEvent(new CustomEvent('rp:notice', { detail: { message, type } }));
+    };
+
     const saveImage = image => {
         const bridge = window.AndroidBridge;
         if (!bridge) {
-            if (window.toast) window.toast('当前环境不支持保存到相册', 'error');
+            if (window.RPImageDownload) {
+                window.RPImageDownload.run(image, { name: guessName(image).replace(/\.[^.]+$/, '') }).catch(() => {});
+                return;
+            }
+            notifyImageSave('当前环境不支持保存到相册', 'error');
             return;
         }
         const source = String(image.currentSrc || image.src || '');
@@ -562,7 +582,7 @@
         const mime = guessMime(image);
         if (source.startsWith('data:image/')) {
             if (typeof bridge.saveImageToGallery !== 'function') {
-                if (window.toast) window.toast('当前版本不支持保存该图片', 'error');
+                notifyImageSave('当前版本不支持保存该图片', 'error');
                 return;
             }
             bridge.saveImageToGallery(source.split(',')[1] || '', name, mime);
@@ -573,14 +593,14 @@
             return;
         }
         if (!/^https?:/i.test(source)) {
-            if (window.toast) window.toast('图片地址不受支持', 'error');
+            notifyImageSave('图片地址不受支持', 'error');
             return;
         }
         if (typeof bridge.saveImageFromUrl === 'function') {
             bridge.saveImageFromUrl(source, name, mime);
             return;
         }
-        if (window.toast) window.toast('当前版本不支持保存网络图片', 'error');
+        notifyImageSave('当前版本不支持保存网络图片', 'error');
     };
 
     const isSaveableImage = image => {

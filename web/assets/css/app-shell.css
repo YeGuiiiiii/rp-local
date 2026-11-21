@@ -36,7 +36,7 @@
 .classic-patch-button svg { width: 16px; height: 16px; }
 .classic-patch-button:focus-visible { outline: 2px solid var(--c-accent); }
 .classic-local-links { display: flex; gap: 12px; max-width: 768px; margin: 20px auto; }
-:root[data-ui-skin="classic"] { --shell-bg: rgb(var(--gray-50)); --shell-surface: rgb(var(--gray-0,255 255 255)); --shell-text: var(--c-text); --shell-muted: var(--c-text-3); --shell-accent: var(--c-accent); --shell-line: var(--c-border); }
+:root[data-ui-skin="classic"] { --shell-bg: rgb(var(--gray-50)); --shell-surface: rgb(var(--surface, 255 255 255)); --shell-text: var(--c-text); --shell-muted: var(--c-text-3); --shell-accent: var(--c-accent); --shell-line: var(--c-border); }
 .shell-page, .shell-root .management-view {
     height: 100%; min-height: 0; overflow-y: auto; overflow-x: hidden;
     color: var(--shell-text); background: var(--shell-bg); animation: none;

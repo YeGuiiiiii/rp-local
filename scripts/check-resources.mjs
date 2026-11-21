@@ -13,7 +13,7 @@ const baselinePath = path.join(root, 'dist', 'RP-local-0.3.apk');
 let baseline = null;
 if (fs.existsSync(baselinePath)) {
     let JSZip = null;
-    for (const candidate of ['jszip', 'C:/Users/pzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/jszip']) {
+    for (const candidate of ['jszip', process.env.RPHUB_JSZIP_PATH].filter(Boolean)) {
         try { JSZip = require(candidate); break; } catch { /* 换下一个候选 */ }
     }
     if (JSZip) baseline = await JSZip.loadAsync(fs.readFileSync(baselinePath));
@@ -40,7 +40,7 @@ for (const name of files) {
             } else unchangedScripts++;
         }
     }
-    if (name.startsWith('assets' + path.sep + 'css' + path.sep) && name.endsWith('.css')) {
+    if ((name.startsWith('assets' + path.sep + 'css' + path.sep) || name.startsWith('assets' + path.sep + 'themes' + path.sep)) && name.endsWith('.css')) {
         for (const [, value] of text.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
             if (/^(?:data:|https?:|#)/.test(value)) continue;
             if (!fs.existsSync(path.resolve(path.dirname(file), value))) errors.push('Missing CSS resource: ' + name + ' -> ' + value);
@@ -90,6 +90,8 @@ const report = {
     inlineScriptsAndPromptsUnchanged: !baselineDifferences.some(name => name.endsWith('.html')),
     baselineDifferences, errors,
 };
-fs.writeFileSync(path.join(root, 'verification', 'resources.json'), JSON.stringify(report, null, 2));
+const reportDir = process.env.RPHUB_TEST_OUTPUT_DIR || path.join(root, 'verification');
+fs.mkdirSync(reportDir, { recursive: true });
+fs.writeFileSync(path.join(reportDir, 'resources.json'), JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));
 if (errors.length || (process.argv.includes('--preserve-runtime') && baselineDifferences.length)) process.exitCode = 1;

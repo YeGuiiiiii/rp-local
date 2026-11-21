@@ -320,7 +320,7 @@
                 const code = await response.text();
                 if (disposed || run !== generation) return null;
                 let stream;
-                if (fileRef.url) {
+                if (fileRef.url || typeof fileRef.resolveUrl === 'function') {
                     readController = new AbortController();
                     // [rphub 2.9.138] 原生读取令牌只能用一次：清点一趟、导入一趟，第二趟拿旧令牌必被拒
                     //   （表现为「读取本地备份失败，请重新选择文件」）。这里在每趟 fetch 之前重新要一个。
@@ -534,13 +534,33 @@
             //   逻辑键（剥掉 rp_hub_ 前缀）由它自己补前缀并连带清历史前缀。
             const purgeLegacyKeys = async keys => {
                 const api = window.RPHubStorage;
-                if (!api || typeof api.deleteStoredValue !== 'function') return 0;
                 let done = 0;
                 for (const key of keys) {
-                    const logical = String(key || '').replace(/^rp_hub_/, '');
+                    const raw = String(key || '');
+                    if (!raw) continue;
+                    if (raw.startsWith('__ls__:')) {
+                        const lsKey = raw.slice(7);
+                        try {
+                            localStorage.removeItem(lsKey);
+                            await window.RPLocalStore?.remove?.(raw);
+                            done++;
+                        } catch (error) { console.warn('清理旧版偏好快照失败:', raw, error); }
+                        continue;
+                    }
+                    const logical = raw.replace(/^(?:rp_hub_|silly_tavern_)/, '');
                     if (!logical) continue;
-                    try { await api.deleteStoredValue(logical); done++; }
-                    catch (error) { console.warn('清理旧版快照失败:', key, error); }
+                    try {
+                        if (api && typeof api.deleteStoredValue === 'function') {
+                            await api.deleteStoredValue(logical, { force: true });
+                        }
+                        try {
+                            if (localStorage.getItem(raw) !== null) {
+                                localStorage.removeItem(raw);
+                                await window.RPLocalStore?.remove?.('__ls__:' + raw);
+                            }
+                        } catch (_) {}
+                        done++;
+                    } catch (error) { console.warn('清理旧版快照失败:', key, error); }
                 }
                 return done;
             };
@@ -631,7 +651,7 @@
                             </label>
                             <p style="font-size:11px;color:#9ca3af;margin:6px 0 0">删除后无法从应用内找回；不确定就先别勾，可稍后在「数据体检」里导出再清理。</p>
                         </div>
-                                    <div v-if="!external && state.phase === 'ready' && state.legacyCount" style="margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid #d7e3f4;background:#f4f8ff;text-align:left">
+                        <div v-else-if="!external && state.phase === 'ready' && state.legacyCount" style="margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid #d7e3f4;background:#f4f8ff;text-align:left">
                             <p style="font-size:12px;color:#1e3a8a;line-height:1.6;margin:0">已跳过 {{ state.legacyCount }} 条旧备份快照（{{ format(state.legacyTotal) }}），不参与这次导入。原文件里这些数据还在，需要时从原文件取即可。</p>
                         </div>
                         <p v-if="!external && state.phase === 'ready'" class="transfer-warning">导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。</p>

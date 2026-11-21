@@ -823,10 +823,11 @@
                                 <p class="text-xs text-gray-500 mt-1">检查重复 UI 模板、旧渲染缓存、超量记录和重复图片。</p>
                             </div>
                             <button type="button" @click="compactStorage" :disabled="isCompactingStorage || isCheckingDataHealth || isAutoBackingUp" class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold disabled:opacity-50" title="重建数据库文件，把导入残留的空闲页真正释放（需要一点时间）">{{ isCompactingStorage ? '压缩中…' : '压缩存储' }}</button>
-                            <button type="button" @click="scanDataHealth" :disabled="isCheckingDataHealth || isAutoBackingUp" class="px-3 py-2 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 text-sm font-semibold disabled:opacity-50">
+                            <button type="button" @click="scanDataHealth" :disabled="isCheckingDataHealth || isAutoBackingUp || isCompactingStorage" class="px-3 py-2 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 text-sm font-semibold disabled:opacity-50">
                                 {{ isCheckingDataHealth ? '检查中...' : '开始体检' }}
                             </button>
                         </div>
+                        <p v-if="compactStorageNote" class="mt-2 text-xs text-primary-600">{{ compactStorageNote }}</p>
                         <p v-if="dataHealthError" class="mt-2 text-xs text-red-500">{{ dataHealthError }}</p>
                         <div v-if="dataHealthResult.checkedAt" class="mt-3 space-y-2">
                             <div class="flex items-center justify-between text-xs text-gray-500">
@@ -867,7 +868,7 @@
         </div>
 
         <!-- [rphub 2.8.95] 备份体积分析结果弹窗：toast 是单行胶囊，表格只能放这里 -->
-        <div v-if="showBackupSizeModal &amp;&amp; backupSizeReport" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div v-if="showBackupSizeModal &amp;&amp; backupSizeReport" @keydown.esc.stop="showBackupSizeModal = false" tabindex="-1" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100">
                 <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/80">
                     <div class="min-w-0">
@@ -1271,7 +1272,7 @@
                                                     <span class="text-gray-400">·</span>
                                                     <span class="text-gray-500 font-medium whitespace-nowrap">
                                                         <span v-if="quotaLoading">获取中...</span>
-                                                        <span v-else="">{{ quotaError ? '查询失败' : quotaValue + ' 次' }}</span>
+                                                        <span v-else="">{{ quotaLabel }}</span>
                                                     </span>
                                                 </div>
                                                 <span v-if="imageGenStatus === 'connected'" class="text-xs font-mono font-medium text-primary-600">{{
@@ -1436,7 +1437,7 @@
                                         <!-- Image Key -->
                                         <div class="min-w-0">
                                             <label class="settings-label">自动生图密钥</label>
-                                            <secret-input v-model="settings.imageGenKey" input-class="settings-control font-mono" placeholder="STA1N密钥/NAI官方密钥"></secret-input>
+                                            <secret-input v-model="settings.imageGenKey" input-class="settings-control font-mono" :placeholder="imageApi.selectedId === 'builtin' ? 'STA1N密钥/NAI官方密钥' : '可选，自定义接口密钥'"></secret-input>
                                         </div>
 
                                         <!-- Image Model -->
@@ -1536,15 +1537,15 @@
                                                 </div>
                                                 <div class="min-w-0">
                                                     <label class="settings-label">迭代步数（1 - 50）</label>
-                                                    <input type="number" min="1" max="50" step="1" :value="imageGenParams.steps" class="settings-control" @change="event => setImageGenParam('steps', event.target.value)">
+                                                    <input type="number" min="1" max="50" step="1" :value="imageGenParams.steps" class="settings-control" @change="event => setImageGenParam('steps', event.target.value, event.target)">
                                                 </div>
                                                 <div class="min-w-0">
                                                     <label class="settings-label">提示词引导强度（1 - 20）</label>
-                                                    <input type="number" min="1" max="20" step="0.5" :value="imageGenParams.scale" class="settings-control" @change="event => setImageGenParam('scale', event.target.value)">
+                                                    <input type="number" min="1" max="20" step="0.5" :value="imageGenParams.scale" class="settings-control" @change="event => setImageGenParam('scale', event.target.value, event.target)">
                                                 </div>
                                                 <div class="min-w-0">
                                                     <label class="settings-label">引导重缩放（0 - 1）</label>
-                                                    <input type="number" min="0" max="1" step="0.05" :value="imageGenParams.cfg" class="settings-control" @change="event => setImageGenParam('cfg', event.target.value)">
+                                                    <input type="number" min="0" max="1" step="0.05" :value="imageGenParams.cfg" class="settings-control" @change="event => setImageGenParam('cfg', event.target.value, event.target)">
                                                 </div>
                                                 <div class="min-w-0 flex items-end">
                                                     <button type="button" class="settings-control text-center text-xs font-bold text-gray-600 hover:text-primary-600 dark:text-gray-300" @click="resetImageGenParams()">恢复默认</button>
@@ -1875,7 +1876,7 @@
             </div>
 
             <!-- UI Templates View -->
-            <ui-templates-view :show="currentView === 'uitemplates'" :templates="currentUiTemplates" :has-character="!!currentCharacter" :show-settings="showUiTemplateSettings" :settings="settings" :update-status="uiTemplateUpdateStatus" :help-topic="settingsHelpTopic" :analysis-depth="uiTemplateAnalysisDepthSlider" @menu="toggleNavigation" @export="openExportModal('uitemplates')" @import="importUiTemplates" @create="createUiTemplate" @update:show-settings="showUiTemplateSettings = $event" @update:help-topic="settingsHelpTopic = $event" @analyze="updateUiTemplatesFromChat()" @select-model="openModelSelector('uiTemplateModel')" @update:analysis-depth="uiTemplateAnalysisDepthSlider = $event" :is-fetching-ui-template-models="isFetchingUiTemplateModels" @fetch-models="fetchUiTemplateModels(true)" @edit="editUiTemplate" @delete="deleteUiTemplate">
+            <ui-templates-view :show="currentView === 'uitemplates'" :templates="managedUiTemplates" :has-character="!!currentCharacter" :show-settings="showUiTemplateSettings" :settings="settings" :update-status="uiTemplateUpdateStatus" :help-topic="settingsHelpTopic" :analysis-depth="uiTemplateAnalysisDepthSlider" @menu="toggleNavigation" @export="openExportModal('uitemplates')" @import="importUiTemplates" @create="createUiTemplate" @update:show-settings="showUiTemplateSettings = $event" @update:help-topic="settingsHelpTopic = $event" @analyze="updateUiTemplatesFromChat()" @select-model="openModelSelector('uiTemplateModel')" @update:analysis-depth="uiTemplateAnalysisDepthSlider = $event" :is-fetching-ui-template-models="isFetchingUiTemplateModels" @fetch-models="fetchUiTemplateModels(true)" @edit="editUiTemplate(currentUiTemplates.indexOf(managedUiTemplates[$event]))" @delete="deleteUiTemplate(currentUiTemplates.indexOf(managedUiTemplates[$event]))">
             </ui-templates-view>
             <!-- Regex View -->
             <div v-if="currentView === 'regex'" class="management-view resource-management">

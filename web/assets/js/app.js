@@ -707,10 +707,27 @@ const app = createApp({
         // 兼容壳：输入框已回归 v-model（index.html 的 @input 直接绑 autoResizeInput）。
         // 保留这两个函数名，是因为 index.html 的 @pointerdown.capture 与 setup 导出列表仍引用它们。
         // v-model 下二者均无副作用；flushChatInput 额外加一层「IME 合成期不回写 userInput」的保护。
+        let isChatInputComposing = false;
+        let boundCompositionInput = null;
+        const onInputCompositionStart = () => { isChatInputComposing = true; };
+        const onInputCompositionEnd = () => { isChatInputComposing = false; };
+        watch(inputBox, (el, prev) => {
+            if (prev && prev === boundCompositionInput) {
+                prev.removeEventListener('compositionstart', onInputCompositionStart);
+                prev.removeEventListener('compositionend', onInputCompositionEnd);
+                boundCompositionInput = null;
+                isChatInputComposing = false;
+            }
+            if (el) {
+                el.addEventListener('compositionstart', onInputCompositionStart);
+                el.addEventListener('compositionend', onInputCompositionEnd);
+                boundCompositionInput = el;
+            }
+        }, { immediate: true });
         const flushChatInput = () => {
             const el = inputBox.value;
             if (!el) return;
-            if (el.isComposing === true) return;
+            if (isChatInputComposing) return;
             const value = el.value || '';
             if (userInput.value !== value) userInput.value = value;
         };
@@ -936,6 +953,7 @@ const app = createApp({
             imageStyle: 'vertical',
             customImageArtists: [{ name: '', artists: '', negative: '', selected: true }],
             freezeGeneratedImages: false,
+            freezeGeneratedImagesExplicit: false,
             imageModel: 'nai-diffusion-4-5-full',
             imageSize: '竖图',
             imageGenCount: 2,
@@ -1368,20 +1386,16 @@ const app = createApp({
             const quality = saved.qualityModel || '';
             const balanced = saved.balancedModel || '';
             const fast = saved.fastModel || '';
-            if (!quality && !balanced && !fast) return;
+            const slot4 = saved.slot4Model || '';
+            const slot5 = saved.slot5Model || '';
+            if (!quality && !balanced && !fast && !slot4 && !slot5) return;
             settings.qualityModel = quality;
             settings.balancedModel = balanced;
             settings.fastModel = fast;
-            const mode = ['quality', 'balanced', 'fast'].includes(saved.mode) ? saved.mode : 'quality';
+            settings.slot4Model = slot4;
+            settings.slot5Model = slot5;
+            const mode = ['quality', 'balanced', 'fast', 'slot4', 'slot5'].includes(saved.mode) ? saved.mode : 'quality';
             currentModelMode.value = mode;
-            // [rphub 2.9.077] 这里原本写的是 { quality, balanced, fast, slot4, slot5 }，
-            //   slot4 / slot5 没有加 settings. 前缀 —— 裸标识符在严格模式下直接
-            //   ReferenceError，这一行抛错后 settings.model 根本没被更新；紧接着
-            //   [apiUrl, apiKey, model] 的 watcher 拿旧站的 model 又把 qualityModel
-            //   写了回去，于是「切到哪个站，第一个栏位都是第一个站的模型」。
-            //   顺手把 4 / 5 号栏位也纳入恢复，否则切站后它们同样停留在上一站。
-            settings.slot4Model = saved.slot4Model || '';
-            settings.slot5Model = saved.slot5Model || '';
             const slots = {
                 quality: settings.qualityModel,
                 balanced: settings.balancedModel,
@@ -1434,11 +1448,16 @@ const app = createApp({
             ...apiProviderOptions.filter(provider => (
                 provider.id === settings.apiProviderId || String(settings.apiProviderKeys?.[provider.id] || '').trim()
             )),
-            ...customApiProviderOptions
+            ...customApiProviderOptions.filter(provider => provider && provider.id !== 'custom')
         ]);
         const toggleApiQuickSelector = () => { showApiQuickSelector.value = !showApiQuickSelector.value; };
         const selectQuickApiProvider = (provider) => {
             if (!provider) return;
+            if (provider.id === 'custom') {
+                showApiQuickSelector.value = false;
+                onCustomApiEntryClick();
+                return;
+            }
             selectApiProvider(provider);
             showApiQuickSelector.value = false;
             showToast('已切换 API 站：' + (provider.name || provider.id), 'success');
@@ -1462,6 +1481,7 @@ const app = createApp({
                 } else {
                     settings.model = settings.qualityModel;
                 }
+                applyModelSlotTemperature(val);
                 showModelSelector.value = false;
                 showChatModelSelector.value = false;
             }
@@ -2224,7 +2244,7 @@ const app = createApp({
             const startedAt = Date.now();
             try {
                 const dataKey = window.RPHubStorage.scopedStorageKeyFor('classic_memories', scopeId);
-                const metaKey = window.RPHubStorage.scopedStorageKeyFor('memory_state', scopeId);
+                const metaKey = window.RPHubStorage.scopedStorageKeyFor('b1_memory_state', scopeId);
                 const timeout = new Promise((_, reject) => setTimeout(
                     () => reject(new Error('读取 15 秒无响应（数据库请求没有返回）')), 15000));
                 const records = await Promise.race([
@@ -2245,7 +2265,9 @@ const app = createApp({
                 if (dataValue === undefined) {
                     try {
                         const allKeys = await window.RPHubStorage.listStorageKeys();
-                        const memoryKeys = allKeys.filter(key => String(key).indexOf('classic_memories_') === 0);
+                        const memoryKeys = allKeys
+                            .map(key => getStorageLogicalKey(key))
+                            .filter(key => key.indexOf('classic_memories_') === 0);
                         if (memoryKeys.length) {
                             const short = memoryKeys.slice(0, 4).map(key => {
                                 const suffix = String(key).slice('classic_memories_'.length);
@@ -3510,7 +3532,7 @@ const app = createApp({
                     const ok = await memToolsWriteMemoryList(scopeId, list => [
                         ...list.filter(memory => !sourceSet.has(String(memory && memory.id || ''))),
                         merged
-                    ], { memoryId: merged.id, sourceIds: ids });
+                    ], { memoryId: merged.secondaryCompressed ? '' : merged.id, sourceIds: ids });
                     if (!ok) {
                         // 骨架返回 false 有两种：写后校验不过、写入期间切了角色。
                         // 前者它自己弹 toast，这里只补后者的卡片提示。
@@ -4834,7 +4856,15 @@ const app = createApp({
             (total, message) => total + String(message?.content || '').length,
             0
         ));
-        const CHARACTER_SCOPED_STORAGE_NAMES = ['chat', 'classic_memories', 'branches'];
+        const CHARACTER_SCOPED_STORAGE_NAMES = [
+            'chat',
+            'classic_memories',
+            'branches',
+            MEM_TOOLS_VERSIONS_KEY,
+            MEM_TOOLS_VERSIONS_CURRENT_KEY,
+            MEM_TOOLS_PINNED_KEY,
+            MEM_TOOLS_EXTRACT_KEY
+        ];
         const {
             clearTokenUsageHistory,
             displayedTokenUsageHistory,
@@ -4932,10 +4962,11 @@ const app = createApp({
         };
         let _backupScopeSaveTimer = null;
         watch(backupScope, () => {
+            if (!_initComplete) return;
             if (_backupScopeSaveTimer) clearTimeout(_backupScopeSaveTimer);
             _backupScopeSaveTimer = setTimeout(() => {
                 _backupScopeSaveTimer = null;
-                if (!getMainDb()) return;   // 初始化前不写，避免把默认值覆盖到已有数据
+                if (!_initComplete || !getMainDb()) return;   // 初始化前不写，避免把默认值覆盖到已有数据
                 const payload = {};
                 Object.keys(BACKUP_SCOPE_DEFAULTS).forEach(key => {
                     payload[key] = backupScope.value[key] !== false;
@@ -5117,6 +5148,7 @@ const app = createApp({
         };
 
         watch(autoBackupConfig, () => {
+            if (!_initComplete) return;
             saveAutoBackupConfig();
         }, { deep: true });
 
@@ -5389,23 +5421,23 @@ const app = createApp({
                     writeEntry(withBackupSettings(slim, backupSettings));
                 }, () => gateTripped);
 
-                if (gateTripped) {
+                const handleGateTripped = async () => {
                     // 文件会话已开 ⇒ 必须删掉半成品（2.8.14 起 abortChunkedBackup 会删文件）
                     abortChunkedBackup(session);
                     session = null;
                     autoBackupConfig.value.lastSkipAt = Date.now();
                     await saveAutoBackupConfig();
-                    // [rphub 2.8.94] 中止时必须说清「是谁撑爆的」，否则用户无从下手
                     const bucketFull = rankBackupBuckets(bucketStat, 10)
                         .map((item, i) => (i + 1) + '. ' + item.name + ' ' + fmtBackupMB(item.bytes)
                             + '（' + item.entries + ' 条）')
                         .join('\n');
                     console.warn('[AutoBackup] 备份体积已超上限（已写 ' + fmtBackupMB(writeStat.bytes)
                         + '，上限 ' + fmtBackupMB(sizeLimit) + '），本次中止。体积构成：\n' + bucketFull);
-                    // [rphub 2.8.95] toast 只有一行：这里只说结论，明细交给「体积分析」弹窗。
-                    //   字数受 .toast-item 的 max-width 约束（360dp 下正文可用约 262px ≈ 18 个汉字），
-                    //   16 字是能留出余量的上限，再长就又变成省略号了。
                     showToast('备份已中止，点「体积分析」看明细', 'warning', 5000);
+                };
+
+                if (gateTripped) {
+                    await handleGateTripped();
                     return;
                 }
 
@@ -5416,17 +5448,27 @@ const app = createApp({
                 const legacyEntries = await collectLegacyBackupEntries(mainLogicalKeys);
                 if (legacyEntries.length) legacyEntries.forEach(writeEntry);
 
+                if (gateTripped) {
+                    await handleGateTripped();
+                    return;
+                }
+
                 writePart('],"databases":{');
                 const companionDbs = await collectCompanionDatabasesDump();
                 const lsDump = collectLocalStorageDump();
                 let firstDb = true;
                 Object.keys(companionDbs).forEach(dbName => {
+                    if (gateTripped) return;
                     writePart((firstDb ? '' : ',') + '"' + dbName + '":' + JSON.stringify(companionDbs[dbName]));
                     firstDb = false;
                 });
-                writePart('},"webStorage":{"localStorage":' + JSON.stringify(lsDump) + '}}');
+                if (!gateTripped) writePart('},"webStorage":{"localStorage":' + JSON.stringify(lsDump) + '}}');
+                if (gateTripped) {
+                    await handleGateTripped();
+                    return;
+                }
                 const finished = String(bridge.finishBackupWrite(session.token) || '');
-                if (finished !== 'OK') {
+                if (finished !== 'OK' && !finished.startsWith('OK:')) {
                     throw new Error(finished.startsWith('ERR:') ? finished.slice(4) : '完成备份写入失败');
                 }
 
@@ -5698,11 +5740,7 @@ const app = createApp({
             const reader = typeof window.RPLocalFiles?.prepareBackupFileRead === 'function' ? window.RPLocalFiles : bridge;
             if (bridge?.isNativeApp?.() && typeof reader?.prepareBackupFileRead === 'function') {
                 try {
-                    const token = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
-                    if (!token || token.startsWith('ERR:')) throw new Error(token.slice(4) || '读取备份失败');
-                    // [rphub 2.9.138] 令牌是一次性的，而清点与导入要读两趟，所以每趟都得重新换令牌。
-                    //   只传 URL 的话第二趟会拿已失效令牌去 fetch，原生回 "Backup read expired"，
-                    //   界面显示「读取本地备份失败」。≥48MB 的备份必然走到这一步。
+                    // [rphub 2.9.138] 令牌是一次性的，清点与导入要读两趟，每趟按需申请新令牌，避免预先多申请一张废票。
                     const resolveUrl = () => {
                         const fresh = String(reader.prepareBackupFileRead(record.id, !!record.isTreeDoc) || '');
                         if (!fresh || fresh.startsWith('ERR:')) {
@@ -5710,7 +5748,7 @@ const app = createApp({
                         }
                         return new URL('__rphub_backup_read__?t=' + encodeURIComponent(fresh), location.href).href;
                     };
-                    await streamImportPanel.value.startUrl(resolveUrl(),
+                    await streamImportPanel.value.startUrl('',
                         record.fileName || record.name || '备份.json', Number(record.sizeBytes) || 0,
                         { resolveUrl });
                 } catch (error) { showToast(error.message || '读取备份失败', 'error'); }
@@ -6079,6 +6117,16 @@ const app = createApp({
         // 条目 key 加 __ls__: 前缀以区分。
         const LOCAL_BACKUP_PREFIX = '__ls__:';
         const LOCAL_BACKUP_SKIP = ['rphub-web-error', 'roleplay_hub_update_id', window.RPReleaseNotes.marker];
+        const LOCAL_BACKUP_EPHEMERAL_SKIP = new Set([
+            'rphub_embedding_cache_count',
+            'rphub_embedding_cache_bytes',
+            'rphub_import_trace_v1',
+            'rphub_heap_marks_v1',
+            'rphub_restore_peak_v1',
+            'rphub.bootAttempts',
+            '__qa_native_files',
+            '__qa_release_native'
+        ]);
         const collectLocalStorageEntries = () => {
             const list = [];
             try {
@@ -6086,6 +6134,7 @@ const app = createApp({
                     const key = localStorage.key(index);
                     if (!key || key.startsWith(LOCAL_BACKUP_PREFIX)) continue;
                     if (LOCAL_BACKUP_SKIP.indexOf(key) !== -1) continue;
+                    if (LOCAL_BACKUP_EPHEMERAL_SKIP.has(key)) continue;
                     const raw = localStorage.getItem(key);
                     if (raw === null) continue;
                     list.push({ key: LOCAL_BACKUP_PREFIX + key, value: raw });
@@ -6103,7 +6152,7 @@ const app = createApp({
             try {
                 for (let i = 0; i < localStorage.length; i++) {
                     const k = localStorage.key(i);
-                    if (k) dump[k] = localStorage.getItem(k);
+                    if (k && !LOCAL_BACKUP_EPHEMERAL_SKIP.has(k)) dump[k] = localStorage.getItem(k);
                 }
             } catch (_) {}
             return dump;
@@ -6203,6 +6252,7 @@ const app = createApp({
             // 无恢复价值 ⇒ 硬排除，永不进备份（要释放空间请用官方「空间管理 → 清理无用残留」）。
             if (logicalKey.startsWith('memories_')) return false;
             if (logicalKey.startsWith('classic_memories_')) return backupScope.value.summary;
+            if (logicalKey.startsWith('rphub_mem_tools_') && logicalKey !== MEM_TOOLS_EXTRACT_PROMPT_KEY) return backupScope.value.summary;
             if (logicalKey === 'token_usage_history') return backupScope.value.tokenUsage;
             return true;
         };
@@ -6251,24 +6301,7 @@ const app = createApp({
             }
             showToast('当前环境不支持选择默认保存文件夹', 'warning');
         };
-        // [rphub 2.9.103] 落点改为固定，界面上不再提供「选择默认文件夹」。
-        //   这段页面来自原版模板，用 DOM 方式摘掉按钮，避免改动模板结构。
-        const removeBackupFolderButton = () => {
-            try {
-                document.querySelectorAll('button').forEach(button => {
-                    if (String(button.textContent || '').trim() === '选择默认文件夹') button.remove();
-                });
-            } catch (_) {}
-        };
-        const observeBackupFolderButton = () => {
-            removeBackupFolderButton();
-            try {
-                const observer = new MutationObserver(() => removeBackupFolderButton());
-                observer.observe(document.body, { childList: true, subtree: true });
-            } catch (_) {}
-        };
-        if (document.body) observeBackupFolderButton();
-        else document.addEventListener('DOMContentLoaded', observeBackupFolderButton, { once: true });
+        // [rphub 2.9.103 / audit cleanup] 原「选择默认文件夹」文本按钮已不存在，移除无节流全局 MutationObserver。
 
         window.rphubBackupFolderChanged = (folderUri) => {
             appBackupFolder.value = String(folderUri || '');
@@ -6549,6 +6582,14 @@ const app = createApp({
                         });
                     }
 
+                    // [rphub 2.8.96/2.8.99] 旧版自动备份快照（auto_backup_<日期>_<ts>）在 shouldIncludeBackupEntry 里已被排除出新备份，
+                    //   因此必须在口径二早退之前统计，否则「导出旧快照 / 清理旧快照」永远找不到条目。
+                    if (logicalKey.indexOf('auto_backup_') === 0 && logicalKey !== 'auto_backup_config') {
+                        legacyBackupCount += 1;
+                        legacyBackupBytes += estimateDataHealthSize(value);
+                        legacyBackupKeys.push(logicalKey);
+                    }
+
                     // ===== 口径二：只算会进备份的条目 =====
                     if (!shouldIncludeBackupEntry(entry)) return;
                     const slim = slimBackupEntry(entry);
@@ -6581,13 +6622,6 @@ const app = createApp({
                                 avatarBytes
                             });
                         });
-                    }
-                    // [rphub 2.8.96/2.8.99] 旧版把整份备份再 setStoredValue 回主库，键名
-                    //   auto_backup_<日期>_<ts>；当前版本只认 auto_backup_config，这类键没有读取路径。
-                    if (logicalKey.indexOf('auto_backup_') === 0 && logicalKey !== 'auto_backup_config') {
-                        legacyBackupCount += 1;
-                        legacyBackupBytes += bytes + 1;
-                        legacyBackupKeys.push(logicalKey);
                     }
                 });
 
@@ -6638,7 +6672,7 @@ const app = createApp({
                     const folders = window.RPLocalStore?.available && typeof window.RPLocalStore.listCardFolders === 'function'
                         ? window.RPLocalStore.listCardFolders() : [];
                     const liveFolders = new Set(characters.value.map(card => card.storageFolder).filter(Boolean));
-                    const dead = folders.filter(folder => !liveFolders.has(folder.name));
+                    const dead = folders.filter(folder => folder.files > 0 && !liveFolders.has(folder.name));
                     if (dead.length) {
                         items.push({
                             id: 'orphan-card-folders',
@@ -6797,12 +6831,23 @@ const app = createApp({
         const compactStorageNote = ref('');
         const compactStorage = async () => {
             if (isCompactingStorage.value) return;
+            if (isConversationBusy.value || isClassicBatchExtracting.value || isAutoBackingUp.value) {
+                showToast('请等待当前对话、记忆补录或备份完成后再整理存储', 'warning', 4000);
+                return;
+            }
             const confirmText = '压缩会重建整个数据库文件：先把现有数据复制一份做校验，再删库重建并写回。\n\n'
                 + '过程中请不要关闭应用；数据量大时需要一两分钟。建议先做一次备份再继续。';
             confirmAction(confirmText, async () => {
+                if (isConversationBusy.value || isClassicBatchExtracting.value || isAutoBackingUp.value) {
+                    showToast('请等待当前对话、记忆补录或备份完成后再整理存储', 'warning', 4000);
+                    return;
+                }
                 isCompactingStorage.value = true;
-                compactStorageNote.value = '正在准备…';
+                compactStorageNote.value = '正在保存挂起数据…';
                 try {
+                    debouncedSave.cancel();
+                    debouncedCharacterSave.cancel();
+                    await flushPendingChatHistorySave();
                     const result = await window.RPHubStorage.compactDatabase({
                         onStage: stage => { compactStorageNote.value = stage; },
                         onProgress: (done, total, label) => {
@@ -6870,14 +6915,19 @@ const app = createApp({
                     }
                 } else if (item.action === 'slim-chat-ui') {
                     if (!getMainDb()) await initDB();
-                    const entries = await readMainDbEntries(getMainDb());
-                    for (const entry of entries) {
-                        if (!item.keys?.includes(entry.key)) continue;
-                        const result = slimChatHistoryForHealth(unwrapForStorage(entry.value));
-                        if (!result.changed) continue;
-                        const logicalKey = getStorageLogicalKey(entry.key);
+                    const activeScopeId = getCurrentStoryBranchScopeId();
+                    for (const key of item.keys || []) {
+                        const logicalKey = getStorageLogicalKey(key);
+                        if (!logicalKey.startsWith('chat_')) continue;
                         const scopeId = logicalKey.slice('chat_'.length);
+                        const storedHistory = await getScopedStoredValue('chat', scopeId);
+                        if (!Array.isArray(storedHistory)) continue;
+                        const result = slimChatHistoryForHealth(unwrapForStorage(storedHistory));
+                        if (!result.changed) continue;
                         await setScopedStoredValue('chat', scopeId, result.history, { clone: false });
+                        if (scopeId && scopeId === activeScopeId) {
+                            chatHistory.value = result.history;
+                        }
                     }
                 } else if (item.action === 'trim-token-usage') {
                     tokenUsageHistory.value = tokenUsageHistory.value.slice(0, getTokenUsageHealthLimit());
@@ -7040,8 +7090,7 @@ const app = createApp({
                     readCharacter: window.RPHubStorage.readCharacter,
                     transform: entry => withBackupSettings(slimBackupEntry(entry, true), backupSettings),
                     companions: collectCompanionDatabasesDump,
-                    webStorage: () => Object.fromEntries(Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
-                        .filter(Boolean).map(key => [key, localStorage.getItem(key)])),
+                    webStorage: collectLocalStorageDump,
                     progress: value => Object.assign(backupTask, { percent: value.percent, message: value.message,
                         detail: value.done + ' / ' + value.total + ' 项 · 已写 ' + fmtMB(value.bytes) }),
                     write: async text => {
@@ -7488,10 +7537,21 @@ const app = createApp({
                             //   即 JSON.parse 的纯对象，不含代理 / Date / ArrayBuffer。
                             //   __rphub_bin__ 仍在 restore 这一步转 Blob，语义不变。
                             const request = putBackupEntry(store, entry);
-                            if (request) request.onsuccess = () => {
-                                backupTask.percent = 60 + ++written / restoredEntries.length * 35;
-                                backupTask.detail = written + ' / ' + restoredEntries.length + ' 项';
-                            };
+                            if (request) {
+                                const onWritten = () => {
+                                    backupTask.percent = 60 + ++written / restoredEntries.length * 35;
+                                    backupTask.detail = written + ' / ' + restoredEntries.length + ' 项';
+                                };
+                                if (typeof request.addEventListener === 'function') {
+                                    request.addEventListener('success', onWritten, { once: true });
+                                } else {
+                                    const prevOnSuccess = request.onsuccess;
+                                    request.onsuccess = (event) => {
+                                        if (typeof prevOnSuccess === 'function') prevOnSuccess.call(request, event);
+                                        onWritten();
+                                    };
+                                }
+                            }
                         });
                         await new Promise((resolve, reject) => {
                             transaction.oncomplete = resolve;
@@ -7618,10 +7678,14 @@ const app = createApp({
         const isSquareLoading = ref(true);
         const squareUrl = ref('https://rphforum.zeabur.app/');
 
+        let pendingSquareCustomUrl = '';
         // [RP-Hub 2.8.46] native 接管 target="_blank" 后，指向广场的链接转到这里：
         // 直接在 App 内的万相广场打开，而不是另起浏览器、更不是原来的「点了没反应」。
         window.rphubOpenSquare = (url) => {
-            if (typeof url === 'string' && url) squareUrl.value = url;
+            if (typeof url === 'string' && url) {
+                pendingSquareCustomUrl = url;
+                squareUrl.value = url;
+            }
             isSquareLoading.value = true;
             navigateWorkspace('square');
         };
@@ -7784,7 +7848,12 @@ const app = createApp({
                 generatorUrl.value = `./character/index.html?t=${Date.now()}`;
             } else if (newView === 'square') {
                 isSquareLoading.value = true;
-                squareUrl.value = `https://rphforum.zeabur.app/?t=${Date.now()}`;
+                if (pendingSquareCustomUrl) {
+                    squareUrl.value = pendingSquareCustomUrl;
+                    pendingSquareCustomUrl = '';
+                } else {
+                    squareUrl.value = `https://rphforum.zeabur.app/?t=${Date.now()}`;
+                }
             } else if (newView === 'novel') {
                 isNovelLoading.value = true;
                 novelUrl.value = `./novel/index.html?t=${Date.now()}`;
@@ -8099,7 +8168,19 @@ const app = createApp({
                 return;
             }
             if (!getMainDb()) await initDB();
-            await window.RPHubStorage.saveCharacterLibrary(characters.value);
+            const summaries = await window.RPHubStorage.saveCharacterLibrary(characters.value);
+            if (Array.isArray(summaries)) {
+                const byUuid = new Map(summaries.filter(item => item?.uuid).map(item => [item.uuid, item]));
+                characters.value.forEach(card => {
+                    const summary = card?.uuid ? byUuid.get(card.uuid) : null;
+                    if (summary?.storageFolder && card.storageFolder !== summary.storageFolder) {
+                        card.storageFolder = summary.storageFolder;
+                    }
+                    if (summary?.importedName && !card.importedName) {
+                        card.importedName = summary.importedName;
+                    }
+                });
+            }
         };
 
         // B1: three explicit groups instead of one long chain of independent puts.
@@ -8566,6 +8647,8 @@ const app = createApp({
                         .slice(0, usageLimit);
                 }
 
+                // [rphub 2.8.101] 加载完成时的堆 = 应用常驻占用。放在 return true 前确保实际采集。
+                _loadEndHeapUsed = markHeap('load-end') || _loadEndHeapUsed;
                 return true;
             } catch (e) {
                 console.error('Failed to load saved data', e);
@@ -8586,9 +8669,6 @@ const app = createApp({
                 showToast('加载保存的数据失败', 'error');
                 return false;
             }
-            // [rphub 2.8.101] 加载完成时的堆 = 应用常驻占用。之后任何读数跟它比，
-            //   多出来的部分才是「临时对象」，不是「数据本来就占这么多」。
-            _loadEndHeapUsed = markHeap('load-end') || _loadEndHeapUsed;
         };
 
         // Sync World Info and Regex to Current Character
@@ -8745,9 +8825,7 @@ const app = createApp({
             }
             return settings.freezeGeneratedImages === true;
         };
-        // 启动即迁移一次：否则用户没有历史图片时，设置页会拿 settings 里的旧 false
-        //   显示成「已关闭」，而实际是开着的。
-        try { isImageFreezeEnabled(); } catch (e) { /* settings 还没就绪就等首次 hydrate */ }
+        // 迁移推迟到 onMounted -> loadData() 完成之后执行，避免在旧 settings 读入前提前置位 imageFreezeMigrated。
         const imageFreezeTagOf = (requestUrl) => {
             try { return new URL(requestUrl, window.location.href).searchParams.get('tag') || ''; }
             catch (e) { return ''; }
@@ -9614,14 +9692,22 @@ const app = createApp({
         // Debounce function
         const debounce = (fn, delay) => {
             let timeoutId = null;
+            let lastArgs = [];
             const wrapped = (...args) => {
+                lastArgs = args;
                 if (timeoutId) clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => { timeoutId = null; fn(...args); }, delay);
+                timeoutId = setTimeout(() => { timeoutId = null; fn(...lastArgs); }, delay);
             };
             // [rphub 2.8.117] 导入收尾要能取消排队中的自动保存：屏障释放后它若再触发一次，
             //   等于白省一遍整库写。
             wrapped.cancel = () => {
                 if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            };
+            wrapped.flush = () => {
+                if (!timeoutId) return;
+                clearTimeout(timeoutId);
+                timeoutId = null;
+                return fn(...lastArgs);
             };
             return wrapped;
         };
@@ -12210,6 +12296,8 @@ const app = createApp({
                 const removedMessageIds = new Set([...removedIndexes]
                     .map(messageIndex => chatHistory.value[messageIndex]?.id)
                     .filter(Boolean));
+                const previousRecentGenerationTimes = recentGenerationTimes.value;
+                const previousChatRenderLimit = chatRenderLimit.value;
                 recentGenerationTimes.value = recentGenerationTimes.value.filter(t => !removedMessageIds.has(t.id || t));
                 const nextHistory = chatHistory.value.filter((_, messageIndex) => !removedIndexes.has(messageIndex));
                 const uiCleanup = pruneUiTemplateChangesFromTurn(affectedTurn);
@@ -12271,6 +12359,8 @@ const app = createApp({
                 _chatOptimisticPending = false;
                 if (!committed.ok) {
                     chatHistory.value = previousHistory;
+                    recentGenerationTimes.value = previousRecentGenerationTimes;
+                    chatRenderLimit.value = previousChatRenderLimit;
                     showToast(`删除失败：${committed.error?.message || '对话变更尚未完整保存，请重试'}`, 'error');
                     return;
                 }
@@ -12291,71 +12381,89 @@ const app = createApp({
                 currentWaitTime.value = '0.0';
             };
 
+            const stopRegenerationStatus = () => {
+                isGenerating.value = false;
+                isReceiving.value = false;
+                isThinking.value = false;
+            };
+
             const msg = chatHistory.value[index];
 
             if (msg.role === 'user') {
                 startRegenerationStatus();
-                // 如果是用户消息，直接基于当前上下文生成（重试/继续）
-                abortConversationBackgroundWork();
-                // 只删除最新一轮的记忆，保留之前的
-                const snapshot = await ensureConversationMessageIds();
+                let handedOff = false;
                 try {
-                    const intent = await tryBeginMemoryIntent('重试轮次');
-                    if (intent) {
-                        const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, intent.source);
-                        const nextMemories = removeClassicMemoriesFromTurn(snapshot.turns.length, bound);
-                        const result = await commitMemoryTransform(intent, () => nextMemories);
-                        if (!result.published) {
-                            showToast('记忆已写入原角色，但界面已切换，已停止重试', 'warning');
-                            return;
+                    // 如果是用户消息，直接基于当前上下文生成（重试/继续）
+                    abortConversationBackgroundWork();
+                    // 只删除最新一轮的记忆，保留之前的
+                    const snapshot = await ensureConversationMessageIds();
+                    try {
+                        const intent = await tryBeginMemoryIntent('重试轮次');
+                        if (intent) {
+                            const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, intent.source);
+                            const nextMemories = removeClassicMemoriesFromTurn(snapshot.turns.length, bound);
+                            const result = await commitMemoryTransform(intent, () => nextMemories);
+                            if (!result.published) {
+                                showToast('记忆已写入原角色，但界面已切换，已停止重试', 'warning');
+                                return;
+                            }
                         }
+                    } catch (error) {
+                        showToast(`记忆更新失败：${error?.message || error}，已停止重试`, 'error');
+                        return;
                     }
-                } catch (error) {
-                    showToast(`记忆更新失败：${error?.message || error}，已停止重试`, 'error');
-                    return;
+                    await saveMemorySettingsNow();
+                    handedOff = true;
+                    await generateResponse(startTime, { reuseGeneratingState: true });
+                } finally {
+                    if (!handedOff) stopRegenerationStatus();
                 }
-                await saveMemorySettingsNow();
-                await generateResponse(startTime, { reuseGeneratingState: true });
             } else {
                 // 如果是 AI 消息，删除它（及之后）然后重新生成
                 confirmAction('确定要重新生成这条消息吗？该楼层的记忆将被清除。', async () => {
                     startRegenerationStatus();
-                abortConversationBackgroundWork();
-                    // 计算被删除区间的 assistant 轮次，只删除 >= 该轮次的记忆
-                    const snapshot = await ensureConversationMessageIds();
-                    const turnAtIndex = getConversationTurnAtIndexFromSnapshot(snapshot, index);
-                    const uiTurnAtIndex = turnAtIndex;
-                    const uiCleanup = pruneUiTemplateChangesFromTurn(uiTurnAtIndex);
-                    // Remove timing record for the message being regenerated
-                    if (msg.id) {
-                        recentGenerationTimes.value = recentGenerationTimes.value.filter(t => (t.id || t) !== msg.id);
-                    }
-                    const nextHistory = chatHistory.value.slice(0, index);
-                    let committed;
+                    let handedOff = false;
                     try {
-                        const intent = await tryBeginMemoryIntent('重新生成消息');
-                        let nextMemories = intent ? intent.source : [];
-                        if (intent) {
-                            const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, nextMemories);
-                            nextMemories = removeClassicMemoriesFromTurn(turnAtIndex, bound);
-                            nextMemories = syncMemoryConversationBindings(buildConversationTurnSnapshot(nextHistory), {}, nextMemories);
+                        abortConversationBackgroundWork();
+                        // 计算被删除区间的 assistant 轮次，只删除 >= 该轮次的记忆
+                        const snapshot = await ensureConversationMessageIds();
+                        const turnAtIndex = getConversationTurnAtIndexFromSnapshot(snapshot, index);
+                        const uiTurnAtIndex = turnAtIndex;
+                        const uiCleanup = pruneUiTemplateChangesFromTurn(uiTurnAtIndex);
+                        // Remove timing record for the message being regenerated
+                        if (msg.id) {
+                            recentGenerationTimes.value = recentGenerationTimes.value.filter(t => (t.id || t) !== msg.id);
                         }
-                        committed = await commitConversationState({
-                            storyScopeId: intent ? intent.scopeId : getCurrentStoryBranchScopeId(),
-                            history: nextHistory,
-                            intent,
-                            memories: nextMemories,
-                            saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0
-                        });
-                    } catch (error) {
-                        console.error('Regenerate commit failed:', error);
-                        committed = { ok: false, error };
+                        const nextHistory = chatHistory.value.slice(0, index);
+                        let committed;
+                        try {
+                            const intent = await tryBeginMemoryIntent('重新生成消息');
+                            let nextMemories = intent ? intent.source : [];
+                            if (intent) {
+                                const bound = syncMemoryConversationBindings(snapshot, { backfill: true }, nextMemories);
+                                nextMemories = removeClassicMemoriesFromTurn(turnAtIndex, bound);
+                                nextMemories = syncMemoryConversationBindings(buildConversationTurnSnapshot(nextHistory), {}, nextMemories);
+                            }
+                            committed = await commitConversationState({
+                                storyScopeId: intent ? intent.scopeId : getCurrentStoryBranchScopeId(),
+                                history: nextHistory,
+                                intent,
+                                memories: nextMemories,
+                                saveTemplateRuntime: uiCleanup.logs > 0 || uiCleanup.blocks > 0
+                            });
+                        } catch (error) {
+                            console.error('Regenerate commit failed:', error);
+                            committed = { ok: false, error };
+                        }
+                        if (!committed.ok) { showToast('对话变更尚未完整保存，已停止后续操作', 'error'); return; }
+                        chatHistory.value = nextHistory;
+                        removeOrphanedUiTemplateCorrections();
+                        await saveMemorySettingsNow();
+                        handedOff = true;
+                        await generateResponse(startTime, { reuseGeneratingState: true });
+                    } finally {
+                        if (!handedOff) stopRegenerationStatus();
                     }
-                    if (!committed.ok) { showToast('对话变更尚未完整保存，已停止后续操作', 'error'); return; }
-                    chatHistory.value = nextHistory;
-                    removeOrphanedUiTemplateCorrections();
-                    await saveMemorySettingsNow();
-                    await generateResponse(startTime, { reuseGeneratingState: true });
                 });
             }
         };
@@ -12466,6 +12574,11 @@ const app = createApp({
             const requestTools = activeToolDepth < ACTIVE_TOOL_MAX_AUTO_CONTINUE ? getEnabledActiveTools() : [];
 
             if (!currentCharacter.value) {
+                if (reuseGeneratingState) {
+                    isGenerating.value = false;
+                    isReceiving.value = false;
+                    isThinking.value = false;
+                }
                 showToast('请先选择一个角色', 'error');
                 return;
             }
@@ -13347,8 +13460,14 @@ const app = createApp({
                 const turn = Number(memory?.turn);
                 if (!isSecondaryClassicMemory(memory) && turn > 0 && turn <= compressionLimit) byTurn.set(turn, memory);
             });
+            const pinnedRanges = Array.isArray(memToolsPinned.list) ? memToolsPinned.list : [];
+            const isTurnPinned = (turnNo) => pinnedRanges.some(range => turnNo >= Number(range?.start) && turnNo <= Number(range?.end));
             const groups = [];
             for (let start = 1; start + CLASSIC_SECONDARY_GROUP_SIZE - 1 <= compressionLimit; start += CLASSIC_SECONDARY_GROUP_SIZE) {
+                const groupEnd = start + CLASSIC_SECONDARY_GROUP_SIZE - 1;
+                if (pinnedRanges.length && Array.from({ length: CLASSIC_SECONDARY_GROUP_SIZE }, (_, offset) => start + offset).some(isTurnPinned)) {
+                    continue;
+                }
                 const group = Array.from({ length: CLASSIC_SECONDARY_GROUP_SIZE }, (_, offset) => byTurn.get(start + offset));
                 // 仅跳过确认没有正文的空轮；有正文却缺总结的轮次必须先补录。
                 const complete = group.every((memory, offset) => {
@@ -13706,10 +13825,15 @@ const app = createApp({
                 // 中止生成只停聊天，不再连带打断召回；timeoutMs 给足批量嵌入时间。
                 pool: false, timeoutMs: 60000
             });
-            recordApiUsage(getApiUsagePayload(data), {
-                type: 'embedding', model, apiUrl, apiKey, isStream: false,
-                durationMs: Date.now() - requestStartedAt, outputCharacters: 0
-            });
+            if (!data?.__rpEmbeddingCacheHit) {
+                const usageApiUrl = String(apiUrl || '')
+                    .replace(/\/+$/, '')
+                    .replace(/\/(?:chat\/completions|models|embeddings)$/i, '') || apiUrl;
+                recordApiUsage(getApiUsagePayload(data), {
+                    type: 'embedding', model, apiUrl: usageApiUrl, apiKey, isStream: false,
+                    durationMs: Date.now() - requestStartedAt, outputCharacters: 0
+                });
+            }
             const rows = Array.isArray(data.data) ? [...data.data] : [];
             rows.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
             const vectors = rows.map(row => normalizeEmbedding(row.embedding));
@@ -14693,6 +14817,11 @@ const app = createApp({
         const abortConversationBackgroundWork = () => {
             abortUiTemplateUpdate();
             abortClassicBatchExtraction();
+            abortMemToolsMerge();
+            abortMemToolsEdit();
+            abortMemToolsAuto();
+            abortMemToolsExtract();
+            abortMemToolsAsk();
         };
 
         const startClassicBatchMemoryExtraction = async (options = {}) => {
@@ -14969,7 +15098,15 @@ const app = createApp({
             return startClassicBatchMemoryExtraction({ manual: true });
         };
 
-        watch(() => [memorySettings.enabled, memorySettings.mode, memorySettings.classicModel, memorySettings.embeddingModel, settings.apiUrl], () => {
+        watch(() => [
+            memorySettings.enabled,
+            memorySettings.mode,
+            memorySettings.classicModel,
+            memorySettings.embeddingModel,
+            memorySettings.memoryApiUrl,
+            memorySettings.memoryApiKey,
+            settings.apiUrl
+        ], () => {
             abortClassicBatchExtraction();
         });
 
@@ -15219,9 +15356,24 @@ const app = createApp({
                 .map(name => deleteScopedStoredValue(name, id))));
 
             if (!char.uuid) return;
+            const cleanupScopes = [char.uuid, ...allBranchScopeIds];
+            cleanupScopes.forEach(scopeId => {
+                try { localStorage.removeItem(IMAGE_FREEZE_LS_PREFIX + scopeId); } catch (_) {}
+                try { localStorage.removeItem('rp-reading::' + scopeId); } catch (_) {}
+            });
+            try {
+                const rawNight = localStorage.getItem('rp-card-night');
+                if (rawNight) {
+                    const parsedNight = JSON.parse(rawNight);
+                    if (parsedNight && typeof parsedNight === 'object' && Object.prototype.hasOwnProperty.call(parsedNight, char.uuid)) {
+                        delete parsedNight[char.uuid];
+                        localStorage.setItem('rp-card-night', JSON.stringify(parsedNight));
+                    }
+                }
+            } catch (_) {}
             ensureGlobalUiTemplates().forEach(template => {
                 if (!template.runtimeByCharacter) return;
-                [char.uuid, ...allBranchScopeIds].forEach(scopeId => delete template.runtimeByCharacter[scopeId]);
+                cleanupScopes.forEach(scopeId => delete template.runtimeByCharacter[scopeId]);
             });
             // [rphub 2.9.148] 删卡顺手清本机文件夹。
             //   原来 remove() 对 __rp_card__ 直接 return，写盘时又没进账本，
@@ -15231,13 +15383,17 @@ const app = createApp({
         };
 
         const finishCharacterDeletion = async () => {
+            const activeCard = currentCharacterIndex.value >= 0 ? characters.value[currentCharacterIndex.value] : null;
             await Promise.all([
                 saveCharactersNow(),
                 saveMemorySettingsNow(),
                 setStoredValue('global_ui_templates', globalUiTemplates.value),
                 currentCharacterIndex.value >= 0
                     ? setStoredValue('last_active_char', currentCharacterIndex.value)
-                    : deleteStoredValue('last_active_char')
+                    : deleteStoredValue('last_active_char'),
+                activeCard?.uuid
+                    ? setStoredValue('last_active_char_id', activeCard.uuid)
+                    : deleteStoredValue('last_active_char_id')
             ]);
         };
 
@@ -15284,10 +15440,11 @@ const app = createApp({
                     await deleteCharacterData(char, index);
 
                     suspendCharacterAutoSave = true;
-                    characters.value.splice(index, 1);
                     if (isCurrent) {
                         clearCurrentCharacterData();
-                    } else if (currentCharacterIndex.value > index) {
+                    }
+                    characters.value.splice(index, 1);
+                    if (!isCurrent && currentCharacterIndex.value > index) {
                         currentCharacterIndex.value--;
                     }
                     await finishCharacterDeletion();
@@ -15351,6 +15508,9 @@ const app = createApp({
                     ])).flat();
 
                     suspendCharacterAutoSave = true;
+                    if (deletingCurrent) {
+                        clearCurrentCharacterData();
+                    }
                     for (const index of indices) {
                         const char = characters.value[index];
                         if (!char) continue;
@@ -15358,13 +15518,13 @@ const app = createApp({
                         characters.value.splice(index, 1);
                     }
 
-                    if (deletingCurrent) {
-                        clearCurrentCharacterData();
-                    } else if (currentUUID) {
-                        const newIndex = characters.value.findIndex(c => c.uuid === currentUUID);
-                        currentCharacterIndex.value = newIndex;
-                    } else {
-                        currentCharacterIndex.value = -1;
+                    if (!deletingCurrent) {
+                        if (currentUUID) {
+                            const newIndex = characters.value.findIndex(c => c.uuid === currentUUID);
+                            currentCharacterIndex.value = newIndex;
+                        } else {
+                            currentCharacterIndex.value = -1;
+                        }
                     }
 
                     await finishCharacterDeletion();
@@ -15742,8 +15902,14 @@ const app = createApp({
                         const scopeId = getStoryBranchScopeId(char.uuid, target.id);
                         await Promise.all([
                             deleteScopedStoredValue('chat', scopeId),
-                            deleteScopedStoredValue('classic_memories', scopeId)
+                            deleteScopedStoredValue('classic_memories', scopeId),
+                            deleteScopedStoredValue(MEM_TOOLS_VERSIONS_KEY, scopeId),
+                            deleteScopedStoredValue(MEM_TOOLS_VERSIONS_CURRENT_KEY, scopeId),
+                            deleteScopedStoredValue(MEM_TOOLS_PINNED_KEY, scopeId),
+                            deleteScopedStoredValue(MEM_TOOLS_EXTRACT_KEY, scopeId)
                         ]);
+                        try { localStorage.removeItem(IMAGE_FREEZE_LS_PREFIX + scopeId); } catch (_) {}
+                        try { localStorage.removeItem('rp-reading::' + scopeId); } catch (_) {}
                         getUiTemplatesForRuntime(char).forEach(template => {
                             if (!template.runtimeByCharacter) return;
                             delete template.runtimeByCharacter[scopeId];
@@ -16119,6 +16285,7 @@ const app = createApp({
                 loadGlobalUiTemplateRuntimeForCharacter(char);
             }
             chatHistory.value = loadedChatHistory;
+            _chatHydrated = true;
             adoptCharacterMemories(loadedMemories);
 
             // Load Character Specific Data
@@ -16720,7 +16887,9 @@ const app = createApp({
         const exportChatLinesStreaming = async (fileName, manifest, branchChats) => {
             const bridge = window.AndroidBridge;
             const canStream = bridge?.isNativeApp?.()
-                && typeof bridge.beginPickerSave === 'function'
+                && (typeof bridge.createBackupFileToDownloads === 'function'
+                    || typeof bridge.createBackupFile === 'function'
+                    || typeof bridge.beginPickerSave === 'function')
                 && typeof bridge.writeBackupChunk === 'function'
                 && typeof bridge.finishBackupWrite === 'function';
             if (!canStream) {
@@ -16996,25 +17165,72 @@ const app = createApp({
         };
 
         // Lifecycle
+        const flushPendingSavesOnHide = () => {
+            if (!_initComplete || !getMainDb()) return;
+            try { debouncedSave.flush(); } catch (_) {}
+            try { debouncedCharacterSave.flush(); } catch (_) {}
+            try { flushPendingChatHistorySave(); } catch (_) {}
+        };
+        const handleDocumentVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                flushPendingSavesOnHide();
+                return;
+            }
+            if (document.visibilityState !== 'visible') return;
+            setTimeout(() => {
+                if (autoBackupConfig.value.triggerMode === 'remind') maybeRemindDailyBackup();
+                else performDailyAutoBackup(false);
+            }, 1500);
+        };
+        const handleDocumentClickOutside = (e) => {
+            if (settingsHelpTopic.value
+                && !e.target.closest('.settings-help-trigger')
+                && !e.target.closest('.settings-help-popover')) {
+                settingsHelpTopic.value = '';
+            }
+            if (showTokenUsageTimeFilter.value && !e.target.closest('.token-usage-time-filter-container')) {
+                showTokenUsageTimeFilter.value = false;
+            }
+            if (showProfileDropdown.value && !e.target.closest('.profile-dropdown-container')) {
+                showProfileDropdown.value = false;
+            }
+            if (showApiProviderSelector.value && !e.target.closest('.api-provider-selector-container')) {
+                showApiProviderSelector.value = false;
+            }
+            if (showApiQuickSelector.value && !e.target.closest('.api-quick-selector-container')) {
+                showApiQuickSelector.value = false;
+            }
+            if (showCustomArtistEditor.value && !e.target.closest('.custom-artist-editor-container')) {
+                showCustomArtistEditor.value = false;
+            }
+            if (showCustomApiSites.value && !e.target.closest('.custom-api-sites-container')) {
+                showCustomApiSites.value = false;
+            }
+        };
+        const syncAppHostClasses = () => {
+            const appEl = document.getElementById('app');
+            if (!appEl) return;
+            appEl.classList.toggle('app-native-fullscreen', !!isChatFullscreen.value);
+            appEl.classList.toggle('mobile-keyboard-active', !!isMobileKeyboardOpen.value);
+        };
+        watch([isChatFullscreen, isMobileKeyboardOpen], syncAppHostClasses, { immediate: true });
+        window.__rpConfirmAction = (message, title = '确认操作') => showVueConfirmModal(title, message);
+
         onMounted(async () => {
+            syncAppHostClasses();
             nextTick(scheduleMobileLazyUiTemplates);
             document.addEventListener('fullscreenchange', syncChatFullscreenState);
             document.addEventListener('webkitfullscreenchange', syncChatFullscreenState);
-            // [rphub 2.8.102] 回到前台再检查一次。loadData 里那个 6 秒定时器只在启动时挂
-            //   一次，页面重载或进程被杀就永久丢失（2.8.101 实测正是这种情形）。
-            //   1.5 秒延迟是让切回后的首帧渲染先跑完，别在回来的瞬间弹窗。
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState !== 'visible') return;
-                setTimeout(() => {
-                    if (autoBackupConfig.value.triggerMode === 'remind') maybeRemindDailyBackup();
-                    else performDailyAutoBackup(false);
-                }, 1500);
-            });
+            // [rphub 2.8.102] 回到前台检查备份，切后台/卸载前刷新挂起保存。
+            document.addEventListener('visibilitychange', handleDocumentVisibilityChange);
+            window.addEventListener('pagehide', flushPendingSavesOnHide);
 
             if (!await loadData()) {
                 window.__rpDataError = true;
                 return;
             }
+            // [rphub 2.8.64 / audit fix] 必须在 loadData() 恢复 savedSettings 之后执行一次性默认开启迁移。
+            try { isImageFreezeEnabled(); } catch (_) {}
             await imageApi.load(settings.imageGenKey);
             if (imageApi.ready) settings.imageGenKey = imageApi.current.key;
             syncAppBackupFolderBridge();
@@ -17146,6 +17362,7 @@ const app = createApp({
                 currentCharacterIndex.value = lastActiveCharacterId.value;
                 resetChatRenderWindow();
                 let char = characters.value[currentCharacterIndex.value];
+                let chatRestored = false;
 
                 // Load Chat History for this character
                 try {
@@ -17163,46 +17380,44 @@ const app = createApp({
                     );
                     // 2.8.110: 到这一步聊天才算真正装载完毕，此前任何 saveData 都不该写聊天。
                     _chatHydrated = true;
+                    chatRestored = true;
                 } catch (error) {
                     console.error('Error loading chat history on restore:', error);
                     currentCharacterIndex.value = -1;
                     _isApplyingCharacterScopedData = false;
                     showToast('聊天记录恢复失败，原记录未被覆盖，请重新选择角色重试', 'error', 5000);
-                    return;
                 }
-                loadGlobalUiTemplateRuntimeForCharacter(char);
+                if (chatRestored) {
+                    loadGlobalUiTemplateRuntimeForCharacter(char);
 
-                // Load Char Specifics
-                applyCharacterScopedResources(char);
-                finishApplyingCharacterScopedData();
+                    // Load Char Specifics
+                    applyCharacterScopedResources(char);
+                    finishApplyingCharacterScopedData();
 
-                if (char.recentGenerationTimes) recentGenerationTimes.value = JSON.parse(JSON.stringify(char.recentGenerationTimes));
-                else recentGenerationTimes.value = [];
+                    if (char.recentGenerationTimes) recentGenerationTimes.value = JSON.parse(JSON.stringify(char.recentGenerationTimes));
+                    else recentGenerationTimes.value = [];
 
-                window.__rpBootStage = '载入角色记忆';
-                // [rphub 2.9.126] 恢复启动时加载记忆的时序。
-                //   2.9.122 曾把它挪到首屏之后，影响所有用户的记忆就绪时间，
-                //   而它只救回了单个极端个例，收益与面不成比例，故撤回。
-                //   保留的是「上次卡过就跳过」的持久开关与超时兜底：
-                //   常态用户走 await，卡过的设备走跳过，两条路都不影响别人。
-                let skipMemoryThisBoot = false;
-                try { skipMemoryThisBoot = localStorage.getItem('rphub.memoryBootSkip') === '1'; } catch (_) {}
-                if (skipMemoryThisBoot) {
-                    window.__rpBootStage = '已按上次记录跳过记忆加载';
-                    window.__rpMemoryLoadSkipped = true;
-                } else {
-                    await loadCharacterMemories(getStoryBranchScopeId(char.uuid), ' on restore');
+                    window.__rpBootStage = '载入角色记忆';
+                    let skipMemoryThisBoot = false;
+                    try { skipMemoryThisBoot = localStorage.getItem('rphub.memoryBootSkip') === '1'; } catch (_) {}
+                    if (skipMemoryThisBoot) {
+                        window.__rpBootStage = '已按上次记录跳过记忆加载';
+                        window.__rpMemoryLoadSkipped = true;
+                    } else {
+                        await loadCharacterMemories(getStoryBranchScopeId(char.uuid), ' on restore');
+                    }
+                    window.__rpBootStage = '应用角色资源';
+
+                    // Enforce special rules (Nai画图正则 & 自动生图)
+                    enforceSpecialRules();
+
+                    // Sync image style rules
+                    if (isAutoImageGenEnabled.value) {
+                        updateImageGenRegexState({ enableRegex: true });
+                    }
                 }
-                window.__rpBootStage = '应用角色资源';
-
-                // Enforce special rules (Nai画图正则 & 自动生图)
-                enforceSpecialRules();
-
-                // Sync image style rules
-                if (isAutoImageGenEnabled.value) {
-                    updateImageGenRegexState({ enableRegex: true });
-                }
-
+            } else {
+                _chatHydrated = true;
             }
             window.__rpBootStage = '确定首屏视图';
             currentView.value = currentCharacter.value && chatHistory.value.length ? 'chat' : 'characters';
@@ -17238,34 +17453,15 @@ const app = createApp({
             scheduleMobileVisualViewportSync({ force: true });
 
             // --- 全局点击外部区域收起面板 ---
-            document.addEventListener('click', (e) => {
-                if (settingsHelpTopic.value
-                    && !e.target.closest('.settings-help-trigger')
-                    && !e.target.closest('.settings-help-popover')) {
-                    settingsHelpTopic.value = '';
-                }
-                if (showTokenUsageTimeFilter.value && !e.target.closest('.token-usage-time-filter-container')) {
-                    showTokenUsageTimeFilter.value = false;
-                }
-                if (showProfileDropdown.value && !e.target.closest('.profile-dropdown-container')) {
-                    showProfileDropdown.value = false;
-                }
-                if (showApiProviderSelector.value && !e.target.closest('.api-provider-selector-container')) {
-                    showApiProviderSelector.value = false;
-                }
-                if (showCustomArtistEditor.value && !e.target.closest('.custom-artist-editor-container')) {
-                    showCustomArtistEditor.value = false;
-                }
-                if (showCustomApiSites.value && !e.target.closest('.custom-api-sites-container')) {
-                    showCustomApiSites.value = false;
-                }
-            });
+            document.addEventListener('click', handleDocumentClickOutside);
         });
 
         onBeforeUnmount(() => {
             window.removeEventListener('rp:startup-finished', finishStartup);
             window.removeEventListener('rp:notice', shellNotice);
+            window.removeEventListener('pagehide', flushPendingSavesOnHide);
             if (window.rphubHandleBack === shellGoBack) delete window.rphubHandleBack;
+            if (window.__rpConfirmAction) delete window.__rpConfirmAction;
             activeSortable?.destroy();
             presetSortables.forEach(sortable => sortable.destroy());
             generatedImageObserver?.disconnect();
@@ -17273,6 +17469,13 @@ const app = createApp({
             closeNavigation();
             document.removeEventListener('fullscreenchange', syncChatFullscreenState);
             document.removeEventListener('webkitfullscreenchange', syncChatFullscreenState);
+            document.removeEventListener('visibilitychange', handleDocumentVisibilityChange);
+            document.removeEventListener('click', handleDocumentClickOutside);
+            if (boundCompositionInput) {
+                boundCompositionInput.removeEventListener('compositionstart', onInputCompositionStart);
+                boundCompositionInput.removeEventListener('compositionend', onInputCompositionEnd);
+                boundCompositionInput = null;
+            }
             if (window.visualViewport) {
                 window.visualViewport.removeEventListener('resize', handleMobileViewportResize);
                 window.visualViewport.removeEventListener('scroll', handleMobileViewportResize);
@@ -17534,6 +17737,7 @@ const app = createApp({
         });
         return {
             backupUi,
+            saveData,
             switchProfile, createNewProfile, deleteProfile, userProfiles, activeProfileId, showProfileDropdown,
             processMainContent, replaceUserNamePlaceholder,
             currentView, showDescriptionPanel, showModelSelector, modelSelectionTarget, openModelSelector, showChatModelSelector, showCharacterEditor, showAddCharacterMenu, showPresetEditor, showUiTemplateEditor,

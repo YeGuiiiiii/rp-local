@@ -17,7 +17,7 @@
     --yy-rose: #e7acbb;
     --yy-depth: 0 5px 16px #0003;
 }
-:root[data-ui-skin="vampire"][data-rphub-accent="1"] {
+:root[data-ui-skin="vampire"][data-accent-scope="1"] {
     --yy-rose: rgb(var(--primary-700));
     --shell-accent: var(--yy-rose);
     --shell-tint: rgb(var(--primary-50));
@@ -47,7 +47,7 @@
     --gray-800: 242 233 235;
     --gray-900: 249 244 245;
 }
-:root[data-ui-skin="vampire"]:not([data-rphub-accent="1"]) .chenyue-theme .app-main {
+:root[data-ui-skin="vampire"]:not([data-accent-scope="1"]) .chenyue-theme .app-main {
     --primary-50: 51 30 41;
     --primary-100: 68 39 50;
     --primary-200: 88 45 62;

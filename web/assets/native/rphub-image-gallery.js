@@ -16,7 +16,7 @@
  */
 (function () {
     'use strict';
-
+    try { if (window.parent && window.parent !== window) return; } catch (_) { return; }
     if (window.__RPHubImageGalleryInstalled) return;
     window.__RPHubImageGalleryInstalled = true;
 
@@ -675,7 +675,7 @@
     var NAV_ANCHOR_LABELS = ['数据与备份', '数据备份', '灯塔', '在线时长'];
 
     function mountNavItem() {
-        if (window.RPThemePacks.current !== 'classic') return;
+        if (!window.RPThemePacks || window.RPThemePacks.current !== 'classic') return;
         var existing = document.getElementById(NAV_ITEM_ID);
         var items = document.querySelectorAll('.app-navigation-grid .app-navigation-item');
         var target = null;
@@ -1060,9 +1060,8 @@
     function saveRecordToAlbum(record) {
         if (window.RPImageDownload) {
             var source = record.kind === 'upload' ? record.thumb : resolveUrl(record.originUrl);
-            if (!source) { toast('没有可保存的图片'); return; }
-            window.RPImageDownload.run(source, { name: 'RP图片' }).catch(function () {});
-            return;
+            if (!source) { toast('没有可保存的图片'); return Promise.reject(new Error('没有可保存的图片')); }
+            return window.RPImageDownload.run(source, { name: 'RP图片' });
         }
         var bridge = window.AndroidBridge;
         // 上传图走 base64 直传（缩略图本来就小），远端图直接给 URL 让原生去拉，
@@ -1073,23 +1072,29 @@
             if (bridge && typeof bridge.saveImageFromUrl === 'function' && record.kind !== 'upload') {
                 bridge.saveImageFromUrl(url, name, 'image/png');
                 toast('已保存到相册');
-                return;
+                return Promise.resolve();
             }
             if (bridge && typeof bridge.saveImageToGallery === 'function' && record.thumb) {
-                // 没有原图时退回缩略图：体积小、足够分享。
-                var reader = new FileReader();
-                reader.onload = function () {
-                    var base64 = String(reader.result || '').split(',')[1] || '';
-                    bridge.saveImageToGallery(base64, name, 'image/webp');
-                    toast('已保存到相册');
-                };
-                reader.readAsDataURL(record.thumb);
-                return;
+                return new Promise(function (resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        try {
+                            var base64 = String(reader.result || '').split(',')[1] || '';
+                            bridge.saveImageToGallery(base64, name, 'image/webp');
+                            toast('已保存到相册');
+                            resolve();
+                        } catch (err) { reject(err); }
+                    };
+                    reader.onerror = function () { reject(reader.error || new Error('读取图片失败')); };
+                    reader.readAsDataURL(record.thumb);
+                });
             }
         } catch (error) {
             console.warn('[图库] 保存失败:', error);
+            return Promise.reject(error);
         }
         toast('当前环境不支持保存');
+        return Promise.reject(new Error('当前环境不支持保存'));
     }
 
     function deleteRecords(ids) {
@@ -1126,11 +1131,18 @@
     function removeSelected() {
         if (!selectedIds || !selectedIds.size) { toast('先长按选中图片'); return; }
         var ids = Array.from(selectedIds);
-        if (!window.confirm('删除选中的 ' + ids.length + ' 张图片？此操作不可撤销')) return;
-        deleteRecords(ids).then(function () {
-            toast('已删除 ' + ids.length + ' 张');
-            renderGrid();
-        }).catch(function () { toast('删除失败'); });
+        var msg = '删除选中的 ' + ids.length + ' 张图片？此操作不可撤销';
+        var ask = (window.AndroidBridge && typeof window.AndroidBridge.isNativeApp === 'function'
+            && window.AndroidBridge.isNativeApp() && typeof window.__rpConfirmAction === 'function')
+            ? window.__rpConfirmAction(msg, '删除图片')
+            : Promise.resolve(window.confirm(msg));
+        ask.then(function (ok) {
+            if (!ok) return;
+            return deleteRecords(ids).then(function () {
+                toast('已删除 ' + ids.length + ' 张');
+                renderGrid();
+            }).catch(function () { toast('删除失败'); });
+        });
     }
 
     function pickAllFiltered() {
@@ -1219,7 +1231,6 @@
             var target = event.target;
             if (!target || !target.dataset) return;
             if (target.dataset.act === 'close') { overlay.remove(); releaseObjectUrls(); return; }
-            if (target.dataset.act === 'export') { exportSelected(); return; }
         });
 
         var pick = overlay.querySelector('.rphub-gal-pick');
@@ -1241,7 +1252,12 @@
      * 十、注入维持 + 启动
      * ============================================================ */
 
+    function isClassicSkinActive() {
+        return !!(window.RPThemePacks && window.RPThemePacks.current === 'classic');
+    }
+
     function tick() {
+        if (!isClassicSkinActive()) return;
         try {
             mountNavItem();
             scheduleCollect();
@@ -1256,9 +1272,13 @@
         // 启动那一刻 chatHistory 往往还没从 IndexedDB 载入，隔几秒再补一次。
         setTimeout(tick, 1500);
         setTimeout(tick, 4000);
-        // 聊天页消息流高频变动：用脏标记合并，避免 observer 自己把自己拖死。
+        // 切回经典皮肤时补挂载入口，避免现代皮肤空转观察器。
+        window.addEventListener('rp-ui-theme-change', function () {
+            if (isClassicSkinActive()) tick();
+        });
+        // 聊天页消息流高频变动：仅在经典皮肤启用观察器与兜底采集，避免现代皮肤每帧空扫。
         var observer = new MutationObserver(function (records) {
-            if (observerTimer) return;
+            if (observerTimer || !isClassicSkinActive()) return;
             var needTick = !document.getElementById(NAV_ITEM_ID);
             if (!needTick && records) {
                 for (var i = 0; i < records.length; i++) {
@@ -1282,7 +1302,7 @@
         observer.observe(document.body, { childList: true, subtree: true });
         // 定时兜底：只靠 MutationObserver 的话，聊天区稳定不动时永远采不到上传图。
         setInterval(function () {
-            if (document.hidden) return;
+            if (document.hidden || !isClassicSkinActive()) return;
             try {
                 collectUploadedFromHistory();
                 collectContentImagesFromHistory();

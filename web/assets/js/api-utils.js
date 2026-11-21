@@ -183,10 +183,15 @@
                 return {
                     onData(text) {
                         if (current !== state || state.ended) return;
-                        state.lastDataAt = Date.now();
                         if (typeof text === 'string') {
+                            // Pure SSE comment keep-alive frames (e.g. ": keep-alive\n\n") must not reset
+                            // stall detection or inflate visible character counts.
+                            if (/^(?::[^\n]*\r?\n)+$/.test(text)) return;
+                            state.lastDataAt = Date.now();
                             state.chars += text.length;
                             if (!state.received && SUBSTANTIVE.test(text)) state.received = true;
+                        } else {
+                            state.lastDataAt = Date.now();
                         }
                         render();
                     },
@@ -408,9 +413,11 @@
         const abort = () => controller.abort();
         let timer;
         let timedOut = false;
+        const timeoutMs = Number.isFinite(Number(options.timeoutMs)) && Number(options.timeoutMs) > 0
+            ? Number(options.timeoutMs) : 120000;
         const touch = () => {
             clearTimeout(timer);
-            timer = setTimeout(() => { timedOut = true; controller.abort(); }, 120000);
+            timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
         };
         if (options.signal?.aborted) abort();
         else options.signal?.addEventListener('abort', abort, { once: true });
@@ -469,7 +476,14 @@
         });
     };
 
-    const requestJson = options => withApiResponse(options, async response => parsePayload(await response.text(), response.status));
+    const requestJson = options => withApiResponse(options, async response => {
+        const parsed = parsePayload(await response.text(), response.status);
+        if (parsed && typeof parsed === 'object'
+            && response?.headers?.get?.('x-rphub-embedding-cache') === 'hit') {
+            try { Object.defineProperty(parsed, '__rpEmbeddingCacheHit', { value: true }); } catch (_) {}
+        }
+        return parsed;
+    });
 
     const requestChatCompletionOnce = async (options, attempt) => {
         const startedAt = Date.now();
@@ -658,7 +672,7 @@
                 stream: !!options.stream,
                 ...(options.stream ? { stream_options: { include_usage: true } } : {})
             } }, async (response, touch) => {
-                const eventStream = response.headers.get('content-type')?.includes('text/event-stream');
+                const eventStream = /text\/event-stream/i.test(String(response.headers.get('content-type') || ''));
                 let rawText;
                 if (!eventStream) {
                     rawText = await response.text();
@@ -720,9 +734,17 @@
                 // 会被前端误判超时 abort，而服务端其实已生成完并计费。等待数据期间定时 touch()
                 // 续命即可，效果等价于插件往流里注入 SSE 注释行，但无需改写响应流。
                 let rphubKeepAlive = null;
+                const keepAliveStartedAt = Date.now();
                 try {
-                    // 只有真正进入流式读取才保活；一次性 JSON 请求保持官方原行为（该超时是必要兜底）。
-                    if (reader) rphubKeepAlive = setInterval(() => { try { touch(); } catch (_) { } }, 10000);
+                    // 只有真正进入流式读取才保活；同时保留 10 分钟总时长上限，防止半开死连接无限挂起。
+                    if (reader) rphubKeepAlive = setInterval(() => {
+                        if (Date.now() - keepAliveStartedAt > KEEP_ALIVE_MAX_TOTAL_MS) {
+                            clearInterval(rphubKeepAlive);
+                            rphubKeepAlive = null;
+                            return;
+                        }
+                        try { touch(); } catch (_) { }
+                    }, 10000);
                     if (reader) {
                         while (!done) {
                             throwIfChatAborted(options.signal, window.RPHubChatAbortRequested === true);

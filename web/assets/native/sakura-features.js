@@ -6,6 +6,7 @@
  */
 (function () {
     'use strict';
+    try { if (window.parent && window.parent !== window) return; } catch (_) { return; }
     if (window.__sakuraFeaturesLoaded) return;
     window.__sakuraFeaturesLoaded = true;
 
@@ -37,18 +38,33 @@
     function openDB(name, store, version) {
         var key = name + ':' + (version || 1);
         if (_sfDBP && _sfDBP._key === key) return _sfDBP;
-        _sfDBP = new Promise(function (resolve, reject) {
+        var p = new Promise(function (resolve, reject) {
             try {
                 var req = indexedDB.open(name, version || 1);
                 req.onupgradeneeded = function (e) {
                     var db = e.target.result;
                     if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
                 };
-                req.onsuccess = function (e) { e.target.result._key = key; resolve(e.target.result); };
-                req.onerror = function (e) { reject(e.target.error || new Error('打开数据库失败')); };
-            } catch (e) { reject(e); }
+                req.onsuccess = function (e) {
+                    var db = e.target.result;
+                    db.onversionchange = function () {
+                        try { db.close(); } catch (_) {}
+                        if (_sfDBP === p) _sfDBP = null;
+                    };
+                    resolve(db);
+                };
+                req.onerror = function (e) {
+                    if (_sfDBP === p) _sfDBP = null;
+                    reject(e.target.error || new Error('打开数据库失败'));
+                };
+            } catch (e) {
+                if (_sfDBP === p) _sfDBP = null;
+                reject(e);
+            }
         });
-        return _sfDBP;
+        p._key = key;
+        _sfDBP = p;
+        return p;
     }
     function idbGet(dbName, store, key) {
         return openDB(dbName, store).then(function (db) {
@@ -299,9 +315,10 @@
     // 数据逻辑不动——renderPresence 每秒轮询，卡片挂上来自动就填好了。
     function mountPresenceCard() {
         if (document.getElementById('sf-presence-card')) return;
-        var stack = document.querySelector(window.RPThemePacks.current !== 'classic'
-            ? '.settings-view[data-section="reading"] .settings-stack'
-            : '.settings-view .settings-stack');
+        var isClassic = !window.RPThemePacks || window.RPThemePacks.current === 'classic';
+        var stack = document.querySelector(isClassic
+            ? '.settings-view:not(.shell-settings-detail) .settings-stack'
+            : '.settings-view[data-section="reading"] .settings-stack');
         if (!stack) return;
         var card = document.createElement('div');
         card.id = 'sf-presence-card';
@@ -572,17 +589,24 @@
         var flat = body.replace(/\s+/g, ' ');
         var title = flat.slice(0, 14) + (flat.length > 14 ? '…' : '');
         var text = prompt ? ('【对戏】' + prompt + '\n\n' + body) : body;
-        // 消息身份 = 角色 + 会话下标 + 正文长度。
-        // 原来按「全文相等」判重，看起来更严，实际是个死锁：只要有一条相同文本残留在库里，
-        // 这条就永远收不进去。而残留恰恰来自删除写入失败（save 把错误吞了）。
-        var srcKey = String(history[idx].role || '') + '|' + idx + '|' + body.length;
+        // 消息身份 = 角色/分支作用域 + 角色 + 会话下标 + 正文长度（避免不同角色卡同下标同长度互相覆盖）。
+        var scopePrefix = '';
+        try {
+            var charUuid = s.currentCharacter && s.currentCharacter.uuid ? String(s.currentCharacter.uuid) : '';
+            var branchId = s.activeStoryBranchId ? String(s.activeStoryBranchId) : '';
+            if (charUuid) scopePrefix = charUuid + (branchId ? ':' + branchId : '') + '|';
+        } catch (_) {}
+        var legacySrcKey = String(history[idx].role || '') + '|' + idx + '|' + body.length;
+        var srcKey = scopePrefix + legacySrcKey;
 
         momentsLoadStrict().then(function (list) {
             var hit = -1;
             for (var k = 0; k < list.length; k++) {
                 if (!list[k]) continue;
-                // 2.8.51 存的老条目没有 srcKey，退回全文比较，顺手把身份补上
-                if (list[k].srcKey === srcKey || (!list[k].srcKey && list[k].text === text)) { hit = k; break; }
+                // 兼容老版本不含角色前缀的 srcKey（需同时正文一致才认定同一条）以及更早无 srcKey 的条目
+                if (list[k].srcKey === srcKey
+                    || (list[k].srcKey === legacySrcKey && list[k].text === text)
+                    || (!list[k].srcKey && list[k].text === text)) { hit = k; break; }
             }
             if (hit >= 0) {
                 // 同一条消息再点一次：覆盖那一条，而不是拦住用户

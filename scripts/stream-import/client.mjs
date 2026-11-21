@@ -99,24 +99,33 @@ async function recoverSession(main, session) {
 
 export async function recover(main) {
     // 会话与暂存数据在独立库里；恢复动作只碰正式库的 store。
-    const stage = await database();
-    window.RPLocalStore?.setWebWritesPaused(true);
+    let hasStagingDb = true;
     try {
-        const sessions = await resultOf(stage.transaction('restore_sessions').objectStore('restore_sessions').getAll());
-        for (const session of sessions) {
-            await recoverSession(main, session);
-            await removeSession(stage, session.id);
+        if (typeof indexedDB.databases === 'function') {
+            const list = await indexedDB.databases();
+            hasStagingDb = Array.isArray(list) ? list.some(item => item?.name === 'RPHubStagingDB') : true;
         }
-        const keys = await window.RPHubStorage.readStorageKeys(main);
-        const markers = keys.filter(key => key.startsWith('__rp_restore_commit__:'));
-        if (markers.length) {
-            const tx = main.transaction('store', 'readwrite');
-            markers.forEach(key => tx.objectStore('store').delete(key));
-            await completed(tx);
+    } catch (_) { hasStagingDb = true; }
+    if (hasStagingDb) {
+        const stage = await database();
+        window.RPLocalStore?.setWebWritesPaused(true);
+        try {
+            const sessions = await resultOf(stage.transaction('restore_sessions').objectStore('restore_sessions').getAll());
+            for (const session of sessions) {
+                await recoverSession(main, session);
+                await removeSession(stage, session.id);
+            }
+        } finally {
+            window.RPLocalStore?.setWebWritesPaused(false);
+            stage.close();
         }
-    } finally {
-        window.RPLocalStore?.setWebWritesPaused(false);
-        stage.close();
+    }
+    const keys = await window.RPHubStorage.readStorageKeys(main);
+    const markers = keys.filter(key => key.startsWith('__rp_restore_commit__:'));
+    if (markers.length) {
+        const tx = main.transaction('store', 'readwrite');
+        markers.forEach(key => tx.objectStore('store').delete(key));
+        await completed(tx);
     }
     // 老版本把暂存表建在正式库里，那些行还占着逻辑空间；新代码不再读它们，顺手清空。
     //   注意：IndexedDB 删行不会立刻缩小文件，但至少让「压缩存储」重写时不再搬这几张废表。
@@ -130,7 +139,7 @@ export async function recover(main) {
         } catch (error) { /* 清不掉不影响使用 */ }
     }
     // 暂存库已清空：整库删掉，把空间还给系统（这是本版的核心目的）。
-    await deleteStagingDatabase();
+    if (hasStagingDb) await deleteStagingDatabase();
 }
 async function prepareExtras(db, session) {
     const web = new Map();

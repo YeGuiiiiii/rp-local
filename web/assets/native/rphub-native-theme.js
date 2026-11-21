@@ -1,5 +1,6 @@
 // Sync the Android window background independently of per-card night rendering.
 (function () {
+    try { if (window.parent && window.parent !== window) return; } catch (_) { return; }
     if (window.__rphubNativeThemeBound) return;
     window.__rphubNativeThemeBound = true;
 
@@ -18,6 +19,7 @@
     var last = null;
 
     function push() {
+        if (document.documentElement.dataset.rphubScheme === 'auto') return;
         var theme = readTheme();
         if (theme === last) return;
         last = theme;

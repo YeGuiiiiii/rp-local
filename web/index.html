@@ -200,7 +200,10 @@
                 if (mascot && mascot.dataset.ready !== '1') {
                     mascot.dataset.ready = '1';
                     var moods = ['welcome', 'album', 'peek'];
-                    mascot.src = 'assets/images/chenyue/' + moods[Math.floor(start / 1000) % moods.length] + '.webp';
+                    var mood = moods[Math.floor(start / 1000) % moods.length];
+                    mascot.src = (window.RPThemePacks && typeof window.RPThemePacks.asset === 'function')
+                        ? window.RPThemePacks.asset(mood)
+                        : ('assets/images/chenyue/' + mood + '.webp');
                     mascot.alt = '欢迎回来的自设小伙伴';
                     mascot.classList.remove('is-loading');
                     splash.classList.add('is-ready');
@@ -2098,6 +2101,12 @@
                                                 </button>
 </div>
                                         </div>
+                                    </div>
+                                    <div v-if="isCustomApiProvider" class="mb-2">
+                                        <label class="settings-label">站点名称</label>
+                                        <input class="settings-control" :value="selectedApiProvider.name"
+                                            @input="updateCustomApiProvider(selectedApiProvider.id, 'name', $event.target.value)"
+                                            placeholder="给这个站点起个名字" aria-label="自定义站点名称">
                                     </div>
                                     <div v-if="isCustomApiProvider" class="relative">
                                         <div
@@ -4715,6 +4724,10 @@
         scheduleFrameSync(0);
         syncUi();
     });
+    window.addEventListener('rp-ui-theme-change', function () {
+        // 切皮肤/切布局时立刻重新评估 data-accent-scope 与主色整表复刻，防止经典主色串进陈玥/冬至。
+        paint({ persist: false, immediate: true });
+    });
     window.addEventListener('storage', function (e) {
         // 只对主题相关键反应；原来任何 rphub-* 键（含拖动坐标）都会触发重算
         if (!e || !e.key) return;
@@ -4739,30 +4752,25 @@
     var uiTimer = 0;
     var lastFrameCount = -1;   // [rphub 2.8.77] 只在同源 iframe 数量变化时重刷
     var observer = null;
-    try {
-        observer = new MutationObserver(function () {
-            if (uiTimer) return;
-            uiTimer = setTimeout(function () {
-                uiTimer = 0;
-                if (!isTop) return;
-                // [rphub 2.8.77] 两处收敛。第三方原版是「每 200ms 无条件 syncUi()
-                // + scheduleFrameSync(300)」，流式输出期会一直跑，而且 applyToFrame
-                // 会重写同源 iframe 里的 <style>（整段 kitCss 重新 set textContent）。
-                //   ① 抽屉是 v-if="open"，关着的时候页面里根本没有入口要维护，
-                //      syncUi 白跑；
-                //   ② iframe 只在数量变化时补刷 —— 首次挂上由下面的 load 监听补，
-                //      切档换色由 paint() 的 scheduleFrameSync(0) 立即刷，都不受影响。
-                if (!document.getElementById('app-navigation-panel')) return;
-                syncUi();
-                var frameCount = frames().length;
-                if (frameCount !== lastFrameCount) {
-                    lastFrameCount = frameCount;
-                    scheduleFrameSync(300);
-                }
-            }, 200);
-        });
-        observer.observe(document.body || root, { childList: true, subtree: true });
-    } catch (_) { /* ignore */ }
+    if (!window.RPLocalWorkspace) {
+        try {
+            observer = new MutationObserver(function () {
+                if (uiTimer) return;
+                uiTimer = setTimeout(function () {
+                    uiTimer = 0;
+                    if (!isTop) return;
+                    if (!document.getElementById('app-navigation-panel')) return;
+                    syncUi();
+                    var frameCount = frames().length;
+                    if (frameCount !== lastFrameCount) {
+                        lastFrameCount = frameCount;
+                        scheduleFrameSync(300);
+                    }
+                }, 200);
+            });
+            observer.observe(document.body || root, { childList: true, subtree: true });
+        } catch (_) { /* ignore */ }
+    }
 
     // 首帧只读不写：否则会触发原生壳 recreate 自举
     paint({ persist: false });
@@ -4897,24 +4905,27 @@
         var scope = themeScope();
         return scope.layout === 'classic' && scope.isDefaultPack;
     }
+    var recolorQueuedAccent = null;
     function applyRecolor(accent) {
-        if (!accent) { clearRecolor(); return; }
+        if (!accent) { recolorQueuedAccent = null; clearRecolor(); return; }
         // [rphub 2.9.069] 只服务经典布局。主题色那一行本来就只在这套布局里出现，
         //   但整表复刻是全局的：不拦的话另外两套布局（vampire / 辰月）的底色也会被染色。
-        if (!accentScopeAllowed()) { clearRecolor(); return; }
-        if (recolorBusy) return;
+        if (!accentScopeAllowed()) { recolorQueuedAccent = null; clearRecolor(); return; }
+        if (recolorBusy) { recolorQueuedAccent = accent; return; }
         recolorBusy = true;
+        recolorQueuedAccent = null;
         var jobs = [];
         try {
         var sheets = Array.prototype.slice.call(document.styleSheets || []);
         sheets.forEach(function (sheet) {
             var owner = sheet.ownerNode;
             if (!owner || owner.id === STYLE_ID || owner.id === RECOLOR_ID) return;
-            // 别家皮肤的样式表一律跳过：它们的底色属于各自的视觉语言，不该被主色带跑。
+            // 别家皮肤和含相对图片路径的专用表一律跳过，避免相对 url("../images/...") 注入到根文档后 404。
             if (owner.id && owner.id.indexOf('ui-skin-') === 0 && owner.id !== 'ui-skin-classic') return;
             if (owner.tagName === 'STYLE') { jobs.push(Promise.resolve(owner.textContent)); return; }
             var href = owner.href;
             if (!href) return;
+            if (/(?:chenyue-theme|materials)\.css(?:[?#]|$)/i.test(href)) return;
             if (recolorTexts[href]) { jobs.push(Promise.resolve(recolorTexts[href])); return; }
             jobs.push(readCssText(href).then(function (t) {
                 if (t) recolorTexts[href] = t;
@@ -4922,12 +4933,20 @@
             }));
         });
         Promise.all(jobs).then(function (texts) {
+            if (!accentScopeAllowed()) { clearRecolor(); return; }
             var src = texts.filter(Boolean).join('\n');
             if (!src) return;
             recolorStyleNode().textContent = recolorCssText(src, accent);
         }).catch(function (e) {
             console.warn('[rphub] 主色整表复刻失败', e);
-        }).then(function () { recolorBusy = false; });
+        }).then(function () {
+            recolorBusy = false;
+            if (recolorQueuedAccent && recolorQueuedAccent !== accent) {
+                var nextAccent = recolorQueuedAccent;
+                recolorQueuedAccent = null;
+                applyRecolor(nextAccent);
+            }
+        });
         } catch (error) {
             // 同步阶段出错（例如 file:// 下 fetch 直接抛）也必须复位，否则后续换色全被挡住。
             console.warn('[rphub] 整表复刻同步阶段失败', error);

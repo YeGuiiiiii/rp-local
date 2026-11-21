@@ -1,4 +1,4 @@
-param([string]$Version = '2.9.155')
+﻿param([string]$Version = '2.9.155')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
@@ -45,7 +45,6 @@ Copy-Item -LiteralPath "$projectRoot\reference\RP-Hub\LICENSE" -Destination "$pr
 $unsigned = Join-Path $buildAlias ".tools\rp-local-$Version.apk"
 & $javaExe '-Dfile.encoding=UTF-8' -jar "$buildAlias\.tools\apktool.jar" b -f "$buildAlias\android" -o $unsigned
 if ($LASTEXITCODE -ne 0) { throw 'APK build failed.' }
-Add-Type -AssemblyName System.IO.Compression.FileSystem
 # [2026-11-13 闪退事故] 旧实现用 .NET ZipArchive Update 模式改 zip：一旦 System.IO.Compression
 # 被显式 Add-Type，.NET 会把整个包重新编码（flags 变 0x8、声明 bit3 却不写 descriptor），
 # Android 原生 zip 解析器读到即 abort —— 2.9.044/045/046 三包装机即死，均由此装配差异造成。

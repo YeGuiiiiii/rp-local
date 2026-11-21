@@ -38,7 +38,7 @@
         };
     }
     function createReaderSession({ getScope, getContainer, getHistory, getLimit, setLimit, isChat }) {
-        let restoring = false;
+        let restoringDepth = 0;
         let timer;
         const key = () => 'rp-reading::' + getScope();
         const read = () => {
@@ -46,7 +46,7 @@
             try { return JSON.parse(localStorage.getItem(key()) || 'null'); } catch (_) { return null; }
         };
         const capture = (force = false) => {
-            if (restoring || (!isChat() && force !== true) || !getScope()) return;
+            if (restoringDepth > 0 || (!isChat() && force !== true) || !getScope()) return;
             const container = getContainer();
             if (!container || !container.clientHeight) return;
             const top = container.getBoundingClientRect().top;
@@ -71,7 +71,7 @@
         const restore = async () => {
             const saved = read();
             if (!saved) return false;
-            restoring = true;
+            restoringDepth++;
             try {
                 const history = getHistory();
                 const index = saved.messageId ? history.findIndex(message => message?.id === saved.messageId) : saved.index;
@@ -85,7 +85,7 @@
                 else if (node) container.scrollTop += node.getBoundingClientRect().top - container.getBoundingClientRect().top - (Number(saved.offset) || 0);
                 else container.scrollTop = Number(saved.top) || 0;
                 return true;
-            } finally { restoring = false; }
+            } finally { restoringDepth = Math.max(0, restoringDepth - 1); }
         };
         const visibility = () => { if (document.hidden) capture(); };
         onMounted(() => {
