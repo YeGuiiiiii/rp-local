@@ -637,7 +637,6 @@ const app = createApp({
         let mobileViewportRaf = null;
         let mobileKeyboardBlurTimer = null;
         let lastAppliedMobileViewportHeight = 0;
-        let lastAppliedMobileKeyboardInset = 0;
         let lastAppliedMobileBackgroundHeight = 0;
 
         const memoryAvailableModels = ref([]);
@@ -751,6 +750,21 @@ const app = createApp({
             isNavigationOpen.value = false;
         };
 
+        const keepMobileEditorVisible = () => {
+            const input = document.activeElement;
+            if (!isMobileViewport() || !input?.matches('input, textarea') || input === inputBox.value) return;
+            // Scroll the form itself; moving the document would also move the fixed header.
+            for (let parent = input.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+                if (parent.scrollHeight <= parent.clientHeight || !/auto|scroll/.test(getComputedStyle(parent).overflowY)) continue;
+                const rect = input.getBoundingClientRect();
+                const bounds = parent.getBoundingClientRect();
+                const top = Math.max(0, bounds.top) + 12;
+                const bottom = Math.min(lastAppliedMobileViewportHeight, bounds.bottom) - 12;
+                if (rect.bottom > bottom) parent.scrollTop += rect.bottom - bottom;
+                else if (rect.top < top) parent.scrollTop -= top - rect.top;
+            }
+        };
+
         const applyMobileVisualViewportHeight = (height, { force = false } = {}) => {
             const rphubNativeInset = Math.max(0, Math.round(Number(window.__rphubNativeInset) || 0));
             if (rphubNativeInset > 0) {
@@ -758,26 +772,14 @@ const app = createApp({
                 height = Math.max(0, Math.round(rphubLayoutH - rphubNativeInset));
             }
             if (!Number.isFinite(height) || height <= 0) return;
-            const safeHeight = rphubNativeInset > 0 ? Math.round(height) : Math.max(320, Math.round(height));
+            const safeHeight = Math.max(1, Math.round(height));
             if (!force && Math.abs(safeHeight - lastAppliedMobileViewportHeight) < 2) return;
+            const changed = safeHeight !== lastAppliedMobileViewportHeight;
             lastAppliedMobileViewportHeight = safeHeight;
             document.documentElement.style.setProperty('--app-visual-height', `${safeHeight}px`);
             const appElement = document.getElementById('app');
             if (appElement?.style.height) appElement.style.height = '';
-        };
-
-        const applyMobileKeyboardInset = (inset, { force = false } = {}) => {
-            if ((Number(window.__rphubNativeInset) || 0) > 0) {
-                if (lastAppliedMobileKeyboardInset !== 0) {
-                    lastAppliedMobileKeyboardInset = 0;
-                    document.documentElement.style.setProperty('--keyboard-inset', '0px');
-                }
-                return;
-            }
-            const safeInset = Math.max(0, Math.round(Number(inset) || 0));
-            if (!force && Math.abs(safeInset - lastAppliedMobileKeyboardInset) < 2) return;
-            lastAppliedMobileKeyboardInset = safeInset;
-            document.documentElement.style.setProperty('--keyboard-inset', `${safeInset}px`);
+            if (changed) requestAnimationFrame(keepMobileEditorVisible);
         };
 
             window.rphubSetKeyboardInset = (inset) => {
@@ -785,7 +787,6 @@ const app = createApp({
                 const safeInset = Math.max(0, Math.round(Number(inset) || 0));
                 window.__rphubNativeInset = safeInset;
                 isMobileKeyboardOpen.value = safeInset > 0;
-                applyMobileKeyboardInset(0, { force: true });
                 const rphubLayoutH = window.innerHeight || document.documentElement.clientHeight || 0;
                 applyMobileVisualViewportHeight(rphubLayoutH - safeInset, { force: true });
             };
@@ -807,7 +808,6 @@ const app = createApp({
                 closeNavigation();
                 isMobileKeyboardOpen.value = false;
                 lastAppliedMobileViewportHeight = 0;
-                lastAppliedMobileKeyboardInset = 0;
                 lastAppliedMobileBackgroundHeight = 0;
                 document.documentElement.style.removeProperty('--app-visual-height');
                 document.documentElement.style.removeProperty('--keyboard-inset');
@@ -826,17 +826,16 @@ const app = createApp({
                 : 0;
             const viewportCompressed = viewport && height < layoutHeight - 80;
             const keyboardOpen = !!(viewportCompressed || keyboardInset > 40);
-            const keyboardInsetForLayout = keyboardOpen ? keyboardInset : 0;
-            const appHeightForLayout = keyboardInsetForLayout > 0 ? layoutHeight : visualHeightForLayout;
+            const appHeightForLayout = visualHeightForLayout;
             const freezeBackground = inputFocused || keyboardOpen || isMobileKeyboardOpen.value;
             const backgroundHeight = freezeBackground
                 ? Math.max(lastAppliedMobileBackgroundHeight, lastAppliedMobileViewportHeight, appHeightForLayout)
                 : Math.max(layoutHeight, visualHeightForLayout);
 
             applyMobileVisualViewportHeight(appHeightForLayout, { force });
-            applyMobileKeyboardInset(keyboardInsetForLayout, { force });
             applyMobileBackgroundHeight(backgroundHeight, { force });
-            isMobileKeyboardOpen.value = !!(inputFocused || keyboardOpen);
+            isMobileKeyboardOpen.value = !!(inputFocused || keyboardOpen || window.__rphubNativeInset > 0);
+            keepMobileEditorVisible();
 
         };
 
@@ -17450,6 +17449,7 @@ const app = createApp({
             }
             window.addEventListener('orientationchange', handleMobileOrientationChange, { passive: true });
             window.addEventListener('resize', handleMobileViewportResize, { passive: true });
+            document.addEventListener('focusin', keepMobileEditorVisible);
             scheduleMobileVisualViewportSync({ force: true });
 
             // --- 全局点击外部区域收起面板 ---
@@ -17482,6 +17482,7 @@ const app = createApp({
             }
             window.removeEventListener('orientationchange', handleMobileOrientationChange);
             window.removeEventListener('resize', handleMobileViewportResize);
+            document.removeEventListener('focusin', keepMobileEditorVisible);
             if (mobileViewportRaf) cancelAnimationFrame(mobileViewportRaf);
             clearTimeout(mobileKeyboardBlurTimer);
         });
