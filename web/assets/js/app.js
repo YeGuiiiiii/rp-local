@@ -7675,7 +7675,8 @@ const app = createApp({
 
         // Square State
         const isSquareLoading = ref(true);
-        const squareUrl = ref('https://rphforum.zeabur.app/');
+        const squareHomeUrl = 'https://rphub.nanamirui.eu.cc/';
+        const squareUrl = ref(squareHomeUrl);
 
         let pendingSquareCustomUrl = '';
         // [RP-Hub 2.8.46] native 接管 target="_blank" 后，指向广场的链接转到这里：
@@ -7851,7 +7852,7 @@ const app = createApp({
                     squareUrl.value = pendingSquareCustomUrl;
                     pendingSquareCustomUrl = '';
                 } else {
-                    squareUrl.value = `https://rphforum.zeabur.app/?t=${Date.now()}`;
+                    squareUrl.value = `${squareHomeUrl}?t=${Date.now()}`;
                 }
             } else if (newView === 'novel') {
                 isNovelLoading.value = true;
