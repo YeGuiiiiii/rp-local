@@ -142,17 +142,38 @@ fs.mkdirSync(output, { recursive: true });
         });
         await page.locator('.shell-chat-menu').getByRole('button', { name: '设置', exact: true }).click();
         await page.evaluate(() => { qa.toasts = []; });
-        for (const width of [390, 1280]) {
-            await page.setViewportSize({ width, height: 900 });
-            await returnButton().waitFor();
-            await page.locator('.shell-settings-home').evaluate(element => { element.scrollTop = 0; });
-            await page.screenshot({ path: path.join(output, `settings-${width}.png`), animations: 'disabled' });
-            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-            await page.locator('.shell-settings-home').evaluate(element => { element.scrollTop = 300; });
-            assert.ok(await returnButton().evaluate(button => {
-                const rect = button.getBoundingClientRect();
-                return rect.top >= 0 && rect.bottom < innerHeight;
-            }), 'The return action stays visible after scrolling settings');
+        // The classic layout has no illustrated settings home; its detail header is covered above.
+        for (const [skin, mode] of [['chenyue', 'day'], ['chenyue', 'night'], ['winter', 'day'], ['winter', 'night']]) {
+            await page.evaluate(({ skin, mode }) => { RPThemePacks.set(skin); RPThemePacks.setMode(mode); }, { skin, mode });
+            for (const width of [360, 390, 768, 1280]) {
+                await page.setViewportSize({ width, height: 900 });
+                await returnButton().waitFor();
+                await page.locator('.shell-settings-home').evaluate(element => { element.scrollTop = 0; });
+                const header = await page.locator('.settings-home-heading').evaluate(element => {
+                    const title = element.querySelector('h1');
+                    const titleBox = title.getBoundingClientRect();
+                    const mascot = element.querySelector('.yy-page-mascot').getBoundingClientRect();
+                    const button = element.querySelector('.chat-return-button').getBoundingClientRect();
+                    const size = getComputedStyle(title).backgroundSize.split(' ')[0];
+                    return {
+                        badgeFits: size === 'contain' || size.endsWith('%') && parseFloat(size) <= 100
+                            || size.endsWith('px') && parseFloat(size) <= titleBox.width + 1,
+                        aligned: Math.abs((mascot.top + mascot.bottom - button.top - button.bottom) / 2) < 4,
+                        separate: titleBox.right <= mascot.left + 1 && mascot.right <= button.left - 4,
+                        height: element.getBoundingClientRect().height
+                    };
+                });
+                assert.ok(header.badgeFits, 'The settings title decoration must fit without clipping: ' + JSON.stringify(header));
+                assert.ok(header.aligned && header.separate, 'Header artwork and return action must align without overlapping');
+                assert.ok(header.height <= 112, 'Settings header must not leave a large empty band');
+                await page.screenshot({ path: path.join(output, `settings-${skin}-${mode}-${width}.png`), animations: 'disabled' });
+                assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+                await page.locator('.shell-settings-home').evaluate(element => { element.scrollTop = 300; });
+                assert.ok(await returnButton().evaluate(button => {
+                    const rect = button.getBoundingClientRect();
+                    return rect.top >= 0 && rect.bottom < innerHeight;
+                }), 'The return action stays visible after scrolling settings');
+            }
         }
         await returnButton().click();
         assert.equal(await state(), 'chat');
