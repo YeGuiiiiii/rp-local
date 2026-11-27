@@ -202,6 +202,12 @@
           <button type="button" class="settings-icon-button" :aria-label="(api.all?'全不选':'全选')+label" :title="api.all?'全不选':'全选'" :aria-pressed="api.all" :disabled="!api.total" @click="api.toggleAll()"><icon name="CheckCheck"/></button>
         </div>`
     };
+    const ReturnChat = {
+        components: { Icon },
+        setup: () => ({ chatReturn: Vue.inject('chatReturn', null) }),
+        template: `<button v-if="chatReturn?.available" type="button" class="chat-return-button"
+          @click="chatReturn.go"><icon name="ArrowLeft"/><span>返回聊天</span></button>`
+    };
     const MascotHeader = {
         components: { PokeMascot },
         props: { title: String, count: String, pose: { type: String, default: 'welcome' }, active: { type: Boolean, default: true } },
@@ -550,6 +556,7 @@
             <header class="backup-header">
               <button type="button" class="shell-icon-button" aria-label="返回" title="返回" @click="s.back"><icon name="ArrowLeft"/></button>
               <h1>数据与备份</h1>
+              <return-chat></return-chat>
             </header>
             <div class="backup-content">
                 <section class="backup-section">
@@ -760,7 +767,7 @@
                 { label: '用量统计', view: 'usage', icon: 'ChartNoAxesCombined' },
                 { label: '关于与鸣谢', view: 'patchlist', icon: 'Info' }
             ];
-            return { groups: [
+            return { chatReturn: Vue.inject('chatReturn', null), groups: [
                 { title: '对话与创作', rows: rows.slice(0, 4) },
                 { title: '空间与存档', rows: rows.slice(4, 7) },
                 { title: '记录与支持', rows: rows.slice(7) }
@@ -768,7 +775,7 @@
         },
         template: `
           <main class="shell-page shell-settings-home">
-            <mascot-header title="设置" pose="peek"></mascot-header>
+            <div class="settings-home-heading" :class="{ 'has-chat-return': chatReturn?.available }"><mascot-header title="设置" pose="peek"></mascot-header><return-chat></return-chat></div>
             <button type="button" class="shell-profile" @click="$emit('section','persona')">
               <persona-avatar :src="user.avatar"></persona-avatar>
               <span><small>个人设定</small><strong>{{user.name==='请前往设置自定义你的名称'?'设置你的人设':user.name}}</strong></span><icon name="ChevronRight"/>
@@ -1018,5 +1025,5 @@
             </transition>
           </teleport>`
     };
-    window.RPAppShell = Object.freeze({ Icon, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, UpdatePanel, UpdateNotice, ImageDownloadSheet, ReleaseAnnouncement });
+    window.RPAppShell = Object.freeze({ Icon, ReturnChat, ResourceBatchActions, ThemeMascot, PersonaAvatar, PokeMascot, MascotHeader, Dock, ChatMenu, CardNightSelect, ImageProviderSettings, BackupPage, CompetitionList, CompetitionDetail, Advanced, Settings, Utilities, UpdatePanel, UpdateNotice, ImageDownloadSheet, ReleaseAnnouncement });
 })();

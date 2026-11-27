@@ -1502,8 +1502,9 @@
             <div v-if="currentView === 'patchlist'" class="management-view">
             <div class="max-w-3xl mx-auto">
                 <mascot-header title="关于与鸣谢" pose="welcome"></mascot-header>
-                <div class="sticky top-0 z-20 -mx-2 px-2 py-2 bg-gray-50/95 backdrop-blur-sm mb-2">
+                <div class="sticky top-0 z-20 -mx-2 px-2 py-2 bg-gray-50/95 backdrop-blur-sm mb-2 flex items-center justify-between">
                     <button type="button" @click="shellGoBack" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-100">返回</button>
+                    <return-chat></return-chat>
                 </div>
                 <div class="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                     <div class="pointer-events-none absolute inset-0 flex items-center justify-center">

@@ -349,6 +349,8 @@ const app = createApp({
         let embeddedBackArmedView = '';
         let embeddedBackArmedAt = 0;
         const shellHistory = [];
+        const chatReturnScope = ref(null);
+        const chatSettingsViews = ['settings', 'settings-detail', 'memory', 'cache', 'backup', 'usage', 'patchlist'];
         const streamImportPanel = ref(null);
         const backupTask = reactive({ active: false, locked: false, title: '', message: '', percent: 0, detail: '', error: '', confirm: null, recovery: false });
         const backupProfiles = window.RPStreamImport.profiles;
@@ -428,6 +430,10 @@ const app = createApp({
             if (view === currentView.value) return;
             if (shellRoots.includes(view)) {
                 shellHistory.length = 0;
+                if (view === 'settings' && (currentView.value === 'chat' || chatReturnScope.value))
+                    shellHistory.push({ view: 'chat' });
+            } else if (view === 'chat') {
+                shellHistory.length = 0;
             } else {
                 shellHistory.push({ view: currentView.value, section: settingsSection.value, scope: resourceScope.value,
                     announcement: showAnnouncement.value,
@@ -447,12 +453,13 @@ const app = createApp({
             navigateWorkspace('settings-detail');
             settingsSection.value = section;
         };
-        const shellGoBack = () => {
+        const shellGoBack = destination => {
             const updateNotice = document.querySelector('.update-notice[open]');
             if (updateNotice) { window.RPUpdates.dismiss(); updateNotice.close(); return true; }
             const imageDownload = document.querySelector('.image-download-sheet[open]');
             if (imageDownload) { imageDownload.close(); return true; }
             if (streamImportPanel.value?.handleBack()) return true;
+            if (backupTask.active) return true;
             if (cloudBackup.busy) return true;
             if (cloudBackup.mode) { closeCloudBackup(); return true; }
             const chatExportPanel = document.getElementById('rphub-chat-export-panel');
@@ -488,9 +495,14 @@ const app = createApp({
                     return true;
                 }
             }
+            if (destination === 'chat' && canReturnChat.value) {
+                shellReturning = true;
+                navigateWorkspace('chat');
+                return true;
+            }
             if (currentView.value === 'characters') return false;
             if (shellRoots.includes(currentView.value)) {
-                navigateWorkspace('characters');
+                navigateWorkspace(currentView.value === 'settings' && canReturnChat.value ? 'chat' : 'characters');
                 return true;
             }
             const previous = shellHistory.pop();
@@ -9756,6 +9768,22 @@ const app = createApp({
         const currentCharacter = computed(() => {
             return currentCharacterIndex.value >= 0 ? characters.value[currentCharacterIndex.value] : null;
         });
+        const canReturnChat = computed(() => !!currentCharacter.value && !!chatReturnScope.value
+            && chatReturnScope.value === getCurrentStoryBranchScopeId()
+            && chatSettingsViews.includes(currentView.value));
+        Vue.provide('chatReturn', reactive({ available: canReturnChat, go: () => shellGoBack('chat') }));
+        watch(currentView, (view, previous) => {
+            if (previous === 'chat' && chatSettingsViews.includes(view) && currentCharacter.value)
+                chatReturnScope.value = getCurrentStoryBranchScopeId();
+            else if (view === 'chat' || (shellRoots.includes(view) && view !== 'settings'))
+                chatReturnScope.value = null;
+        }, { flush: 'sync' });
+        watch(getCurrentStoryBranchScopeId, () => {
+            chatReturnScope.value = null;
+            // A removed or replaced chat must not survive in the back stack.
+            for (let i = shellHistory.length - 1; i >= 0; i--)
+                if (shellHistory[i].view === 'chat') shellHistory.splice(i, 1);
+        }, { flush: 'sync' });
         watch(() => currentCharacter.value?.uuid, id => window.RPCardNight.select(id), { immediate: true, flush: 'sync' });
         // [rphub 2.8.92] 作用域 watcher 的正确位置：必须在 currentCharacter 声明**之后**。
         //   原位置（let chatHistorySaveTimer 那一带）在 currentCharacter 之前约 1300 行，
@@ -18180,6 +18208,7 @@ app.component('ModalHeader', ModalHeader);
 app.component('LocalFilesPanel', window.RPLocalPanel);
 app.component('ShellIcon', window.RPAppShell.Icon);
 app.component('MascotHeader', window.RPAppShell.MascotHeader);
+app.component('ReturnChat', window.RPAppShell.ReturnChat);
 app.component('ThemeMascot', window.RPAppShell.ThemeMascot);
 app.component('PersonaAvatar', window.RPAppShell.PersonaAvatar);
 app.component('PokeMascot', window.RPAppShell.PokeMascot);

@@ -567,8 +567,9 @@
     const SettingsPageHeader = {
         props: { title: String, classic: Boolean },
         emits: ['menu'],
+        setup: () => ({ chatReturn: Vue.inject('chatReturn', null) }),
         template: `
-            <div class="settings-page-header">
+            <div class="settings-page-header" :class="{ 'has-chat-return': chatReturn?.available }">
                 <div class="management-page-heading">
                     <button @click="$emit('menu')" class="app-nav-trigger" :aria-label="classic ? '打开导航' : '返回'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -578,10 +579,11 @@
                     </button>
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
                         <slot name="icon"></slot>
-                        {{ title }}
+                        <span class="settings-page-title">{{ title }}</span>
                         <slot name="title-extra"></slot>
                     </h2>
                 </div>
+                <return-chat></return-chat>
                 <div v-if="$slots.default" class="flex space-x-2 md:space-x-3">
                     <slot></slot>
                 </div>

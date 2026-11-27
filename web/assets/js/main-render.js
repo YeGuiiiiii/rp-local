@@ -426,7 +426,7 @@ const _hoisted_220 = {
   class: "management-view"
 }
 const _hoisted_221 = { class: "max-w-3xl mx-auto" }
-const _hoisted_222 = { class: "sticky top-0 z-20 -mx-2 px-2 py-2 bg-gray-50/95 backdrop-blur-sm mb-2" }
+const _hoisted_222 = { class: "sticky top-0 z-20 -mx-2 px-2 py-2 bg-gray-50/95 backdrop-blur-sm mb-2 flex items-center justify-between" }
 const _hoisted_223 = ["onClick"]
 const _hoisted_224 = { class: "relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm p-5" }
 const _hoisted_225 = ["onClick"]
@@ -1568,6 +1568,7 @@ return function render(_ctx, _cache) {
     const _component_character_card = _resolveComponent("character-card")
     const _component_embedded_view_content = _resolveComponent("embedded-view-content")
     const _component_mascot_header = _resolveComponent("mascot-header")
+    const _component_return_chat = _resolveComponent("return-chat")
     const _component_backup_page = _resolveComponent("backup-page")
     const _component_persona_avatar = _resolveComponent("persona-avatar")
     const _component_secret_input = _resolveComponent("secret-input")
@@ -3606,7 +3607,8 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: shellGoBack,
                     class: "inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-100"
-                  }, "返回", 8 /* PROPS */, _hoisted_223)
+                  }, "返回", 8 /* PROPS */, _hoisted_223),
+                  _createVNode(_component_return_chat)
                 ]),
                 _createElementVNode("div", _hoisted_224, [
                   _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP-Local 2.9.096 · 页面与功能随安装包更新。</p>", 3)),
@@ -18601,29 +18603,29 @@ return function render(_ctx, _cache) {
 })();
 window.RPCompiledRenders.SettingsPageHeader = (function () {
 const _Vue = Vue
-const { createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode } = _Vue
 
-const _hoisted_1 = { class: "settings-page-header" }
-const _hoisted_2 = { class: "management-page-heading" }
-const _hoisted_3 = ["onClick", "aria-label"]
-const _hoisted_4 = {
+const _hoisted_1 = { class: "management-page-heading" }
+const _hoisted_2 = ["onClick", "aria-label"]
+const _hoisted_3 = {
   class: "w-6 h-6",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24"
 }
-const _hoisted_5 = {
+const _hoisted_4 = {
   key: 0,
   href: "#icon-menu"
 }
-const _hoisted_6 = {
+const _hoisted_5 = {
   key: 1,
   d: "m15 18-6-6 6-6M9 12h12",
   "stroke-width": "1.8",
   "stroke-linecap": "round",
   "stroke-linejoin": "round"
 }
-const _hoisted_7 = { class: "text-xl md:text-2xl font-bold text-gray-800 flex items-center" }
+const _hoisted_6 = { class: "text-xl md:text-2xl font-bold text-gray-800 flex items-center" }
+const _hoisted_7 = { class: "settings-page-title" }
 const _hoisted_8 = {
   key: 0,
   class: "flex space-x-2 md:space-x-3"
@@ -18631,33 +18633,38 @@ const _hoisted_8 = {
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, createElementVNode: _createElementVNode, renderSlot: _renderSlot, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode } = _Vue
+    const { openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, createElementVNode: _createElementVNode, renderSlot: _renderSlot, toDisplayString: _toDisplayString, resolveComponent: _resolveComponent, createVNode: _createVNode, normalizeClass: _normalizeClass } = _Vue
 
-    return (_openBlock(), _createElementBlock("div", _hoisted_1, [
-      _createElementVNode("div", _hoisted_2, [
+    const _component_return_chat = _resolveComponent("return-chat")
+
+    return (_openBlock(), _createElementBlock("div", {
+      class: _normalizeClass(["settings-page-header", { 'has-chat-return': chatReturn?.available }])
+    }, [
+      _createElementVNode("div", _hoisted_1, [
         _createElementVNode("button", {
           onClick: $event => ($emit('menu')),
           class: "app-nav-trigger",
           "aria-label": classic ? '打开导航' : '返回'
         }, [
-          (_openBlock(), _createElementBlock("svg", _hoisted_4, [
+          (_openBlock(), _createElementBlock("svg", _hoisted_3, [
             classic
-              ? (_openBlock(), _createElementBlock("use", _hoisted_5))
-              : (_openBlock(), _createElementBlock("path", _hoisted_6))
+              ? (_openBlock(), _createElementBlock("use", _hoisted_4))
+              : (_openBlock(), _createElementBlock("path", _hoisted_5))
           ]))
-        ], 8 /* PROPS */, _hoisted_3),
-        _createElementVNode("h2", _hoisted_7, [
+        ], 8 /* PROPS */, _hoisted_2),
+        _createElementVNode("h2", _hoisted_6, [
           _renderSlot($slots, "icon"),
-          _createTextVNode(" " + _toDisplayString(title) + " ", 1 /* TEXT */),
+          _createElementVNode("span", _hoisted_7, _toDisplayString(title), 1 /* TEXT */),
           _renderSlot($slots, "title-extra")
         ])
       ]),
+      _createVNode(_component_return_chat),
       ($slots.default)
         ? (_openBlock(), _createElementBlock("div", _hoisted_8, [
             _renderSlot($slots, "default")
           ]))
         : _createCommentVNode("v-if", true)
-    ]))
+    ], 2 /* CLASS */))
   }
 }
 })();
@@ -23938,6 +23945,32 @@ return function render(_ctx, _cache) {
   }
 }
 })();
+window.RPCompiledRenders.ReturnChat = (function () {
+const _Vue = Vue
+const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode } = _Vue
+
+const _hoisted_1 = ["onClick"]
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode } = _Vue
+
+    const _component_icon = _resolveComponent("icon")
+
+    return (chatReturn?.available)
+      ? (_openBlock(), _createElementBlock("button", {
+          key: 0,
+          type: "button",
+          class: "chat-return-button",
+          onClick: chatReturn.go
+        }, [
+          _createVNode(_component_icon, { name: "ArrowLeft" }),
+          _cache[0] || (_cache[0] = _createElementVNode("span", null, "返回聊天", -1 /* CACHED */))
+        ], 8 /* PROPS */, _hoisted_1))
+      : _createCommentVNode("v-if", true)
+  }
+}
+})();
 window.RPCompiledRenders.MascotHeader = (function () {
 const _Vue = Vue
 const { createVNode: _createVNode, createElementVNode: _createElementVNode, createCommentVNode: _createCommentVNode, createTextVNode: _createTextVNode } = _Vue
@@ -24796,6 +24829,7 @@ return function render(_ctx, _cache) {
     const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, createTextVNode: _createTextVNode, openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, vModelText: _vModelText, withDirectives: _withDirectives, renderList: _renderList, Fragment: _Fragment, vModelSelect: _vModelSelect, vModelCheckbox: _vModelCheckbox, withModifiers: _withModifiers, renderSlot: _renderSlot } = _Vue
 
     const _component_icon = _resolveComponent("icon")
+    const _component_return_chat = _resolveComponent("return-chat")
     const _component_local_files_panel = _resolveComponent("local-files-panel")
 
     return (_openBlock(), _createElementBlock("div", _hoisted_1, [
@@ -24809,7 +24843,8 @@ return function render(_ctx, _cache) {
         }, [
           _createVNode(_component_icon, { name: "ArrowLeft" })
         ], 8 /* PROPS */, _hoisted_3),
-        _cache[0] || (_cache[0] = _createElementVNode("h1", null, "数据与备份", -1 /* CACHED */))
+        _cache[0] || (_cache[0] = _createElementVNode("h1", null, "数据与备份", -1 /* CACHED */)),
+        _createVNode(_component_return_chat)
       ]),
       _createElementVNode("div", _hoisted_4, [
         _createElementVNode("section", _hoisted_5, [
@@ -25520,18 +25555,24 @@ const _hoisted_11 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { resolveComponent: _resolveComponent, createVNode: _createVNode, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, renderList: _renderList, Fragment: _Fragment, openBlock: _openBlock, createElementBlock: _createElementBlock } = _Vue
+    const { resolveComponent: _resolveComponent, createVNode: _createVNode, normalizeClass: _normalizeClass, createElementVNode: _createElementVNode, toDisplayString: _toDisplayString, renderList: _renderList, Fragment: _Fragment, openBlock: _openBlock, createElementBlock: _createElementBlock } = _Vue
 
     const _component_mascot_header = _resolveComponent("mascot-header")
+    const _component_return_chat = _resolveComponent("return-chat")
     const _component_persona_avatar = _resolveComponent("persona-avatar")
     const _component_icon = _resolveComponent("icon")
     const _component_update_panel = _resolveComponent("update-panel")
 
     return (_openBlock(), _createElementBlock("main", _hoisted_1, [
-      _createVNode(_component_mascot_header, {
-        title: "设置",
-        pose: "peek"
-      }),
+      _createElementVNode("div", {
+        class: _normalizeClass(["settings-home-heading", { 'has-chat-return': chatReturn?.available }])
+      }, [
+        _createVNode(_component_mascot_header, {
+          title: "设置",
+          pose: "peek"
+        }),
+        _createVNode(_component_return_chat)
+      ], 2 /* CLASS */),
       _createElementVNode("button", {
         type: "button",
         class: "shell-profile",
