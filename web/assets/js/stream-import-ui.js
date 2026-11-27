@@ -605,7 +605,7 @@
                 <div v-if="isOpen" class="stream-import-overlay" role="dialog" aria-modal="true" :aria-label="external ? task.title : '导入备份'">
                     <section ref="panel" class="stream-import-dialog transfer-dialog" tabindex="-1" @keydown="trapFocus">
                         <button v-if="canClose" class="transfer-close" type="button" :aria-label="external ? '关闭备份弹窗' : '关闭导入弹窗'" @click="close"><shell-icon name="X"></shell-icon></button>
-                        <img class="transfer-mascot" :src="art" alt="" aria-hidden="true" draggable="false">
+                        <img v-if="art" class="transfer-mascot" :src="art" alt="" aria-hidden="true" draggable="false">
                         <h3>{{ external ? task.title : state.phase === 'recovery' ? '请重新打开软件完成恢复' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'select' ? '选择要导入的内容' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份' }}</h3>
                         <p v-if="!external" class="transfer-filename">{{ state.name }}</p>
                         <div v-if="!external && state.recap" style="margin:8px 0 12px;padding:10px 12px;border-radius:10px;border:1px solid #f0c2a8;background:#fff7f1;text-align:left">

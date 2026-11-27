@@ -3,12 +3,11 @@
     const key = 'rphub-ui-pack';
     const root = document.documentElement;
     const catalog = window.RPThemeCatalog;
-    const fallback = 'assets/images/chenyue/';
     let selected;
     const legacyMode = id => id === 'journal' ? 'day' : id === 'vampire' ? 'night' : '';
     const skinId = id => legacyMode(id) ? 'chenyue' : id;
     try {
-        selected = localStorage.getItem('rphub-layout118') === '1' ? localStorage.getItem(key) : 'classic';
+        selected = localStorage.getItem(key) || 'classic';
         const previousMode = legacyMode(selected);
         if (previousMode) {
             localStorage.setItem('rphub-theme-scheme', previousMode);
@@ -21,9 +20,14 @@
     const mode = () => root.dataset.appTheme === 'dark' ? 'night' : 'day';
     const getPack = () => catalog.find(pack => pack.id === selected) || catalog[0];
     const variant = (pack = getPack()) => pack.variants[mode()] || pack.variants.day;
-    const asset = name => variant()[name] || variant().overrides?.[name] || (variant().assets || fallback) + name + '.webp';
+    const asset = name => getPack().mascots
+        ? variant()[name] || variant().overrides?.[name] || (variant().assets ? variant().assets + name + '.webp' : '')
+        : '';
     const syncStandalone = () => document.querySelectorAll('[data-ui-mascot]').forEach(image => {
-        image.src = asset(image.dataset.uiMascot);
+        const source = asset(image.dataset.uiMascot);
+        image.hidden = !source;
+        if (source) image.src = source;
+        else image.removeAttribute('src');
     });
     function apply() {
         const current = getPack();
@@ -39,6 +43,7 @@
         root.dataset.uiPack = current.id;
         root.dataset.uiSkin = appearance.skin;
         root.dataset.uiLayout = current.layout;
+        root.dataset.uiMascots = current.mascots ? 'true' : 'false';
         document.body?.classList.toggle('chenyue-theme', current.layout !== 'classic');
         syncStandalone();
         window.dispatchEvent(new Event('rp-ui-theme-change'));
@@ -52,7 +57,8 @@
         }
     }
     window.RPThemePacks = Object.freeze({
-        catalog, asset, variant, setMode, get mode() { return mode(); }, get current() { return getPack().id; },
+        catalog, asset, variant, setMode, get mascots() { return !!getPack().mascots; },
+        get mode() { return mode(); }, get current() { return getPack().id; },
         toggleMode: () => setMode(mode() === 'night' ? 'day' : 'night'),
         set(id) {
             const pack = catalog.find(pack => pack.id === skinId(id));

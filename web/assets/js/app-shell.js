@@ -76,7 +76,10 @@
         window.addEventListener('rp-ui-theme-change', sync);
         onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', sync));
         return { selected, night, packs: window.RPThemePacks.catalog,
+            mascots: computed(() => { selected.value; return window.RPThemePacks.mascots; }),
             variant: computed(() => { selected.value; night.value; return window.RPThemePacks.variant(); }),
+            announcementArt: computed(() => { selected.value; night.value;
+                return window.RPThemePacks.variant().announcement || window.RPThemePacks.asset('welcome'); }),
             toggleDayNight: () => window.RPThemePacks.toggleMode(),
             preview: pack => pack.variants[night.value ? 'night' : 'day'].preview };
     };
@@ -89,12 +92,13 @@
             onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', sync));
             return { source: computed(() => { skin.value; return window.RPThemePacks.asset(props.pose); }) };
         },
-        template: `<img :src="source" :alt="alt" data-rphub-no-save>`
+        template: `<img v-if="source" :src="source" :alt="alt" data-rphub-no-save>`
     };
     const PokeMascot = {
         components: { ThemeMascot },
         props: { pose: { type: String, default: 'welcome' }, context: String, active: { type: Boolean, default: true } },
         setup(props) {
+            const { mascots } = useThemePack();
             const target = ref(null), speech = ref(''), emotion = ref(''), position = ref({});
             let timer, animation, anchor;
             const clear = () => {
@@ -103,7 +107,7 @@
                 animation?.cancel();
             };
             const say = response => {
-                if (!response || !props.active) return;
+                if (!response || !props.active || !mascots.value || !target.value) return;
                 clear();
                 const bounds = target.value.getBoundingClientRect();
                 anchor = { x: bounds.x, y: bounds.y };
@@ -117,6 +121,7 @@
                 timer = setTimeout(clear, 1500);
             };
             const poke = () => {
+                if (!mascots.value) return;
                 say(window.RPMascotDialogue.poke(props.context));
                 if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
                     animation = target.value.querySelector('img').animate([
@@ -126,7 +131,7 @@
                 }
             };
             const greet = () => {
-                if (props.context === 'characters' && props.active && window.__rpDataReady && !document.querySelector('.entry-transition')
+                if (mascots.value && props.context === 'characters' && props.active && window.__rpDataReady && !document.querySelector('.entry-transition')
                     && ![...document.querySelectorAll('[role="dialog"]')].some(el => el.getClientRects().length)) {
                     say(window.RPMascotDialogue.greeting());
                 }
@@ -137,6 +142,7 @@
                 if (speech.value && bounds && (bounds.x !== anchor.x || bounds.y !== anchor.y)) clear();
             };
             watch(() => props.active, active => { if (!active) clear(); else nextTick(greet); });
+            watch(mascots, enabled => { if (!enabled) clear(); });
             onMounted(() => {
                 greet();
                 window.addEventListener('rp:startup-finished', greet);
@@ -151,10 +157,10 @@
                 window.removeEventListener('scroll', scroll, true);
                 document.removeEventListener('visibilitychange', hidden);
             });
-            return { target, speech, emotion, position, poke };
+            return { target, speech, emotion, position, poke, mascots };
         },
         template: `
-          <button ref="target" type="button" class="yy-poke-mascot" aria-label="戳戳玥玥" title="戳戳玥玥" @click.stop="poke">
+          <button v-if="mascots" ref="target" type="button" class="yy-poke-mascot" aria-label="戳戳玥玥" title="戳戳玥玥" @click.stop="poke">
             <theme-mascot :pose="emotion ? 'poke-'+emotion : pose" alt=""></theme-mascot>
             <teleport to="body">
               <transition name="yy-speech">
@@ -520,12 +526,14 @@
           </main>`
     };
     const PersonaAvatar = {
-        components: { ThemeMascot },
+        components: { ThemeMascot, Icon },
         props: { src: String },
+        setup: useThemePack,
         template: `
           <span class="persona-avatar" :class="{'persona-avatar--default':!src}" data-rphub-no-save>
             <img v-if="src" :src="src" alt="">
-            <theme-mascot v-else pose="poke-happy" alt=""></theme-mascot>
+            <theme-mascot v-else-if="mascots" pose="poke-happy" alt=""></theme-mascot>
+            <icon v-else name="User"/>
           </span>`
     };
     const BackupPage = {
@@ -669,6 +677,7 @@
         props: { blocked: Boolean },
         setup(props) {
             const updates = window.RPUpdates, state = updates.state;
+            const themePack = useThemePack();
             const isIosApp = location.protocol === 'rplocal:' || !!window.webkit?.messageHandlers?.rplocal;
             const dialog = ref(null), ready = ref(false), imageFailed = ref(false);
             const sync = () => {
@@ -678,7 +687,7 @@
             };
             const finish = () => { ready.value = true; };
             watch([ready, () => props.blocked, () => state.showNotice], sync, { flush: 'post' });
-            watch(() => state.mascot, () => { imageFailed.value = false; });
+            watch([() => state.mascot, themePack.variant], () => { imageFailed.value = false; });
             onMounted(() => {
                 if (window.__rpDataReady && !document.querySelector('.entry-transition')) finish();
                 window.addEventListener('rp:startup-finished', finish, { once: true });
@@ -688,7 +697,7 @@
                 dialog.value?.close();
             });
             const dismiss = () => { updates.dismiss(); dialog.value.close(); };
-            return { updates, state, dialog, imageFailed, dismiss, isIosApp,
+            return { updates, state, dialog, imageFailed, dismiss, isIosApp, ...themePack,
                 trapFocus: useDialogFocus(() => state.showNotice && !props.blocked, '.update-notice'),
                 closed: () => { if (!props.blocked && state.showNotice) updates.dismiss(); },
                 busy: computed(() => ['checking', 'downloading', 'verifying'].includes(state.phase)),
@@ -707,7 +716,7 @@
               <button type="button" class="update-notice-close" aria-label="关闭更新提醒" title="关闭更新提醒"
                 @click="dismiss" autofocus><icon name="X"/></button>
               <div class="update-notice-art" aria-hidden="true">
-                <img v-if="!imageFailed" :src="'assets/images/updates/' + state.mascot + '.webp'"
+                <img v-if="mascots && !imageFailed" :src="variant.update || 'assets/images/updates/' + state.mascot + '.webp'"
                   alt="" width="720" height="540" data-rphub-no-save @error="imageFailed = true">
                 <icon v-else name="BellRing"/>
               </div>
@@ -980,6 +989,7 @@
             watch(() => props.show, show => { document.getElementById('app').inert = show; });
             onBeforeUnmount(() => { document.getElementById('app').inert = false; });
             return {
+                ...useThemePack(),
                 notes: window.RPReleaseNotes.notes,
                 trapFocus: useDialogFocus(() => props.show, '.release-notice')
             };
@@ -991,7 +1001,7 @@
                 @keydown.esc.stop.prevent="$emit('close')" @keydown="trapFocus">
                 <section class="release-notice" role="dialog" aria-modal="true" aria-labelledby="release-title">
                   <header class="release-header">
-                    <div><h2 id="release-title">{{notes.title}}</h2><p>RP-Local {{notes.version}} <span>与 {{notes.baseline}} 对照</span></p></div>
+                    <div><h2 id="release-title">{{mascots ? notes.title : '更新公告'}}</h2><p>RP-Local {{notes.version}} <span>与 {{notes.baseline}} 对照</span></p></div>
                     <button type="button" class="release-close" aria-label="关闭更新公告" title="关闭更新公告" @click="$emit('close')"><icon name="X"/></button>
                   </header>
                   <div class="release-reading" tabindex="0" role="region" aria-label="更新内容">
@@ -1000,8 +1010,8 @@
                       <competition-list v-if="section.events" compact @select="$emit('event',$event)"></competition-list>
                     </section>
                   </div>
-                  <footer class="release-footer">
-                    <img src="assets/images/announcements/secretary.webp" alt="戴圆眼镜的秘书装玥玥，拿教鞭指向上方公告" class="release-mascot" data-rphub-no-save>
+                  <footer v-if="mascots" class="release-footer">
+                    <img :src="announcementArt" alt="" class="release-mascot" data-rphub-no-save>
                   </footer>
                 </section>
               </div>

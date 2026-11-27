@@ -9,6 +9,16 @@
     opacity: 1;
     visibility: visible;
 }
+.entry-transition-brand { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+.entry-transition-book { position: relative; width: 80px; height: 60px; margin-bottom: 26px; color: var(--shell-accent, #6366f1); perspective: 275px; }
+.entry-transition-book svg { display: block; width: 100%; height: 100%; }
+.entry-transition-book path[fill] { fill: var(--shell-surface, #fff); }
+.entry-transition-book .entry-book-page { position: absolute; left: 50%; top: 0; width: 43.75%; height: 100%; overflow: visible; transform-origin: left center; animation: entry-page-turn 1.2s cubic-bezier(.45,0,.35,1) infinite; }
+.entry-transition-logo { display: inline-flex; align-items: baseline; gap: .55rem; line-height: 1; }
+.entry-logo-rp { font-size: 40px; font-weight: 600; letter-spacing: 0; }
+.entry-logo-hub { font-size: 28px; font-weight: 500; color: var(--shell-accent, #6366f1); letter-spacing: 0; }
+@keyframes entry-page-turn { 0% { opacity: 0; transform: rotateY(0deg); } 12%,80% { opacity: 1; } 100% { opacity: 0; transform: rotateY(-180deg); } }
+@media (prefers-reduced-motion: reduce) { .entry-transition-book .entry-book-page { animation: none; } }
 .local-files-overlay, .local-files-preview {
     position: fixed; inset: 0; z-index: 10010; background: #0008;
     display: flex; justify-content: center; padding: 16px;

@@ -30,7 +30,7 @@ const fixture = () => ({
   databases: {
     RPHubDB: { store: [{ k: 'rp_hub_stream_probe', v: 'duplicate-database-must-not-win' }] },
     sf_moments_db: { moments: [{ k: 'list', v: [{ content: '名场面正文' }] }] },
-  }, webStorage: { localStorage: { 'stream-pref': 'web-fallback' } },
+  }, webStorage: { localStorage: { 'stream-pref': 'web-fallback', 'rphub-ui-pack': 'chenyue' } },
 });
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -302,7 +302,8 @@ const fixture = () => ({
       await stage();
       for (const [width, height] of [[360,640],[390,844],[844,390],[1280,900]]) {
         await page.setViewportSize({ width, height });
-        await page.locator('.transfer-mascot').evaluate(image => image.decode());
+        if (skin === 'classic') assert.equal(await page.locator('.transfer-mascot').count(), 0);
+        else await page.locator('.transfer-mascot').evaluate(image => image.decode());
         await page.waitForTimeout(250);
         await page.screenshot({ path: path.join(transferEvidence, `import-${skin}-${theme}-${width}.png`), fullPage: true });
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow ${width}/${skin}/${theme}`);
@@ -327,7 +328,7 @@ const fixture = () => ({
         chat: await get('chat_stream-new'), memory: await get('classic_memories_stream-new'),
         deleted: await get('classic_memories_deleted'), meta: await get('b1_memory_state_stream-new'),
         deletedState: await RPHubStorage.readMemoryState('deleted'),
-        probe: await get('stream_probe'), pref: localStorage.getItem('stream-pref'),
+        probe: await get('stream_probe'), pref: localStorage.getItem('stream-pref'), skin: RPThemePacks.current,
         presetGroups: await get('preset_groups'),
         binary: binary.image instanceof Blob ? Array.from(new Uint8Array(await binary.image.arrayBuffer())) : null,
         files: Object.values(__qaNativeFiles).filter(file => file.text?.includes('流式测试卡')).length,
@@ -341,6 +342,7 @@ const fixture = () => ({
     assert.match(restored.meta.revision, /^[a-f0-9]{32}$/);
     assert.notEqual(restored.meta.revision, revision);
     assert.equal(restored.probe, 'last'); assert.equal(restored.pref, 'entry-wins');
+    assert.equal(restored.skin, 'chenyue', 'Restored skin preference must apply after reload');
     assert.deepEqual(restored.presetGroups, ['STA1N官方分组', '流式恢复的空组']);
     assert.deepEqual(restored.binary, [1, 2, 3]); assert.ok(restored.files > 0);
     await backup();

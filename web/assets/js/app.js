@@ -16832,7 +16832,7 @@ const app = createApp({
             box.className = 'transfer-dialog';
             box.tabIndex = -1;
             box.innerHTML = [
-                '<img class="transfer-mascot" src="', window.RPThemePacks.asset('transfer'), '" alt="" aria-hidden="true">',
+                window.RPThemePacks.mascots ? '<img class="transfer-mascot" src="' + window.RPThemePacks.asset('transfer') + '" alt="" aria-hidden="true">' : '',
                 '<h3>导出聊天记录</h3><p class="transfer-filename">',
                 String((char && char.name) || '当前角色').replace(/[<>&]/g, ''),
                 '</p>',

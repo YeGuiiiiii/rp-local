@@ -23843,19 +23843,22 @@ return function render(_ctx, _cache) {
 })();
 window.RPCompiledRenders.ThemeMascot = (function () {
 const _Vue = Vue
-const {  } = _Vue
+const { createCommentVNode: _createCommentVNode } = _Vue
 
 const _hoisted_1 = ["src", "alt"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { openBlock: _openBlock, createElementBlock: _createElementBlock } = _Vue
+    const { openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode } = _Vue
 
-    return (_openBlock(), _createElementBlock("img", {
-      src: source,
-      alt: alt,
-      "data-rphub-no-save": ""
-    }, null, 8 /* PROPS */, _hoisted_1))
+    return source
+      ? (_openBlock(), _createElementBlock("img", {
+          key: 0,
+          src: source,
+          alt: alt,
+          "data-rphub-no-save": ""
+        }, null, 8 /* PROPS */, _hoisted_1))
+      : _createCommentVNode("v-if", true)
   }
 }
 })();
@@ -23871,35 +23874,38 @@ return function render(_ctx, _cache) {
 
     const _component_theme_mascot = _resolveComponent("theme-mascot")
 
-    return (_openBlock(), _createElementBlock("button", {
-      ref: "target",
-      type: "button",
-      class: "yy-poke-mascot",
-      "aria-label": "戳戳玥玥",
-      title: "戳戳玥玥",
-      onClick: _withModifiers(poke, ["stop"])
-    }, [
-      _createVNode(_component_theme_mascot, {
-        pose: emotion ? 'poke-'+emotion : pose,
-        alt: ""
-      }, null, 8 /* PROPS */, ["pose"]),
-      (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
-        _createVNode(_Transition, { name: "yy-speech" }, {
-          default: _withCtx(() => [
-            (speech && active)
-              ? (_openBlock(), _createElementBlock("p", {
-                  key: 0,
-                  class: "yy-mascot-speech",
-                  role: "status",
-                  "aria-live": "polite",
-                  style: _normalizeStyle(position)
-                }, _toDisplayString(speech), 5 /* TEXT, STYLE */))
-              : _createCommentVNode("v-if", true)
-          ]),
-          _: 1 /* STABLE */
-        })
-      ]))
-    ], 8 /* PROPS */, _hoisted_1))
+    return mascots
+      ? (_openBlock(), _createElementBlock("button", {
+          key: 0,
+          ref: "target",
+          type: "button",
+          class: "yy-poke-mascot",
+          "aria-label": "戳戳玥玥",
+          title: "戳戳玥玥",
+          onClick: _withModifiers(poke, ["stop"])
+        }, [
+          _createVNode(_component_theme_mascot, {
+            pose: emotion ? 'poke-'+emotion : pose,
+            alt: ""
+          }, null, 8 /* PROPS */, ["pose"]),
+          (_openBlock(), _createBlock(_Teleport, { to: "body" }, [
+            _createVNode(_Transition, { name: "yy-speech" }, {
+              default: _withCtx(() => [
+                (speech && active)
+                  ? (_openBlock(), _createElementBlock("p", {
+                      key: 0,
+                      class: "yy-mascot-speech",
+                      role: "status",
+                      "aria-live": "polite",
+                      style: _normalizeStyle(position)
+                    }, _toDisplayString(speech), 5 /* TEXT, STYLE */))
+                  : _createCommentVNode("v-if", true)
+              ]),
+              _: 1 /* STABLE */
+            })
+          ]))
+        ], 8 /* PROPS */, _hoisted_1))
+      : _createCommentVNode("v-if", true)
   }
 }
 })();
@@ -24642,6 +24648,7 @@ return function render(_ctx, _cache) {
     const { openBlock: _openBlock, createElementBlock: _createElementBlock, createCommentVNode: _createCommentVNode, resolveComponent: _resolveComponent, createBlock: _createBlock, normalizeClass: _normalizeClass } = _Vue
 
     const _component_theme_mascot = _resolveComponent("theme-mascot")
+    const _component_icon = _resolveComponent("icon")
 
     return (_openBlock(), _createElementBlock("span", {
       class: _normalizeClass(["persona-avatar", {'persona-avatar--default':!src}]),
@@ -24653,11 +24660,16 @@ return function render(_ctx, _cache) {
             src: src,
             alt: ""
           }, null, 8 /* PROPS */, _hoisted_1))
-        : (_openBlock(), _createBlock(_component_theme_mascot, {
-            key: 1,
-            pose: "poke-happy",
-            alt: ""
-          }))
+        : mascots
+          ? (_openBlock(), _createBlock(_component_theme_mascot, {
+              key: 1,
+              pose: "poke-happy",
+              alt: ""
+            }))
+          : (_openBlock(), _createBlock(_component_icon, {
+              key: 2,
+              name: "User"
+            }))
     ], 2 /* CLASS */))
   }
 }
@@ -25405,10 +25417,10 @@ return function render(_ctx, _cache) {
                 _createVNode(_component_icon, { name: "X" })
               ], 8 /* PROPS */, _hoisted_2),
               _createElementVNode("div", _hoisted_3, [
-                (!imageFailed)
+                (mascots && !imageFailed)
                   ? (_openBlock(), _createElementBlock("img", {
                       key: 0,
-                      src: 'assets/images/updates/' + state.mascot + '.webp',
+                      src: variant.update || 'assets/images/updates/' + state.mascot + '.webp',
                       alt: "",
                       width: "720",
                       height: "540",
@@ -25977,6 +25989,11 @@ const _hoisted_6 = {
   "aria-label": "更新内容"
 }
 const _hoisted_7 = { key: 0 }
+const _hoisted_8 = {
+  key: 0,
+  class: "release-footer"
+}
+const _hoisted_9 = ["src"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -26002,7 +26019,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("section", _hoisted_2, [
                   _createElementVNode("header", _hoisted_3, [
                     _createElementVNode("div", null, [
-                      _createElementVNode("h2", _hoisted_4, _toDisplayString(notes.title), 1 /* TEXT */),
+                      _createElementVNode("h2", _hoisted_4, _toDisplayString(mascots ? notes.title : '更新公告'), 1 /* TEXT */),
                       _createElementVNode("p", null, [
                         _createTextVNode("RP-Local " + _toDisplayString(notes.version) + " ", 1 /* TEXT */),
                         _createElementVNode("span", null, "与 " + _toDisplayString(notes.baseline) + " 对照", 1 /* TEXT */)
@@ -26038,14 +26055,16 @@ return function render(_ctx, _cache) {
                       ]))
                     }), 128 /* KEYED_FRAGMENT */))
                   ]),
-                  _cache[0] || (_cache[0] = _createElementVNode("footer", { class: "release-footer" }, [
-                    _createElementVNode("img", {
-                      src: "assets/images/announcements/secretary.webp",
-                      alt: "戴圆眼镜的秘书装玥玥，拿教鞭指向上方公告",
-                      class: "release-mascot",
-                      "data-rphub-no-save": ""
-                    })
-                  ], -1 /* CACHED */))
+                  mascots
+                    ? (_openBlock(), _createElementBlock("footer", _hoisted_8, [
+                        _createElementVNode("img", {
+                          src: announcementArt,
+                          alt: "",
+                          class: "release-mascot",
+                          "data-rphub-no-save": ""
+                        }, null, 8 /* PROPS */, _hoisted_9)
+                      ]))
+                    : _createCommentVNode("v-if", true)
                 ])
               ], 40 /* PROPS, NEED_HYDRATION */, _hoisted_1))
             : _createCommentVNode("v-if", true)
@@ -26426,25 +26445,25 @@ const _hoisted_3 = ["onKeydown"]
 const _hoisted_4 = ["aria-label", "onClick"]
 const _hoisted_5 = ["src"]
 const _hoisted_6 = {
-  key: 1,
+  key: 2,
   class: "transfer-filename"
 }
 const _hoisted_7 = {
-  key: 2,
+  key: 3,
   style: {"margin":"8px 0 12px","padding":"10px 12px","border-radius":"10px","border":"1px solid #f0c2a8","background":"#fff7f1","text-align":"left"}
 }
 const _hoisted_8 = { style: {"font-size":"12px","color":"#7c2d12","line-height":"1.6","margin":"0","word-break":"break-all"} }
 const _hoisted_9 = ["value", "aria-label"]
 const _hoisted_10 = {
-  key: 4,
-  class: "transfer-progress-meta"
-}
-const _hoisted_11 = {
   key: 5,
   class: "transfer-progress-meta"
 }
-const _hoisted_12 = {
+const _hoisted_11 = {
   key: 6,
+  class: "transfer-progress-meta"
+}
+const _hoisted_12 = {
+  key: 7,
   role: "status"
 }
 const _hoisted_13 = {
@@ -26452,21 +26471,21 @@ const _hoisted_13 = {
   style: {"color":"#9ca3af"}
 }
 const _hoisted_14 = {
-  key: 7,
+  key: 8,
   role: "alert",
   class: "transfer-error"
 }
 const _hoisted_15 = {
-  key: 8,
+  key: 9,
   class: "transfer-error transfer-error-path"
 }
 const _hoisted_16 = { key: 0 }
 const _hoisted_17 = {
-  key: 9,
+  key: 10,
   class: "transfer-summary"
 }
 const _hoisted_18 = {
-  key: 10,
+  key: 11,
   style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #e5e7eb","background":"#f9fafb","text-align":"left"}
 }
 const _hoisted_19 = { style: {"font-size":"12px","color":"#374151","cursor":"pointer","line-height":"1.6"} }
@@ -26482,34 +26501,34 @@ const _hoisted_27 = {
   style: {"font-size":"11px","color":"#1d4ed8","line-height":"1.5","margin":"6px 0 0"}
 }
 const _hoisted_28 = {
-  key: 11,
+  key: 12,
   style: {"margin":"8px 0","padding":"10px 12px","border":"1px solid #e5e7eb","border-radius":"10px","background":"#f9fafb","text-align":"left"}
 }
 const _hoisted_29 = { style: {"font-size":"12px","font-weight":"600","color":"#374151","margin":"0 0 4px"} }
 const _hoisted_30 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#374151"} }
 const _hoisted_31 = ["onUpdate:modelValue"]
 const _hoisted_32 = {
-  key: 12,
+  key: 13,
   style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #d7e3f4","background":"#f4f8ff","text-align":"left"}
 }
 const _hoisted_33 = { style: {"font-size":"12px","color":"#1e3a8a","line-height":"1.6","margin":"0"} }
 const _hoisted_34 = {
-  key: 13,
+  key: 14,
   class: "transfer-warning"
 }
 const _hoisted_35 = {
-  key: 14,
+  key: 15,
   class: "transfer-actions"
 }
 const _hoisted_36 = ["onClick"]
 const _hoisted_37 = ["onClick"]
 const _hoisted_38 = {
-  key: 15,
+  key: 16,
   class: "transfer-actions"
 }
 const _hoisted_39 = ["onClick"]
 const _hoisted_40 = {
-  key: 16,
+  key: 17,
   class: "transfer-actions"
 }
 const _hoisted_41 = ["onClick"]
@@ -26562,13 +26581,16 @@ return function render(_ctx, _cache) {
                       _createVNode(_component_shell_icon, { name: "X" })
                     ], 8 /* PROPS */, _hoisted_4))
                   : _createCommentVNode("v-if", true),
-                _createElementVNode("img", {
-                  class: "transfer-mascot",
-                  src: art,
-                  alt: "",
-                  "aria-hidden": "true",
-                  draggable: "false"
-                }, null, 8 /* PROPS */, _hoisted_5),
+                art
+                  ? (_openBlock(), _createElementBlock("img", {
+                      key: 1,
+                      class: "transfer-mascot",
+                      src: art,
+                      alt: "",
+                      "aria-hidden": "true",
+                      draggable: "false"
+                    }, null, 8 /* PROPS */, _hoisted_5))
+                  : _createCommentVNode("v-if", true),
                 _createElementVNode("h3", null, _toDisplayString(external ? task.title : state.phase === 'recovery' ? '请重新打开软件完成恢复' : state.phase === 'ready' ? '备份已准备好' : state.phase === 'select' ? '选择要导入的内容' : state.phase === 'failed' ? '这次没有导入成功' : state.phase === 'cancelled' ? '已取消导入' : '导入备份'), 1 /* TEXT */),
                 (!external)
                   ? (_openBlock(), _createElementBlock("p", _hoisted_6, _toDisplayString(state.name), 1 /* TEXT */))
@@ -26582,7 +26604,7 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true),
                 (external || ['reading','ready','applying','success'].includes(state.phase))
                   ? (_openBlock(), _createElementBlock("progress", {
-                      key: 3,
+                      key: 4,
                       value: percent,
                       max: "100",
                       "aria-label": external ? '备份进度' : '文件读取进度'

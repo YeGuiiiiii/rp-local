@@ -153,7 +153,8 @@ fs.mkdirSync(output, { recursive: true });
         await page.evaluate(() => __qa.navigateWorkspace('characters'));
         await capture('classic-night-mobile');
         await page.evaluate(() => __qa.openAnnouncement());
-        await page.getByRole('dialog', { name: '玥玥的更新简报' }).waitFor();
+        await page.getByRole('dialog', { name: '更新公告', exact: true }).waitFor();
+        assert.equal(await page.locator('.release-mascot').count(), 0, 'Classic announcement has no persona illustration');
         const notice = await page.locator('.release-reading').innerText();
         for (const section of await page.evaluate(() => RPReleaseNotes.notes.sections.filter(section => section.text))) {
             assert.ok(notice.includes(section.text), 'Announcement must show the current release content');

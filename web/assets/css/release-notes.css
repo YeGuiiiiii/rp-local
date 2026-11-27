@@ -71,3 +71,8 @@
     .release-enter-active,.release-enter-active .release-notice,.release-leave-active { transition: none; }
     .release-enter-from .release-notice { transform: none; }
 }
+:root[data-ui-mascots="false"] .release-overlay {
+    --yy-ink: var(--shell-text); --yy-paper: var(--shell-surface); --yy-field: var(--shell-bg);
+    --yy-muted: var(--shell-muted); --yy-rose: var(--shell-accent); --yy-line: var(--shell-line);
+}
+:root[data-ui-mascots="false"] .release-reading { padding-bottom: 24px; scroll-padding-bottom: 24px; }

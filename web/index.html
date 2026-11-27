@@ -94,7 +94,7 @@
         }
     </style>
 </head>
-<body class="chenyue-theme bg-gray-50 text-gray-900 font-sans selection:bg-primary-200 selection:text-primary-900">
+<body class="bg-gray-50 text-gray-900 font-sans selection:bg-primary-200 selection:text-primary-900">
     <!-- THESIS: Yueyue's night wardrobe becomes a usable vampire reading interface.
     OWN-WORLD: charcoal bookcloth, wine-red lining, pearl text and silver crescent clasps.
     STORY: choose a saved UI with its matching display mode and palette; work through familiar controls.
@@ -184,7 +184,7 @@
             if (done) { return; }
             if (window.__rpDataError && msg && retry) {
                 var failedMascot = splash && splash.querySelector('.startup-mascot');
-                if (failedMascot && failedMascot.dataset.failed !== '1') {
+                if (window.RPThemePacks.mascots && failedMascot && failedMascot.dataset.failed !== '1') {
                     failedMascot.dataset.failed = '1';
                     failedMascot.dataset.uiMascot = 'confused';
                     failedMascot.src = window.RPThemePacks.asset('confused');
@@ -198,13 +198,11 @@
             }
             if (isReady()) {
                 var mascot = splash && splash.querySelector('.startup-mascot');
-                if (mascot && mascot.dataset.ready !== '1') {
+                if (window.RPThemePacks.mascots && mascot && mascot.dataset.ready !== '1') {
                     mascot.dataset.ready = '1';
                     var moods = ['welcome', 'album', 'peek'];
                     var mood = moods[Math.floor(start / 1000) % moods.length];
-                    mascot.src = (window.RPThemePacks && typeof window.RPThemePacks.asset === 'function')
-                        ? window.RPThemePacks.asset(mood)
-                        : ('assets/images/chenyue/' + mood + '.webp');
+                    mascot.src = window.RPThemePacks.asset(mood);
                     mascot.alt = '欢迎回来的自设小伙伴';
                     mascot.classList.remove('is-loading');
                     splash.classList.add('is-ready');
@@ -271,16 +269,41 @@
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
     })();
     </script>
-    <div class="entry-transition rphub-splash-hold startup-home" role="status" aria-label="启动欢迎页">
+    <template id="persona-startup">
         <div class="startup-brand">RP<span>记录每一次相遇</span></div>
         <div class="startup-main">
-            <img class="startup-mascot is-loading" data-ui-mascot="transfer" src="assets/images/chenyue/transfer.webp" alt="正在整理故事的玥玥">
+            <img class="startup-mascot is-loading" data-ui-mascot="transfer" alt="正在整理故事的玥玥">
             <p class="startup-eyebrow">欢迎回来</p>
             <h1>今天，也有新故事。</h1>
             <div class="startup-progress" aria-hidden="true"><span></span></div>
         </div>
         <div class="startup-footer">慢慢来，故事会等你。</div>
+    </template>
+    <div class="entry-transition rphub-splash-hold" role="status" aria-label="启动欢迎页">
+        <div class="entry-transition-brand">
+            <div class="entry-transition-book">
+                <svg viewBox="0 0 64 48" fill="none" aria-hidden="true">
+                    <path d="M4 8q14-6 28 0 14-6 28 0v34q-14-6-28 0-14-6-28 0Z" fill="#f6f9fe" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                    <path d="M32 8v34" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M10 16q8-3 16 0m-16 7q8-3 16 0m-16 7q8-3 12-1m16-13q8-3 16 0m-16 7q8-3 16 0m-16 7q8-3 12-1" stroke="currentColor" stroke-opacity=".3" stroke-linecap="round" />
+                </svg>
+                <svg class="entry-book-page" viewBox="0 0 28 48" fill="none" aria-hidden="true">
+                    <path d="M0 8q14-6 28 0v34q-14-6-28 0Z" fill="#f6f9fe" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                    <path d="M6 16q8-3 16 0m-16 7q8-3 16 0m-16 7q8-3 12-1" stroke="currentColor" stroke-opacity=".3" stroke-linecap="round" />
+                </svg>
+            </div>
+            <div class="entry-transition-logo"><span class="entry-logo-rp">RP</span><span class="entry-logo-hub">HUB</span></div>
+        </div>
     </div>
+    <script>
+        if (window.RPThemePacks.mascots) {
+            var startup = document.querySelector('.entry-transition');
+            startup.classList.add('startup-home');
+            startup.replaceChildren(document.getElementById('persona-startup').content.cloneNode(true));
+            startup.querySelector('.startup-mascot').src = window.RPThemePacks.asset('transfer');
+            document.body.classList.add('chenyue-theme');
+        }
+    </script>
     <small id="app-version-marker" class="app-version-marker">版本 <script>document.write(window.RP_LOCAL_VERSION || '未知')</script></small>
 
         <style id="rphub-island-flex-fix">

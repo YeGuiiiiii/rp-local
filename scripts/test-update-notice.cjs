@@ -89,11 +89,17 @@ fs.mkdirSync(output, { recursive: true });
             }, { skin, mode, mascot });
             await popup.waitFor();
             const img = popup.locator('img');
-            await img.evaluate(el => el.complete && el.naturalWidth ? Promise.resolve() : new Promise((resolve, reject) => {
-                el.onload = resolve; el.onerror = reject;
-            }));
-            assert.ok((await img.getAttribute('src')).endsWith(mascot + '.webp'), 'Each opening uses one of the two random illustrations');
-            assert.equal(await img.evaluate(el => RPImagePolicy.isContentImage(el)), false, 'Software illustrations are excluded from player downloads');
+            if (skin === 'classic') {
+                assert.equal(await img.count(), 0, 'Classic updates use a neutral icon');
+                assert.equal(await popup.locator('.update-notice-art > svg').count(), 1);
+            } else {
+                await img.evaluate(el => el.complete && el.naturalWidth ? Promise.resolve() : new Promise((resolve, reject) => {
+                    el.onload = resolve; el.onerror = reject;
+                }));
+                assert.ok((await img.getAttribute('src')).endsWith(skin === 'winter' ? '/mascots/welcome.webp' : mascot + '.webp'),
+                    'Update illustration belongs to the chosen skin');
+                assert.equal(await img.evaluate(el => RPImagePolicy.isContentImage(el)), false, 'Software illustrations are excluded from player downloads');
+            }
             const box = await popup.boundingBox();
             assert.ok(box.width <= 300 && box.height <= 380, 'The reminder is a small popup');
             assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1,
@@ -127,7 +133,7 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await page.evaluate(() => RPUpdates.state.phase), 'error');
         failure = false; imageFailure = true;
         await load();
-        await page.evaluate(() => { __qa.showUserSetupModal = false; __qa.closeAnnouncement(); return RPUpdates.check(); });
+        await page.evaluate(() => { __qa.showUserSetupModal = false; __qa.closeAnnouncement(); RPThemePacks.set('chenyue'); return RPUpdates.check(); });
         await popup.waitFor();
         await page.waitForFunction(() => !!document.querySelector('.update-notice-art > svg'));
         assert.equal(await popup.getByRole('button', { name: '下载更新', exact: true }).isEnabled(), true, 'An image failure does not block updating or closing');
@@ -144,7 +150,7 @@ fs.mkdirSync(output, { recursive: true });
                 await load();
                 await page.evaluate(async mascot => {
                     __qa.showUserSetupModal = false; __qa.closeAnnouncement();
-                    RPThemePacks.set('classic');
+                    RPThemePacks.set('chenyue');
                     if (RPThemePacks.mode !== 'day') RPThemePacks.toggleMode();
                     const random = Math.random;
                     Math.random = () => mascot === 'yueyue' ? .1 : .9;
