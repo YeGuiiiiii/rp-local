@@ -790,6 +790,7 @@
             });
             // 在业务层 JSON/模板校验之前记账；部分流式响应后中止也不会漏掉已返回的用量。
             if (receivedPayload) options.onUsage?.(result.usage, {
+                attempt,
                 isStream: result.isStream, durationMs: Date.now() - startedAt,
                 outputCharacters: [...calls.values()].reduce((sum, call) => sum + call.function.arguments.length, 0) + plainContent.length + result.reasoning.length
             });

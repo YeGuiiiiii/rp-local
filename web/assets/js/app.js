@@ -4901,6 +4901,7 @@ const app = createApp({
             toast: (...args) => showToast(...args)
         });
         const requestTrackedChatCompletion = (options, type) => {
+            const reportHeat = window.RPHForumHeat?.capture(currentCharacter.value?.rphForumHeat, 'rplocal');
             const apiUrl = settings.apiUrl;
             const request = { url: buildApiEndpoint(apiUrl, 'chat/completions'), apiKey: settings.apiKey, ...options };
             // 2.7.87：url 被 options 覆盖成模板专用站后，统计口径要跟着走，
@@ -4908,9 +4909,10 @@ const app = createApp({
         const usageApiUrl = String(request.url || apiUrl)
             .replace(/\/+$/, '')
             .replace(/\/(?:chat\/completions|models|embeddings)$/i, '') || apiUrl;
-        return requestChatCompletion({ ...request, onUsage: (usage, metrics) => recordApiUsage(usage, {
-                type, model: request.model, apiUrl: usageApiUrl, apiKey: request.apiKey, ...metrics
-            }) });
+        return requestChatCompletion({ ...request, onUsage: (usage, metrics) => {
+                void reportHeat?.(normalizeApiUsage(usage), metrics.attempt);
+                return recordApiUsage(usage, { type, model: request.model, apiUrl: usageApiUrl, apiKey: request.apiKey, ...metrics });
+            } });
         };
         const {
             cloudBackup,
@@ -13809,6 +13811,7 @@ const app = createApp({
         };
 
         const requestMemoryEmbeddings = async (inputs, signal, model = getMemoryEmbeddingModel()) => {
+            const reportHeat = window.RPHForumHeat?.capture(currentCharacter.value?.rphForumHeat, 'rplocal');
             if (!getMemoryApiEndpoint('embeddings') || !getMemoryApiKey()) throw new Error('请先配置 API 地址和 Key');
             if (!model) throw new Error('请先选择向量模型');
 
@@ -13829,6 +13832,7 @@ const app = createApp({
                 const usageApiUrl = String(apiUrl || '')
                     .replace(/\/+$/, '')
                     .replace(/\/(?:chat\/completions|models|embeddings)$/i, '') || apiUrl;
+                void reportHeat?.(normalizeApiUsage(getApiUsagePayload(data)));
                 recordApiUsage(getApiUsagePayload(data), {
                     type: 'embedding', model, apiUrl: usageApiUrl, apiKey, isStream: false,
                     durationMs: Date.now() - requestStartedAt, outputCharacters: 0
@@ -16407,6 +16411,7 @@ const app = createApp({
             const char = {
                 name: imported.name,
                 importedName: imported.name,
+                ...(window.RPHForumHeat?.valid(rawData?.rphForumHeat) ? {rphForumHeat:rawData.rphForumHeat} : {}),
                 description: imported.description,
                 first_mes: imported.first_mes,
                 avatar: avatarUrl || defaultAvatar,
