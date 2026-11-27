@@ -15,7 +15,7 @@ fs.mkdirSync(output, { recursive: true });
     page.on('pageerror', error => errors.push(error.message));
     await context.route('**/*', route => {
         const url = new URL(route.request().url());
-        if (['rphforum.zeabur.app', 'wxdt.duckdns.org'].includes(url.hostname))
+        if (['rphub.nanamirui.eu.cc', 'wxdt.duckdns.org'].includes(url.hostname))
             return route.fulfill({ contentType: 'text/html', body: '<!doctype html><h1>Online fixture</h1>' });
         if (url.origin !== 'https://sta1n156.github.io') return route.abort();
         const file = path.resolve(web, url.pathname.slice('/RP-Hub/'.length) || 'index.html');
