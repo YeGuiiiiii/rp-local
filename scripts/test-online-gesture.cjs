@@ -15,7 +15,7 @@ fs.mkdirSync(output, { recursive: true });
     page.on('pageerror', error => errors.push(error.message));
     await context.route('**/*', route => {
         const url = new URL(route.request().url());
-        if (['rphub.nanamirui.eu.cc', 'wxdt.duckdns.org'].includes(url.hostname))
+        if (['rphforum.zeabur.app', 'wxdt.duckdns.org'].includes(url.hostname))
             return route.fulfill({ contentType: 'text/html', body: '<!doctype html><h1>Online fixture</h1>' });
         if (url.origin !== 'https://sta1n156.github.io') return route.abort();
         const file = path.resolve(web, url.pathname.slice('/RP-Hub/'.length) || 'index.html');
@@ -91,10 +91,21 @@ fs.mkdirSync(output, { recursive: true });
         await touch('touchMove', await center(option('万相广场')));
         await page.waitForFunction(() => document.querySelector('.shell-online-choice.is-target')?.getAttribute('aria-label') === '万相广场');
         await touch('touchEnd'); await closed('square');
+        assert.equal(await page.evaluate(() => new URL(__qa.squareUrl).origin), 'https://rphforum.zeabur.app');
         await page.evaluate(() => window.rphubHandleBack());
         assert.equal(await page.evaluate(() => __qa.currentView), 'square');
         await page.evaluate(() => window.rphubHandleBack());
         assert.equal(await page.evaluate(() => __qa.currentView), 'settings', 'Online page returns to the caller');
+        await page.evaluate(() => __qa.navigateWorkspace('square'));
+        await page.waitForFunction(() => !__qa.isSquareLoading);
+        assert.equal(await page.evaluate(() => new URL(__qa.squareUrl).origin), 'https://rphforum.zeabur.app',
+            'Reopening the square keeps the original forum');
+        await page.evaluate(() => __qa.navigateWorkspace('settings'));
+        await page.evaluate(() => rphubOpenSquare('https://rphforum.zeabur.app/posts/test?from=app'));
+        await page.waitForFunction(() => !__qa.isSquareLoading);
+        assert.equal(await page.evaluate(() => __qa.squareUrl), 'https://rphforum.zeabur.app/posts/test?from=app',
+            'Native square links preserve the post path and query');
+        await page.evaluate(() => __qa.navigateWorkspace('settings'));
         await hold(); await touch('touchMove', { x: 35, y: 100 }); await touch('touchEnd'); await closed();
         await hold(); await touch('touchMove', await center(option('灯塔')));
         await touch('touchCancel'); await closed();
