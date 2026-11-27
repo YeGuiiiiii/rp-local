@@ -1,4 +1,8 @@
-RP Local 2.9.001 - personal preview build
+RP Local — attribution and distribution notices
+
+The project license accompanies this package in RP-Hub-LICENSE.txt.
+See local-site/NOTICES.txt for upstream credits and bundled software terms.
+The notes below describe the source and assets of the original preview build.
 
 RP-Hub: STA1N156, https://github.com/STA1N156/RP-Hub
 Original project license: Creative Commons Attribution-NonCommercial 4.0.

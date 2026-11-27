@@ -88,6 +88,9 @@
 
 ## 待处理或待证实
 
+- ~~U42 文档与分发：AKkzzzz，`ae6068b`。核对上游正文，补齐网页及客户端许可与第三方署名。build-stream、compile-ui、check-resources、iOS 资源准备和 Android 装配夹具均通过。~~
+- U42 权利来源待补证：增强版 2.8.80 / 2.8.118 APK 中独立新增的补丁、安卓外壳，以及部分供图、贴纸和宣传图所用第三方素材，应由维护者补充原作者、授权范围及可核对的出处。
+
 - U41：AKkzzzz，`ff33ad4`。广场 PNG / JSON 导入保留作品 ID。Chrome 已验证实际导出的 PNG 经角色库保存和切换后，延迟返回的 130 token 仍计入原卡。隔离广场已验证断网重传去重、未报告用量跳过。已通过网页构建。Android 正式包及真机验证待发版。
 
 - U40：AKkzzzz，分支 `feat/rph-square-domain`，修复 `3b83fb4`。首次打开和重新进入万相广场均指向 `https://rphub.nanamirui.eu.cc/`。Android 按 HTTPS 主机名分发新旧广场链接，保留深链。已运行 `node scripts/build-stream.cjs`、`node scripts/compile-ui.cjs`、`node scripts/test-online-gesture.cjs` 与 `node scripts/test-ui-boundaries.cjs`，均通过。Chrome 手机视口实测从在线入口两次加载新站，Android smali 已组装为 DEX。待签名新版在 Android 真机上核验广场入口及深链。

@@ -48,6 +48,7 @@ const aboutItems = find(about, node => node.tagName === 'ol').childNodes.filter(
 aboutItems[0].childNodes[0].value = '页面与补丁随安装包内置，按 RP-Hub 2.8.118 对照维护。';
 aboutItems.at(-1).childNodes[0].value = '更新公告：使用本地版公告，首次安装或更新后展示一次。设置 → 外观 → 皮肤可选择经典皮肤或玥玥经典皮肤，日夜可在倾斜反光下方或聊天菜单切换。';
 append(about, `<div class="classic-local-links"><button type="button" class="settings-action" @click="openAnnouncement">查看更新公告</button>
+    <a href="RP-Hub-LICENSE.txt" class="settings-action">项目许可全文</a> <a href="NOTICES.txt" class="settings-action">来源与第三方署名</a>
     <button type="button" class="settings-action" @click="openSettingsSection('appearance')">外观</button></div>`);
 const cardView = view(originalMain, 'characters');
 view(originalMain, 'chat').attrs.push({ name: 'v-if', value: 'hasOpenedChat' });
