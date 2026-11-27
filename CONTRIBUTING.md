@@ -56,4 +56,4 @@ Git Credential Manager 的 .NET 登录程序不支持 socks5 代理。若拉取�
 
 ## 许可
 
-沿用 CC BY-NC 4.0，保留 Roleplay Hub / STA1N156 及原增强版署名。第三方资源遵循各自许可。
+沿用 CC BY-NC 4.0，保留 Roleplay Hub / STA1N156 及原增强版署名。第三方资源遵循各自许可。引入或升级随包组件时，请核对该版本的版权、许可及 NOTICE 文件，在 [web/NOTICES.txt](web/NOTICES.txt) 更新声明。引入他人素材时请记录权利人、来源与允许的使用范围。

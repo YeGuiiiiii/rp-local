@@ -40,7 +40,7 @@ if (!$stagedSite.StartsWith($stagingRoot, [StringComparison]::OrdinalIgnoreCase)
 }
 if (Test-Path -LiteralPath $stagedSite) { Remove-Item -LiteralPath $stagedSite -Recurse -Force }
 Copy-Item -LiteralPath "$projectRoot\web" -Destination $stagedSite -Recurse
-Copy-Item -LiteralPath "$projectRoot\reference\RP-Hub\LICENSE" -Destination "$projectRoot\android\assets\RP-Hub-LICENSE.txt" -Force
+Copy-Item -LiteralPath "$projectRoot\LICENSE" -Destination "$projectRoot\android\assets\RP-Hub-LICENSE.txt" -Force
 & "$PSScriptRoot\compile-native.ps1"
 $unsigned = Join-Path $buildAlias ".tools\rp-local-$Version.apk"
 & $javaExe '-Dfile.encoding=UTF-8' -jar "$buildAlias\.tools\apktool.jar" b -f "$buildAlias\android" -o $unsigned
