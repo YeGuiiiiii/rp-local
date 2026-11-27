@@ -88,7 +88,7 @@
 
 ## 待处理或待证实
 
-- U40：AKkzzzz 认领，分支 `feat/rph-square-domain`。将广场入口迁移至 rphub.nanamirui.eu.cc，核对客户端内嵌导航、Android 链接分发和旧补丁兼容。
+- U40：AKkzzzz，分支 `feat/rph-square-domain`，修复 `3b83fb4`。首次打开和重新进入万相广场均指向 `https://rphub.nanamirui.eu.cc/`。Android 按 HTTPS 主机名分发新旧广场链接，保留深链。已运行 `node scripts/build-stream.cjs`、`node scripts/compile-ui.cjs`、`node scripts/test-online-gesture.cjs` 与 `node scripts/test-ui-boundaries.cjs`，均通过。Chrome 手机视口实测从在线入口两次加载新站，Android smali 已组装为 DEX。待签名新版在 Android 真机上核验广场入口及深链。
 
 以下项目除已注明认领者外均为**待认领**；认领时填写维护者和分支，不要同时修改同一入口。
 
