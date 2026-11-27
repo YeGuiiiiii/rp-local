@@ -7689,7 +7689,7 @@ const app = createApp({
 
         // Square State
         const isSquareLoading = ref(true);
-        const squareHomeUrl = 'https://rphub.nanamirui.eu.cc/';
+        const squareHomeUrl = 'https://rphforum.zeabur.app/';
         const squareUrl = ref(squareHomeUrl);
 
         let pendingSquareCustomUrl = '';

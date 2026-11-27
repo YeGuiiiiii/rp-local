@@ -25,7 +25,7 @@ fs.mkdirSync(evidence, { recursive: true });
   const fixture = fs.readFileSync(path.join(root, 'dist/app-icon.png'));
   await context.route('**/*', route => {
     const url = new URL(route.request().url());
-    if (['rphub.nanamirui.eu.cc', 'wxdt.duckdns.org'].includes(url.hostname)) {
+    if (['rphforum.zeabur.app', 'wxdt.duckdns.org'].includes(url.hostname)) {
       return route.fulfill({ contentType: 'text/html; charset=utf-8', body: '<!doctype html><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><h1>在线页面测试</h1><input placeholder="测试输入"><p>站点内容保持原样。</p>' });
     }
     if (url.hostname === 'story.test') return route.fulfill({
@@ -57,7 +57,7 @@ fs.mkdirSync(evidence, { recursive: true });
       const back = page.getByRole('button', { name: '返回本地版', exact: true });
       await back.waitFor();
       if (view === 'square' || view === 'lighthouse') {
-        await page.frameLocator(`iframe[src*="${view === 'square' ? 'rphub.nanamirui.eu.cc' : 'wxdt'}"]`).getByRole('heading', { name: '在线页面测试' }).waitFor();
+        await page.frameLocator(`iframe[src*="${view === 'square' ? 'rphforum.zeabur.app' : 'wxdt'}"]`).getByRole('heading', { name: '在线页面测试' }).waitFor();
         await page.waitForFunction(view => !__qa[view === 'square' ? 'isSquareLoading' : 'isLighthouseLoading'], view);
       }
       const buttonBox = await back.boundingBox();
