@@ -55,8 +55,8 @@ const dinerTemplate = backupPath && JSON.parse(fs.readFileSync(backupPath, 'utf8
             host.querySelector('.ui-template-render').append(frame);
             document.body.append(host);
         });
-        const colors = () => page.locator('#card-color-fixture iframe').evaluate(frame => {
-            const doc = frame.contentDocument, ink = doc.querySelector('#ink'), paper = doc.querySelector('.paper');
+        const colors = () => page.frameLocator('#card-color-fixture iframe').locator('body').evaluate(body => {
+            const doc = body.ownerDocument, ink = doc.querySelector('#ink'), paper = doc.querySelector('.paper');
             const style = getComputedStyle;
             return { ink: style(ink).color, paper: style(paper).backgroundColor };
         });

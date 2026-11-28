@@ -725,7 +725,7 @@
                                     class="absolute top-2 left-1/2 -translate-x-1/2 z-20 badge badge-error badge-outline font-bold shadow-sm bg-base-100">
                                     修改前</div>
                                 <iframe :srcdoc="originalPreviewHTML"
-                                    class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin"></iframe>
+                                    class="w-full h-full border-0" sandbox="allow-scripts"></iframe>
                             </div>
                             <div class="flex-1 flex-col h-full relative"
                                 :class="mobilePreviewMode === 'modified' ? 'flex' : 'hidden md:flex'">
@@ -733,7 +733,7 @@
                                     class="absolute top-2 left-1/2 -translate-x-1/2 z-20 badge badge-success badge-outline font-bold shadow-sm bg-base-100">
                                     修改后</div>
                                 <iframe v-if="previewHTML" :srcdoc="previewHTML" class="w-full h-full border-0"
-                                    sandbox="allow-scripts allow-same-origin"></iframe>
+                                    sandbox="allow-scripts"></iframe>
                             </div>
                         </template>
 
@@ -741,7 +741,7 @@
                         <template v-else>
                             <div class="w-full h-full">
                                 <iframe v-if="showPreview" :srcdoc="previewHTML" class="w-full h-full border-0"
-                                    sandbox="allow-scripts allow-same-origin"></iframe>
+                                    sandbox="allow-scripts"></iframe>
                             </div>
                         </template>
                     </div>
@@ -1710,6 +1710,12 @@ You are carrying out a fictional character card creation and editing task. Act a
                 // Main Settings Sync Listener
                 const setupSyncListener = () => {
                     window.addEventListener('message', (event) => {
+                        if (event.origin === 'null' && event.data?.type === 'WORKSHOP_PREVIEW_SLASH'
+                            && showPreview.value && event.data.channel === previewChannel
+                            && [...document.querySelectorAll('iframe[srcdoc]')].some(frame => frame.contentWindow === event.source)) {
+                            window.triggerSlash?.(String(event.data.text || ''));
+                            return;
+                        }
                         if (event.source !== window.parent || !event.data) return;
                         if (event.data.type === 'WORKSHOP_IMPORT_RESULT') {
                             isImporting.value = false;
@@ -2316,6 +2322,7 @@ You are carrying out a fictional character card creation and editing task. Act a
                     return processed;
                 };
 
+                const previewChannel = window.RPHubUtils.generateUUID();
                 const renderPreview = (text) => {
                     if (!text) return null;
                     const fullText = text;
@@ -2363,12 +2370,12 @@ You are carrying out a fictional character card creation and editing task. Act a
                     const scriptShim = `
                     <script>
                         window.triggerSlash = function(text) {
-                            if (window.parent && window.parent.triggerSlash) {
-                                window.parent.triggerSlash(text);
-                            } else {
-                                console.error("triggerSlash function not found in parent.");
-                            }
+                            parent.postMessage({type:'WORKSHOP_PREVIEW_SLASH',channel:${JSON.stringify(previewChannel)},text:String(text || '')}, '*');
                         };
+                        document.addEventListener('click', function(event) {
+                            var trigger = event.target.closest && event.target.closest('[data-slash]');
+                            if (trigger) { event.preventDefault();window.triggerSlash(trigger.getAttribute('data-slash')); }
+                        });
                     <\/script>
                 `;
 

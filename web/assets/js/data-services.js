@@ -3149,17 +3149,124 @@
         return output;
     };
 
-    const htmlIframeSandbox = 'allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-same-origin allow-downloads allow-pointer-lock allow-presentation allow-top-navigation-by-user-activation';
+    const htmlIframeSandbox = 'allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock allow-presentation';
+    let cardRuntime = 0, cardScope = '', cardRuntimeOptions = {};
+    const cardAppearances = new Map();
+    const savedCardHtmlCache = new Map();
+    const cardAppearanceProperties = {
+        background: ['background-color', '.chat-view-root'],
+        color: ['color', '.chat-view-root .markdown-body'],
+        fontFamily: ['font-family', '.chat-view-root .markdown-body'],
+        fontSize: ['font-size', '.chat-view-root .markdown-body'],
+        bubbleBackground: ['background-color', '.chat-view-root .msg-bubble-glass'],
+        bubbleColor: ['color', '.chat-view-root .msg-bubble-glass .markdown-body']
+    };
+    const applyCardAppearance = () => {
+        let style = document.getElementById('rp-card-appearance');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'rp-card-appearance';
+            document.head.appendChild(style);
+        }
+        while (style.sheet.cssRules.length) style.sheet.deleteRule(0);
+        for (const [key, value] of Object.entries(cardAppearances.get(cardScope) || {})) {
+            const [property, selector] = cardAppearanceProperties[key];
+            const index = style.sheet.insertRule(selector + '{}');
+            style.sheet.cssRules[index].style.setProperty(property, value, 'important');
+        }
+    };
+    const configureCardRuntime = options => { cardRuntimeOptions = options; };
+    const resetCardRuntime = scope => {
+        cardScope = String(scope || '');
+        cardRuntime++;
+        savedCardHtmlCache.clear();
+        applyCardAppearance();
+    };
+    const readCardStorage = () => {
+        try {
+            const value = JSON.parse(localStorage.getItem('rp-card-state::' + cardScope));
+            return value && typeof value === 'object' && !Array.isArray(value)
+                ? Object.fromEntries(Object.entries(value).filter(([, item]) => typeof item === 'string')) : {};
+        } catch (_) { return {}; }
+    };
+    window.addEventListener('message', event => {
+        const data = event.data;
+        if (event.origin !== 'null' || data?.type !== 'RPHUB_CARD' || data.runtime !== String(cardRuntime)) return;
+        const frame = [...document.querySelectorAll('iframe.executable-html-frame')]
+            .find(item => item.contentWindow === event.source && item.dataset.rpCardChannel === data.channel
+                && item.dataset.rpCardRuntime === data.runtime);
+        if (!frame) return;
+        if (data.action === 'resize') {
+            const height = Number(data.value);
+            if (Number.isFinite(height) && height > 0) frame.style.height = Math.min(height, 100000) + 'px';
+            return;
+        }
+        if (!cardScope || frame.dataset.rpCardPreview === 'true' || !cardRuntimeOptions.isActive?.()) return;
+        if (data.action === 'slash' && typeof data.value === 'string' && cardRuntimeOptions.isReady?.())
+            cardRuntimeOptions.interact?.(data.value);
+        else if (data.action === 'citation' && typeof data.value === 'string' && cardRuntimeOptions.isReady?.())
+            cardRuntimeOptions.citation?.(data.value);
+        else if (data.action === 'storage' && data.value && typeof data.value === 'object') {
+            const { operation, key, value } = data.value;
+            const storage = readCardStorage();
+            if (operation === 'clear') Object.keys(storage).forEach(key => delete storage[key]);
+            else if (typeof key !== 'string') return;
+            else if (operation === 'remove') delete storage[key];
+            else if (operation === 'set' && typeof value === 'string')
+                Object.defineProperty(storage, key, { value, writable: true, enumerable: true, configurable: true });
+            else return;
+            try { localStorage.setItem('rp-card-state::' + cardScope, JSON.stringify(storage)); }
+            catch (error) { console.warn('卡内状态保存失败:', error.message); }
+        } else if (data.action === 'appearance') {
+            const appearance = {};
+            if (data.value && typeof data.value === 'object') for (const [key, value] of Object.entries(data.value)) {
+                const property = cardAppearanceProperties[key]?.[0];
+                if (property && typeof value === 'string' && value.length <= 256 && CSS.supports(property, value))
+                    appearance[key] = value;
+            }
+            cardAppearances.set(cardScope, appearance);
+            applyCardAppearance();
+        }
+    });
 
-    const buildExecutableHtmlDocument = (rawHtml) => {
+    const buildExecutableHtmlDocument = (rawHtml, channel, emptyStorage) => {
         const metaViewport = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
         const resetStyle = '<style>html,body{margin:0!important;padding:0!important;width:100%!important;height:auto!important;min-height:auto!important;word-wrap:break-word!important;box-sizing:border-box!important;overflow:hidden!important;}::-webkit-scrollbar{display:none;}*,*::before,*::after{box-sizing:inherit!important;}img,video,canvas,svg{max-width:100%!important;height:auto!important;}table{display:block!important;overflow-x:auto!important;max-width:100%!important;}pre{white-space:pre-wrap!important;word-wrap:break-word!important;max-width:100%!important;}.container,.reality-panel,.app-container{max-width:100%!important;width:100%!important;margin:0!important;border-radius:0!important;box-shadow:none!important;border:none!important;height:auto!important;min-height:0!important;}body>div:first-child{margin:0!important;max-width:100%!important;height:auto!important;min-height:0!important;}#app{height:auto!important;min-height:auto!important;}.bottom-safe{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;}</style>';
         const jqueryScript = '<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" defer><\/script>';
         const scriptShim = `
             <script>
-                window.triggerSlash = function(text) {
-                    if (window.parent && window.parent.triggerSlash) window.parent.triggerSlash(text);
-                };
+                (function() {
+                const channel = ${JSON.stringify(channel)};
+                const runtime = ${JSON.stringify(String(cardRuntime))};
+                const send = (action, value) => parent.postMessage({type:'RPHUB_CARD', channel, runtime, action, value}, '*');
+                window.triggerSlash = text => send('slash', String(text || ''));
+                window.RPHubCard = Object.freeze({
+                    triggerSlash: window.triggerSlash,
+                    setAppearance: value => send('appearance', value)
+                });
+                const initialStorage = ${JSON.stringify(emptyStorage ? {} : readCardStorage()).replace(/</g, '\\u003c')};
+                function scopedStorage(initial, persist) {
+                    const entries = new Map(Object.entries(initial));
+                    const update = (operation, key, value) => { if (persist) send('storage', {operation, key, value}); };
+                    const api = {
+                        getItem: key => entries.get(String(key)) ?? null,
+                        setItem(key, value) { key=String(key);value=String(value);entries.set(key,value);update('set',key,value); },
+                        removeItem(key) { key=String(key);entries.delete(key);update('remove',key); },
+                        clear() { entries.clear();update('clear'); },
+                        key: index => [...entries.keys()][Number(index)] ?? null,
+                        get length() { return entries.size; }
+                    };
+                    return new Proxy(api, {
+                        get: (target, key) => key in target ? target[key] : api.getItem(key) ?? undefined,
+                        set(target, key, value) { api.setItem(key,value);return true; },
+                        deleteProperty(target, key) { api.removeItem(key);return true; },
+                        ownKeys: () => [...entries.keys()],
+                        getOwnPropertyDescriptor: (target, key) => entries.has(key)
+                            ? {value:entries.get(key),configurable:true,enumerable:true,writable:true} : undefined
+                    });
+                }
+                Object.defineProperty(window, 'localStorage', {value:scopedStorage(initialStorage,true)});
+                Object.defineProperty(window, 'sessionStorage', {value:scopedStorage({},false)});
 
                 let lastHeight = 0;
                 let isUpdating = false;
@@ -3181,7 +3288,7 @@
                     }, wait);
                 }
                 function updateHeight() {
-                    if (!window.frameElement || isUpdating) return;
+                    if (isUpdating) return;
                     isUpdating = true;
                     requestAnimationFrame(function() {
                         var body = document.body;
@@ -3194,18 +3301,16 @@
                         for (var i = 0; i < body.children.length; i++) {
                             var child = body.children[i];
                             if (child.tagName === 'SCRIPT' || child.tagName === 'STYLE' || child.tagName === 'LINK') continue;
-                            var style = window.getComputedStyle(child);
-                            if (style.position === 'fixed') continue;
                             var rect = child.getBoundingClientRect();
                             var itemMax = Math.max(rect.bottom, child.offsetTop + child.offsetHeight);
                             if (itemMax > maxBottom) maxBottom = itemMax;
                         }
                         var bodyStyle = window.getComputedStyle(body);
                         var marginBottom = parseFloat(bodyStyle.marginBottom) || 0;
-                        var newHeight = Math.max(maxBottom + marginBottom, body.scrollHeight) + 4;
+                        var newHeight = Math.max(1, Math.ceil(Math.max(maxBottom + marginBottom, body.scrollHeight)));
                         if (Math.abs(newHeight - lastHeight) > 0) {
                             lastHeight = newHeight;
-                            window.frameElement.style.height = newHeight + 'px';
+                            send('resize', newHeight);
                         }
                         isUpdating = false;
                     });
@@ -3236,30 +3341,33 @@
                     document.querySelectorAll('img').forEach(function(img) {
                         img.addEventListener('load', updateHeight);
                     });
-                    // 卡片里的记忆引用 [M12]：借父页面同一套处理加角标，点击回到父页面打开判断依据。
-                    var citations = window.parent && window.parent.RPHubMemoryCitations;
-                    if (citations && citations.decorate(document)) {
-                        var citationStyle = document.createElement('style');
-                        citationStyle.textContent = citations.frameStyle();
-                        document.head.appendChild(citationStyle);
-                        document.addEventListener('click', function(event) {
-                            var cite = event.target.closest && event.target.closest('.memory-cite, .memory-cite-text');
-                            if (cite) citations.open(cite.getAttribute('data-memory-nos'));
-                        });
+                    document.addEventListener('click', function(event) {
+                        var cite = event.target.closest && event.target.closest('.memory-cite, .memory-cite-text');
+                        if (cite) send('citation', cite.getAttribute('data-memory-nos'));
+                    });
+                    if (window.ResizeObserver) {
+                        var ro = new ResizeObserver(function() { scheduleUpdateHeight(100); });
+                        ro.observe(document.body);
+                    } else {
+                        setInterval(updateHeight, 1000);
                     }
                     updateHeight();
                 });
-                if (window.ResizeObserver) {
-                    var ro = new ResizeObserver(function() { scheduleUpdateHeight(100); });
-                    if (document.body) ro.observe(document.body);
-                } else {
-                    setInterval(updateHeight, 1000);
-                }
                 if (document.readyState === 'complete') updateHeight();
+                })();
             <\/script>
         `;
 
-        const content = rawHtml || '';
+        let content = rawHtml || '';
+        if (/\[M\d+\]/.test(content) && window.RPHubMemoryCitations) {
+            const parsed = new DOMParser().parseFromString(content, 'text/html');
+            if (window.RPHubMemoryCitations.decorate(parsed)) {
+                const style = parsed.createElement('style');
+                style.textContent = window.RPHubMemoryCitations.frameStyle();
+                parsed.head.appendChild(style);
+                content = parsed.documentElement.outerHTML;
+            }
+        }
         const trimmed = content.trim();
         if (/^\s*(<!doctype|<html)/i.test(trimmed)) {
             const headRegex = /<head(\s[^>]*)?>/i;
@@ -3287,7 +3395,7 @@ ${content}
 </html>`;
     };
 
-    const createExecutableHtmlIframe = (rawHtml, extraClass) => {
+    const createExecutableHtmlIframe = (rawHtml, extraClass = '', { preview = false, snapshot = false } = {}) => {
         const iframe = document.createElement('iframe');
         iframe.className = `w-full bg-white block executable-html-frame ${extraClass}`.trim();
         iframe.style.height = 'auto';
@@ -3297,18 +3405,21 @@ ${content}
         iframe.style.padding = '0';
         iframe.setAttribute('scrolling', 'no');
         iframe.setAttribute('sandbox', htmlIframeSandbox);
+        iframe.dataset.rpCardRuntime = String(cardRuntime);
+        iframe.dataset.rpCardChannel = generateUUID();
+        iframe.dataset.rpCardPreview = String(preview);
         iframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen; autoplay; encrypted-media; picture-in-picture');
-        iframe.srcdoc = buildExecutableHtmlDocument(rawHtml);
+        iframe.srcdoc = buildExecutableHtmlDocument(rawHtml, iframe.dataset.rpCardChannel, preview || snapshot);
         return iframe;
     };
 
-    const renderExecutableHtmlFrame = (rawHtml, extraClass) => {
+    const renderExecutableHtmlFrame = (rawHtml, extraClass, options) => {
         const container = document.createElement('div');
         container.className = 'html-card-container ui-template-frame-container';
         container.style.margin = '0';
         container.style.padding = '0';
         container.style.overflow = 'hidden';
-        container.appendChild(createExecutableHtmlIframe(rawHtml, extraClass));
+        container.appendChild(createExecutableHtmlIframe(rawHtml, extraClass, options));
         return container.outerHTML;
     };
 
@@ -3316,7 +3427,31 @@ ${content}
         if (!template || !template.htmlTemplate) return '';
         const variables = template.variableState || {};
         const html = renderUiTemplateString(stripUiTemplateCodeFence(template.htmlTemplate), variables);
-        return renderExecutableHtmlFrame(html, 'ui-template-iframe');
+        return renderExecutableHtmlFrame(html, 'ui-template-iframe', {
+            preview: template.preview === true, snapshot: template.snapshot === true
+        });
+    };
+    // Saved chat blocks contain old iframe markup. Rebuild only the displayed copy with current permissions.
+    const renderSavedUiTemplateHtml = html => {
+        if (!html) return '';
+        if (savedCardHtmlCache.has(html)) return savedCardHtmlCache.get(html);
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        parsed.querySelectorAll('iframe.executable-html-frame[srcdoc]').forEach(frame => {
+            const inner = new DOMParser().parseFromString(frame.getAttribute('srcdoc'), 'text/html');
+            inner.querySelectorAll('script').forEach(script => {
+                const text = script.textContent;
+                const legacyShim = text.includes('window.triggerSlash = function(text)') && text.includes('scheduleUpdateHeight');
+                const runtimeShim = text.includes('RPHUB_CARD') && text.includes('scopedStorage(initial, persist)');
+                if (legacyShim || runtimeShim) script.remove();
+            });
+            const replacement = parsed.createElement('div');
+            replacement.append(...inner.head.childNodes, ...inner.body.childNodes);
+            frame.replaceWith(replacement);
+        });
+        const result = renderExecutableHtmlFrame(parsed.head.innerHTML + parsed.body.innerHTML, 'ui-template-iframe');
+        savedCardHtmlCache.set(html, result);
+        if (savedCardHtmlCache.size > 64) savedCardHtmlCache.delete(savedCardHtmlCache.keys().next().value);
+        return result;
     };
 
     const stringifyUiSchema = (schema) => {
@@ -3497,6 +3632,7 @@ ${content}
     window.RPHubUiTemplateUtils = {
         applyUiTemplateUpdateListToTemplate,
         cloneUiObject,
+        configureCardRuntime,
         createExecutableHtmlIframe,
         findUiTemplateUpdateBlock,
         inferInitialUiTemplateState,
@@ -3504,6 +3640,8 @@ ${content}
         normalizeUiTemplateUpdateList,
         parseUiTemplateUpdates,
         renderUiTemplateHtml,
+        renderSavedUiTemplateHtml,
+        resetCardRuntime,
         sanitizeUiTemplateImportEntry,
         setUiTemplateValue,
         stringifyUiSchema,

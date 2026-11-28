@@ -574,7 +574,6 @@ window.RPHubUtils = {
         if (normalized.maxDepth === undefined) normalized.maxDepth = null;
         normalized.scope = normalized.scope === 'global'
             || options.fallbackScope === 'global'
-            || options.systemNames.includes(normalized.name || normalized.scriptName)
             ? 'global'
             : 'character';
         delete normalized.disabled;

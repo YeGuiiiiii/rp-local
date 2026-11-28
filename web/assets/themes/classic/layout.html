@@ -305,7 +305,7 @@
                                                 <generation-timer v-if="isGenerating" :wait-time="currentWaitTime" :estimated-time="estimatedGenerationTime"></generation-timer>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; msg.uiTemplateBlocks &amp;&amp; msg.uiTemplateBlocks.top &amp;&amp; msg.uiTemplateBlocks.top.length" class="ui-template-message-block ui-template-message-block-top">
-                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.top" :key="'msg-ui-top-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
+                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.top" :key="'msg-ui-top-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'top')"></div>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; uiTemplateUpdateStatus.state === 'running' &amp;&amp; uiTemplateUpdateStatus.targetMessageId === msg.id &amp;&amp; activeUiTemplates.some(t => t.placement === 'top')" class="ui-template-message-block ui-template-message-block-top">
                                                 <ui-template-pending></ui-template-pending>
@@ -328,7 +328,7 @@
                                             </template>
 
                                             <div v-if="msg.role === 'assistant' &amp;&amp; msg.uiTemplateBlocks &amp;&amp; msg.uiTemplateBlocks.bottom &amp;&amp; msg.uiTemplateBlocks.bottom.length" class="ui-template-message-block ui-template-message-block-bottom">
-                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.bottom" :key="'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="replaceUserNamePlaceholder(html)"></div>
+                                                <div v-for="(html, tIndex) in msg.uiTemplateBlocks.bottom" :key="'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex" class="w-full ui-template-render" @click="handleUiTemplateClick" v-html="renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'bottom')"></div>
                                             </div>
                                             <div v-if="msg.role === 'assistant' &amp;&amp; uiTemplateUpdateStatus.state === 'running' &amp;&amp; uiTemplateUpdateStatus.targetMessageId === msg.id &amp;&amp; activeUiTemplates.some(t => t.placement === 'bottom')" class="ui-template-message-block ui-template-message-block-bottom">
                                                 <ui-template-pending></ui-template-pending>

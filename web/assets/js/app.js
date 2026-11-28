@@ -2073,6 +2073,8 @@ const app = createApp({
 
         const regexScripts = ref([]);
         const globalRegexScripts = ref([]);
+        const isBuiltinImageRegex = script => script.scope === 'global'
+            && (script.name || script.scriptName) === 'NAI画图正则';
         const LEGACY_USER_REGEX_NAME = 'Auto Replace {{user}}';
         const isLegacyUserRegex = (script) => (script?.name || script?.scriptName) === LEGACY_USER_REGEX_NAME;
         const removeLegacyUserRegex = () => {
@@ -9643,11 +9645,10 @@ const app = createApp({
         };
 
         const updateImageGenRegexState = ({ enableRegex = false } = {}) => {
-            const imageGenRegexName = 'NAI画图正则';
-            let regex = regexScripts.value.find(r => r.name === imageGenRegexName);
+            let regex = regexScripts.value.find(isBuiltinImageRegex);
             if (!regex) {
                 enforceSpecialRules();
-                regex = regexScripts.value.find(r => r.name === imageGenRegexName);
+                regex = regexScripts.value.find(isBuiltinImageRegex);
                 if (!regex) return [];
             }
 
@@ -9937,6 +9938,11 @@ const app = createApp({
             event.stopPropagation();
             window.triggerSlash(command);
         };
+        const renderUiTemplateBlock = (html, lazy = false, index = 0, placement = 'top') => {
+            if (lazy) return buildMobileUiLazyBlock(Math.max(0, Number(index) || 0), placement === 'bottom' ? 'bottom' : 'top');
+            const replaced = replaceUserNamePlaceholder(html);
+            return window.RPHubUiTemplateUtils.renderSavedUiTemplateHtml(replaced);
+        };
 
         const renderEditingUiTemplatePreview = () => {
             let variableState = editingUiTemplate.data.previewVariableState || {};
@@ -9946,6 +9952,7 @@ const app = createApp({
                 // 预览里 JSON 写错时，先沿用打开弹窗时的变量，避免整个弹窗空掉。
             }
             return renderUiTemplateHtml({
+                preview: true,
                 htmlTemplate: editingUiTemplate.data.htmlTemplate,
                 variableState
             });
@@ -10102,11 +10109,11 @@ const app = createApp({
             if (!targetMessage) return false;
             const top = activeUiTemplates.value
                 .filter(template => template.placement === 'top' && !excludeTemplateIds.has(template.id))
-                .map(renderUiTemplateHtml)
+                .map(template => renderUiTemplateHtml({ ...template, snapshot: true }))
                 .filter(Boolean);
             const bottom = activeUiTemplates.value
                 .filter(template => template.placement === 'bottom' && !excludeTemplateIds.has(template.id))
-                .map(renderUiTemplateHtml)
+                .map(template => renderUiTemplateHtml({ ...template, snapshot: true }))
                 .filter(Boolean);
             targetMessage.uiTemplateBlocks = {
                 top,
@@ -10626,7 +10633,7 @@ const app = createApp({
                 const turnInfo = getConversationTurnAtIndex(index);
                 const turn = Number(turnInfo?.turn) || 0;
                 const savedBlocks = source.uiTemplateBlocks?.lazy !== true && source.uiTemplateBlocks?.[placement];
-                const html = Array.isArray(savedBlocks) ? savedBlocks.join('') : activeUiTemplates.value
+                const html = Array.isArray(savedBlocks) ? savedBlocks.map(html => renderUiTemplateBlock(html)).join('') : activeUiTemplates.value
                     .filter(template => template.placement === placement)
                     .map(template => renderUiTemplateHtml({
                         htmlTemplate: template.htmlTemplate,
@@ -11113,7 +11120,7 @@ const app = createApp({
         const getCharacterRegexCount = (char) => {
             if (!char.regexScripts) return (char.regexNames || []).filter(name => !systemRegexNames.includes(name)).length;
             return char.regexScripts.reduce((count, script) => (
-                count + (systemRegexNames.includes(script.name || script.scriptName) ? 0 : 1)
+                count + (isBuiltinImageRegex(script) ? 0 : 1)
             ), 0);
         };
 
@@ -11204,8 +11211,8 @@ const app = createApp({
             let result = replaceUserNamePlaceholder(text);
             if (role === 'system') return result;
             const orderedScripts = [...regexScripts.value].sort((a, b) => {
-                const aIsImageGen = (a.name || a.scriptName) === 'NAI画图正则';
-                const bIsImageGen = (b.name || b.scriptName) === 'NAI画图正则';
+                const aIsImageGen = isBuiltinImageRegex(a);
+                const bIsImageGen = isBuiltinImageRegex(b);
                 return aIsImageGen === bIsImageGen ? 0 : (aIsImageGen ? 1 : -1);
             });
 
@@ -11237,7 +11244,7 @@ const app = createApp({
                         : (script.replaceString || '');
 
                     if (!regexPattern) return;
-                    const isImageGenScript = (script.name || script.scriptName) === 'NAI画图正则';
+                    const isImageGenScript = isBuiltinImageRegex(script);
 
                     // 解析 /pattern/flags 格式
                     if (regexPattern.startsWith('/') && regexPattern.lastIndexOf('/') > 0) {
@@ -11314,6 +11321,11 @@ const app = createApp({
         let messageBodyGeneration = 0;
         const messageBodyCache = new WeakMap();
         const bumpMessageBodyGeneration = () => { messageBodyGeneration += 1; };
+        watch(getCurrentStoryBranchScopeId, scope => {
+            window.RPHubUiTemplateUtils.resetCardRuntime(scope);
+            clearMessageRenderCaches();
+            bumpMessageBodyGeneration();
+        }, { immediate: true, flush: 'sync' });
         const getMessageBodyEntry = (message) => {
             const content = typeof message?.content === 'string' ? message.content : '';
             const cached = messageBodyCache.get(message);
@@ -15456,6 +15468,7 @@ const app = createApp({
             cleanupScopes.forEach(scopeId => {
                 try { localStorage.removeItem(IMAGE_FREEZE_LS_PREFIX + scopeId); } catch (_) {}
                 try { localStorage.removeItem('rp-reading::' + scopeId); } catch (_) {}
+                try { localStorage.removeItem('rp-card-state::' + scopeId); } catch (_) {}
             });
             try {
                 const rawNight = localStorage.getItem('rp-card-night');
@@ -15659,7 +15672,7 @@ const app = createApp({
                 enabled: false // Default closed
             };
             // 查找当前是否已存在新命名的正则
-            const newRegexIndex = regexScripts.value.findIndex(r => r.name === imageGenRegexName);
+            const newRegexIndex = regexScripts.value.findIndex(isBuiltinImageRegex);
 
             if (newRegexIndex !== -1) {
                 // 如果已存在，保留目前的启用状态并更新内容
@@ -16006,6 +16019,7 @@ const app = createApp({
                         ]);
                         try { localStorage.removeItem(IMAGE_FREEZE_LS_PREFIX + scopeId); } catch (_) {}
                         try { localStorage.removeItem('rp-reading::' + scopeId); } catch (_) {}
+                        try { localStorage.removeItem('rp-card-state::' + scopeId); } catch (_) {}
                         getUiTemplatesForRuntime(char).forEach(template => {
                             if (!template.runtimeByCharacter) return;
                             delete template.runtimeByCharacter[scopeId];
@@ -17260,6 +17274,12 @@ const app = createApp({
             await nextTick();
             inputBox.value?.focus();
         };
+        window.RPHubUiTemplateUtils.configureCardRuntime({
+            isActive: () => currentView.value === 'chat',
+            isReady: () => switchingCharacterIndex.value === -1 && !storyBranchSwitching.value,
+            interact: text => window.triggerSlash(text),
+            citation: nos => window.RPHubMemoryCitations?.open(nos)
+        });
 
         // Lifecycle
         const flushPendingSavesOnHide = () => {
@@ -17564,6 +17584,8 @@ const app = createApp({
         });
 
         onBeforeUnmount(() => {
+            window.RPHubUiTemplateUtils.configureCardRuntime({});
+            window.RPHubUiTemplateUtils.resetCardRuntime('');
             window.removeEventListener('rp:startup-finished', finishStartup);
             window.removeEventListener('rp:notice', shellNotice);
             window.removeEventListener('pagehide', flushPendingSavesOnHide);
@@ -17968,7 +17990,7 @@ const app = createApp({
             createPreset, editPreset, autoBackupConfig, autoBackupFolderPath, autoBackupHistory, isAutoBackingUp, isRestoringAutoBackup, performDailyAutoBackup, backupOverdueDays, maybeRemindDailyBackup, analyzeBackupSize, openBackupSizeModal, backupSizeReport, showBackupSizeModal, exportLegacyBackups, purgeLegacyBackups, restoreAutoBackupRecord, backupManagerFiles, backupManagerLoading, backupRenameId, backupRenameDraft, formatBackupFileTime, loadBackupManagerFiles, startRenameBackupFile, cancelRenameBackupFile, commitRenameBackupFile, deleteBackupManagerFile, exportBackupManagerFile, savePreset, deletePreset, presetGroups, isPresetGroupAllEnabled, togglePresetGroupEnabled, isPresetBatchManaging, selectedPresetIndices, showPresetBatchMoveModal, presetBatchTargetGroup, togglePresetBatchMode, toggleSelectPreset, isPresetSelected, toggleSelectGroupPresets, isPresetGroupAllSelected, selectAllPresets, clearSelectedPresets, openPresetBatchMoveModal, applyPresetBatchMove, batchTogglePresetsEnabled, batchDeletePresets, deletePresetGroup,
             activePresetGroupName, activePresetGroup, visiblePresetGroups, openPresetGroup, showPresetGroupForm,
             presetGroupDraft, presetGroupEditing, presetGroupError, openPresetGroupForm, savePresetGroup, exportPresetGroups, importPresets,
-            renderMarkdown, messageBody, messageCot, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
+            renderMarkdown, renderUiTemplateBlock, messageBody, messageCot, messageUsesWideLayout, parseCot, closeCharacterEditor: () => showCharacterEditor.value = false,
             openExportModal: (type) => {
                 exportType.value = type;
                 selectedExportIndices.value.clear();

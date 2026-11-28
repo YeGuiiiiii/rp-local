@@ -3,6 +3,7 @@
 // --- Message renderer ---
 (function () {
     const MAX_CACHE_SIZE = 2000;
+    const requiresIsolatedFrame = text => /<(?:style|script|link|iframe|object|embed)\b|\son[a-z]+\s*=|\bposition\s*:\s*fixed\b/i.test(text);
 
     const createMessageRenderer = ({
         processRegex, replaceUserPlaceholder, createExecutableHtmlIframe, marked, DOMPurify,
@@ -46,7 +47,7 @@
                 }
             }
             if (!usesFrame && !trimmed.includes('```')) {
-                usesFrame = /(<!doctype html>|<html\b[^>]*>|^\s*<(style|script)\b)/i.test(trimmed);
+                usesFrame = /(<!doctype html>|<html\b[^>]*>)/i.test(trimmed) || requiresIsolatedFrame(trimmed);
             }
             return cacheValue(frameDetectionCache, cacheKey, usesFrame);
         };
@@ -62,7 +63,25 @@
         const markdownOnlyRenderer = new marked.Renderer();
         markdownOnlyRenderer.html = token => String(typeof token === 'string' ? token : token.text)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const createIframe = (html) => createExecutableHtmlIframe(html, 'border-t border-gray-200 shadow-sm');
+        const createFrame = html => createExecutableHtmlIframe(html, 'border-t border-gray-200 shadow-sm');
+        const createIframe = (html) => {
+            if (!html.includes('generated-image-card')) return createFrame(html);
+            const parsed = new DOMParser().parseFromString(html, 'text/html');
+            const cards = [...parsed.querySelectorAll('.generated-image-card[data-image-request]')];
+            if (!cards.length) return createFrame(html);
+            const container = document.createElement('div');
+            cards.forEach(card => card.remove());
+            container.appendChild(createFrame(parsed.head.innerHTML + parsed.body.innerHTML));
+            // The host owns image generation and reroll controls. Card styling must not accompany these nodes.
+            cards.forEach(card => {
+                const safe = DOMPurify.sanitize(card.outerHTML, {
+                    FORBID_TAGS: ['style', 'script', 'link', 'iframe', 'object', 'embed'],
+                    FORBID_ATTR: ['style']
+                });
+                container.insertAdjacentHTML('beforeend', safe);
+            });
+            return container;
+        };
 
         const replaceHtmlCodeBlocks = (documentNode) => {
             let modified = false;
@@ -213,6 +232,10 @@
                 return cacheValue(renderedCache, cacheKey, decorateHtml(html, role));
             }
             const trimmed = processed.trim();
+            if (!trimmed.includes('```') && requiresIsolatedFrame(trimmed)) {
+                const html = /^\s*</.test(trimmed) ? processed : sanitizeMarkdown(processed);
+                return cacheValue(renderedCache, cacheKey, createIframe(html).outerHTML);
+            }
             const htmlMatch = trimmed.match(/(<!doctype html>|<html\b[^>]*>)/i);
 
             if (htmlMatch && !trimmed.includes('```')) {
@@ -253,6 +276,8 @@
             }
 
             const html = sanitizeMarkdown(processed);
+            if (requiresIsolatedFrame(html))
+                return cacheValue(renderedCache, cacheKey, createIframe(html).outerHTML);
             try {
                 const documentNode = new DOMParser().parseFromString(html, 'text/html');
                 const codeBlocksChanged = replaceHtmlCodeBlocks(documentNode);

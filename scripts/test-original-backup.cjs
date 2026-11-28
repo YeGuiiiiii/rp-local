@@ -88,6 +88,8 @@ const origin = 'https://sta1n156.github.io';
       } else await s.setScopedStoredValue('classic_memories','backup-card-uuid__branch__branch-two',memories);
       localStorage.setItem('rphub-image-freeze::backup-card-uuid','{"m:main-message#0":{"tag":"tag","url":"https://example.invalid/image.png"}}');
       localStorage.setItem('test-ui-preference','keep-this');
+      localStorage.setItem('rp-card-state::backup-card-uuid','{"shared-key":"card-A"}');
+      localStorage.setItem('rp-card-state::backup-card-uuid__branch__branch-two','{"shared-key":"branch-B"}');
     });
   }
   async function exportData(page) {
@@ -129,6 +131,8 @@ const origin = 'https://sta1n156.github.io';
         branch:await s.getScopedStoredValue('chat','backup-card-uuid__branch__branch-two'),
         memory:await s.getScopedStoredValue('classic_memories','backup-card-uuid__branch__branch-two'),
         preference:localStorage.getItem('test-ui-preference'),
+        cardState:localStorage.getItem('rp-card-state::backup-card-uuid'),
+        branchCardState:localStorage.getItem('rp-card-state::backup-card-uuid__branch__branch-two'),
         freeze:localStorage.getItem('rphub-image-freeze::backup-card-uuid'),
         binaryBlob:binary?.file instanceof Blob,
         binaryBytes:binary?.file instanceof Blob ? [...new Uint8Array(await binary.file.arrayBuffer())] : [],
@@ -153,6 +157,8 @@ const origin = 'https://sta1n156.github.io';
     assert.equal(data.memory[0].summary,'分支总结');
     assert.equal(data.memory[0].embeddingQ,'AAAA');
     assert.equal(data.preference,'keep-this');
+    assert.equal(JSON.parse(data.cardState)['shared-key'],'card-A');
+    assert.equal(JSON.parse(data.branchCardState)['shared-key'],'branch-B');
     assert.ok(data.freeze.includes('main-message'));
     assert.equal(data.binaryBlob,true);
     assert.deepEqual(data.binaryBytes,[1,2,3]);

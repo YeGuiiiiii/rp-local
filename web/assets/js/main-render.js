@@ -2329,7 +2329,7 @@ return function render(_ctx, _cache) {
                                                     key: 'msg-ui-top-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
-                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                    innerHTML: renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'top')
                                                   }, null, 8 /* PROPS */, _hoisted_100))
                                                 }), 128 /* KEYED_FRAGMENT */))
                                               ]))
@@ -2381,7 +2381,7 @@ return function render(_ctx, _cache) {
                                                     key: 'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
-                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                    innerHTML: renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'bottom')
                                                   }, null, 8 /* PROPS */, _hoisted_106))
                                                 }), 128 /* KEYED_FRAGMENT */))
                                               ]))
@@ -10825,7 +10825,7 @@ return function render(_ctx, _cache) {
                                                     key: 'msg-ui-top-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
-                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                    innerHTML: renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'top')
                                                   }, null, 8 /* PROPS */, _hoisted_99))
                                                 }), 128 /* KEYED_FRAGMENT */))
                                               ]))
@@ -10877,7 +10877,7 @@ return function render(_ctx, _cache) {
                                                     key: 'msg-ui-bottom-' + (msg.id || index) + '-' + tIndex,
                                                     class: "w-full ui-template-render",
                                                     onClick: handleUiTemplateClick,
-                                                    innerHTML: replaceUserNamePlaceholder(html)
+                                                    innerHTML: renderUiTemplateBlock(html, msg.uiTemplateBlocks.lazy, index, 'bottom')
                                                   }, null, 8 /* PROPS */, _hoisted_105))
                                                 }), 128 /* KEYED_FRAGMENT */))
                                               ]))
