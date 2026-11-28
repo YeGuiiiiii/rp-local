@@ -26513,73 +26513,78 @@ const _hoisted_13 = {
 }
 const _hoisted_14 = {
   key: 8,
-  role: "alert",
-  class: "transfer-error"
+  role: "status",
+  style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #f59e0b","background":"#fffbeb","text-align":"left","font-size":"12px","color":"#92400e","line-height":"1.6"}
 }
 const _hoisted_15 = {
   key: 9,
+  role: "alert",
+  class: "transfer-error"
+}
+const _hoisted_16 = {
+  key: 10,
   class: "transfer-error transfer-error-path"
 }
-const _hoisted_16 = { key: 0 }
-const _hoisted_17 = {
-  key: 10,
-  class: "transfer-summary"
-}
+const _hoisted_17 = { key: 0 }
 const _hoisted_18 = {
   key: 11,
+  class: "transfer-summary"
+}
+const _hoisted_19 = {
+  key: 12,
   style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #e5e7eb","background":"#f9fafb","text-align":"left"}
 }
-const _hoisted_19 = { style: {"font-size":"12px","color":"#374151","cursor":"pointer","line-height":"1.6"} }
-const _hoisted_20 = { style: {"display":"flex","gap":"6px","margin":"8px 0 6px"} }
-const _hoisted_21 = ["onClick"]
+const _hoisted_20 = { style: {"font-size":"12px","color":"#374151","cursor":"pointer","line-height":"1.6"} }
+const _hoisted_21 = { style: {"display":"flex","gap":"6px","margin":"8px 0 6px"} }
 const _hoisted_22 = ["onClick"]
-const _hoisted_23 = { style: {"max-height":"36vh","overflow":"auto","border":"1px solid #e5e7eb","border-radius":"8px","background":"#ffffff"} }
-const _hoisted_24 = ["value", "onUpdate:modelValue"]
-const _hoisted_25 = { style: {"flex":"1","min-width":"0","overflow":"hidden","text-overflow":"ellipsis","white-space":"nowrap"} }
-const _hoisted_26 = { style: {"flex":"none","color":"#6b7280"} }
-const _hoisted_27 = {
+const _hoisted_23 = ["onClick"]
+const _hoisted_24 = { style: {"max-height":"36vh","overflow":"auto","border":"1px solid #e5e7eb","border-radius":"8px","background":"#ffffff"} }
+const _hoisted_25 = ["value", "onUpdate:modelValue"]
+const _hoisted_26 = { style: {"flex":"1","min-width":"0","overflow":"hidden","text-overflow":"ellipsis","white-space":"nowrap"} }
+const _hoisted_27 = { style: {"flex":"none","color":"#6b7280"} }
+const _hoisted_28 = {
   key: 0,
   style: {"font-size":"11px","color":"#1d4ed8","line-height":"1.5","margin":"6px 0 0"}
 }
-const _hoisted_28 = {
-  key: 12,
+const _hoisted_29 = {
+  key: 13,
   style: {"margin":"8px 0","padding":"10px 12px","border":"1px solid #e5e7eb","border-radius":"10px","background":"#f9fafb","text-align":"left"}
 }
-const _hoisted_29 = { style: {"font-size":"12px","font-weight":"600","color":"#374151","margin":"0 0 4px"} }
-const _hoisted_30 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#374151"} }
-const _hoisted_31 = ["onUpdate:modelValue"]
-const _hoisted_32 = {
-  key: 13,
+const _hoisted_30 = { style: {"font-size":"12px","font-weight":"600","color":"#374151","margin":"0 0 4px"} }
+const _hoisted_31 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#374151"} }
+const _hoisted_32 = ["onUpdate:modelValue"]
+const _hoisted_33 = {
+  key: 14,
   style: {"margin":"8px 0","padding":"10px 12px","border-radius":"10px","border":"1px solid #d7e3f4","background":"#f4f8ff","text-align":"left"}
 }
-const _hoisted_33 = { style: {"font-size":"12px","color":"#1e3a8a","line-height":"1.6","margin":"0"} }
-const _hoisted_34 = {
-  key: 14,
-  class: "transfer-warning"
-}
+const _hoisted_34 = { style: {"font-size":"12px","color":"#1e3a8a","line-height":"1.6","margin":"0"} }
 const _hoisted_35 = {
   key: 15,
-  class: "transfer-actions"
+  class: "transfer-warning"
 }
-const _hoisted_36 = ["onClick"]
-const _hoisted_37 = ["onClick"]
-const _hoisted_38 = {
+const _hoisted_36 = {
   key: 16,
   class: "transfer-actions"
 }
-const _hoisted_39 = ["onClick"]
-const _hoisted_40 = {
+const _hoisted_37 = ["onClick"]
+const _hoisted_38 = ["onClick"]
+const _hoisted_39 = {
   key: 17,
   class: "transfer-actions"
 }
-const _hoisted_41 = ["onClick"]
+const _hoisted_40 = ["onClick"]
+const _hoisted_41 = {
+  key: 18,
+  class: "transfer-actions"
+}
 const _hoisted_42 = ["onClick"]
-const _hoisted_43 = ["disabled", "onClick"]
-const _hoisted_44 = ["onClick"]
+const _hoisted_43 = ["onClick"]
+const _hoisted_44 = ["disabled", "onClick"]
 const _hoisted_45 = ["onClick"]
 const _hoisted_46 = ["onClick"]
 const _hoisted_47 = ["onClick"]
 const _hoisted_48 = ["onClick"]
+const _hoisted_49 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -26670,40 +26675,43 @@ return function render(_ctx, _cache) {
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
+                (!external && state.storageWarning && state.phase !== 'failed')
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_14, _toDisplayString(state.storageWarning), 1 /* TEXT */))
+                  : _createCommentVNode("v-if", true),
                 (external ? task.error : state.error)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_14, _toDisplayString(external ? task.error : state.error), 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_15, _toDisplayString(external ? task.error : state.error), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (!external && state.errorPath)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_15, [
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_16, [
                       _createTextVNode("出错位置：" + _toDisplayString(state.errorPath), 1 /* TEXT */),
                       (state.errorLimit)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_16, "（当前档位单条上限 " + _toDisplayString(Math.round(state.errorLimit / 1048576)) + " MB）", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_17, "（当前档位单条上限 " + _toDisplayString(Math.round(state.errorLimit / 1048576)) + " MB）", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external && state.summary)
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_17, "角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条", 1 /* TEXT */))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_18, "角色卡 " + _toDisplayString(state.summary.cards) + " 张 · 聊天 " + _toDisplayString(state.summary.messages) + " 条 · 记忆 " + _toDisplayString(state.summary.memories) + " 条", 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
                 (!external && state.phase === 'select')
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_18, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_19, [
                       _createElementVNode("details", null, [
-                        _createElementVNode("summary", _hoisted_19, [
+                        _createElementVNode("summary", _hoisted_20, [
                           _createTextVNode("共 " + _toDisplayString(state.items.length) + " 项 · 已选 " + _toDisplayString(state.picked.length) + " 项 · " + _toDisplayString(format(pickedBytes)), 1 /* TEXT */),
                           _cache[2] || (_cache[2] = _createElementVNode("span", { style: {"color":"#9ca3af"} }, "（点开可逐项取消）", -1 /* CACHED */))
                         ]),
-                        _createElementVNode("div", _hoisted_20, [
+                        _createElementVNode("div", _hoisted_21, [
                           _createElementVNode("button", {
                             class: "shell-button",
                             type: "button",
                             onClick: _withModifiers($event => (pickAll(true)), ["prevent"])
-                          }, "全选", 8 /* PROPS */, _hoisted_21),
+                          }, "全选", 8 /* PROPS */, _hoisted_22),
                           _createElementVNode("button", {
                             class: "shell-button",
                             type: "button",
                             onClick: _withModifiers($event => (pickAll(false)), ["prevent"])
-                          }, "全不选", 8 /* PROPS */, _hoisted_22)
+                          }, "全不选", 8 /* PROPS */, _hoisted_23)
                         ]),
-                        _createElementVNode("div", _hoisted_23, [
+                        _createElementVNode("div", _hoisted_24, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(state.items, (row) => {
                             return (_openBlock(), _createElementBlock("label", {
                               key: row.group,
@@ -26713,30 +26721,30 @@ return function render(_ctx, _cache) {
                                 type: "checkbox",
                                 value: row.group,
                                 "onUpdate:modelValue": $event => ((state.picked) = $event)
-                              }, null, 8 /* PROPS */, _hoisted_24), [
+                              }, null, 8 /* PROPS */, _hoisted_25), [
                                 [_vModelCheckbox, state.picked]
                               ]),
-                              _createElementVNode("span", _hoisted_25, _toDisplayString(row.label), 1 /* TEXT */),
-                              _createElementVNode("span", _hoisted_26, _toDisplayString(format(row.bytes)), 1 /* TEXT */)
+                              _createElementVNode("span", _hoisted_26, _toDisplayString(row.label), 1 /* TEXT */),
+                              _createElementVNode("span", _hoisted_27, _toDisplayString(format(row.bytes)), 1 /* TEXT */)
                             ]))
                           }), 128 /* KEYED_FRAGMENT */))
                         ])
                       ]),
                       (state.legacyCount)
-                        ? (_openBlock(), _createElementBlock("p", _hoisted_27, "另有 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "）已自动跳过，不在这里列。", 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("p", _hoisted_28, "另有 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "）已自动跳过，不在这里列。", 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
                       _cache[3] || (_cache[3] = _createElementVNode("p", { style: {"font-size":"11px","color":"#9ca3af","line-height":"1.5","margin":"6px 0 0"} }, "导入只会写入选中的项，没选的保持原样。体积大的项建议单独导一次；同名的项以最后一次导入为准。", -1 /* CACHED */))
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external && state.phase === 'ready' && state.legacy.length)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_28, [
-                      _createElementVNode("p", _hoisted_29, "检测到 " + _toDisplayString(state.legacy.length) + " 条旧版备份快照，共 " + _toDisplayString(format(legacyBytes)), 1 /* TEXT */),
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_29, [
+                      _createElementVNode("p", _hoisted_30, "检测到 " + _toDisplayString(state.legacy.length) + " 条旧版备份快照，共 " + _toDisplayString(format(legacyBytes)), 1 /* TEXT */),
                       _cache[5] || (_cache[5] = _createElementVNode("p", { style: {"font-size":"11px","color":"#6b7280","line-height":"1.5","margin":"0 0 6px"} }, "当前版本既不读取、也不参与还原，只是占着空间。导入会自动跳过它们。", -1 /* CACHED */)),
-                      _createElementVNode("label", _hoisted_30, [
+                      _createElementVNode("label", _hoisted_31, [
                         _withDirectives(_createElementVNode("input", {
                           type: "checkbox",
                           "onUpdate:modelValue": $event => ((state.cleanLegacy) = $event)
-                        }, null, 8 /* PROPS */, _hoisted_31), [
+                        }, null, 8 /* PROPS */, _hoisted_32), [
                           [_vModelCheckbox, state.cleanLegacy]
                         ]),
                         _cache[4] || (_cache[4] = _createTextVNode(" 导入后一并删除这些旧快照 ", -1 /* CACHED */))
@@ -26744,45 +26752,45 @@ return function render(_ctx, _cache) {
                       _cache[6] || (_cache[6] = _createElementVNode("p", { style: {"font-size":"11px","color":"#9ca3af","margin":"6px 0 0"} }, "删除后无法从应用内找回；不确定就先别勾，可稍后在「数据体检」里导出再清理。", -1 /* CACHED */))
                     ]))
                   : (!external && state.phase === 'ready' && state.legacyCount)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_32, [
-                        _createElementVNode("p", _hoisted_33, "已跳过 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "），不参与这次导入。原文件里这些数据还在，需要时从原文件取即可。", 1 /* TEXT */)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_33, [
+                        _createElementVNode("p", _hoisted_34, "已跳过 " + _toDisplayString(state.legacyCount) + " 条旧备份快照（" + _toDisplayString(format(state.legacyTotal)) + "），不参与这次导入。原文件里这些数据还在，需要时从原文件取即可。", 1 /* TEXT */)
                       ]))
                     : _createCommentVNode("v-if", true),
                 (!external && state.phase === 'ready')
-                  ? (_openBlock(), _createElementBlock("p", _hoisted_34, "导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。"))
+                  ? (_openBlock(), _createElementBlock("p", _hoisted_35, "导入会覆盖备份中对应的现有数据。请先保留当前备份，再确认导入。"))
                   : _createCommentVNode("v-if", true),
                 (external && task.confirm)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_35, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_36, [
                       _createElementVNode("button", {
                         class: "shell-button",
                         type: "button",
                         onClick: $event => (task.confirm(false))
-                      }, "取消", 8 /* PROPS */, _hoisted_36),
+                      }, "取消", 8 /* PROPS */, _hoisted_37),
                       _createElementVNode("button", {
                         class: "shell-button transfer-primary",
                         type: "button",
                         onClick: $event => (task.confirm(true))
-                      }, "确认导入", 8 /* PROPS */, _hoisted_37)
+                      }, "确认导入", 8 /* PROPS */, _hoisted_38)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (external && task.recovery)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_38, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_39, [
                       _createElementVNode("button", {
                         class: "shell-button transfer-primary",
                         type: "button",
                         onClick: reload
-                      }, "重新打开并恢复", 8 /* PROPS */, _hoisted_39)
+                      }, "重新打开并恢复", 8 /* PROPS */, _hoisted_40)
                     ]))
                   : _createCommentVNode("v-if", true),
                 (!external)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_40, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_41, [
                       (state.recap && state.phase === 'idle')
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 0,
                             class: "shell-button transfer-primary",
                             type: "button",
                             onClick: resume
-                          }, "重新选择备份", 8 /* PROPS */, _hoisted_41))
+                          }, "重新选择备份", 8 /* PROPS */, _hoisted_42))
                         : _createCommentVNode("v-if", true),
                       (state.phase === 'reading')
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26790,7 +26798,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button",
                             type: "button",
                             onClick: pause
-                          }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_42))
+                          }, _toDisplayString(state.paused ? '继续' : '暂停'), 9 /* TEXT, PROPS */, _hoisted_43))
                         : _createCommentVNode("v-if", true),
                       (state.phase === 'select')
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26799,7 +26807,7 @@ return function render(_ctx, _cache) {
                             type: "button",
                             disabled: !state.picked.length,
                             onClick: startImport
-                          }, "导入选中项", 8 /* PROPS */, _hoisted_43))
+                          }, "导入选中项", 8 /* PROPS */, _hoisted_44))
                         : _createCommentVNode("v-if", true),
                       (['reading','ready','select'].includes(state.phase))
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26807,7 +26815,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button",
                             type: "button",
                             onClick: cancel
-                          }, "取消", 8 /* PROPS */, _hoisted_44))
+                          }, "取消", 8 /* PROPS */, _hoisted_45))
                         : _createCommentVNode("v-if", true),
                       (state.phase === 'ready')
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26815,7 +26823,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button transfer-primary",
                             type: "button",
                             onClick: apply
-                          }, "确认导入", 8 /* PROPS */, _hoisted_45))
+                          }, "确认导入", 8 /* PROPS */, _hoisted_46))
                         : _createCommentVNode("v-if", true),
                       (['failed','cancelled'].includes(state.phase))
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26823,7 +26831,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button transfer-primary",
                             type: "button",
                             onClick: choose
-                          }, "重新选择", 8 /* PROPS */, _hoisted_46))
+                          }, "重新选择", 8 /* PROPS */, _hoisted_47))
                         : _createCommentVNode("v-if", true),
                       (state.phase === 'applying')
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26831,7 +26839,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button",
                             type: "button",
                             onClick: cancel
-                          }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_47))
+                          }, "取消并恢复原数据", 8 /* PROPS */, _hoisted_48))
                         : _createCommentVNode("v-if", true),
                       (state.phase === 'recovery')
                         ? (_openBlock(), _createElementBlock("button", {
@@ -26839,7 +26847,7 @@ return function render(_ctx, _cache) {
                             class: "shell-button transfer-primary",
                             type: "button",
                             onClick: reload
-                          }, "重新打开并恢复", 8 /* PROPS */, _hoisted_48))
+                          }, "重新打开并恢复", 8 /* PROPS */, _hoisted_49))
                         : _createCommentVNode("v-if", true)
                     ]))
                   : _createCommentVNode("v-if", true)

@@ -99,6 +99,13 @@
 
 ## 待处理或待证实
 
+- U48（`qq1049323397`，基线 `d10deed` / 2.9.158，**仅推源码 `2.9.159 / 419`、未打包 APK / 未发 Release / 未真机复测**）：
+  1. **低存储空间局部驱逐反杀本地副本与自动找回**：`web/assets/js/local-files.js`、`web/assets/js/data-services.js`、`web/assets/js/app.js`。当主库 `RPHubDB` 因低空间驱逐丢失 `rp_hub_characters` 等核心键而随后被运行页写入零散设置/新聊天时，`initialize()` 不再把残缺主库误判为全量替代而调用 `call('remove', file)` 删除本地存活记忆/角色卡/分支副本；改为优先从 `个人数据/角色卡索引.json` 与 `inventory` 自动补回主库缺失记录（保留主库既有新聊天不倒退）并提示用户，同时 `initDB()` 主动静默申请 `navigator.storage.persist()`。
+  2. **残缺备份导出拦路闸**：`web/assets/js/app.js` 在 `exportAllData` 与 `performDailyAutoBackup` 新增 `inspectBackupReadiness()`，当主库缺失 `rp_hub_characters`、当前角色记忆处于 `classicMemoryLoad.status === 'error'|'loading'`/`__rpMemoryLoadSkipped`、或库内缺少当前角色记忆正文时直接拦截并提示，不再默默产出缺卡/缺记忆残档。
+  3. **导入前空间预警与底层 `indexedDB.open` 报错翻译**：`scripts/stream-import/storage.mjs`、`scripts/stream-import/worker.mjs`、`scripts/stream-import/client.mjs`、`web/assets/js/stream-import-ui.js`。追踪并安全关闭 `openStagingDbs` 暂存连接；`recover()` 在无未完成提交标记时对损坏/打不开的暂存库容错降级不锁死冷启动；`formatStorageError` / `translateImportError` 将 `Internal error opening backing store for indexedDB.open.`、`QuotaExceededError` 译为明确清理空间中文提示；`navigator.storage.estimate()` 预判低空间时展示琥珀色提醒。
+  4. **补录记忆幽灵 `2/2` 假进度与向量总数跳变**：`web/assets/js/app.js` 抽取 `resolveClassicTurnMessage` 与 `hasClassicSummaryTurnContent` 同源判据，扫描待补录轮次时跳过无有效正文的空轮（含空内容与仅未闭合 `<think>` 吞掉正文的异常轮），不再将其计入 `summary`/`vector` 分母，消除每次点击重复显示假进度及分母收缩 2 条的现象。
+- U48 验证与发布状态：构建（`build-stream.cjs` / `compile-ui.cjs` 59 组件 / `check-resources.mjs` 196 文件 0 错）通过；桌面无头 Edge + 模拟桥/模拟接口实测新增专项 `scripts/test-eviction-backup-recovery.cjs`（5/5 通过）、真实 230.38 MB 备份只读补录核验（19,057 楼层 / 1,928 条记忆，API 请求 0 次、跳过 2 轮空正文、0/0 结束），既有存储/备份/记忆/审计套件 `test-storage.cjs`、`test-chat-file-recovery.cjs`、`test-backup-recovery.cjs`、`test-large-memory-storage.cjs`、`test-memory-load-recovery.cjs`、`test-memory-switch-timeout.cjs`、`test-memory-system.cjs`、`test-memory-extract.cjs`、`test-stream-character-library.cjs`、`test-audit-repairs.cjs` 10/10 全通过，2.9.159 公告与版本号打开无错；`test-release-notes.cjs` 仍停在 U43/U44 既有基线断言（第 99 行赛事入口首屏可见）。详情见 `verification/2.9.159-驱逐丢档与导入补录修复报告-20261128.md`（未入库）；**本轮仅推送源码，未打包 APK、未发 Release、未做 Android 真机低空间复测**，待持有原签名的维护者打包 `2.9.159 / 419` 并回测。
+
 - ~~U47 源码：**Codex，`codex/skin-isolation`，2026-11-27，修复 `50f85dc`，换行整理 `d303f02`**。按用户确认将默认广场恢复为 `https://rphforum.zeabur.app/`，首次打开和重进共用该地址。仅修改源码，暂不重新发布；已发布 2.9.158 中地址不变。~~
 - U47 验证：在线入口专项新增断言先复现 nanami 地址不符，修改后 `test-online-gesture.cjs`、`test-ui-boundaries.cjs` 通过，覆盖首次打开、再次进入、原站帖子路径与查询参数保留、长按拖动/取消/返回、360/390/1280 宽度。隔离浏览器使用受控网页响应，未声称外网站点在线或真机验证；JS 语法和最终差异检查通过。
 

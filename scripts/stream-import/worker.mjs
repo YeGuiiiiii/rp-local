@@ -1,5 +1,5 @@
 import { BackupStreamDecoder, shouldSkipEntryKey } from './decoder.mjs';
-import { database, StagingSink, saveSession, validate } from './storage.mjs';
+import { database, StagingSink, saveSession, validate, formatStorageError } from './storage.mjs';
 import { profile } from './profiles.mjs';
 
 let paused = false, resume, running = false;
@@ -173,7 +173,7 @@ self.onmessage = async ({ data }) => {
         //   而 path 已经能精确指到 $.entries[3].value 这种位置。
         postMessage({
             type: 'failed',
-            message: error.name === 'QuotaExceededError' ? '设备存储空间不足，原数据未改动' : error.message,
+            message: formatStorageError(error),
             path: typeof error.path === 'string' ? error.path : '',
             offset: typeof error.offset === 'number' ? error.offset : 0,
             unitLimit: limits.unitBytes,

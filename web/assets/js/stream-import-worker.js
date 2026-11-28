@@ -1769,6 +1769,18 @@
   });
   var rangeOf = (...keys) => IDBKeyRange.bound(keys, [...keys, []]);
   var STAGING_DB_NAME = "RPHubStagingDB";
+  var openStagingDbs = /* @__PURE__ */ new Set();
+  function formatStorageError(error) {
+    const name = String(error?.name || "");
+    const raw = String(error?.message || error || "").trim();
+    if (name === "QuotaExceededError" || /quota|space|disk full|ENOSPC/i.test(raw)) {
+      return "\u624B\u673A\u53EF\u7528\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u65E0\u6CD5\u5199\u5165\u5BFC\u5165\u6682\u5B58\u6570\u636E\u3002\u8BF7\u5148\u6E05\u7406\u624B\u673A\u7A7A\u95F4\uFF08\u5EFA\u8BAE\u81F3\u5C11\u4FDD\u7559 2 GB \u4EE5\u4E0A\uFF0C\u6216\u5907\u4EFD\u4F53\u79EF 3 \u500D\u4EE5\u4E0A\u7684\u7A7A\u95F4\uFF09\uFF0C\u5F7B\u5E95\u5173\u95ED\u5E76\u91CD\u5F00\u8F6F\u4EF6\u540E\u518D\u8BD5\uFF1B\u539F\u6570\u636E\u672A\u6539\u52A8\u3002";
+    }
+    if (/internal error opening backing store|backing store|leveldb|ioerror|sqlite/i.test(raw) || name === "UnknownError" && /indexeddb|database|backing|store/i.test(raw)) {
+      return `\u624B\u673A\u53EF\u7528\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\u6216\u6D4F\u89C8\u5668\u6570\u636E\u5E93\u5E95\u5C42\u65E0\u6CD5\u6253\u5F00\u3002\u8BF7\u5148\u6E05\u7406\u624B\u673A\u7A7A\u95F4\uFF08\u5EFA\u8BAE\u81F3\u5C11\u4FDD\u7559 2 GB \u4EE5\u4E0A\uFF09\uFF0C\u5F7B\u5E95\u5173\u95ED\u5E76\u91CD\u5F00\u8F6F\u4EF6\u540E\u518D\u8BD5\uFF1B\u539F\u6570\u636E\u672A\u6539\u52A8\u3002\uFF08\u5E95\u5C42\u539F\u56E0\uFF1A${raw}\uFF09`;
+    }
+    return raw || "\u6570\u636E\u5E93\u64CD\u4F5C\u5931\u8D25\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8";
+  }
   var database = () => new Promise((resolve, reject) => {
     const request = indexedDB.open(STAGING_DB_NAME, 1);
     let settled = false;
@@ -1776,7 +1788,10 @@
     function fail(error) {
       settled = true;
       clearTimeout(timer);
-      reject(error);
+      const translated = new Error(formatStorageError(error));
+      if (error && typeof error === "object" && error.name) translated.rawName = error.name;
+      translated.cause = error;
+      reject(translated);
     }
     request.onupgradeneeded = () => upgrade(request.result);
     request.onblocked = () => fail(new Error("\u6570\u636E\u5E93\u88AB\u5176\u4ED6\u9875\u9762\u5360\u7528\uFF0C\u8BF7\u5173\u95ED\u5176\u4ED6\u9875\u9762\u540E\u91CD\u8BD5"));
@@ -1788,7 +1803,14 @@
         db.close();
         return;
       }
+      openStagingDbs.add(db);
+      const rawClose = db.close.bind(db);
+      db.close = () => {
+        openStagingDbs.delete(db);
+        return rawClose();
+      };
       db.onversionchange = () => db.close();
+      db.onclose = () => openStagingDbs.delete(db);
       resolve(db);
     };
   });
@@ -2096,7 +2118,7 @@
     } catch (error) {
       postMessage({
         type: "failed",
-        message: error.name === "QuotaExceededError" ? "\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u539F\u6570\u636E\u672A\u6539\u52A8" : error.message,
+        message: formatStorageError(error),
         path: typeof error.path === "string" ? error.path : "",
         offset: typeof error.offset === "number" ? error.offset : 0,
         unitLimit: limits.unitBytes

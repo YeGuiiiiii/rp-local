@@ -99,6 +99,37 @@
             inventory[key] = file;
         }
     }
+    const restoreCardsFromIndex = (index, allowMissing = false) => {
+        const list = [];
+        for (const card of index) {
+            const value = read(`角色卡数据/${card.storageFolder}/角色卡.json`);
+            if (!value) {
+                if (allowMissing) {
+                    console.warn('本地恢复跳过缺失角色卡:', card.storageFolder || card.uuid);
+                    continue;
+                }
+                throw new Error('角色卡文件缺失，请从备份恢复');
+            }
+            if (value.avatar?.rphubCardImage === 1) {
+                const avatar = read(`角色卡数据/${card.storageFolder}/封面数据.json`);
+                if (typeof avatar !== 'string') {
+                    if (allowMissing) {
+                        console.warn('本地恢复跳过缺失封面:', card.storageFolder || card.uuid);
+                        value.avatar = '';
+                    } else {
+                        throw new Error('角色卡封面缺失，请从备份恢复');
+                    }
+                } else {
+                    value.avatar = avatar;
+                }
+            }
+            ['name', 'favoriteAt', 'createdAt'].forEach(key => {
+                if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
+            });
+            list.push(value);
+        }
+        return list;
+    };
     async function initialize(entries, put, { synchronized = false, readEntry } = {}) {
         if (!bridge) return;
         const existing = entries.find(entry => entry.key === 'rp_hub_characters');
@@ -120,6 +151,61 @@
             }
         }
         if (synchronized) return;
+        const savedIndex = !existing ? (read('个人数据/角色卡索引.json') || []) : [];
+        const partialEviction = entries.length > 0 && !existing && Array.isArray(savedIndex) && savedIndex.length > 0;
+        if (partialEviction) {
+            // 主库缺少角色卡集合但存在部分键值、本机仍有角色卡索引：疑似低空间驱逐后残缺。
+            // 绝不清理本地副本，优先恢复角色卡与主库缺失的记忆/分支/配置，再保留主库最新条目。
+            const restored = restoreCardsFromIndex(savedIndex, true);
+            if (restored.length) {
+                assignFolders(restored);
+                await put('rp_hub_characters', restored);
+            }
+            const active = new Set(entries.map(entry => entry.key));
+            const restoredRevisions = new Set();
+            let restoredCount = 0;
+            for (const [key, file] of Object.entries(inventory)) {
+                if (key.startsWith('__rp_chat__:') || key.startsWith('__rp_mem__:')) continue;
+                if (key.startsWith('__ls__:')) {
+                    if (localStorage.getItem(key.slice(7)) === null) {
+                        const entry = read(file);
+                        if (entry && typeof entry.value === 'string') {
+                            localStorage.setItem(key.slice(7), entry.value);
+                            restoredCount++;
+                        }
+                    }
+                    continue;
+                }
+                if (active.has(key)) continue;
+                const entry = read(file);
+                if (entry && typeof entry.key === 'string') {
+                    await put(entry.key, entry.value);
+                    restoredCount++;
+                    if (entry.value && (entry.value.rphubChat === 1 || entry.value.rphubMemory === 1) && entry.value.revision) {
+                        restoredRevisions.add(entry.value.revision);
+                    }
+                }
+            }
+            for (const [key, file] of Object.entries(inventory)) {
+                if (!key.startsWith('__rp_chat__:') && !key.startsWith('__rp_mem__:')) continue;
+                if (active.has(key)) continue;
+                const rev = key.split(':')[1] || '';
+                if (!rev || !restoredRevisions.has(rev)) continue;
+                const entry = read(file);
+                if (entry && typeof entry.key === 'string') {
+                    await put(entry.key, entry.value);
+                    restoredCount++;
+                }
+            }
+            for (const entry of entries) {
+                await saveEntry(entry.key, Object.hasOwn(entry, 'value') ? entry.value : await readEntry(entry.key));
+            }
+            write('个人数据/文件索引.json', inventory);
+            if (restored.length || restoredCount > 0) {
+                window.__rpLocalRecoveryNotice = { cards: restored.length, records: restoredCount, at: Date.now() };
+            }
+            return;
+        }
         // A full backup import can replace the database directly; remove stale file references.
         if (entries.length) {
             const active = new Set(entries.map(entry => entry.key));
@@ -135,18 +221,7 @@
             await saveEntry(entry.key, Object.hasOwn(entry, 'value') ? entry.value : await readEntry(entry.key));
         if (!entries.length) {
             const index = read('个人数据/角色卡索引.json') || [];
-            const restored = index.map(card => {
-                const value = read(`角色卡数据/${card.storageFolder}/角色卡.json`);
-                if (!value) throw new Error('角色卡文件缺失，请从备份恢复');
-                if (value.avatar?.rphubCardImage === 1) {
-                    value.avatar = read(`角色卡数据/${card.storageFolder}/封面数据.json`);
-                    if (typeof value.avatar !== 'string') throw new Error('角色卡封面缺失，请从备份恢复');
-                }
-                ['name', 'favoriteAt', 'createdAt'].forEach(key => {
-                    if (Object.prototype.hasOwnProperty.call(card, key)) value[key] = card[key];
-                });
-                return value;
-            });
+            const restored = restoreCardsFromIndex(index, false);
             if (restored.length) {
                 assignFolders(restored);
                 await put('rp_hub_characters', restored);

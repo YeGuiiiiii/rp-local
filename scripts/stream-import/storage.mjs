@@ -26,20 +26,55 @@ export const rangeOf = (...keys) => IDBKeyRange.bound(keys, [...keys, []]);
 //   ＋400MB 正式数据；导完只是删行，IndexedDB 不会把文件缩回去，于是每导一次主库就胖几百兆。
 //   独立成库之后，导完或取消直接 deleteDatabase，空间整块还回去，主库一点都不长。
 export const STAGING_DB_NAME = 'RPHubStagingDB';
-export const deleteStagingDatabase = () => new Promise(resolve => {
-    let request;
-    try { request = indexedDB.deleteDatabase(STAGING_DB_NAME); }
-    catch (error) { resolve(false); return; }
-    const done = () => resolve(true);
-    request.onsuccess = done;
-    request.onerror = done;
-    request.onblocked = done;          // 还有连接没关时会被挡住：不算失败，下次开库会重建
-});
+const openStagingDbs = new Set();
+export function formatStorageError(error) {
+    const name = String(error?.name || '');
+    const raw = String(error?.message || error || '').trim();
+    if (name === 'QuotaExceededError'
+        || /quota|space|disk full|ENOSPC/i.test(raw)) {
+        return '手机可用存储空间不足，无法写入导入暂存数据。请先清理手机空间（建议至少保留 2 GB 以上，或备份体积 3 倍以上的空间），彻底关闭并重开软件后再试；原数据未改动。';
+    }
+    if (/internal error opening backing store|backing store|leveldb|ioerror|sqlite/i.test(raw)
+        || (name === 'UnknownError' && /indexeddb|database|backing|store/i.test(raw))) {
+        return `手机可用存储空间不足或浏览器数据库底层无法打开。请先清理手机空间（建议至少保留 2 GB 以上），彻底关闭并重开软件后再试；原数据未改动。（底层原因：${raw}）`;
+    }
+    return raw || '数据库操作失败，原数据未改动';
+}
+export const deleteStagingDatabase = () => {
+    for (const active of [...openStagingDbs]) {
+        try { active.close(); } catch (_) {}
+    }
+    openStagingDbs.clear();
+    return new Promise(resolve => {
+        let request;
+        try { request = indexedDB.deleteDatabase(STAGING_DB_NAME); }
+        catch (error) { resolve(false); return; }
+        let settled = false;
+        const finish = value => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            resolve(value);
+        };
+        const timer = setTimeout(() => finish(true), 5000);
+        request.onsuccess = () => finish(true);
+        request.onerror = () => finish(true);
+        // 还有其他连接占用时短暂让出时间等待关闭，避免紧接 open 时底层状态竞争
+        request.onblocked = () => setTimeout(() => finish(true), 600);
+    });
+};
 export const database = () => new Promise((resolve, reject) => {
     const request = indexedDB.open(STAGING_DB_NAME, 1);
     let settled = false;
     const timer = setTimeout(() => fail(new Error('打开数据库超时，请关闭其他软件页面后重试')), 15000);
-    function fail(error) { settled = true; clearTimeout(timer); reject(error); }
+    function fail(error) {
+        settled = true;
+        clearTimeout(timer);
+        const translated = new Error(formatStorageError(error));
+        if (error && typeof error === 'object' && error.name) translated.rawName = error.name;
+        translated.cause = error;
+        reject(translated);
+    }
     request.onupgradeneeded = () => upgrade(request.result);
     request.onblocked = () => fail(new Error('数据库被其他页面占用，请关闭其他页面后重试'));
     request.onerror = () => fail(request.error);
@@ -47,7 +82,11 @@ export const database = () => new Promise((resolve, reject) => {
         clearTimeout(timer);
         const db = request.result;
         if (settled) { db.close(); return; }
+        openStagingDbs.add(db);
+        const rawClose = db.close.bind(db);
+        db.close = () => { openStagingDbs.delete(db); return rawClose(); };
         db.onversionchange = () => db.close();
+        db.onclose = () => openStagingDbs.delete(db);
         resolve(db);
     };
 });

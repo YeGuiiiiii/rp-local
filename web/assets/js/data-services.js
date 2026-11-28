@@ -56,6 +56,13 @@
             await recoverCompactionIfNeeded(dbList);
             await window.RPStreamImport.recover(mainDb);
             try {
+                if (navigator.storage && typeof navigator.storage.persist === 'function') {
+                    const check = typeof navigator.storage.persisted === 'function'
+                        ? navigator.storage.persisted() : Promise.resolve(false);
+                    Promise.resolve(check).then(already => already ? true : navigator.storage.persist()).catch(() => {});
+                }
+            } catch (_) {}
+            try {
                 const legacyInfo = dbList?.find(item => item?.name === LEGACY_DB_NAME);
                 const shouldOpenLegacy = !dbList || !!legacyInfo;
                 if (shouldOpenLegacy) {

@@ -1,4 +1,4 @@
-import { upgrade, database, deleteStagingDatabase, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate } from './storage.mjs';
+import { upgrade, database, deleteStagingDatabase, resultOf, completed, rangeOf, saveSession, removeSession, each, StagingSink, validate, formatStorageError } from './storage.mjs';
 import { profile, profiles } from './profiles.mjs';
 import { verifyChunks, decodeChat } from './cloud.mjs';
 
@@ -38,6 +38,10 @@ export async function stageEntries(entries, { limits = profile() } = {}) {
     } catch (error) {
         try { await removeSession(db, id); }
         catch (cleanupError) { console.warn('清理导入暂存失败:', cleanupError); }
+        if (error && error.name !== 'AbortError') {
+            const friendly = formatStorageError(error);
+            if (friendly && friendly !== error.message) error.message = friendly;
+        }
         throw error;
     }
     finally { db.close(); }
@@ -107,17 +111,32 @@ export async function recover(main) {
         }
     } catch (_) { hasStagingDb = true; }
     if (hasStagingDb) {
-        const stage = await database();
-        window.RPLocalStore?.setWebWritesPaused(true);
+        let stage = null;
         try {
-            const sessions = await resultOf(stage.transaction('restore_sessions').objectStore('restore_sessions').getAll());
-            for (const session of sessions) {
-                await recoverSession(main, session);
-                await removeSession(stage, session.id);
+            stage = await database();
+        } catch (stageError) {
+            const existingKeys = await window.RPHubStorage.readStorageKeys(main);
+            if (existingKeys.some(key => key.startsWith('__rp_restore_commit__:'))) {
+                const failure = new Error(formatStorageError(stageError));
+                failure.cause = stageError;
+                throw failure;
             }
-        } finally {
-            window.RPLocalStore?.setWebWritesPaused(false);
-            stage.close();
+            console.warn('清理暂存库失败，已跳过：', stageError);
+            await deleteStagingDatabase();
+            hasStagingDb = false;
+        }
+        if (stage) {
+            window.RPLocalStore?.setWebWritesPaused(true);
+            try {
+                const sessions = await resultOf(stage.transaction('restore_sessions').objectStore('restore_sessions').getAll());
+                for (const session of sessions) {
+                    await recoverSession(main, session);
+                    await removeSession(stage, session.id);
+                }
+            } finally {
+                window.RPLocalStore?.setWebWritesPaused(false);
+                stage.close();
+            }
         }
     }
     const keys = await window.RPHubStorage.readStorageKeys(main);
@@ -216,6 +235,10 @@ export async function apply(id, { beforeApply, restoreValue, signal, progress })
         await applySession(main, stage, id, { beforeApply, restoreValue, signal, progress });
     } catch (error) {
         retain = !!error.recoveryRequired;
+        if (error && error.name !== 'AbortError') {
+            const friendly = formatStorageError(error);
+            if (friendly && friendly !== error.message) error.message = friendly;
+        }
         throw error;
     } finally {
         try { if (!retain) await removeSession(stage, id); }

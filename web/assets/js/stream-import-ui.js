@@ -93,6 +93,33 @@
         return Object.assign({}, base, { unitBytes, chunkBytes });
     };
     window.RPStreamImportLimits = measureTransferLimits;
+    const translateImportError = message => {
+        const raw = String(message || '').trim();
+        if (!raw) return '导入未完成，原数据未改动';
+        if (/手机可用存储空间不足|已清理/.test(raw)) return raw;
+        if (/QuotaExceededError|quota|disk full|ENOSPC/i.test(raw)) {
+            return '手机可用存储空间不足，无法写入导入暂存数据。请先清理手机空间（建议至少保留 2 GB 以上，或备份体积 3 倍以上的空间），彻底关闭并重开软件后再试；原数据未改动。';
+        }
+        if (/internal error opening backing store|backing store|leveldb|ioerror|sqlite/i.test(raw)) {
+            return `手机可用存储空间不足或浏览器数据库底层无法打开。请先清理手机空间（建议至少保留 2 GB 以上），彻底关闭并重开软件后再试；原数据未改动。（底层原因：${raw}）`;
+        }
+        return raw;
+    };
+    const estimateStorageSpace = async (neededBytes, format) => {
+        try {
+            if (!navigator.storage || typeof navigator.storage.estimate !== 'function') return '';
+            const estimate = await navigator.storage.estimate();
+            const quota = Number(estimate && estimate.quota);
+            const usage = Number(estimate && estimate.usage) || 0;
+            if (!Number.isFinite(quota) || quota <= 0) return '';
+            const available = Math.max(0, quota - usage);
+            const needed = Math.max(0, Number(neededBytes) || 0);
+            if (available >= Math.max(needed * 1.5, 200 * 1048576)) return '';
+            return `当前浏览器可用存储空间约 ${format(available)}，而本次需导入 ${format(needed)}，空间可能不足导致失败；建议先清理出至少 2 GB 以上手机空间，或展开清单分批勾选导入。`;
+        } catch (_) {
+            return '';
+        }
+    };
     const StreamImportPanel = {
         props: { prepare: Function, decode: Function, task: Object, profile: String },
         setup(props) {
@@ -102,7 +129,7 @@
             const art = ref(window.RPThemePacks.asset('transfer'));
             const syncArt = () => { art.value = window.RPThemePacks.asset('transfer'); };
             window.addEventListener('rp-ui-theme-change', syncArt);
-            const state = reactive({ phase: 'idle', name: '', bytes: 0, read: 0, message: '', error: '', errorPath: '', errorLimit: 0, summary: null, paused: false, applied: 0, legacy: [], cleanLegacy: false, unitLimit: 0, recap: '', legacyCount: 0, legacyTotal: 0, items: [], picked: [], clock: 0, spans: [], entriesOpen: -1, entriesClose: -1, indexed: false });
+            const state = reactive({ phase: 'idle', name: '', bytes: 0, read: 0, message: '', error: '', errorPath: '', errorLimit: 0, storageWarning: '', summary: null, paused: false, applied: 0, legacy: [], cleanLegacy: false, unitLimit: 0, recap: '', legacyCount: 0, legacyTotal: 0, items: [], picked: [], clock: 0, spans: [], entriesOpen: -1, entriesClose: -1, indexed: false });
             const busy = computed(() => ['reading', 'ready', 'applying', 'success', 'recovery'].includes(state.phase));
             const isApplying = computed(() => ['applying', 'success', 'recovery'].includes(state.phase));
             const external = computed(() => props.task?.active);
@@ -230,11 +257,12 @@
                 try { await RPStreamImport.removeSession(db, sessionId); } finally { db.close(); }
             };
             const fail = (message, detail) => {
-                mark('fail', { msg: String(message || ''), why: '最后消息：' + lastWorkerMessage });
+                const translated = translateImportError(message);
+                mark('fail', { msg: translated, why: '最后消息：' + lastWorkerMessage });
                 const settle = settlePass; settlePass = null; settle?.();
                 stopWorker();
                 setPhase('failed', 'fail');
-                state.paused = false; state.error = message; state.message = '导入未完成，原数据未改动';
+                state.paused = false; state.error = translated; state.message = '导入未完成，原数据未改动';
                 state.errorPath = detail?.path || ''; state.errorLimit = detail?.unitLimit || 0;
                 cleanup(id).catch(error => console.warn('清理导入暂存失败:', error));
             };
@@ -419,6 +447,9 @@
                     ? '共 ' + items.length + ' 项，已全选；点开清单可逐项取消'
                     : '共 ' + items.length + ' 项；这类备份不能按区间读，先选体积小的一批'
                         + (rest > 0 ? '，剩下 ' + rest + ' 项可点开清单自己勾' : '');
+                estimateStorageSpace(pickedBytes.value || state.bytes, format).then(warning => {
+                    if (state.phase === 'select') state.storageWarning = warning;
+                });
                 return true;
             };
             const importPass = async (pick, ranges) => {
@@ -460,10 +491,13 @@
                     : { url: file.url, name: String(file.name || ''), size: Number(file.size) || 0, resolveUrl: file.resolveUrl };
                 generation++;
                 Object.assign(state, { name: fileRef.name, bytes: fileRef.size, read: 0, error: '', errorPath: '',
-                    summary: null, paused: false, items: [], picked: [], unitLimit: 0, legacyCount: 0, legacyTotal: 0,
+                    storageWarning: '', summary: null, paused: false, items: [], picked: [], unitLimit: 0, legacyCount: 0, legacyTotal: 0,
                     spans: [], indexed: false, entriesOpen: -1, entriesClose: -1 });
                 if (/\.zip$/i.test(fileRef.name)) { fail('ZIP 文件请使用“导入备份”'); return; }
                 setPhase('reading', 'start', '文件 ' + fileRef.name + ' ' + format(fileRef.size));
+                estimateStorageSpace(fileRef.size, format).then(warning => {
+                    if (['reading', 'select'].includes(state.phase)) state.storageWarning = warning;
+                });
                 if (fileRef.size >= SURVEY_MIN) { await surveyPass(); return; }
                 await importPass(null);
             };
@@ -488,6 +522,12 @@
                 ranges.push({ start: state.entriesClose, end: fileRef.size });
                 return ranges;
             };
+            Vue.watch(pickedBytes, nextBytes => {
+                if (state.phase !== 'select') return;
+                estimateStorageSpace(nextBytes || state.bytes, format).then(warning => {
+                    if (state.phase === 'select') state.storageWarning = warning;
+                });
+            });
             const pickAll = on => { state.picked = on ? state.items.map(item => item.group) : []; };
             const startImport = async () => {
                 if (state.phase !== 'select' || !state.picked.length) return;
@@ -526,8 +566,9 @@
                         window.location.reload();
                     }, 300);
                 } catch (error) {
-                    setPhase(error.recoveryRequired ? 'recovery' : 'failed', 'apply-error', String(error.message || ''));
-                    state.error = error.name === 'AbortError' ? '已取消，原数据已恢复' : error.message;
+                    const translated = error.name === 'AbortError' ? '已取消，原数据已恢复' : translateImportError(error.message || error);
+                    setPhase(error.recoveryRequired ? 'recovery' : 'failed', 'apply-error', String(translated || ''));
+                    state.error = translated;
                 } finally { controller = null; }
             };
             // 旧版自动备份快照：当前版本不读取，删掉只是回收空间。走存储层统一入口，
@@ -622,6 +663,7 @@
                             <span>{{ format(state.read) }} / {{ format(state.bytes) }}</span><span>{{ percent }}%</span>
                         </div>
                         <p role="status" v-if="external || state.message">{{ external ? task.message : state.paused ? '已暂停，随时可以继续。' : state.message }}<span v-if="!external && state.phase === 'reading'" style="color:#9ca3af"> · {{ state.clock }}</span></p>
+                        <div v-if="!external && state.storageWarning && state.phase !== 'failed'" role="status" style="margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid #f59e0b;background:#fffbeb;text-align:left;font-size:12px;color:#92400e;line-height:1.6">{{ state.storageWarning }}</div>
                         <p v-if="external ? task.error : state.error" role="alert" class="transfer-error">{{ external ? task.error : state.error }}</p>
                         <p v-if="!external && state.errorPath" class="transfer-error transfer-error-path">出错位置：{{ state.errorPath }}<span v-if="state.errorLimit">（当前档位单条上限 {{ Math.round(state.errorLimit / 1048576) }} MB）</span></p>
                         <p v-if="!external && state.summary" class="transfer-summary">角色卡 {{ state.summary.cards }} 张 · 聊天 {{ state.summary.messages }} 条 · 记忆 {{ state.summary.memories }} 条</p>

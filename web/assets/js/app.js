@@ -5290,6 +5290,41 @@ const app = createApp({
                 () => { performDailyAutoBackup(true); }
             );
         };
+        const inspectBackupReadiness = async () => {
+            const db = getMainDb();
+            if (!db) return { ok: false, reason: '本地数据库尚未就绪，请稍后再备份。' };
+            const dbKeys = await window.RPHubStorage.readStorageKeys(db);
+            const keySet = new Set(dbKeys);
+            if (characters.value.length > 0 && !keySet.has('rp_hub_characters')) {
+                return {
+                    ok: false,
+                    reason: '检测到本地数据库缺少角色卡记录（可能是手机存储空间不足被系统清理），已阻止导出残缺备份；请先清理手机空间并重启软件尝试恢复，再重新备份。'
+                };
+            }
+            if (currentCharacter.value?.uuid) {
+                if (classicMemoryLoad.status === 'error' || window.__rpMemoryLoadSkipped) {
+                    return {
+                        ok: false,
+                        reason: '当前角色记忆尚未读取成功，直接备份会遗漏记忆；请先在「记忆工具」重试读取或重启软件恢复正常后再备份。'
+                    };
+                }
+                if (classicMemoryLoad.status === 'loading') {
+                    return {
+                        ok: false,
+                        reason: '当前角色记忆仍在读取中，请等待读取完成后再备份。'
+                    };
+                }
+                const scopeId = getCurrentStoryBranchScopeId();
+                if (scopeId && classicMemories.value.length > 0
+                    && !keySet.has(`rp_hub_classic_memories_${scopeId}`)) {
+                    return {
+                        ok: false,
+                        reason: '检测到本地数据库缺少当前角色的记忆记录，已阻止导出残缺备份；请先清理手机空间并重启软件尝试恢复，再重新备份。'
+                    };
+                }
+            }
+            return { ok: true, reason: '' };
+        };
         const performDailyAutoBackup = async (isManualTrigger = false) => {
             if (backupTask.active || streamImportPanel.value?.isOpen || cloudBackup.busy) return;
             if (isAutoBackingUp.value) return;
@@ -5350,6 +5385,8 @@ const app = createApp({
                 if (isManualTrigger) showToast('正在执行全量自动备份...', 'info');
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
+                const readiness = await inspectBackupReadiness();
+                if (!readiness.ok) throw new Error(readiness.reason);
                 const backupSettings = await snapshotBackupSettings();
 
                 const fileName = 'rp-hub-autobackup-' + todayStr + '-' + timeCode + '.json';
@@ -7062,6 +7099,8 @@ const app = createApp({
                 if (isConversationBusy.value || isClassicBatchExtracting.value) throw new Error('请先停止当前生成或记忆补录，再进行备份');
                 await flushPendingChatHistorySave();
                 if (!getMainDb()) await initDB();
+                const readiness = await inspectBackupReadiness();
+                if (!readiness.ok) throw new Error(readiness.reason);
                 const backupSettings = await snapshotBackupSettings();
                 const fileName = buildBackupFileName();
                 const nativeBridge = window.AndroidBridge;
@@ -13334,6 +13373,33 @@ const app = createApp({
             });
         };
 
+        // [rphub 2.9.082] 轮次快照只保证有 userIndexes / assistantIndexes（2.9.055 起），
+        //   合并后的 .user / .assistant 并不一定有。原来这里硬读 .user / .assistant，
+        //   取不到正文 → 该轮被判成空轮 → runClassicJob 记一次"已完成"后直接跳过，
+        //   表现就是「补录瞬间 100%、零写入、无任何报错」。
+        //   现在按索引回表拼一条等效消息，两条路径都能取到正文。
+        const resolveClassicTurnMessage = (turnInfo, role) => {
+            const direct = turnInfo?.[role] || null;
+            const directText = direct && typeof direct === 'object' ? String(direct.content || '') : '';
+            if (directText) return direct;
+            const indexes = Array.isArray(turnInfo?.[role + 'Indexes']) ? turnInfo[role + 'Indexes'] : [];
+            const parts = indexes.map(index => chatHistory.value[index]).filter(message => message && message.role === role);
+            if (!parts.length) return direct;
+            return {
+                role,
+                content: parts.map(message => String(message.content || '')).join('\n\n'),
+                _sourceIndexes: indexes
+            };
+        };
+
+        const hasClassicSummaryTurnContent = (snapshot, targetIndex) => {
+            const targetTurn = snapshot?.turns?.[targetIndex];
+            if (!targetTurn || !currentCharacter.value?.uuid) return false;
+            const userContent = getMemoryMessageText(resolveClassicTurnMessage(targetTurn, 'user'));
+            const assistantContent = getMemoryMessageText(resolveClassicTurnMessage(targetTurn, 'assistant'));
+            return Boolean(userContent && assistantContent);
+        };
+
         const buildClassicSummaryJob = (snapshot, targetIndex, includeText = true) => {
             const turns = snapshot.turns;
             const targetTurn = turns[targetIndex];
@@ -13343,28 +13409,10 @@ const app = createApp({
             const key = getClassicMemoryKey(sourceAssistantIds, targetTurn.turn);
             if (!includeText) return { index: targetIndex, turn: targetTurn.turn, sourceAssistantIds, key };
 
-            // [rphub 2.9.082] 轮次快照只保证有 userIndexes / assistantIndexes（2.9.055 起），
-            //   合并后的 .user / .assistant 并不一定有。原来这里硬读 .user / .assistant，
-            //   取不到正文 → 该轮被判成空轮 → runClassicJob 记一次"已完成"后直接跳过，
-            //   表现就是「补录瞬间 100%、零写入、无任何报错」。
-            //   现在按索引回表拼一条等效消息，两条路径都能取到正文。
-            const turnMessage = (turnInfo, role) => {
-                const direct = turnInfo?.[role] || null;
-                const directText = direct && typeof direct === 'object' ? String(direct.content || '') : '';
-                if (directText) return direct;
-                const indexes = Array.isArray(turnInfo?.[role + 'Indexes']) ? turnInfo[role + 'Indexes'] : [];
-                const parts = indexes.map(index => chatHistory.value[index]).filter(message => message && message.role === role);
-                if (!parts.length) return direct;
-                return {
-                    role,
-                    content: parts.map(message => String(message.content || '')).join('\n\n'),
-                    _sourceIndexes: indexes
-                };
-            };
             const contextTurns = turns.slice(Math.max(0, targetIndex - 3), targetIndex + 1).map(turnInfo => ({
                 turn: turnInfo.turn,
-                userContent: getMemoryMessageText(turnMessage(turnInfo, 'user')),
-                assistantContent: getMemoryMessageText(turnMessage(turnInfo, 'assistant')),
+                userContent: getMemoryMessageText(resolveClassicTurnMessage(turnInfo, 'user')),
+                assistantContent: getMemoryMessageText(resolveClassicTurnMessage(turnInfo, 'assistant')),
                 isTarget: turnInfo === targetTurn
             }));
             const targetContext = contextTurns[contextTurns.length - 1];
@@ -13378,11 +13426,11 @@ const app = createApp({
                 contextTurns,
                 sourceUserIds,
                 sourceAssistantIds,
-                sourceUserText: (turnMessage(targetTurn, 'user')?._sourceIndexes || [])
+                sourceUserText: (resolveClassicTurnMessage(targetTurn, 'user')?._sourceIndexes || [])
                     .map(index => chatHistory.value[index])
                     .filter(message => message?.role === 'user')
                     .map(message => String(message.content || ''))
-                    .join('\n\n') || String(turnMessage(targetTurn, 'user')?.content || ''),
+                    .join('\n\n') || String(resolveClassicTurnMessage(targetTurn, 'user')?.content || ''),
                 sourceAssistantText: targetContext.assistantContent,
                 key
             };
@@ -14904,6 +14952,7 @@ const app = createApp({
 
             let vectorSkippedNoSource = 0;
             let secondarySkipped = 0;
+            let skippedEmptyTurns = 0;
             const emptyTargets = new Set();
             try {
                 if (!await ensureCurrentCharacterMemories()) {
@@ -14912,6 +14961,7 @@ const app = createApp({
                 while (_classicBatchExtractAbort === batchController && !batchController.signal.aborted) {
                     if (!_classicMemoriesLoaded) throw memoryOperationError('MemoryNotLoadedError', '记忆保存状态已变化，已停止补录');
                     _classicBatchRescanRequested = false;
+                    skippedEmptyTurns = 0;
                     const snapshot = await ensureConversationMessageIds();
                     if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
                     const safeTurnCount = isConversationBusy.value
@@ -14922,8 +14972,15 @@ const app = createApp({
                     const jobs = [];
                     for (let index = 0; index < safeTurnCount; index++) {
                         const job = buildClassicSummaryJob(snapshot, index, false);
-                        if (job && !emptyTargets.has(job.key) && !(job.sourceAssistantIds.length
-                            ? job.sourceAssistantIds.some(id => coveredIds.has(id)) : coveredTurns.has(job.turn))) jobs.push(job);
+                        const alreadyCovered = !job || emptyTargets.has(job.key) || (job.sourceAssistantIds.length
+                            ? job.sourceAssistantIds.some(id => coveredIds.has(id)) : coveredTurns.has(job.turn));
+                        if (!alreadyCovered) {
+                            if (hasClassicSummaryTurnContent(snapshot, index)) {
+                                jobs.push(job);
+                            } else {
+                                skippedEmptyTurns += 1;
+                            }
+                        }
                         if (index % 128 === 0) {
                             await new Promise(resolve => setTimeout(resolve, 0));
                             if (_classicBatchExtractAbort !== batchController || batchController.signal.aborted) return;
@@ -15098,9 +15155,16 @@ const app = createApp({
                         ? `${vectorSkippedNoSource} 条总结找不到对应原文，未建立向量；补齐对话后可再次补录。` : '';
                     const secondaryNote = secondarySkipped > 0
                         ? `${secondarySkipped} 组二次压缩被跳过：这些组的原始逐轮总结不在当前角色卡的记忆里，需要先补齐逐轮总结。` : '';
+                    const emptyNote = skippedEmptyTurns > 0
+                        ? `已自动跳过 ${skippedEmptyTurns} 轮无有效正文的对话。` : '';
+                    const hasWork = progress.stages.some(stage => stage.total > 0);
                     progress.message = incomplete ? '部分任务未完成，已完成的记忆已保留，可再次补录。'
-                        : [noSourceNote, secondaryNote].filter(Boolean).join(' ')
-                            || (progress.stages.some(stage => stage.total > 0) ? '' : '当前没有需要补录的记忆。');
+                        : !hasWork
+                            ? ([noSourceNote, secondaryNote].filter(Boolean).join(' ')
+                                || (skippedEmptyTurns > 0
+                                    ? `当前没有需要补录的记忆（已自动跳过 ${skippedEmptyTurns} 轮无有效正文的对话）。`
+                                    : '当前没有需要补录的记忆。'))
+                            : [noSourceNote, secondaryNote, emptyNote].filter(Boolean).join(' ');
                 }
             } catch (error) {
                 if (_classicBatchExtractAbort !== batchController) return;
@@ -17469,6 +17533,15 @@ const app = createApp({
             if (window.__rpMemoryLoadSkipped) {
                 showToast('记忆读取超时已跳过，聊天与角色卡正常可用；可到「记忆工具」重试', 'warning', 7000);
             }
+            if (window.__rpLocalRecoveryNotice) {
+                const notice = window.__rpLocalRecoveryNotice;
+                delete window.__rpLocalRecoveryNotice;
+                showToast(
+                    `检测到数据库曾被系统清理，已从本机存档自动找回 ${notice.cards} 张角色卡及相关记录（新聊天已保留）；请检查手机剩余空间并尽快备份。`,
+                    'warning',
+                    9000
+                );
+            }
             window.RPUpdates.start();
 
             fetchModels();
@@ -17854,6 +17927,7 @@ const app = createApp({
             prepareStreamImport, restoreRphubBinaryDeep, showVueConfirmModal,
             settingsSection, settingTitles, openSettingsSection,
             downloadJsonFile,
+            performDailyAutoBackup,
             fetchModels, fetchMemoryModels, isFetchingMemoryModels, exportAllData, importAllData, selectModel, selectQuickModels, sendMessage,
             fetchUiTemplateModels, isFetchingUiTemplateModels,
             appBackupFolder, defaultBackupFolder, chooseAppBackupFolder, isExportingAllData,
