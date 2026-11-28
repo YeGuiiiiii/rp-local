@@ -33,7 +33,8 @@ const heavy = process.argv.includes('--heavy');
             window.__parsedMemoryText = { calls:0, chars:0 };
             const originalParseCot = RPHubUtils.parseCot;
             RPHubUtils.parseCot = text => { __parsedMemoryText.calls++; __parsedMemoryText.chars += String(text || '').length; return originalParseCot(text); };
-            ` + fs.readFileSync(file, 'utf8')
+            ` + fs.readFileSync(file, 'utf8').replace('const getClassicTurnSourceIds =',
+                'window.__memoryHasText = hasMemoryMessageText; const getClassicTurnSourceIds =')
         });
         return route.fulfill({ path: file, contentType: ({ '.js': 'application/javascript', '.html': 'text/html', '.css': 'text/css', '.webp': 'image/webp' })[path.extname(file)] || 'application/octet-stream' });
     });
@@ -91,5 +92,31 @@ const heavy = process.argv.includes('--heavy');
             __qa.startBatchMemoryExtraction();
         });
         await page.waitForFunction(() => __qa.memoryBackfillProgress.status === 'done');
+        const presence = await page.evaluate(() => {
+            const cases = [
+                ['', false], [' \n\t', false], ['普通正文', true], ['<div>界面正文</div>', true],
+                ['<think>只有思考</think>', false], ['<think>尚未结束', false],
+                ['<think>思考</think>正文', true], ['<thi', false], ['<cot>思考</cot>正文', true],
+                ['<ui_template_state_context>隐藏状态</ui_template_state_context>', false],
+                ['<next_response>隐藏指令', false], ['[M123]', false],
+                ['```html\n<think>示例代码</think>\n```', true]
+            ];
+            const results = cases.map(([content, expected]) => ({
+                content, expected, actual: __memoryHasText({ role: 'assistant', content })
+            }));
+            const message = { role: 'user', content: '' };
+            results.push({ content: 'empty cached', expected: false, actual: __memoryHasText(message) });
+            message.content = '编辑后的正文';
+            results.push({ content: 'edited cached', expected: true, actual: __memoryHasText(message) });
+            message.content = '<think>改为隐藏</think>';
+            results.push({ content: 'hidden after edit', expected: false, actual: __memoryHasText(message) });
+            message.imageAttachments = [{ description: '图片文字' }];
+            results.push({ content: 'image only', expected: true, actual: __memoryHasText(message) });
+            message.imageAttachments = [];
+            results.push({ content: 'removed image', expected: false, actual: __memoryHasText(message) });
+            return results;
+        });
+        for (const { content, actual, expected } of presence) assert.equal(actual, expected, content);
+        console.log('PASS memory content filtering, edited messages and image-only turns');
     } finally { release(); await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

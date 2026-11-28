@@ -1,6 +1,6 @@
 RP-Local 使用许可与署名
 
-Roleplay Hub (RP-Hub) 由 STA1N156 创作。RP-Local 以 2.8.80🔔 增强版为基础，合入 2.8.118 的修复，修改了本地启动、文件存储、导入导出和界面。沿用增强版的鸣谢：红花铃🔔、启元。
+Roleplay Hub (RP-Hub) 由 STA1N156 创作。红花铃🔔是本软件贡献最多的主要贡献者，承担了大部分开发与内容贡献。本地版维护者负责其中一部分修改与发布。RP-Local 以 2.8.80🔔 增强版为基础，合入 2.8.118 的修复，修改了本地启动、文件存储、导入导出和界面。保留原项目署名及启元等贡献者的鸣谢。
 上游：https://github.com/STA1N156/RP-Hub/tree/cd8f2a6d599230e8788a1888a478912c6e83d7fe
 本地版及修改记录：https://github.com/YeGuiiiiii/rp-local
 

@@ -102,6 +102,7 @@ fs.mkdirSync(evidence, { recursive: true });
             await __qa.selectCharacter(0, true, { silent: true });
             __qa.currentView = 'chat';
             __qa.chatHistory = [
+                { id: 'ios-user-message', role: 'user', content: '离线聊天是否能保留？', shouldAnimate: false },
                 { id: 'ios-message', role: 'assistant', content: 'ios-offline-test：重开后保留聊天。', shouldAnimate: false },
             ];
         });

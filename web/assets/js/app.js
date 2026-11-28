@@ -13348,6 +13348,21 @@ const app = createApp({
                 stripMemoryCitations(stripNextResponsePrompt(stripUiTemplateContextInjection(parseCot(source.content || '').main)))
             )).filter(Boolean).join('\n\n');
         };
+        const memoryContentPresence = new WeakMap();
+        const hasMemoryMessageText = message => {
+            if (!message) return false;
+            const content = String(message.content || '');
+            let cached = memoryContentPresence.get(message);
+            if (!cached || cached.content !== content) {
+                // Ordinary prose and HTML need no full COT parsing just to count a turn.
+                const needsFiltering = /<\s*\/?\s*(?:thinking|think|cot)\s*>|<\s*\/?\s*(?:t|th|thi|thin|think|thinki|thinkin|thinking|c|co|cot)?\s*$|<ui_template_state_context>|<next_response>|\[M\d{1,6}\]/i.test(content);
+                cached = { content, present: needsFiltering
+                    ? Boolean(stripMemoryCitations(stripNextResponsePrompt(stripUiTemplateContextInjection(parseCot(content).main))).trim())
+                    : /\S/.test(content) };
+                memoryContentPresence.set(message, cached);
+            }
+            return cached.present || getMessageImages(message).length > 0;
+        };
 
         const getClassicTurnSourceIds = (turnInfo, role) => {
             // [rphub 2.9.055] 轮次索引直接给出 userIndexes / assistantIndexes，
@@ -13407,9 +13422,13 @@ const app = createApp({
         const hasClassicSummaryTurnContent = (snapshot, targetIndex) => {
             const targetTurn = snapshot?.turns?.[targetIndex];
             if (!targetTurn || !currentCharacter.value?.uuid) return false;
-            const userContent = getMemoryMessageText(resolveClassicTurnMessage(targetTurn, 'user'));
-            const assistantContent = getMemoryMessageText(resolveClassicTurnMessage(targetTurn, 'assistant'));
-            return Boolean(userContent && assistantContent);
+            return ['user', 'assistant'].every(role => {
+                if (targetTurn[role]?.content && hasMemoryMessageText(targetTurn[role])) return true;
+                return (targetTurn[role + 'Indexes'] || []).some(index => {
+                    const message = chatHistory.value[index];
+                    return message?.role === role && hasMemoryMessageText(message);
+                });
+            });
         };
 
         const buildClassicSummaryJob = (snapshot, targetIndex, includeText = true) => {

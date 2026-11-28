@@ -159,9 +159,17 @@ fs.mkdirSync(output, { recursive: true });
       await page.evaluate(mode => RPHubThemeKit.setScheme(mode), mode);
       assert.ok(await page.locator('.settings-control').first().evaluate(el => getComputedStyle(el).backgroundColor !== 'rgba(0, 0, 0, 0)'));
     }
-    await page.evaluate(() => { RPHubThemeKit.setScheme('day'); RPHubThemeKit.setAccent('#0f9b8e'); });
-    const custom = await measure();
-    assert.notEqual(custom.primary, '142 78 96');
+    await page.evaluate(() => RPHubThemeKit.setScheme('day'));
+    const skinPrimary = (await measure()).primary;
+    await page.evaluate(() => RPHubThemeKit.setAccent('#0f9b8e'));
+    assert.equal((await measure()).primary, skinPrimary, 'Personal skin keeps its authored palette');
+    await page.evaluate(() => RPThemePacks.set('classic'));
+    await page.waitForFunction(() => document.documentElement.dataset.uiLayout === 'classic');
+    const custom = await page.locator('.app-main').evaluate(el => getComputedStyle(el).getPropertyValue('--primary-600').trim());
+    await page.evaluate(() => RPHubThemeKit.setAccent(''));
+    await page.waitForFunction(custom =>
+      getComputedStyle(document.querySelector('.app-main')).getPropertyValue('--primary-600').trim() !== custom, custom);
+    assert.ok(custom, 'Classic layout uses the custom accent');
     await page.evaluate(() => RPHubThemeKit.setAccent(''));
     assert.equal(generationRequests, 0);
     assert.deepEqual(errors, []);

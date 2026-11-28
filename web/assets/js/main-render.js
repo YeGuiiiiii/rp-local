@@ -3611,7 +3611,7 @@ return function render(_ctx, _cache) {
                   _createVNode(_component_return_chat)
                 ]),
                 _createElementVNode("div", _hoisted_224, [
-                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">RP-Local 2.9.096 · 页面与功能随安装包更新。</p>", 3)),
+                  _cache[77] || (_cache[77] = _createStaticVNode("<div class=\"pointer-events-none absolute inset-0 flex items-center justify-center\"><span class=\"select-none whitespace-nowrap text-4xl font-black text-gray-900/10 md:text-6xl\" style=\"transform:rotate(-18deg);\">鸣谢红花铃🔔</span></div><div class=\"flex items-center justify-between gap-3 mb-4\"><h3 class=\"font-bold text-gray-800\">关于与鸣谢</h3><span class=\"text-[11px] font-bold text-primary-600 bg-primary-50 border border-primary-100 rounded-full px-2 py-1\">本地内置</span></div><p class=\"text-sm text-gray-600 mb-4\">红花铃🔔是本软件贡献最多的主要贡献者，承担了大部分开发与内容贡献。本地版维护者负责其中一部分修改与发布。原项目由 STA1N156 创作，保留启元等贡献者的鸣谢。</p>", 3)),
                   _createElementVNode("button", {
                     type: "button",
                     class: "shell-button mb-4",
@@ -24440,7 +24440,8 @@ const _hoisted_14 = {
   class: "competition-section"
 }
 const _hoisted_15 = ["src", "alt"]
-const _hoisted_16 = ["onClick"]
+const _hoisted_16 = { key: 3 }
+const _hoisted_17 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -24499,9 +24500,9 @@ return function render(_ctx, _cache) {
                 _cache[3] || (_cache[3] = _createTextVNode("作品提交格式", -1 /* CACHED */)),
                 _createVNode(_component_icon, { name: "ChevronDown" })
               ]),
-              _cache[5] || (_cache[5] = _createElementVNode("p", null, "邮件标题：【科技杯】作品名 - 作者昵称", -1 /* CACHED */)),
+              _createElementVNode("p", null, "邮件标题：" + _toDisplayString(event.mailSubject), 1 /* TEXT */),
               _createElementVNode("pre", _hoisted_11, _toDisplayString(event.submission), 1 /* TEXT */),
-              _cache[6] || (_cache[6] = _createElementVNode("p", null, "阅读参赛须知后，在邮件中填写是否同意，并署名、填写日期。作品文件需另行添加到邮件附件。", -1 /* CACHED */)),
+              _cache[5] || (_cache[5] = _createElementVNode("p", null, "作品文件需另行添加到邮件附件，填写所选赛区与作品名称。", -1 /* CACHED */)),
               _createElementVNode("a", {
                 class: "competition-mail",
                 href: event.mailto
@@ -24514,22 +24515,22 @@ return function render(_ctx, _cache) {
         (event.notice)
           ? (_openBlock(), _createElementBlock("details", _hoisted_13, [
               _createElementVNode("summary", null, [
-                _cache[7] || (_cache[7] = _createTextVNode("参赛须知", -1 /* CACHED */)),
+                _cache[6] || (_cache[6] = _createTextVNode("参赛须知", -1 /* CACHED */)),
                 _createVNode(_component_icon, { name: "ChevronDown" })
               ]),
-              _cache[8] || (_cache[8] = _createElementVNode("p", null, "本人已阅读以下条款并承诺遵守：", -1 /* CACHED */)),
+              _cache[7] || (_cache[7] = _createElementVNode("p", null, "本人已阅读以下条款并承诺遵守：", -1 /* CACHED */)),
               _createElementVNode("ol", null, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(event.notice, (item) => {
                   return (_openBlock(), _createElementBlock("li", { key: item }, _toDisplayString(item), 1 /* TEXT */))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _cache[9] || (_cache[9] = _createElementVNode("p", null, "参赛者昵称：＿＿＿＿＿　日期：＿＿＿＿＿", -1 /* CACHED */))
+              _cache[8] || (_cache[8] = _createElementVNode("p", null, "参赛者昵称：＿＿＿＿＿　日期：＿＿＿＿＿", -1 /* CACHED */))
             ]))
           : _createCommentVNode("v-if", true),
         (event.examples)
           ? (_openBlock(), _createElementBlock("details", _hoisted_14, [
               _createElementVNode("summary", null, [
-                _cache[10] || (_cache[10] = _createTextVNode("脑洞参考", -1 /* CACHED */)),
+                _cache[9] || (_cache[9] = _createTextVNode("脑洞参考", -1 /* CACHED */)),
                 _createVNode(_component_icon, { name: "ChevronDown" })
               ]),
               _createElementVNode("ul", null, [
@@ -24546,15 +24547,18 @@ return function render(_ctx, _cache) {
           loading: "lazy",
           "data-rphub-no-save": ""
         }, null, 8 /* PROPS */, _hoisted_15),
+        (event.sourceNotice)
+          ? (_openBlock(), _createElementBlock("p", _hoisted_16, _toDisplayString(event.sourceNotice), 1 /* TEXT */))
+          : _createCommentVNode("v-if", true),
         _createElementVNode("button", {
           type: "button",
           class: "competition-visit",
           onClick: $event => ($emit('visit',event.url))
         }, [
           _createVNode(_component_icon, { name: "Lighthouse" }),
-          _cache[11] || (_cache[11] = _createElementVNode("span", null, "前往灯塔查看赛事", -1 /* CACHED */)),
+          _createElementVNode("span", null, _toDisplayString(event.visitLabel), 1 /* TEXT */),
           _createVNode(_component_icon, { name: "ArrowUpRight" })
-        ], 8 /* PROPS */, _hoisted_16)
+        ], 8 /* PROPS */, _hoisted_17)
       ])
     ]))
   }

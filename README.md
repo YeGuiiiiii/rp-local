@@ -1,8 +1,10 @@
-# RP-Local 2.9.154
+# RP-Local 2.9.160
 
-当前安装包：[下载 2.9.154 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.154/RP-local-2.9.154.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.154/SHA256SUMS-2.9.154.txt)。发布页与软件内更新的验收状态见 [维护清单](MAINTENANCE.md) 的 R09；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
+当前安装包：[下载 2.9.160 APK](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.160/RP-local-2.9.160.apk)，[SHA256 校验文件](https://github.com/YeGuiiiiii/rp-local/releases/download/v2.9.160/SHA256SUMS-2.9.160.txt)。发布页与软件内更新的验收状态见 [维护清单](MAINTENANCE.md) 的 R14；正式包和说明见 [版本发布页](https://github.com/YeGuiiiiii/rp-local/releases/latest)。主线不包含二进制安装包；历史发布与下载分支继续保留。同一包名和原签名，可覆盖升级旧本地版，不要先卸载。
 
-本版为 **2.9.154**，Android versionCode 为 **413**。记忆补录遇到正在生成的回复时，会等回复结束后继续，并明确提示当前等待状态。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+本版为 **2.9.160**，Android versionCode 为 **420**。包含跨卡页面隔离、人物装饰独立开关、长聊天补录性能修复，以及提丰杯与雷霆杯的新横幅、规则和投稿方式。玥玥、冬至配色不变。明确标注红花铃🔔为贡献最多的主要贡献者。小改动按 **2.9.001～2.9.599** 递增，末段固定三位；大改动再调整前两段。Android 内部升级序号独立递增，旧版安装包及验证记录保留原编号。
+
+赛事主帖链接尚未公布，目前外部按钮明确标为“灯塔活动专区”；提丰杯邮箱及雷霆杯广场投稿方式已内置，不借用其他赛事原帖。旧赛事资料保留在 Git 历史中，不因更换推荐位置就认定其已结束。
 
 ## 2.9.138 记忆读取异常后的角色切换
 
@@ -465,6 +467,7 @@ Windows 如果提示文件名过长，下载时添加长路径选项：`git -c c
 
 ## 源码来源与署名
 
+- **主要贡献者：红花铃🔔，是本软件贡献最多的开发者，承担了大部分开发与内容贡献。** 本地版维护者负责其中一部分修改与发布；不能仅凭本仓库的提交数量判断完整贡献。
 - 原项目：**Roleplay Hub（RP-Hub）**，作者 **[STA1N156](https://github.com/STA1N156)**。
 - 上游源码：**[STA1N156/RP-Hub](https://github.com/STA1N156/RP-Hub)**。
 - 本地修改基于用户提供的 **RP-Hub 2.8.80🔔 增强版 APK** 中的网页、补丁和安卓外壳；**1.22** 合入用户提供的 **2.8.118** 网页逻辑修复，并适配本地存储与安卓恢复功能。

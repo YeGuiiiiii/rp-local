@@ -53,7 +53,7 @@ fs.mkdirSync(output, { recursive: true });
     async function dismissSetup(page) {
         await page.evaluate(() => { __qa.showUserSetupModal = false; });
     }
-    const dialog = page => page.getByRole('dialog', { name: '玥玥的更新简报', exact: true });
+    const dialog = page => page.locator('.release-notice[role="dialog"]');
     const close = page => page.getByRole('button', { name: '关闭更新公告', exact: true });
     async function capture(page, name) {
         await page.evaluate(() => window.scrollTo(0, 0));
@@ -93,25 +93,23 @@ fs.mkdirSync(output, { recursive: true });
         assert.equal(await fresh.evaluate(() => window.__noticeClaims), 1);
         assert.equal(await dialog(fresh).getByRole('button').count(), 3, 'Close plus two optional event entries, no confirmation');
         assert.equal(await fresh.locator('.release-footer').innerText(), '', 'No explanatory footer');
-        assert.match(await fresh.locator('.release-reading').innerText(), /特别鸣谢红花铃🔔老师、启元老师/);
+        assert.match(await fresh.locator('.release-reading').innerText(), /红花铃.*主要贡献者.*大部分开发与内容贡献/s);
+        assert.match(await fresh.locator('.release-reading').innerText(), /启元老师/);
         assert.match(await fresh.locator('.release-reading').innerText(), /QQ 群 132292045 发布/);
         assert.ok(!(await fresh.locator('.release-reading').innerText()).includes('472441481'));
-        assert.equal(await fresh.locator('.release-reading').evaluate(reading => {
-            const viewport = reading.getBoundingClientRect();
-            return [...reading.querySelectorAll('.competition-entry')].length === 2
-                && [...reading.querySelectorAll('.competition-entry')].every(button => {
-                    const bounds = button.getBoundingClientRect();
-                    return bounds.top >= viewport.top && bounds.bottom <= viewport.bottom;
-                });
-        }), true, 'Both competition entries must be visible before scrolling the announcement');
+        for (const name of ['提丰杯', '雷霆杯']) {
+            const entry = dialog(fresh).getByRole('button', { name, exact: true });
+            await entry.scrollIntoViewIfNeeded();
+            assert.equal(await entry.isVisible(), true, 'Event remains reachable by scrolling');
+        }
         assert.equal(await fresh.locator('.release-reading').innerText().then(text => /预编译|并发写入|隔离数据|同一版本|把故事留在本地/.test(text)), false);
         await fresh.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === '关闭更新公告');
         await fresh.keyboard.press('Tab');
         assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '更新内容');
         await fresh.keyboard.press('Tab');
-        assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '奇幻杯周赛');
+        assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '提丰杯');
         await fresh.keyboard.press('Tab');
-        assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '科技／科幻杯');
+        assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '雷霆杯');
         await fresh.keyboard.press('Tab');
         assert.equal(await fresh.evaluate(() => document.activeElement?.getAttribute('aria-label')), '关闭更新公告');
         const screenshots = [];
@@ -176,6 +174,8 @@ fs.mkdirSync(output, { recursive: true });
         }
         const fallback = await load({ native: false, reducedMotion: 'reduce' });
         await dismissSetup(fallback); await dialog(fallback).waitFor();
+        assert.equal(await dialog(fallback).getByRole('heading', { name: '更新公告', exact: true }).count(), 1,
+            'Classic layout keeps the announcement without mascot branding');
         assert.equal(await fallback.evaluate(() => localStorage.getItem('rp-local-release-shown')), String(release));
         assert.ok(await fallback.locator('.release-overlay').evaluate(element => parseFloat(getComputedStyle(element).transitionDuration) <= .001));
         await close(fallback).click(); await dialog(fallback).waitFor({ state: 'detached' });

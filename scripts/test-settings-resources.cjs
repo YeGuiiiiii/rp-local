@@ -39,13 +39,19 @@ fs.mkdirSync(output, { recursive: true });
             window.__qa = document.getElementById('app').__vue_app__._container._vnode.component.setupState;
             __qa.showUserSetupModal = false;
         });
-        await check('credits stay first whenever the announcement is opened', async () => {
+        await check('source and principal contribution remain accessible whenever the announcement opens', async () => {
             for (let i = 0; i < 2; i++) {
                 await page.evaluate(() => __qa.openAnnouncement());
-                const first = page.locator('.release-section').first();
-                assert.match(await first.innerText(), /鸣谢.*红花铃.*启元/s);
-                assert.doesNotMatch(await first.innerText(), /472441481/);
-                await page.getByRole('button', { name: '关闭更新公告', exact: true }).click();
+                try {
+                    const reading = await page.locator('.release-reading').innerText();
+                    assert.match(reading, /STA1N156.*CC BY-NC 4\.0/s);
+                    assert.match(reading, /红花铃.*主要贡献者.*大部分开发与内容贡献/s);
+                    assert.match(reading, /启元/);
+                    assert.doesNotMatch(reading, /472441481/);
+                } finally {
+                    await page.getByRole('button', { name: '关闭更新公告', exact: true }).click();
+                    await page.locator('.release-overlay').waitFor({ state: 'detached' });
+                }
             }
         });
         await check('NAI global regex can be reached and edited without changing the character scope', async () => {

@@ -40,7 +40,7 @@ const web = path.join(root,'web');
         __qa.showUserSetupModal=false;
         __qa.navigateWorkspace('patchlist');
       });
-      await page.getByText(/^RP-Local \d+(?:\.\d+)+ · 页面与功能随安装包更新。/).waitFor();
+      await page.getByText(/红花铃🔔是本软件贡献最多的主要贡献者/).waitFor();
       assert.equal(await page.getByText('发现新版本',{exact:true}).count(),0);
       await page.waitForTimeout(250);
       assert.deepEqual(updateRequests,[]);

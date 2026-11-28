@@ -469,9 +469,9 @@
               <section class="competition-section"><h2>参赛规则</h2><ul><li v-for="rule in event.rules" :key="rule">{{rule}}</li></ul></section>
               <details v-if="event.submission" class="competition-section">
                 <summary>作品提交格式<icon name="ChevronDown"/></summary>
-                <p>邮件标题：【科技杯】作品名 - 作者昵称</p>
+                <p>邮件标题：{{event.mailSubject}}</p>
                 <pre class="competition-submission">{{event.submission}}</pre>
-                <p>阅读参赛须知后，在邮件中填写是否同意，并署名、填写日期。作品文件需另行添加到邮件附件。</p>
+                <p>作品文件需另行添加到邮件附件，填写所选赛区与作品名称。</p>
                 <a class="competition-mail" :href="event.mailto">打开投稿邮件草稿<icon name="ArrowUpRight"/></a>
               </details>
               <details v-if="event.notice" class="competition-section">
@@ -485,8 +485,9 @@
                 <ul><li v-for="example in event.examples" :key="example">{{example}}</li></ul>
               </details>
               <img :src="event.poster" :alt="event.name+'赛事海报'" class="competition-poster" loading="lazy" data-rphub-no-save>
+              <p v-if="event.sourceNotice">{{event.sourceNotice}}</p>
               <button type="button" class="competition-visit" @click="$emit('visit',event.url)">
-                <icon name="Lighthouse"/><span>前往灯塔查看赛事</span><icon name="ArrowUpRight"/>
+                <icon name="Lighthouse"/><span>{{event.visitLabel}}</span><icon name="ArrowUpRight"/>
               </button>
             </article>
           </main>`

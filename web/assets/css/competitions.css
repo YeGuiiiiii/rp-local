@@ -13,14 +13,14 @@
     position: relative; isolation: isolate; overflow: hidden; min-height: 180px; padding: 20px 64px; align-items: flex-end;
     background: #e4ece2; color: #193c30; border-radius: 8px;
 }
-.competition-entry--science { background: #102b35; color: #f2f7fa; }
+.competition-entry--typhon, .competition-entry--thunder { background: #11131b; color: #fff8ed; }
 .competition-entry--banner:hover { outline: 2px solid var(--shell-accent); outline-offset: 2px; }
 .competition-entry--banner > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: right center; z-index: -1; }
 .competition-entry--banner::before {
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(90deg, #eff4eaf2, #eff4ead6 48%, #eff4ea40 76%, transparent);
 }
-.competition-entry--science::before { background: linear-gradient(90deg, #071e29f2, #071e29d6 48%, #071e2940 76%, transparent); }
+.competition-entry--typhon::before, .competition-entry--thunder::before { background: linear-gradient(90deg, #0c101bf2, #0c101bd6 42%, #0c101b55 72%, transparent); }
 .competition-entry--banner .competition-entry-copy { position: relative; flex: none; width: 100%; gap: 8px; }
 .competition-entry--banner .competition-entry-copy strong { font-size: 22px; line-height: 1.35; }
 .competition-entry--banner .competition-entry-copy > span { font-size: 14px; }
@@ -85,7 +85,7 @@
 .competition-section ol { list-style: decimal; }
 .competition-section li + li { margin-top: 10px; }
 .competition-prizes > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--shell-line); }
-.competition-prizes dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 650; }
+.competition-prizes dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; font-weight: 650; }
 .competition-submission { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; margin: 14px 0; }
 .competition-poster { display: block; width: 100%; max-width: 560px; height: auto; object-fit: contain; margin: 16px auto 0; border-radius: 6px; }
 @media (min-width: 700px) {
