@@ -3196,6 +3196,12 @@
             .find(item => item.contentWindow === event.source && item.dataset.rpCardChannel === data.channel
                 && item.dataset.rpCardRuntime === data.runtime);
         if (!frame) return;
+        if (data.action === 'init') {
+            event.source.postMessage({ type: 'RPHUB_CARD_INIT', channel: data.channel, runtime: data.runtime,
+                value: cardScope && frame.dataset.rpCardPreview !== 'true' && cardRuntimeOptions.isActive?.()
+                    ? readCardStorage() : {} }, '*');
+            return;
+        }
         if (data.action === 'resize') {
             const height = Number(data.value);
             if (Number.isFinite(height) && height > 0) frame.style.height = Math.min(height, 100000) + 'px';
@@ -3217,6 +3223,11 @@
             else return;
             try { localStorage.setItem('rp-card-state::' + cardScope, JSON.stringify(storage)); }
             catch (error) { console.warn('卡内状态保存失败:', error.message); }
+            document.querySelectorAll('iframe.executable-html-frame').forEach(peer => {
+                if (peer === frame || peer.dataset.rpCardRuntime !== data.runtime || peer.dataset.rpCardPreview === 'true') return;
+                peer.contentWindow.postMessage({ type: 'RPHUB_CARD_STORAGE', channel: peer.dataset.rpCardChannel,
+                    runtime: data.runtime, value: data.value }, '*');
+            });
         } else if (data.action === 'appearance') {
             const appearance = {};
             if (data.value && typeof data.value === 'object') for (const [key, value] of Object.entries(data.value)) {
@@ -3229,7 +3240,7 @@
         }
     });
 
-    const buildExecutableHtmlDocument = (rawHtml, channel, emptyStorage) => {
+    const buildExecutableHtmlDocument = (rawHtml, channel) => {
         const metaViewport = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
         const resetStyle = '<style>html,body{margin:0!important;padding:0!important;width:100%!important;height:auto!important;min-height:auto!important;word-wrap:break-word!important;box-sizing:border-box!important;overflow:hidden!important;}::-webkit-scrollbar{display:none;}*,*::before,*::after{box-sizing:inherit!important;}img,video,canvas,svg{max-width:100%!important;height:auto!important;}table{display:block!important;overflow-x:auto!important;max-width:100%!important;}pre{white-space:pre-wrap!important;word-wrap:break-word!important;max-width:100%!important;}.container,.reality-panel,.app-container{max-width:100%!important;width:100%!important;margin:0!important;border-radius:0!important;box-shadow:none!important;border:none!important;height:auto!important;min-height:0!important;}body>div:first-child{margin:0!important;max-width:100%!important;height:auto!important;min-height:0!important;}#app{height:auto!important;min-height:auto!important;}.bottom-safe{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;}</style>';
         const jqueryScript = '<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" defer><\/script>';
@@ -3244,7 +3255,7 @@
                     triggerSlash: window.triggerSlash,
                     setAppearance: value => send('appearance', value)
                 });
-                const initialStorage = ${JSON.stringify(emptyStorage ? {} : readCardStorage()).replace(/</g, '\\u003c')};
+                const initialStorage = /*RPHUB_CARD_STORAGE*/{};
                 function scopedStorage(initial, persist) {
                     const entries = new Map(Object.entries(initial));
                     const update = (operation, key, value) => { if (persist) send('storage', {operation, key, value}); };
@@ -3256,7 +3267,7 @@
                         key: index => [...entries.keys()][Number(index)] ?? null,
                         get length() { return entries.size; }
                     };
-                    return new Proxy(api, {
+                    const storage = new Proxy(api, {
                         get: (target, key) => key in target ? target[key] : api.getItem(key) ?? undefined,
                         set(target, key, value) { api.setItem(key,value);return true; },
                         deleteProperty(target, key) { api.removeItem(key);return true; },
@@ -3264,6 +3275,28 @@
                         getOwnPropertyDescriptor: (target, key) => entries.has(key)
                             ? {value:entries.get(key),configurable:true,enumerable:true,writable:true} : undefined
                     });
+                    if (persist) window.addEventListener('message', event => {
+                        const data = event.data;
+                        if (event.source !== parent || data?.type !== 'RPHUB_CARD_STORAGE'
+                            || data.channel !== channel || data.runtime !== runtime) return;
+                        const { operation, key, value } = data.value;
+                        const oldValue = operation === 'clear' ? null : api.getItem(key);
+                        if (operation === 'clear') {
+                            if (!entries.size) return;
+                            entries.clear();
+                        } else if (operation === 'remove') {
+                            if (oldValue === null) return;
+                            entries.delete(key);
+                        } else {
+                            if (oldValue === value) return;
+                            entries.set(key, value);
+                        }
+                        const change = new StorageEvent('storage', { key: key ?? null, oldValue,
+                            newValue: operation === 'set' ? value : null });
+                        Object.defineProperty(change, 'storageArea', { value: storage });
+                        window.dispatchEvent(change);
+                    });
+                    return storage;
                 }
                 Object.defineProperty(window, 'localStorage', {value:scopedStorage(initialStorage,true)});
                 Object.defineProperty(window, 'sessionStorage', {value:scopedStorage({},false)});
@@ -3395,7 +3428,7 @@ ${content}
 </html>`;
     };
 
-    const createExecutableHtmlIframe = (rawHtml, extraClass = '', { preview = false, snapshot = false } = {}) => {
+    const createExecutableHtmlIframe = (rawHtml, extraClass = '', { preview = false } = {}) => {
         const iframe = document.createElement('iframe');
         iframe.className = `w-full bg-white block executable-html-frame ${extraClass}`.trim();
         iframe.style.height = 'auto';
@@ -3409,7 +3442,26 @@ ${content}
         iframe.dataset.rpCardChannel = generateUUID();
         iframe.dataset.rpCardPreview = String(preview);
         iframe.setAttribute('allow', 'clipboard-read; clipboard-write; fullscreen; autoplay; encrypted-media; picture-in-picture');
-        iframe.srcdoc = buildExecutableHtmlDocument(rawHtml, iframe.dataset.rpCardChannel, preview || snapshot);
+        const channel = JSON.stringify(iframe.dataset.rpCardChannel), runtime = JSON.stringify(String(cardRuntime));
+        const documentJson = JSON.stringify(buildExecutableHtmlDocument(rawHtml, iframe.dataset.rpCardChannel)).replace(/</g, '\\u003c');
+        // Cached markup must fetch current storage before any card script runs.
+        iframe.srcdoc = `<script type="application/json" class="rp-card-document">${documentJson}<\/script><script>
+            (() => {
+                const html = JSON.parse(document.querySelector('.rp-card-document').textContent);
+                const receive = event => {
+                    const data = event.data;
+                    if (event.source !== parent || data?.type !== 'RPHUB_CARD_INIT'
+                        || data.channel !== ${channel} || data.runtime !== ${runtime}) return;
+                    removeEventListener('message', receive);
+                    const state = JSON.stringify(data.value).replace(/</g, '\\\\u003c');
+                    document.open();
+                    document.write(html.replace('/*RPHUB_CARD_STORAGE*/{}', () => state));
+                    document.close();
+                };
+                addEventListener('message', receive);
+                parent.postMessage({type:'RPHUB_CARD',channel:${channel},runtime:${runtime},action:'init'}, '*');
+            })();
+        <\/script>`;
         return iframe;
     };
 
@@ -3428,7 +3480,7 @@ ${content}
         const variables = template.variableState || {};
         const html = renderUiTemplateString(stripUiTemplateCodeFence(template.htmlTemplate), variables);
         return renderExecutableHtmlFrame(html, 'ui-template-iframe', {
-            preview: template.preview === true, snapshot: template.snapshot === true
+            preview: template.preview === true
         });
     };
     // Saved chat blocks contain old iframe markup. Rebuild only the displayed copy with current permissions.
@@ -3437,7 +3489,12 @@ ${content}
         if (savedCardHtmlCache.has(html)) return savedCardHtmlCache.get(html);
         const parsed = new DOMParser().parseFromString(html, 'text/html');
         parsed.querySelectorAll('iframe.executable-html-frame[srcdoc]').forEach(frame => {
-            const inner = new DOMParser().parseFromString(frame.getAttribute('srcdoc'), 'text/html');
+            let inner = new DOMParser().parseFromString(frame.getAttribute('srcdoc'), 'text/html');
+            const storedDocument = inner.querySelector('script.rp-card-document');
+            if (storedDocument) {
+                try { inner = new DOMParser().parseFromString(JSON.parse(storedDocument.textContent), 'text/html'); }
+                catch (_) { return; }
+            }
             inner.querySelectorAll('script').forEach(script => {
                 const text = script.textContent;
                 const legacyShim = text.includes('window.triggerSlash = function(text)') && text.includes('scheduleUpdateHeight');

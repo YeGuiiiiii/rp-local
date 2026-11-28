@@ -45,6 +45,15 @@ const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.resolve(__dirname, '../
         }
     };
     const switchCard = index => page.evaluate(index => __qa.selectCharacter(index), index);
+    const waitForStorage = (body, key, value) => body.evaluate((el, { key, value }) => new Promise((resolve, reject) => {
+        const until = Date.now() + 2000;
+        const poll = () => (key === null ? localStorage.length : localStorage.getItem(key)) === value ? resolve()
+            : Date.now() > until ? reject(new Error('another card page still reads stale storage: ' + JSON.stringify({
+                key, value, actual: key === null ? localStorage.length : localStorage.getItem(key),
+                events: window.storageEvents
+            }))) : setTimeout(poll, 20);
+        poll();
+    }), { key, value });
     const appendFrame = async (html, id = 'isolation-frame', preview = false, settle = true) => {
         await page.evaluate(({ html, id, preview }) => {
             document.getElementById(id)?.remove();
@@ -326,7 +335,7 @@ const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.resolve(__dirname, '../
             const result = await page.evaluate(() => {
                 const html = RPHubUiTemplateUtils.renderUiTemplateHtml({
                     htmlTemplate: '<p id="snapshot-state"></p><script>document.getElementById("snapshot-state").textContent=localStorage.getItem("card-shared-key")</script>',
-                    variableState: {}, snapshot: true
+                    variableState: {}
                 });
                 const holder = document.createElement('div');
                 holder.id = 'snapshot-storage';
@@ -350,6 +359,53 @@ const output = process.env.RPHUB_TEST_OUTPUT_DIR || path.resolve(__dirname, '../
             await appendFrame('<p id="reload">Reloaded card</p>');
             assert.equal(await page.frameLocator('#isolation-frame iframe').locator('body').evaluate(() => localStorage.getItem('card-shared-key')), 'A');
             assert.equal(await page.evaluate(() => localStorage.getItem('card-shared-key')), 'HOST');
+        });
+        await check('pages of the same card observe storage writes, removals and clear', async () => {
+            await appendFrame('<p>First page</p>', 'storage-first');
+            await appendFrame('<p>Second page</p>', 'storage-second');
+            const first = page.frameLocator('#storage-first iframe').locator('body');
+            const second = page.frameLocator('#storage-second iframe').locator('body');
+            try {
+                await second.evaluate(() => {
+                    window.storageEvents = [];
+                    addEventListener('storage', event => storageEvents.push([event.key, event.newValue]));
+                });
+                await first.evaluate(() => localStorage.setItem('shared-panel-state', 'updated'));
+                await waitForStorage(second, 'shared-panel-state', 'updated');
+                assert.deepEqual(await second.evaluate(() => storageEvents.at(-1)), ['shared-panel-state', 'updated']);
+                await first.evaluate(() => localStorage.removeItem('shared-panel-state'));
+                await waitForStorage(second, 'shared-panel-state', null);
+                assert.equal(await second.evaluate(() => localStorage.getItem('shared-panel-state')), null);
+                await first.evaluate(() => localStorage.clear());
+                await waitForStorage(second, null, 0);
+                assert.equal(await second.evaluate(() => localStorage.length), 0);
+            } finally {
+                await first.evaluate(() => localStorage.setItem('card-shared-key', 'A'));
+                await page.evaluate(() => {
+                    document.getElementById('storage-first').remove();
+                    document.getElementById('storage-second').remove();
+                });
+            }
+        });
+        await check('cached message markup starts scripts with the latest card storage', async () => {
+            await page.evaluate(() => {
+                window.__cachedCardMarkup = __qa.renderMarkdown('<p id="fresh-state"></p><script>'
+                    + 'document.getElementById("fresh-state").textContent=localStorage.getItem("card-shared-key")</script>');
+            });
+            await page.frameLocator('#isolation-frame iframe').locator('body').evaluate(() => localStorage.setItem('card-shared-key', 'LATEST'));
+            await page.waitForFunction(() => JSON.parse(localStorage.getItem('rp-card-state::isolation-A'))['card-shared-key'] === 'LATEST');
+            await page.evaluate(() => {
+                const holder = document.createElement('div');
+                holder.id = 'cached-card-state';
+                holder.innerHTML = __cachedCardMarkup;
+                document.body.appendChild(holder);
+            });
+            try {
+                assert.equal(await page.frameLocator('#cached-card-state iframe').locator('#fresh-state').innerText(), 'LATEST');
+            } finally {
+                await page.frameLocator('#isolation-frame iframe').locator('body').evaluate(() => localStorage.setItem('card-shared-key', 'A'));
+                await page.evaluate(() => document.getElementById('cached-card-state').remove());
+            }
         });
         await check('newly committed card pages can initialize before switching finishes', async () => {
             await page.evaluate(async () => { await __qa.createStoryBranch(); });

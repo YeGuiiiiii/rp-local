@@ -10109,11 +10109,11 @@ const app = createApp({
             if (!targetMessage) return false;
             const top = activeUiTemplates.value
                 .filter(template => template.placement === 'top' && !excludeTemplateIds.has(template.id))
-                .map(template => renderUiTemplateHtml({ ...template, snapshot: true }))
+                .map(renderUiTemplateHtml)
                 .filter(Boolean);
             const bottom = activeUiTemplates.value
                 .filter(template => template.placement === 'bottom' && !excludeTemplateIds.has(template.id))
-                .map(template => renderUiTemplateHtml({ ...template, snapshot: true }))
+                .map(renderUiTemplateHtml)
                 .filter(Boolean);
             targetMessage.uiTemplateBlocks = {
                 top,
