@@ -72,11 +72,15 @@
     const useThemePack = () => {
         const selected = ref(window.RPThemePacks.current);
         const night = ref(window.RPThemePacks.mode === 'night');
-        const sync = () => { selected.value = window.RPThemePacks.current; night.value = window.RPThemePacks.mode === 'night'; };
+        const mascots = ref(window.RPThemePacks.mascots);
+        const mascotsEnabled = ref(window.RPThemePacks.mascotsEnabled);
+        const sync = () => {
+            selected.value = window.RPThemePacks.current; night.value = window.RPThemePacks.mode === 'night';
+            mascots.value = window.RPThemePacks.mascots; mascotsEnabled.value = window.RPThemePacks.mascotsEnabled;
+        };
         window.addEventListener('rp-ui-theme-change', sync);
         onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', sync));
-        return { selected, night, packs: window.RPThemePacks.catalog,
-            mascots: computed(() => { selected.value; return window.RPThemePacks.mascots; }),
+        return { selected, night, mascots, mascotsEnabled, packs: window.RPThemePacks.catalog,
             variant: computed(() => { selected.value; night.value; return window.RPThemePacks.variant(); }),
             announcementArt: computed(() => { selected.value; night.value;
                 return window.RPThemePacks.variant().announcement || window.RPThemePacks.asset('welcome'); }),
@@ -86,11 +90,11 @@
     const ThemeMascot = {
         props: { pose: { type: String, default: 'welcome' }, alt: { type: String, default: '陈玥' } },
         setup(props) {
-            const skin = ref(document.documentElement.dataset.uiPack + ':' + document.documentElement.dataset.uiSkin);
-            const sync = () => { skin.value = document.documentElement.dataset.uiPack + ':' + document.documentElement.dataset.uiSkin; };
-            window.addEventListener('rp-ui-theme-change', sync);
-            onBeforeUnmount(() => window.removeEventListener('rp-ui-theme-change', sync));
-            return { source: computed(() => { skin.value; return window.RPThemePacks.asset(props.pose); }) };
+            const { selected, night, mascots } = useThemePack();
+            return { source: computed(() => {
+                selected.value; night.value;
+                return mascots.value ? window.RPThemePacks.asset(props.pose) : '';
+            }) };
         },
         template: `<img v-if="source" :src="source" :alt="alt" data-rphub-no-save>`
     };
@@ -861,6 +865,7 @@
                 accent, accentPresets, setAccentColor,
                 ...themePack, ...useCardNight(),
                 setTilt: event => window.RPGalleryMotion.set(event.target.checked),
+                setMascots: event => window.RPThemePacks.setMascots(event.target.checked),
                 selectPack: id => window.RPThemePacks.set(id),
                 version: window.RP_LOCAL_VERSION
             };
@@ -900,6 +905,12 @@
                   </label>
                 </div>
               </section>
+              <label v-if="selected!=='classic'" class="shell-form-row"><span>人物装饰</span>
+                <span class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" role="switch" aria-label="人物装饰" class="settings-toggle-input sr-only" :checked="mascotsEnabled" @change="setMascots">
+                  <span class="settings-toggle"></span>
+                </span>
+              </label>
               <label class="shell-form-row"><span>倾斜反光</span>
                 <span class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" role="switch" aria-label="倾斜反光" class="settings-toggle-input sr-only" :checked="tiltEnabled" @change="setTilt">

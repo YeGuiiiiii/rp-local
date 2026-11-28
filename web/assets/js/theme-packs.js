@@ -1,12 +1,14 @@
 (function () {
     'use strict';
     const key = 'rphub-ui-pack';
+    const mascotKey = 'rphub-ui-mascots';
     const root = document.documentElement;
     const catalog = window.RPThemeCatalog;
-    let selected;
+    let selected, showMascots = true;
     const legacyMode = id => id === 'journal' ? 'day' : id === 'vampire' ? 'night' : '';
     const skinId = id => legacyMode(id) ? 'chenyue' : id;
     try {
+        showMascots = localStorage.getItem(mascotKey) !== '0';
         selected = localStorage.getItem(key) || 'classic';
         const previousMode = legacyMode(selected);
         if (previousMode) {
@@ -20,7 +22,8 @@
     const mode = () => root.dataset.appTheme === 'dark' ? 'night' : 'day';
     const getPack = () => catalog.find(pack => pack.id === selected) || catalog[0];
     const variant = (pack = getPack()) => pack.variants[mode()] || pack.variants.day;
-    const asset = name => getPack().mascots
+    const mascots = () => !!getPack().mascots && showMascots;
+    const asset = name => mascots()
         ? variant()[name] || variant().overrides?.[name] || (variant().assets ? variant().assets + name + '.webp' : '')
         : '';
     const syncStandalone = () => document.querySelectorAll('[data-ui-mascot]').forEach(image => {
@@ -43,7 +46,7 @@
         root.dataset.uiPack = current.id;
         root.dataset.uiSkin = appearance.skin;
         root.dataset.uiLayout = current.layout;
-        root.dataset.uiMascots = current.mascots ? 'true' : 'false';
+        root.dataset.uiMascots = String(mascots());
         document.body?.classList.toggle('chenyue-theme', current.layout !== 'classic');
         syncStandalone();
         window.dispatchEvent(new Event('rp-ui-theme-change'));
@@ -57,7 +60,13 @@
         }
     }
     window.RPThemePacks = Object.freeze({
-        catalog, asset, variant, setMode, get mascots() { return !!getPack().mascots; },
+        catalog, asset, variant, setMode, get mascots() { return mascots(); },
+        get mascotsEnabled() { return showMascots; },
+        setMascots(value) {
+            showMascots = !!value;
+            try { localStorage.setItem(mascotKey, showMascots ? '1' : '0'); } catch (_) {}
+            apply();
+        },
         get mode() { return mode(); }, get current() { return getPack().id; },
         toggleMode: () => setMode(mode() === 'night' ? 'day' : 'night'),
         set(id) {
@@ -74,6 +83,7 @@
     window.addEventListener('rphub-theme-change', apply);
     window.addEventListener('storage', event => {
         if (event.key === key) { selected = skinId(event.newValue); apply(); }
+        if (event.key === mascotKey) { showMascots = event.newValue !== '0'; apply(); }
     });
     document.addEventListener('DOMContentLoaded', apply, { once: true });
     if (!catalog.some(pack => pack.id === selected)) {

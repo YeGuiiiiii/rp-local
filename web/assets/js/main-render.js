@@ -25686,7 +25686,10 @@ const _hoisted_20 = {
   class: "theme-pack-palette",
   "aria-hidden": "true"
 }
-const _hoisted_21 = { class: "shell-form-row" }
+const _hoisted_21 = {
+  key: 0,
+  class: "shell-form-row"
+}
 const _hoisted_22 = { class: "relative inline-flex items-center cursor-pointer" }
 const _hoisted_23 = ["checked", "onChange"]
 const _hoisted_24 = { class: "shell-form-row" }
@@ -25695,25 +25698,28 @@ const _hoisted_26 = ["checked", "onChange"]
 const _hoisted_27 = { class: "shell-form-row" }
 const _hoisted_28 = { class: "relative inline-flex items-center cursor-pointer" }
 const _hoisted_29 = ["checked", "onChange"]
-const _hoisted_30 = {
-  key: 0,
+const _hoisted_30 = { class: "shell-form-row" }
+const _hoisted_31 = { class: "relative inline-flex items-center cursor-pointer" }
+const _hoisted_32 = ["checked", "onChange"]
+const _hoisted_33 = {
+  key: 1,
   class: "shell-form-row shell-accent-row"
 }
-const _hoisted_31 = { class: "shell-accent-swatches" }
-const _hoisted_32 = ["title", "aria-label", "onClick"]
-const _hoisted_33 = {
+const _hoisted_34 = { class: "shell-accent-swatches" }
+const _hoisted_35 = ["title", "aria-label", "onClick"]
+const _hoisted_36 = {
   class: "shell-accent-custom",
   title: "自定义颜色"
 }
-const _hoisted_34 = ["value", "onInput"]
-const _hoisted_35 = ["onClick"]
-const _hoisted_36 = {
+const _hoisted_37 = ["value", "onInput"]
+const _hoisted_38 = ["onClick"]
+const _hoisted_39 = {
   key: 3,
   class: "shell-row-list"
 }
-const _hoisted_37 = ["onClick"]
-const _hoisted_38 = ["onClick"]
-const _hoisted_39 = ["onClick"]
+const _hoisted_40 = ["onClick"]
+const _hoisted_41 = ["onClick"]
+const _hoisted_42 = ["onClick"]
 
 return function render(_ctx, _cache) {
   with (_ctx) {
@@ -25858,9 +25864,25 @@ return function render(_ctx, _cache) {
                 }), 128 /* KEYED_FRAGMENT */))
               ])
             ]),
-            _createElementVNode("label", _hoisted_21, [
-              _cache[15] || (_cache[15] = _createElementVNode("span", null, "倾斜反光", -1 /* CACHED */)),
-              _createElementVNode("span", _hoisted_22, [
+            (selected!=='classic')
+              ? (_openBlock(), _createElementBlock("label", _hoisted_21, [
+                  _cache[15] || (_cache[15] = _createElementVNode("span", null, "人物装饰", -1 /* CACHED */)),
+                  _createElementVNode("span", _hoisted_22, [
+                    _createElementVNode("input", {
+                      type: "checkbox",
+                      role: "switch",
+                      "aria-label": "人物装饰",
+                      class: "settings-toggle-input sr-only",
+                      checked: mascotsEnabled,
+                      onChange: setMascots
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_23),
+                    _cache[14] || (_cache[14] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+                  ])
+                ]))
+              : _createCommentVNode("v-if", true),
+            _createElementVNode("label", _hoisted_24, [
+              _cache[17] || (_cache[17] = _createElementVNode("span", null, "倾斜反光", -1 /* CACHED */)),
+              _createElementVNode("span", _hoisted_25, [
                 _createElementVNode("input", {
                   type: "checkbox",
                   role: "switch",
@@ -25868,13 +25890,13 @@ return function render(_ctx, _cache) {
                   class: "settings-toggle-input sr-only",
                   checked: tiltEnabled,
                   onChange: setTilt
-                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_23),
-                _cache[14] || (_cache[14] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_26),
+                _cache[16] || (_cache[16] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
             ]),
-            _createElementVNode("label", _hoisted_24, [
-              _cache[17] || (_cache[17] = _createElementVNode("span", null, "夜间模式", -1 /* CACHED */)),
-              _createElementVNode("span", _hoisted_25, [
+            _createElementVNode("label", _hoisted_27, [
+              _cache[19] || (_cache[19] = _createElementVNode("span", null, "夜间模式", -1 /* CACHED */)),
+              _createElementVNode("span", _hoisted_28, [
                 _createElementVNode("input", {
                   type: "checkbox",
                   role: "switch",
@@ -25882,13 +25904,13 @@ return function render(_ctx, _cache) {
                   class: "settings-toggle-input sr-only",
                   checked: night,
                   onChange: toggleDayNight
-                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_26),
-                _cache[16] || (_cache[16] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29),
+                _cache[18] || (_cache[18] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
             ]),
-            _createElementVNode("label", _hoisted_27, [
-              _cache[19] || (_cache[19] = _createElementVNode("span", null, "卡片自动变暗", -1 /* CACHED */)),
-              _createElementVNode("span", _hoisted_28, [
+            _createElementVNode("label", _hoisted_30, [
+              _cache[21] || (_cache[21] = _createElementVNode("span", null, "卡片自动变暗", -1 /* CACHED */)),
+              _createElementVNode("span", _hoisted_31, [
                 _createElementVNode("input", {
                   type: "checkbox",
                   role: "switch",
@@ -25896,14 +25918,14 @@ return function render(_ctx, _cache) {
                   class: "settings-toggle-input sr-only",
                   checked: cardNightEnabled,
                   onChange: setCardNightEnabled
-                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_29),
-                _cache[18] || (_cache[18] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_32),
+                _cache[20] || (_cache[20] = _createElementVNode("span", { class: "settings-toggle" }, null, -1 /* CACHED */))
               ])
             ]),
             (selected==='classic')
-              ? (_openBlock(), _createElementBlock("div", _hoisted_30, [
-                  _cache[20] || (_cache[20] = _createElementVNode("span", null, "主题色", -1 /* CACHED */)),
-                  _createElementVNode("div", _hoisted_31, [
+              ? (_openBlock(), _createElementBlock("div", _hoisted_33, [
+                  _cache[22] || (_cache[22] = _createElementVNode("span", null, "主题色", -1 /* CACHED */)),
+                  _createElementVNode("div", _hoisted_34, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(accentPresets, (preset) => {
                       return (_openBlock(), _createElementBlock("button", {
                         key: preset.color,
@@ -25913,21 +25935,21 @@ return function render(_ctx, _cache) {
                         title: preset.name,
                         "aria-label": preset.name,
                         onClick: $event => (setAccentColor(preset.color))
-                      }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_32))
+                      }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_35))
                     }), 128 /* KEYED_FRAGMENT */)),
-                    _createElementVNode("label", _hoisted_33, [
+                    _createElementVNode("label", _hoisted_36, [
                       _createElementVNode("input", {
                         type: "color",
                         value: accent||'#5a6ff0',
                         "aria-label": "自定义主题色",
                         onInput: $event => (setAccentColor($event.target.value))
-                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_34)
+                      }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_37)
                     ]),
                     _createElementVNode("button", {
                       type: "button",
                       class: "shell-accent-reset",
                       onClick: $event => (setAccentColor(''))
-                    }, "恢复默认", 8 /* PROPS */, _hoisted_35)
+                    }, "恢复默认", 8 /* PROPS */, _hoisted_38)
                   ])
                 ]))
               : _createCommentVNode("v-if", true),
@@ -25936,31 +25958,31 @@ return function render(_ctx, _cache) {
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (section==='legacy')
-        ? (_openBlock(), _createElementBlock("div", _hoisted_36, [
+        ? (_openBlock(), _createElementBlock("div", _hoisted_39, [
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'worldinfo',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "BookOpen" }),
-              _cache[21] || (_cache[21] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
+              _cache[23] || (_cache[23] = _createElementVNode("span", null, "共享世界书", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_37),
+            ], 8 /* PROPS */, _hoisted_40),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'regex',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "Code2" }),
-              _cache[22] || (_cache[22] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
+              _cache[24] || (_cache[24] = _createElementVNode("span", null, "共享正则", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_38),
+            ], 8 /* PROPS */, _hoisted_41),
             _createElementVNode("button", {
               type: "button",
               onClick: $event => ($emit('navigate',{view:'uitemplates',scope:'global'}))
             }, [
               _createVNode(_component_icon, { name: "PanelsTopLeft" }),
-              _cache[23] || (_cache[23] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
+              _cache[25] || (_cache[25] = _createElementVNode("span", null, "共享 UI", -1 /* CACHED */)),
               _createVNode(_component_icon, { name: "ChevronRight" })
-            ], 8 /* PROPS */, _hoisted_39)
+            ], 8 /* PROPS */, _hoisted_42)
           ]))
         : _createCommentVNode("v-if", true)
     ]))

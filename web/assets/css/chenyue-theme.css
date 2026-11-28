@@ -325,7 +325,7 @@
 .chenyue-theme .startup-brand { color: var(--yy-rose); }
 .chenyue-theme .startup-progress span { background: var(--yy-rose); }
 .chenyue-theme .startup-mascot { width: 240px; height: 205px; }
-.chenyue-theme .shell-error {
+:root[data-ui-mascots="true"] .chenyue-theme .shell-error {
     background: var(--yy-paper) url("../images/chenyue/confused.webp") 10px center/42px auto no-repeat;
     padding: 14px 12px 14px 62px; min-height: 64px; border: 1px dashed #ba7a87; border-radius: 6px;
 }
