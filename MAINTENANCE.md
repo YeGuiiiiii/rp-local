@@ -99,7 +99,8 @@
 
 ## 待处理或待证实
 
-- U49：**Codex 认领，`codex/mascot-visibility`，2026-11-28，基线 `0784384` / 2.9.159**。外观增加独立“人物装饰”开关，关闭后保留现代布局、皮肤配色、当前页面和玩家数据，并保存选择；统一处理启动、页面互动、公告、更新与导入导出人物图。本轮仅修改与验证源码，不更改版本号或发布安装包。状态：进行中。
+- ~~U49 源码：**Codex，`codex/mascot-visibility`，2026-11-28，基线 `0784384` / 2.9.159，修复 `db80a09`**。现代皮肤外观增加独立“人物装饰”开关，保留原有默认显示；关闭后保留现代布局、皮肤配色、当前页面、玩家头像与数据，统一停用启动、页面互动、公告、更新与导入导出人物图。选择跨皮肤、重启及完整备份恢复保存；皮肤预览、应用图标和署名保留。~~
+- U49 验证：新增 `test-mascot-visibility.cjs` 先复现缺少开关，后验证即时显隐、对白清理、布局/角色/分支/正文/草稿/玩家头像保留、日夜、弹窗、首屏、备份往返和跨窗口同步通过。网页与流式构建、资源检查、语法和差异检查通过；390/1280 宽两套现代皮肤截图已查看，独立界面审查 `ship`。全量 **78/85**；`test-competitions.cjs`、`test-release-notes.cjs`、`test-settings-resources.cjs`、`test-memory-pressure.cjs` 四项在未修改的 159 基线均复现失败，另三项为 WebKit/FFmpeg 缺失及 Java 中文路径问题，未声称全绿。报告 `verification/mascot-visibility/验证结果.md`。检测器缺失；临时目录清理被自动审批拒绝，暂留。仅提交源码分支，**未合入 main、未改版本、未打包发布，Android 真机待验证**。
 
 - U48（`qq1049323397`，基线 `d10deed` / 2.9.158，**仅推源码 `2.9.159 / 419`、未打包 APK / 未发 Release / 未真机复测**）：
   1. **低存储空间局部驱逐反杀本地副本与自动找回**：`web/assets/js/local-files.js`、`web/assets/js/data-services.js`、`web/assets/js/app.js`。当主库 `RPHubDB` 因低空间驱逐丢失 `rp_hub_characters` 等核心键而随后被运行页写入零散设置/新聊天时，`initialize()` 不再把残缺主库误判为全量替代而调用 `call('remove', file)` 删除本地存活记忆/角色卡/分支副本；改为优先从 `个人数据/角色卡索引.json` 与 `inventory` 自动补回主库缺失记录（保留主库既有新聊天不倒退）并提示用户，同时 `initDB()` 主动静默申请 `navigator.storage.persist()`。
